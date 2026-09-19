@@ -1,0 +1,160 @@
+/* Paleta oficial Hotel San Antonio (SIGEH) */
+* {
+    -color-marron-oscuro: #3B210F;
+    -color-marron-secundario: #5A3516;
+    -color-dorado: #B8862D;
+    -color-dorado-claro: #D4A84C;
+    -color-dorado-premium: #E6C77A;
+    -color-fondo: #F8F6F2;
+    -color-blanco: #FFFFFF;
+    -color-gris-borde: #E5E5E5;
+    -color-gris-texto: #777777;
+    -color-texto: #2B2B2B;
+
+    /* estados de habitacion */
+    -color-disponible: #22C55E;
+    -color-disponible-fondo: #DCFCE7;
+    -color-ocupada: #EF4444;
+    -color-ocupada-fondo: #FEE2E2;
+    -color-limpieza: #F59E0B;
+    -color-limpieza-fondo: #FEF3C7;
+    -color-mantenimiento: #64748B;
+    -color-mantenimiento-fondo: #E2E8F0;
+
+    /* financieros */
+    -color-ingreso: #16A34A;
+    -color-egreso: #DC2626;
+    -color-pendiente: #CA8A04;
+    -color-confirmado: #059669;
+
+    /* carrito */
+    -color-carrito-fondo: #FFF7E6;
+    -color-carrito-alerta: #DC2626;
+}
+
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: -color-fondo;
+    -fx-text-fill: -color-texto;
+}
+
+.panel-encabezado {
+    -fx-background-color: -color-marron-oscuro;
+}
+
+.titulo-encabezado {
+    -fx-text-fill: -color-blanco;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.btn-primario {
+    -fx-background-color: -color-dorado;
+    -fx-text-fill: -color-blanco;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 20px;
+    -fx-cursor: hand;
+}
+.btn-primario:hover {
+    -fx-background-color: -color-dorado-claro;
+}
+
+.btn-secundario {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-marron-oscuro;
+    -fx-border-color: -color-marron-secundario;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 20px;
+    -fx-cursor: hand;
+}
+
+.btn-peligro {
+    -fx-background-color: -color-ocupada;
+    -fx-text-fill: -color-blanco;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 20px;
+    -fx-cursor: hand;
+}
+
+.btn-carrito {
+    -fx-background-color: -color-dorado;
+    -fx-text-fill: -color-blanco;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 20px;
+    -fx-cursor: hand;
+}
+
+.titulo-seccion {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-marron-oscuro;
+}
+
+.texto-secundario {
+    -fx-text-fill: -color-gris-texto;
+}
+
+.tarjeta {
+    -fx-background-color: -color-blanco;
+    -fx-background-radius: 8px;
+    -fx-border-color: -color-gris-borde;
+    -fx-border-radius: 8px;
+    -fx-padding: 16px;
+    -fx-cursor: hand;
+}
+.tarjeta:hover {
+    -fx-border-color: -color-dorado-premium;
+}
+
+/* Estados de habitacion */
+.habitacion-disponible {
+    -fx-background-color: -color-disponible-fondo;
+    -fx-border-color: -color-disponible;
+    -fx-border-width: 2px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}
+.habitacion-ocupada {
+    -fx-background-color: -color-ocupada-fondo;
+    -fx-border-color: -color-ocupada;
+    -fx-border-width: 2px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}
+.habitacion-limpieza {
+    -fx-background-color: -color-limpieza-fondo;
+    -fx-border-color: -color-limpieza;
+    -fx-border-width: 2px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}
+.habitacion-mantenimiento {
+    -fx-background-color: -color-mantenimiento-fondo;
+    -fx-border-color: -color-mantenimiento;
+    -fx-border-width: 2px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}
+
+/* Financieros */
+.texto-ingreso { -fx-text-fill: -color-ingreso; -fx-font-weight: bold; }
+.texto-egreso { -fx-text-fill: -color-egreso; -fx-font-weight: bold; }
+.texto-pendiente { -fx-text-fill: -color-pendiente; -fx-font-weight: bold; }
+.texto-confirmado { -fx-text-fill: -color-confirmado; -fx-font-weight: bold; }
+
+/* Carrito de tiendita */
+.panel-carrito {
+    -fx-background-color: -color-carrito-fondo;
+}
+.badge-carrito {
+    -fx-background-color: -color-carrito-alerta;
+    -fx-text-fill: white;
+    -fx-background-radius: 999px;
+    -fx-padding: 2px 7px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}

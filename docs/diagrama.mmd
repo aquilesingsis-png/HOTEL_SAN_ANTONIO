@@ -1,0 +1,106 @@
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#F3E9DD','primaryBorderColor':'#6B3F22','primaryTextColor':'#2B1D12','lineColor':'#6B3F22','tertiaryColor':'#F3E9DD','fontFamily':'IBM Plex Mono, monospace','fontSize':'13px'}}}%%
+erDiagram
+    TIPO_HABITACION ||--o{ HABITACION : clasifica
+    HABITACION ||--o{ RESERVA : aloja
+    HUESPED ||--o{ RESERVA : realiza
+    USUARIO ||--o{ RESERVA : registra
+    RESERVA ||--o{ PAGO : recibe
+    USUARIO ||--o{ VENTA_TIENDA : vende
+    HUESPED |o--o{ VENTA_TIENDA : compra
+    HABITACION |o--o{ VENTA_TIENDA : "carga_a_cuenta"
+    VENTA_TIENDA ||--o{ DETALLE_VENTA : contiene
+    PRODUCTO ||--o{ DETALLE_VENTA : aparece_en
+    CATEGORIA ||--o{ PRODUCTO : clasifica
+    RESERVA |o--o| COMPROBANTE : genera
+    COMPROBANTE |o--o{ VENTA_TIENDA : consolida
+
+    TIPO_HABITACION {
+        int id_tipo PK
+        string nombre
+        int capacidad
+        decimal precio_base
+    }
+    HABITACION {
+        int id_habitacion PK
+        string numero
+        int id_tipo FK
+        int piso
+        string estado
+    }
+    HUESPED {
+        int id_huesped PK
+        string tipo_documento
+        string num_documento
+        string nombres
+        string apellidos
+        string pais_procedencia
+        string telefono
+    }
+    USUARIO {
+        int id_usuario PK
+        string nombre
+        string apellido
+        string usuario
+        string contrasena_hash
+        string rol
+        boolean activo
+    }
+    RESERVA {
+        int id_reserva PK
+        int id_huesped FK
+        int id_habitacion FK
+        int id_usuario FK
+        date fecha_checkin
+        date fecha_checkout
+        decimal adelanto
+        decimal monto_total
+        string estado
+        string canal
+    }
+    PAGO {
+        int id_pago PK
+        int id_reserva FK
+        decimal monto
+        string metodo_pago
+        string tipo_pago
+        datetime fecha_pago
+    }
+    CATEGORIA {
+        int id_categoria PK
+        string nombre
+    }
+    PRODUCTO {
+        int id_producto PK
+        string codigo_barra
+        string nombre
+        string marca
+        int id_categoria FK
+        decimal precio
+        int stock
+    }
+    VENTA_TIENDA {
+        int id_venta PK
+        int id_huesped FK
+        int id_habitacion FK
+        int id_usuario FK
+        int id_comprobante FK
+        string cliente_externo
+        datetime fecha_venta
+        decimal total
+    }
+    DETALLE_VENTA {
+        int id_detalle PK
+        int id_venta FK
+        int id_producto FK
+        int cantidad
+        decimal precio_unitario
+        decimal subtotal
+    }
+    COMPROBANTE {
+        int id_comprobante PK
+        int id_reserva FK
+        string tipo
+        string numero
+        date fecha_emision
+        decimal monto_total
+    }

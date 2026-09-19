@@ -1,0 +1,174 @@
+<title>Mapa de Navegación San Antonio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg:#F8F6F2;
+    --surface:#FFFFFF;
+    --surface-2:#F3ECDD;
+    --text:#2B2B2B;
+    --muted:#777777;
+    --border:#E5E5E5;
+    --accent-brown:#3B210F;
+    --accent-gold:#B8862D;
+    --accent-red:#DC2626;
+    --pill-modal-bg:#FEF3C7;
+    --pill-modal-text:#CA8A04;
+    --pill-pantalla-bg:#DCFCE7;
+    --pill-pantalla-text:#16A34A;
+    --shadow: 0 1px 2px rgba(43,29,18,0.06), 0 8px 24px rgba(43,29,18,0.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1A1108; --surface:#2A1F15; --surface-2:#34271A; --text:#F0EAE0; --muted:#B7A18A;
+      --border:#4A3826; --accent-brown:#C08A5C; --accent-gold:#D4A84C; --accent-red:#F87171;
+      --pill-modal-bg:#332A18; --pill-modal-text:#E8B84B; --pill-pantalla-bg:#14291C; --pill-pantalla-text:#4ADE80;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1A1108; --surface:#2A1F15; --surface-2:#34271A; --text:#F0EAE0; --muted:#B7A18A;
+    --border:#4A3826; --accent-brown:#C08A5C; --accent-gold:#D4A84C; --accent-red:#F87171;
+    --pill-modal-bg:#332A18; --pill-modal-text:#E8B84B; --pill-pantalla-bg:#14291C; --pill-pantalla-text:#4ADE80;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  body{ background:var(--bg); color:var(--text); font-family:"Work Sans", ui-sans-serif, system-ui, sans-serif; line-height:1.55; }
+  .page{ max-width:920px; margin:0 auto; padding:48px 24px 80px; }
+  .eyebrow{ font-family:"IBM Plex Mono", monospace; font-size:12.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-red); margin:0 0 14px; }
+  h1{ font-family:"Fraunces", Georgia, serif; font-weight:700; font-size:clamp(28px, 4.2vw, 42px); line-height:1.1; text-wrap:balance; margin:0 0 6px; }
+  .subtitle{ font-family:"Fraunces", Georgia, serif; font-style:italic; font-weight:400; font-size:18px; color:var(--accent-brown); margin:0 0 22px; }
+  .lede{ max-width:66ch; font-size:16px; margin:0 0 40px; }
+  .lede strong{color:var(--accent-brown);}
+  section{margin-bottom:44px;}
+  h2{ font-family:"Fraunces", Georgia, serif; font-weight:600; font-size:22px; margin:0 0 4px; }
+  .section-note{ color:var(--muted); font-size:14.5px; margin:0 0 18px; max-width:70ch; }
+  .diagram-panel{ background:#FBF8F2; border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow); padding:20px; overflow-x:auto; }
+  .diagram-panel .mermaid{ min-width:820px; }
+  .legend{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px; margin-top:18px; }
+  .legend-item{ background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px 14px; font-size:14px; display:flex; align-items:center; gap:10px; }
+  .swatch{ width:14px; height:14px; border-radius:4px; flex-shrink:0; }
+  .swatch.pantalla{ background:var(--pill-pantalla-bg); border:2px solid #3C6B2E; }
+  .swatch.modal{ background:var(--pill-modal-bg); border:2px dashed var(--accent-red); }
+  .swatch.flotante{ background:transparent; border:2px dotted var(--accent-gold); }
+  table{ width:100%; border-collapse:collapse; font-size:14.5px; }
+  thead th{ text-align:left; font-family:"IBM Plex Mono", monospace; font-size:12px; letter-spacing:0.05em; text-transform:uppercase; color:var(--muted); font-weight:500; padding:0 12px 10px; border-bottom:1px solid var(--border); }
+  tbody td{ padding:12px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+  tbody tr:last-child td{border-bottom:none;}
+  td.pantalla-nombre{ font-family:"IBM Plex Mono", monospace; font-weight:500; color:var(--accent-brown); white-space:nowrap; }
+  td.fxml{ font-family:"IBM Plex Mono", monospace; font-size:13px; color:var(--muted); white-space:nowrap; }
+  .pill{ display:inline-block; font-family:"IBM Plex Mono", monospace; font-size:11px; padding:2px 8px; border-radius:999px; white-space:nowrap; }
+  .pill.pantalla{ background:var(--pill-pantalla-bg); color:var(--pill-pantalla-text); }
+  .pill.modal{ background:var(--pill-modal-bg); color:var(--pill-modal-text); }
+  .table-wrap{overflow-x:auto;}
+  .callout{ background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:14px 16px; font-size:14px; margin-top:14px; }
+  .callout .tag{ display:inline-block; font-family:"IBM Plex Mono", monospace; font-size:11px; color:var(--accent-red); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; }
+  footer{ margin-top:56px; padding-top:20px; border-top:1px solid var(--border); color:var(--muted); font-size:13px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+</style>
+
+<div class="page">
+  <p class="eyebrow">UNTRM · Taller de Programación II · Trabajo de Primera Unidad</p>
+  <h1>Mapa de Navegación</h1>
+  <p class="subtitle">Hotel San Antonio — flujo entre las 7 pantallas de la Unidad I</p>
+  <p class="lede">
+    Diagrama de flujo mostrando cómo se mueve el recepcionista entre pantallas, y el patrón de
+    <strong>carrito flotante</strong> de la tiendita, accesible desde cualquier pantalla sin interrumpir lo que se esté haciendo.
+  </p>
+
+  <section>
+    <h2>Diagrama de flujo</h2>
+    <p class="section-note">Cajas sólidas = pantalla completa. Cajas punteadas rojas = ventana modal (se abre encima de la pantalla actual).</p>
+    <div class="diagram-panel">
+      <pre class="mermaid">
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#F3ECDD','primaryBorderColor':'#3B210F','primaryTextColor':'#2B2B2B','lineColor':'#3B210F','fontFamily':'IBM Plex Mono, monospace','fontSize':'13px'}}}%%
+flowchart TD
+    LOGIN["Login"]
+    DASHBOARD["Dashboard<br/>(hub principal)"]
+    HABITACIONES["Habitaciones<br/>grid por piso"]
+    REGISTRO["Registrar Huésped + Reserva<br/>(modal · habitación LIBRE)"]
+    CUENTA["Cuenta de Habitación<br/>(modal · habitación OCUPADA)"]
+    HUESPEDES["Huéspedes<br/>lista + formulario"]
+    RESERVAS["Reservas<br/>lista + formulario"]
+    CARRITO["Carrito Tiendita<br/>(modal flotante)"]
+    COMPROBANTE["Comprobante"]
+
+    LOGIN -->|credenciales válidas| DASHBOARD
+    DASHBOARD -->|clic Habitaciones| HABITACIONES
+    DASHBOARD -->|clic Huéspedes| HUESPEDES
+    DASHBOARD -->|clic Reservas| RESERVAS
+    HABITACIONES -->|clic tarjeta LIBRE| REGISTRO
+    HABITACIONES -->|clic tarjeta OCUPADA| CUENTA
+    REGISTRO -->|guardar: crea Reserva + check-in| HABITACIONES
+    CUENTA -->|check-out| COMPROBANTE
+    RESERVAS -->|guardar reserva| HABITACIONES
+    RESERVAS -->|huésped no registrado| HUESPEDES
+    HUESPEDES -->|guardar y volver| RESERVAS
+    CARRITO -->|venta a cliente externo| COMPROBANTE
+    CARRITO -->|cargo a habitación ocupada, queda pendiente| CUENTA
+    DASHBOARD -.->|ícono carrito, siempre visible| CARRITO
+    HABITACIONES -.->|ícono carrito| CARRITO
+    HUESPEDES -.->|ícono carrito| CARRITO
+    RESERVAS -.->|ícono carrito| CARRITO
+    CUENTA -.->|botón "+ Producto"| CARRITO
+    DASHBOARD -->|cerrar sesión| LOGIN
+
+    classDef pantalla fill:#F3ECDD,stroke:#16A34A,stroke-width:2px,color:#2B2B2B;
+    classDef modal fill:#F3ECDD,stroke:#DC2626,stroke-width:2px,stroke-dasharray: 5 4,color:#2B2B2B;
+    class LOGIN,DASHBOARD,HABITACIONES,HUESPEDES,RESERVAS,COMPROBANTE pantalla;
+    class REGISTRO,CUENTA,CARRITO modal;
+      </pre>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="swatch pantalla"></span>Pantalla completa</div>
+      <div class="legend-item"><span class="swatch modal"></span>Ventana modal (encima de la actual)</div>
+      <div class="legend-item"><span class="swatch flotante"></span>Flecha punteada = acceso desde el ícono flotante</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Detalle por pantalla</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Pantalla</th><th>Tipo</th><th>Archivo FXML</th><th>Descripción</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="pantalla-nombre">Login</td><td><span class="pill pantalla">Pantalla</span></td><td class="fxml">login.fxml</td><td>Autenticación de personal (usuario + contraseña). Punto de entrada único.</td></tr>
+          <tr><td class="pantalla-nombre">Dashboard</td><td><span class="pill pantalla">Pantalla</span></td><td class="fxml">dashboard.fxml</td><td>Hub principal con accesos a Habitaciones / Huéspedes / Reservas + ícono de carrito fijo arriba.</td></tr>
+          <tr><td class="pantalla-nombre">Habitaciones</td><td><span class="pill pantalla">Pantalla</span></td><td class="fxml">habitaciones.fxml</td><td>Grid de las 24 habitaciones agrupadas por piso (1, 2, 3), coloreadas por estado.</td></tr>
+          <tr><td class="pantalla-nombre">Registrar Huésped + Reserva</td><td><span class="pill modal">Modal</span></td><td class="fxml">registro_habitacion.fxml</td><td>Se abre al hacer clic en una tarjeta de habitación <b>libre</b>: elegir/crear huésped, fechas, adelanto 50%. Al guardar, la habitación pasa a Ocupada (check-in).</td></tr>
+          <tr><td class="pantalla-nombre">Cuenta de Habitación</td><td><span class="pill modal">Modal</span></td><td class="fxml">cuenta_habitacion.fxml</td><td>Se abre al hacer clic en una tarjeta <b>ocupada</b>: huésped actual, cargo de la habitación, botón "+ Producto" (abre el carrito), lista de pagos, saldo, y botón Check-Out.</td></tr>
+          <tr><td class="pantalla-nombre">Huéspedes</td><td><span class="pill pantalla">Pantalla</span></td><td class="fxml">huespedes.fxml</td><td>Tabla de huéspedes registrados + formulario de alta con autocompletado por DNI (API RENIEC).</td></tr>
+          <tr><td class="pantalla-nombre">Reservas</td><td><span class="pill pantalla">Pantalla</span></td><td class="fxml">reservas.fxml</td><td>Tabla de reservas + formulario: huésped, habitación, fechas, adelanto 50%, canal.</td></tr>
+          <tr><td class="pantalla-nombre">Carrito Tiendita</td><td><span class="pill modal">Modal</span></td><td class="fxml">carrito_tienda.fxml</td><td>Buscar/escanear código de barra (API Open Food Facts), identificar comprador, agregar al carrito.</td></tr>
+          <tr><td class="pantalla-nombre">Comprobante</td><td><span class="pill pantalla">Pantalla</span></td><td class="fxml">comprobante.fxml</td><td>Recibo final: consolida el monto de la reserva con las ventas de tiendita pendientes.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Por qué el carrito es flotante y no un módulo aparte</h2>
+    <div class="callout">
+      <span class="tag">Decisión de diseño</span>
+      El carrito de la tiendita no tiene su propia entrada en el menú del Dashboard — es un <b>ícono fijo</b> visible desde Habitaciones, Huéspedes, Reservas y el propio Dashboard. Esto refleja cómo ocurre en la realidad: un huésped puede pedir una gaseosa mientras el recepcionista está en medio de crear su reserva, sin que tenga que abandonar esa pantalla. Cualquier venta hecha así queda registrada y, si se carga a una habitación, se consolida automáticamente en el comprobante final al hacer check-out.
+    </div>
+  </section>
+
+  <section>
+    <h2>Por qué el modal de habitación tiene 2 vistas distintas</h2>
+    <div class="callout">
+      <span class="tag">Decisión de diseño</span>
+      Al hacer clic en una tarjeta de habitación, lo que se abre <b>depende de su estado</b> — no es un único formulario fijo:
+      <ul style="margin:10px 0 0 18px; padding:0;">
+        <li><b>Libre:</b> se abre el formulario de registro — elegir/crear huésped y crear la reserva.</li>
+        <li><b>Ocupada:</b> se abre la "Cuenta" de esa habitación — el huésped actual, el cargo de la estadía, cualquier consumo de tiendita cargado a la cuenta, los pagos hechos, el saldo pendiente, y el botón de Check-Out (que genera el comprobante final).</li>
+      </ul>
+      Esta separación evita mezclar en un solo formulario dos momentos muy distintos del ciclo de un huésped: cuando llega, y cuando ya está hospedado.
+    </div>
+  </section>
+
+  <footer>
+    <span>Hotel San Antonio — Jr. Amazonas 456, Bagua</span>
+    <span>Mapa de navegación · v1</span>
+  </footer>
+</div>
