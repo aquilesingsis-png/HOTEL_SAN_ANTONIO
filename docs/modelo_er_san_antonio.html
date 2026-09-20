@@ -355,6 +355,9 @@ erDiagram
         decimal monto_total
         string estado
         string canal
+        string ruc_empresa
+        string razon_social
+        string direccion_fiscal
     }
     PAGO {
         int id_pago PK
@@ -460,7 +463,7 @@ erDiagram
           <tr><td class="entidad">HABITACION</td><td class="desc">Las 24 habitaciones físicas del hotel, con número, piso y estado operativo actual.</td><td class="modulo">Habitaciones</td><td><span class="pill u1">Unidad I</span></td></tr>
           <tr><td class="entidad">HUESPED</td><td class="desc">Personas registradas como huéspedes, con documento (DNI/Pasaporte) validado vía API RENIEC.</td><td class="modulo">Huéspedes</td><td><span class="pill u1">Unidad I</span></td></tr>
           <tr><td class="entidad">USUARIO</td><td class="desc">Cuentas de personal del hotel con rol (Administrador / Recepcionista) para el control de acceso.</td><td class="modulo">Login · Usuarios</td><td><span class="pill u1">Unidad I</span></td></tr>
-          <tr><td class="entidad">RESERVA</td><td class="desc">Asignación de un huésped a una habitación — cubre tanto reservas anticipadas (canal Teléfono/WhatsApp/Booking) como clientes que llegan al instante (canal Presencial, check-in inmediato el mismo día).</td><td class="modulo">Reservas</td><td><span class="pill u1">Unidad I</span></td></tr>
+          <tr><td class="entidad">RESERVA</td><td class="desc">Asignación de un huésped a una habitación — cubre tanto reservas anticipadas (canal Teléfono/WhatsApp/Booking) como clientes que llegan al instante (canal Presencial, check-in inmediato el mismo día). Los campos ruc_empresa/razon_social/direccion_fiscal son opcionales, para cuando la reserva se factura a una empresa (API SUNAT-RUC).</td><td class="modulo">Reservas</td><td><span class="pill u1">Unidad I</span></td></tr>
           <tr><td class="entidad">PAGO</td><td class="desc">Movimientos de pago asociados a una reserva (adelanto, saldo), por Yape, transferencia, efectivo o tarjeta.</td><td class="modulo">Caja</td><td><span class="pill u2">Unidad II</span></td></tr>
           <tr><td class="entidad">CATEGORIA</td><td class="desc">Grupos de productos de la tiendita (Bebidas, Snacks, Golosinas...); catálogo abierto que el Administrador puede ampliar.</td><td class="modulo">Tiendita · Almacén</td><td><span class="pill u1">Unidad I</span></td></tr>
           <tr><td class="entidad">PRODUCTO</td><td class="desc">Catálogo de la tiendita (snacks, gaseosas), identificado por código de barra vía API Open Food Facts.</td><td class="modulo">Tiendita</td><td><span class="pill u1">Unidad I</span></td></tr>
@@ -556,6 +559,9 @@ erDiagram
           <tr><td class="campo">monto_total</td><td class="tipo">DECIMAL(8,2)</td><td></td></tr>
           <tr><td class="campo">estado</td><td class="tipo">ENUM(5)</td><td></td></tr>
           <tr><td class="campo">canal</td><td class="tipo">ENUM(4)</td><td></td></tr>
+          <tr><td class="campo">ruc_empresa</td><td class="tipo">VARCHAR(11) NULL</td><td></td></tr>
+          <tr><td class="campo">razon_social</td><td class="tipo">VARCHAR(150) NULL</td><td></td></tr>
+          <tr><td class="campo">direccion_fiscal</td><td class="tipo">VARCHAR(200) NULL</td><td></td></tr>
         </tbody></table>
       </div>
 

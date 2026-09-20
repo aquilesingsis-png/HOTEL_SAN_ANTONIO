@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+    Marco principal para el RECEPCIONISTA: menu lateral + encabezado + contenido.
+    Cada boton del menu guarda en "userData" la ruta del FXML que abre. Si ese archivo
+    todavia no existe (modulo pendiente), el marco muestra la pantalla "en construccion".
+    Un boton "menu-grupo" despliega el VBox "submenu" que le sigue (solo uno abierto a la vez).
+-->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.PrincipalController">
+
+    <stylesheets>
+        <URL value="@../../css/estilos.css"/>
+        <URL value="@../../css/principal.css"/>
+    </stylesheets>
+
+    <fx:define>
+        <ToggleGroup fx:id="grupoMenu"/>
+    </fx:define>
+
+    <!-- ============ MENU LATERAL ============ -->
+    <left>
+        <VBox spacing="6" styleClass="barra-lateral">
+            <padding><Insets top="22" right="14" bottom="18" left="14"/></padding>
+
+            <VBox spacing="2">
+                <padding><Insets bottom="14" left="8"/></padding>
+                <Label text="Hotel San Antonio" styleClass="marca-titulo"/>
+                <Label text="Gestión hotelera · Bagua" styleClass="marca-sub"/>
+            </VBox>
+
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="scroll-menu" VBox.vgrow="ALWAYS">
+                <VBox fx:id="barraLateral" spacing="6">
+                    <Label text="OPERACIÓN" styleClass="menu-seccion"/>
+                    <ToggleButton fx:id="btnInicio" text="Inicio" toggleGroup="$grupoMenu" selected="true" styleClass="menu-item"
+                                  userData="/untrm/hotel_san_antonio/fxml/dashboard.fxml" onAction="#onMenu"/>
+                    <ToggleButton text="Habitaciones" toggleGroup="$grupoMenu" styleClass="menu-item"
+                                  userData="/untrm/hotel_san_antonio/fxml/habitaciones/habitaciones.fxml" onAction="#onMenu"/>
+
+                    <Button text="Reservas  ▸" styleClass="menu-item, menu-grupo" onAction="#onGrupo"/>
+                    <VBox styleClass="submenu" userData="Reservas" visible="false" managed="false" spacing="2">
+                        <ToggleButton text="Nueva reserva" toggleGroup="$grupoMenu" styleClass="menu-item, submenu-item"
+                                      userData="/untrm/hotel_san_antonio/fxml/reservas/nueva_reserva.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Reserva programada" toggleGroup="$grupoMenu" styleClass="menu-item, submenu-item"
+                                      userData="/untrm/hotel_san_antonio/fxml/reservas/reserva_programada.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Calendario de ocupación" toggleGroup="$grupoMenu" styleClass="menu-item, submenu-item"
+                                      userData="/untrm/hotel_san_antonio/fxml/reservas/calendario_ocupacion.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Confirmar reserva" toggleGroup="$grupoMenu" styleClass="menu-item, submenu-item"
+                                      userData="/untrm/hotel_san_antonio/fxml/reservas/confirmar_reserva.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Cancelar reserva" toggleGroup="$grupoMenu" styleClass="menu-item, submenu-item"
+                                      userData="/untrm/hotel_san_antonio/fxml/reservas/cancelar_reserva.fxml" onAction="#onMenu"/>
+                    </VBox>
+
+                    <ToggleButton text="Comprobantes" toggleGroup="$grupoMenu" styleClass="menu-item"
+                                  userData="/untrm/hotel_san_antonio/fxml/comprobante.fxml" onAction="#onMenu"/>
+                    <ToggleButton text="Caja y pagos" toggleGroup="$grupoMenu" styleClass="menu-item"
+                                  userData="/untrm/hotel_san_antonio/fxml/caja/caja.fxml" onAction="#onMenu"/>
+                </VBox>
+            </ScrollPane>
+
+            <Region styleClass="separador-menu"/>
+            <VBox spacing="2">
+                <padding><Insets top="10" bottom="8" left="8"/></padding>
+                <Label fx:id="lblUsuario" text="Luis Vasquez" styleClass="usuario-nombre"/>
+                <Label fx:id="lblRol" text="Recepcionista" styleClass="usuario-rol"/>
+            </VBox>
+            <Button text="Cerrar sesión" styleClass="btn-cerrar-sesion" onAction="#onCerrarSesion"/>
+        </VBox>
+    </left>
+
+    <!-- ============ ENCABEZADO + CONTENIDO (a la derecha del menu, de arriba a abajo) ============ -->
+    <center>
+        <BorderPane>
+            <top>
+                <HBox alignment="CENTER_LEFT" spacing="14" styleClass="encabezado-principal">
+                    <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
+                    <VBox spacing="1">
+                        <Label fx:id="lblTitulo" text="Inicio" styleClass="titulo-modulo"/>
+                        <Label fx:id="lblFecha" text="domingo, 20 de septiembre de 2026" styleClass="fecha-encabezado"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="🛒  Carrito" styleClass="btn-carrito" onAction="#onCarrito"/>
+                </HBox>
+            </top>
+
+            <!-- aqui se abre cada pantalla -->
+            <center>
+                <StackPane fx:id="contenido"/>
+            </center>
+        </BorderPane>
+    </center>
+</BorderPane>

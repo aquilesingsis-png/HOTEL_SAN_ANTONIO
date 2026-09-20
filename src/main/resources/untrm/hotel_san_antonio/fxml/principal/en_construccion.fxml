@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Se muestra en el marco principal cuando el modulo elegido todavia no tiene su pantalla. -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      alignment="CENTER" spacing="8">
+
+    <stylesheets>
+        <URL value="@../../css/estilos.css"/>
+        <URL value="@../../css/principal.css"/>
+    </stylesheets>
+
+    <Label text="Módulo en construcción" styleClass="aviso-construccion"/>
+    <Label text="Esta pantalla aparecerá aquí cuando el módulo esté listo." styleClass="texto-secundario"/>
+</VBox>

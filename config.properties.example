@@ -1,0 +1,7 @@
+# Copia este archivo como "config.properties" (sin .example) en la misma carpeta
+# (junto a pom.xml). Ese archivo SI tiene los tokens reales y NUNCA se sube a Git
+# (ya esta en .gitignore). Pide los valores reales al equipo, no los inventes.
+
+reniec.token=PEGAR_TOKEN_AQUI
+sunat.ruc.token=PEGAR_TOKEN_AQUI
+decolecta.token=PEGAR_TOKEN_AQUI

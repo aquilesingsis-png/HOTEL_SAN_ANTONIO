@@ -1,0 +1,136 @@
+/*
+ * Estilos del marco principal (menu lateral + encabezado).
+ * Los colores (-color-*) vienen de estilos.css; este archivo se carga ademas de ese.
+ */
+
+/* ===== Menu lateral ===== */
+.barra-lateral {
+    -fx-background-color: -color-marron-oscuro;
+    -fx-min-width: 240px;
+    -fx-pref-width: 240px;
+    -fx-max-width: 240px;
+}
+.marca-titulo {
+    -fx-text-fill: -color-blanco;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+.marca-sub {
+    -fx-text-fill: -color-dorado-premium;
+    -fx-font-size: 12px;
+}
+.menu-seccion {
+    -fx-text-fill: -color-dorado-claro;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 6px 0 0 8px;
+}
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #F3ECDD;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 11px 16px;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+    -fx-max-width: infinity;
+}
+.menu-item:hover {
+    -fx-background-color: -color-marron-secundario;
+}
+.menu-item:selected {
+    -fx-background-color: -color-dorado;
+    -fx-text-fill: -color-blanco;
+    -fx-font-weight: bold;
+}
+.separador-menu {
+    -fx-background-color: -color-marron-secundario;
+    -fx-min-height: 1px;
+    -fx-pref-height: 1px;
+    -fx-max-height: 1px;
+}
+.usuario-nombre {
+    -fx-text-fill: -color-blanco;
+    -fx-font-weight: bold;
+}
+.usuario-rol {
+    -fx-text-fill: -color-dorado-premium;
+    -fx-font-size: 12px;
+}
+.btn-cerrar-sesion {
+    -fx-background-color: transparent;
+    -fx-text-fill: #F3ECDD;
+    -fx-border-color: -color-marron-secundario;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 7px 14px;
+    -fx-cursor: hand;
+    -fx-max-width: infinity;
+}
+.btn-cerrar-sesion:hover {
+    -fx-background-color: -color-marron-secundario;
+}
+
+/* ===== Encabezado ===== */
+.encabezado-principal {
+    -fx-background-color: -color-blanco;
+    -fx-border-color: -color-gris-borde;
+    -fx-border-width: 0 0 1px 0;
+}
+.titulo-modulo {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-marron-oscuro;
+}
+.fecha-encabezado {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-gris-texto;
+}
+
+/* ===== Pantalla "en construccion" ===== */
+.aviso-construccion {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-marron-oscuro;
+}
+
+/* ===== Submenus (opciones que se despliegan) ===== */
+.menu-grupo {
+    -fx-cursor: hand;
+}
+.menu-grupo-activo {
+    -fx-text-fill: -color-dorado-premium;
+    -fx-font-weight: bold;
+}
+.submenu {
+    -fx-padding: 0 0 4px 12px;
+}
+.submenu-item {
+    -fx-font-size: 13px;
+    -fx-padding: 8px 14px;
+}
+
+/* ===== Area con desplazamiento del menu (cuando hay muchos submenus abiertos) ===== */
+.scroll-menu,
+.scroll-menu > .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+.scroll-menu .scroll-bar {
+    -fx-background-color: transparent;
+    -fx-pref-width: 6px;
+}
+.scroll-menu .scroll-bar .track {
+    -fx-background-color: transparent;
+}
+.scroll-menu .scroll-bar .thumb {
+    -fx-background-color: -color-marron-secundario;
+    -fx-background-radius: 3px;
+}
+.scroll-menu .scroll-bar .increment-button,
+.scroll-menu .scroll-bar .decrement-button {
+    -fx-padding: 0;
+    -fx-pref-height: 0;
+    -fx-opacity: 0;
+}
