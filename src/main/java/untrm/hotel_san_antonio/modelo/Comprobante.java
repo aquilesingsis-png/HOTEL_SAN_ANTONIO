@@ -7,7 +7,7 @@ public class Comprobante {
     private int idComprobante;
     private Integer idReserva; // puede ser null (venta de tiendita sola)
     private int idUsuario;
-    private String tipo;   // BOLETA, NOTA_VENTA
+    private String tipo;   // BOLETA, NOTA_VENTA, FACTURA
     private String numero;
     private LocalDateTime fechaEmision;
     private BigDecimal montoTotal;

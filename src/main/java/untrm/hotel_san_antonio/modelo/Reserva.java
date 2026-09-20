@@ -16,6 +16,7 @@ public class Reserva {
     private BigDecimal montoTotal;
     private String estado; // PENDIENTE, CONFIRMADA, CHECKIN, FINALIZADA, CANCELADA
     private String canal;  // TELEFONO, WHATSAPP, BOOKING, PRESENCIAL
+    private Integer idEmpresa; // null si no se factura a una empresa
 
     // campos de conveniencia para mostrar en tablas, cargados por el DAO con JOIN
     private String nombreHuesped;
@@ -55,6 +56,9 @@ public class Reserva {
 
     public String getCanal() { return canal; }
     public void setCanal(String canal) { this.canal = canal; }
+
+    public Integer getIdEmpresa() { return idEmpresa; }
+    public void setIdEmpresa(Integer idEmpresa) { this.idEmpresa = idEmpresa; }
 
     public String getNombreHuesped() { return nombreHuesped; }
     public void setNombreHuesped(String nombreHuesped) { this.nombreHuesped = nombreHuesped; }

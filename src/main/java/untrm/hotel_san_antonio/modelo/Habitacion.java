@@ -7,6 +7,8 @@ public class Habitacion {
     private TipoHabitacion tipo; // opcional: cargado por el DAO con JOIN
     private int piso;
     private String estado; // DISPONIBLE, OCUPADA, LIMPIEZA, MANTENIMIENTO
+    private String huespedActual; // solo si esta ocupada con una reserva en CHECKIN (lo carga el DAO)
+    private String reservaHoy;    // huesped con reserva CONFIRMADA que llega hoy a esta habitacion libre (lo carga el DAO)
 
     public Habitacion() {}
 
@@ -35,4 +37,10 @@ public class Habitacion {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public String getHuespedActual() { return huespedActual; }
+    public void setHuespedActual(String huespedActual) { this.huespedActual = huespedActual; }
+
+    public String getReservaHoy() { return reservaHoy; }
+    public void setReservaHoy(String reservaHoy) { this.reservaHoy = reservaHoy; }
 }

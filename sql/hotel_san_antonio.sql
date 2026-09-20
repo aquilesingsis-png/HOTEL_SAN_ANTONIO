@@ -65,6 +65,17 @@ CREATE TABLE usuario (
 );
 
 -- ---------------------------------------------------------------------
+-- EMPRESA (cliente al que se factura; sus datos fiscales dependen del RUC,
+-- por eso van en su propia tabla y no dentro de RESERVA — 3FN)
+-- ---------------------------------------------------------------------
+CREATE TABLE empresa (
+    id_empresa        INT AUTO_INCREMENT PRIMARY KEY,
+    ruc               VARCHAR(11)  NOT NULL UNIQUE,
+    razon_social      VARCHAR(150) NOT NULL,
+    direccion_fiscal  VARCHAR(200) NULL
+);
+
+-- ---------------------------------------------------------------------
 -- RESERVA
 -- ---------------------------------------------------------------------
 CREATE TABLE reserva (
@@ -79,9 +90,11 @@ CREATE TABLE reserva (
     monto_total     DECIMAL(8,2) NOT NULL,
     estado          ENUM('PENDIENTE','CONFIRMADA','CHECKIN','FINALIZADA','CANCELADA') NOT NULL DEFAULT 'PENDIENTE',
     canal           ENUM('TELEFONO','WHATSAPP','BOOKING','PRESENCIAL') NOT NULL,
+    id_empresa      INT NULL,
     CONSTRAINT fk_reserva_huesped    FOREIGN KEY (id_huesped)    REFERENCES huesped(id_huesped),
     CONSTRAINT fk_reserva_habitacion FOREIGN KEY (id_habitacion) REFERENCES habitacion(id_habitacion),
     CONSTRAINT fk_reserva_usuario    FOREIGN KEY (id_usuario)    REFERENCES usuario(id_usuario),
+    CONSTRAINT fk_reserva_empresa    FOREIGN KEY (id_empresa)    REFERENCES empresa(id_empresa),
     CONSTRAINT chk_reserva_fechas    CHECK (fecha_checkout > fecha_checkin)
 );
 
@@ -131,7 +144,7 @@ CREATE TABLE comprobante (
     id_comprobante  INT AUTO_INCREMENT PRIMARY KEY,
     id_reserva      INT NULL,
     id_usuario      INT NOT NULL,
-    tipo            ENUM('BOLETA','NOTA_VENTA') NOT NULL,
+    tipo            ENUM('BOLETA','NOTA_VENTA','FACTURA') NOT NULL,
     numero          VARCHAR(20) NOT NULL UNIQUE,
     fecha_emision   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     monto_total     DECIMAL(8,2) NOT NULL,
@@ -208,6 +221,10 @@ INSERT INTO huesped (tipo_documento, num_documento, nombres, apellidos, pais_pro
 ('DNI',       '47852136', 'Carlos',  'Mendoza Ruiz',    'Peru',    '987654321', 'carlos.mendoza@mail.com'),
 ('DNI',       '71234589', 'Maria',   'Fernandez Diaz',  'Peru',    '956123478', NULL),
 ('PASAPORTE', 'AB123456', 'John',    'Smith',           'Estados Unidos', '999888777', 'john.smith@mail.com');
+
+-- Empresa de prueba (datos devueltos por la API de RUC para el RUC de ejemplo)
+INSERT INTO empresa (ruc, razon_social, direccion_fiscal) VALUES
+('20131312955', 'SUPERINTENDENCIA NACIONAL DE ADUANAS Y DE ADMINISTRACION TRIBUTARIA - SUNAT', 'AV. GARCILASO DE LA VEGA NRO. 1472');
 
 -- Reservas de prueba
 INSERT INTO reserva (id_huesped, id_habitacion, id_usuario, fecha_checkin, fecha_checkout, adelanto, monto_total, estado, canal) VALUES
