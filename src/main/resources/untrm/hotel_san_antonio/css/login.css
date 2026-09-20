@@ -1,0 +1,157 @@
+/* Login */
+.login-root {
+    -fx-background-image: url("../images/fondo_login.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+    -fx-background-size: cover;
+}
+
+.login-velo {
+    -fx-background-color: linear-gradient(
+        to right,
+        rgba(37, 20, 8, 0.78) 0%,
+        rgba(54, 28, 9, 0.55) 43%,
+        rgba(36, 20, 10, 0.16) 70%,
+        rgba(28, 15, 7, 0.34) 100%
+    );
+}
+
+.login-marca-hotel {
+    -fx-font-family: "Georgia";
+    -fx-font-size: 44px;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(39, 18, 4, 0.72), 12, 0.25, 0, 2);
+}
+
+.login-marca-estrellas {
+    -fx-font-size: 19px;
+    -fx-text-fill: -color-dorado-premium;
+}
+
+.login-eslogan {
+    -fx-font-family: "Georgia";
+    -fx-font-size: 24px;
+    -fx-font-style: italic;
+    -fx-text-fill: rgba(255, 255, 255, 0.94);
+    -fx-effect: dropshadow(gaussian, rgba(39, 18, 4, 0.76), 10, 0.2, 0, 2);
+}
+
+.login-linea-dorada {
+    -fx-background-color: -color-dorado-claro;
+    -fx-background-radius: 3px;
+    -fx-max-height: 4px;
+}
+
+.login-tarjeta {
+    -fx-background-color: rgba(255, 255, 255, 0.97);
+    -fx-background-radius: 28px;
+    -fx-border-color: rgba(255, 255, 255, 0.72);
+    -fx-border-radius: 28px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(39, 20, 7, 0.34), 32, 0.18, 0, 9);
+}
+
+.login-titulo {
+    -fx-font-family: "Georgia";
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-marron-oscuro;
+}
+
+.login-subtitulo {
+    -fx-font-size: 13px;
+    -fx-text-fill: -color-gris-texto;
+}
+
+.login-campo {
+    -fx-background-color: #FBFBFB;
+    -fx-border-color: #D9D9D9;
+    -fx-border-width: 1.2px;
+    -fx-border-radius: 11px;
+    -fx-background-radius: 11px;
+    -fx-padding: 6px 12px;
+    -fx-min-height: 54px;
+}
+
+.login-campo:focused {
+    -fx-border-color: -color-dorado;
+    -fx-effect: dropshadow(gaussian, rgba(184, 134, 45, 0.18), 8, 0.1, 0, 0);
+}
+
+.login-campo:error {
+    -fx-border-color: #B64832;
+    -fx-background-color: #FFF8F6;
+}
+
+.login-campo-icono {
+    -fx-fill: -color-marron-oscuro;
+}
+
+.login-campo-control {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 7px 2px;
+    -fx-font-size: 15px;
+    -fx-text-fill: -color-texto;
+    -fx-prompt-text-fill: #929292;
+}
+
+.login-campo-control:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.login-btn-ver {
+    -fx-background-color: transparent;
+    -fx-padding: 7px 4px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-dorado;
+    -fx-cursor: hand;
+}
+
+.login-btn-ver:hover,
+.login-btn-ver:selected {
+    -fx-text-fill: -color-marron-oscuro;
+}
+
+.login-error {
+    -fx-background-color: #FFF0ED;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 11px;
+    -fx-font-size: 12px;
+    -fx-text-fill: #9C3421;
+}
+
+.login-btn-ingresar {
+    -fx-background-color: linear-gradient(to right, #A96F16, #CB8F2C);
+    -fx-background-radius: 11px;
+    -fx-padding: 14px 24px;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(90, 53, 22, 0.25), 9, 0.12, 0, 3);
+}
+
+.login-btn-ingresar:hover {
+    -fx-background-color: linear-gradient(to right, #BC7F1D, #D9A03C);
+}
+
+.login-btn-ingresar:pressed {
+    -fx-translate-y: 1px;
+    -fx-effect: none;
+}
+
+.login-btn-ingresar:disabled {
+    -fx-opacity: 0.82;
+}
+
+.login-progreso {
+    -fx-progress-color: white;
+}
+
+.login-ayuda {
+    -fx-font-size: 11px;
+    -fx-text-fill: #8C8C8C;
+}
