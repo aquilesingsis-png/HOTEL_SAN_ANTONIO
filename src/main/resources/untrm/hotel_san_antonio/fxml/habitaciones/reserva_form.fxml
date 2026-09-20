@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Ventana emergente: registrar huesped y reserva desde una habitacion disponible. -->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.ReservaFormController">
+
+    <stylesheets>
+        <URL value="@../../css/estilos.css"/>
+        <URL value="@../../css/habitaciones.css"/>
+    </stylesheets>
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="panel-encabezado">
+            <padding><Insets top="14" right="22" bottom="14" left="22"/></padding>
+            <Label fx:id="lblTitulo" styleClass="titulo-encabezado"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblEstadoHab" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fx:id="scrollForm" fitToWidth="true" styleClass="scroll-transparente">
+            <HBox spacing="20" alignment="TOP_LEFT">
+                <padding><Insets top="20" right="22" bottom="20" left="22"/></padding>
+
+                <!-- ============ FORMULARIO ============ -->
+                <VBox spacing="16" HBox.hgrow="ALWAYS">
+
+                    <VBox spacing="12" styleClass="panel-form">
+                        <Label text="Huésped" styleClass="titulo-panel"/>
+                        <GridPane hgap="14" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50"/>
+                                <ColumnConstraints percentWidth="50"/>
+                            </columnConstraints>
+
+                            <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <Label text="Tipo de documento" styleClass="etiqueta-form"/>
+                                <ComboBox fx:id="cmbTipoDoc" maxWidth="Infinity"/>
+                            </VBox>
+                            <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <Label text="Número de documento" styleClass="etiqueta-form"/>
+                                <HBox spacing="8">
+                                    <TextField fx:id="txtDocumento" HBox.hgrow="ALWAYS"/>
+                                    <Button fx:id="btnBuscarDoc" text="Buscar" styleClass="btn-secundario" onAction="#onBuscarDocumento"/>
+                                </HBox>
+                            </VBox>
+
+                            <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                <Label text="Nombres" styleClass="etiqueta-form"/>
+                                <TextField fx:id="txtNombres"/>
+                            </VBox>
+                            <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                <Label text="Apellidos" styleClass="etiqueta-form"/>
+                                <TextField fx:id="txtApellidos"/>
+                            </VBox>
+
+                            <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                <Label text="País de procedencia" styleClass="etiqueta-form"/>
+                                <TextField fx:id="txtPais"/>
+                            </VBox>
+                            <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                <Label text="Teléfono (opcional)" styleClass="etiqueta-form"/>
+                                <TextField fx:id="txtTelefono" promptText="9XXXXXXXX"/>
+                            </VBox>
+
+                            <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2">
+                                <Label text="Correo electrónico (opcional)" styleClass="etiqueta-form"/>
+                                <TextField fx:id="txtEmail"/>
+                            </VBox>
+                        </GridPane>
+                    </VBox>
+
+                    <VBox spacing="12" styleClass="panel-form">
+                        <Label text="Estadía" styleClass="titulo-panel"/>
+                        <GridPane hgap="14" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50"/>
+                                <ColumnConstraints percentWidth="50"/>
+                            </columnConstraints>
+
+                            <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <Label text="Fecha de ingreso" styleClass="etiqueta-form"/>
+                                <DatePicker fx:id="dpIngreso" maxWidth="Infinity"/>
+                            </VBox>
+                            <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <Label text="Fecha de salida" styleClass="etiqueta-form"/>
+                                <DatePicker fx:id="dpSalida" maxWidth="Infinity"/>
+                            </VBox>
+
+                            <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                <Label text="Canal de reserva" styleClass="etiqueta-form"/>
+                                <ComboBox fx:id="cmbCanal" maxWidth="Infinity"/>
+                            </VBox>
+                            <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                <Label text="Noches" styleClass="etiqueta-form"/>
+                                <Label fx:id="lblNoches" styleClass="valor-form"/>
+                            </VBox>
+                        </GridPane>
+                    </VBox>
+
+                    <VBox spacing="12" styleClass="panel-form">
+                        <Label fx:id="lblTituloPago" text="Adelanto" styleClass="titulo-panel"/>
+                        <GridPane hgap="14" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50"/>
+                                <ColumnConstraints percentWidth="50"/>
+                            </columnConstraints>
+
+                            <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <Label fx:id="lblMontoPago" text="Monto del adelanto (S/)" styleClass="etiqueta-form"/>
+                                <TextField fx:id="txtAdelanto"/>
+                            </VBox>
+                            <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <Label fx:id="lblMetodo1" text="Método de pago" styleClass="etiqueta-form"/>
+                                <ComboBox fx:id="cmbMetodo" maxWidth="Infinity"/>
+                            </VBox>
+                        </GridPane>
+
+                        <CheckBox fx:id="chkDividirPago" text="Dividir el pago en dos métodos"/>
+                        <GridPane fx:id="boxSegundoPago" hgap="14" vgap="8">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50"/>
+                                <ColumnConstraints percentWidth="50"/>
+                            </columnConstraints>
+
+                            <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <Label text="Segundo método" styleClass="etiqueta-form"/>
+                                <ComboBox fx:id="cmbMetodo2" maxWidth="Infinity"/>
+                            </VBox>
+                            <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <Label text="Monto con el segundo método (S/)" styleClass="etiqueta-form"/>
+                                <TextField fx:id="txtMonto2"/>
+                            </VBox>
+                            <Label fx:id="lblDivision" styleClass="texto-secundario" wrapText="true"
+                                   GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2"/>
+                        </GridPane>
+                    </VBox>
+
+                    <VBox spacing="12" styleClass="panel-form">
+                        <CheckBox fx:id="chkEmpresa" text="Facturar a una empresa"/>
+                        <VBox fx:id="boxEmpresa" spacing="12">
+                            <VBox spacing="4">
+                                <Label text="RUC" styleClass="etiqueta-form"/>
+                                <HBox spacing="8">
+                                    <TextField fx:id="txtRuc" HBox.hgrow="ALWAYS"/>
+                                    <Button fx:id="btnBuscarRuc" text="Buscar" styleClass="btn-secundario" onAction="#onBuscarRuc"/>
+                                </HBox>
+                            </VBox>
+                            <VBox spacing="4">
+                                <Label text="Razón social" styleClass="etiqueta-form"/>
+                                <TextField fx:id="txtRazonSocial"/>
+                            </VBox>
+                            <VBox spacing="4">
+                                <Label text="Dirección fiscal" styleClass="etiqueta-form"/>
+                                <TextField fx:id="txtDireccionFiscal"/>
+                            </VBox>
+                        </VBox>
+                    </VBox>
+                </VBox>
+
+                <!-- ============ PANEL LATERAL ============ -->
+                <VBox spacing="16" minWidth="300" prefWidth="300" maxWidth="300">
+                    <VBox spacing="8" styleClass="panel-form">
+                        <Label text="La habitación" styleClass="titulo-panel"/>
+                        <Label fx:id="lblHabNumero" styleClass="valor-grande"/>
+                        <Label fx:id="lblHabTipo" styleClass="texto-secundario"/>
+                        <Label fx:id="lblHabCapacidad"/>
+                        <Label fx:id="lblHabTarifa"/>
+                        <Label text="Incluye" styleClass="etiqueta-form"/>
+                        <Label fx:id="lblHabIncluye" wrapText="true" styleClass="texto-secundario"/>
+                    </VBox>
+
+                    <VBox spacing="8" styleClass="panel-form">
+                        <Label text="Resumen" styleClass="titulo-panel"/>
+                        <Label fx:id="lblResCalculo" styleClass="texto-secundario"/>
+                        <Label fx:id="lblResTotal" styleClass="valor-grande"/>
+                        <Label fx:id="lblResMinimo"/>
+                        <Label fx:id="lblResSaldo"/>
+                    </VBox>
+                </VBox>
+            </HBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="panel-pie">
+            <padding><Insets top="14" right="22" bottom="14" left="22"/></padding>
+            <Button fx:id="btnMantenimiento" text="Poner en mantenimiento" styleClass="btn-secundario" onAction="#onMantenimiento"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnCancelar" text="Cancelar" styleClass="btn-secundario" onAction="#onCancelar"/>
+            <Button fx:id="btnGuardar" text="Registrar check-in" styleClass="btn-primario" onAction="#onGuardar"/>
+        </HBox>
+    </bottom>
+</BorderPane>
