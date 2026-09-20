@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<!--
+    Tarjeta de una habitacion. Los textos y la clase de estado (habitacion-*) son de muestra:
+    el controlador los reemplaza con los datos reales.
+-->
+<VBox fx:id="raiz" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="untrm.hotel_san_antonio.controlador.TarjetaHabitacionController"
+      spacing="5" styleClass="hab-tarjeta, habitacion-disponible" onMouseClicked="#onClic">
+
+    <stylesheets>
+        <URL value="@../../css/estilos.css"/>
+        <URL value="@../../css/habitaciones.css"/>
+    </stylesheets>
+
+    <Label fx:id="lblNumero" text="101" styleClass="hab-numero"/>
+    <Label fx:id="lblTipo" text="Simple · 1 persona" styleClass="hab-tipo"/>
+    <HBox alignment="CENTER_LEFT" spacing="7">
+        <Circle radius="5" styleClass="punto-estado"/>
+        <Label fx:id="lblEstado" text="Disponible" styleClass="hab-estado"/>
+    </HBox>
+    <Label fx:id="lblHuesped" text="Nombre del huésped" styleClass="hab-huesped"/>
+</VBox>

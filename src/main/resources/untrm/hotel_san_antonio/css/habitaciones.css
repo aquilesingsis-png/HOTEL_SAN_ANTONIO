@@ -1,0 +1,137 @@
+/*
+ * Estilos propios del modulo Habitaciones (tarjetas, formulario de registro y cuenta de habitacion).
+ * Los colores (-color-*) y estilos generales viven en estilos.css; este archivo se carga ademas de ese.
+ */
+/* ===== Tarjetas de habitacion ===== */
+.hab-tarjeta {
+    -fx-padding: 14px 16px;
+    -fx-min-width: 180px;
+    -fx-pref-width: 180px;
+    -fx-cursor: hand;
+}
+.hab-tarjeta:hover {
+    -fx-effect: dropshadow(gaussian, rgba(59,33,15,0.22), 10, 0, 0, 3);
+}
+.hab-numero {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-texto;
+}
+.hab-tipo {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-gris-texto;
+}
+.hab-estado {
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-texto;
+}
+.hab-huesped {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-gris-texto;
+}
+.titulo-piso {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-marron-oscuro;
+}
+.scroll-transparente,
+.scroll-transparente > .viewport {
+    -fx-background-color: transparent;
+}
+.scroll-transparente {
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+}
+
+/* ===== Formularios (ventanas emergentes) ===== */
+.panel-form {
+    -fx-background-color: -color-blanco;
+    -fx-background-radius: 8px;
+    -fx-border-color: -color-gris-borde;
+    -fx-border-radius: 8px;
+    -fx-padding: 16px;
+}
+.titulo-panel {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-marron-oscuro;
+}
+.etiqueta-form {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-gris-texto;
+}
+.valor-form {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-texto;
+    -fx-padding: 6px 0 0 0;
+}
+.valor-grande {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-marron-oscuro;
+}
+.panel-pie {
+    -fx-background-color: -color-blanco;
+    -fx-border-color: -color-gris-borde;
+    -fx-border-width: 1px 0 0 0;
+}
+.texto-error {
+    -fx-text-fill: -color-egreso;
+    -fx-font-weight: bold;
+}
+.text-field:focused, .combo-box:focused, .date-picker:focused {
+    -fx-border-color: -color-dorado;
+}
+
+/* ===== Campos de formulario con la paleta ===== */
+.text-field, .combo-box-base {
+    -fx-background-color: -color-blanco;
+    -fx-border-color: -color-gris-borde;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+.combo-box-base > .arrow-button {
+    -fx-background-color: transparent;
+}
+
+/* Punto de color del estado dentro de la tarjeta de habitacion */
+.habitacion-disponible .punto-estado { -fx-fill: -color-disponible; }
+.habitacion-ocupada .punto-estado { -fx-fill: -color-ocupada; }
+.habitacion-limpieza .punto-estado { -fx-fill: -color-limpieza; }
+.habitacion-mantenimiento .punto-estado { -fx-fill: -color-mantenimiento; }
+
+/* ===== Tablas de la cuenta de habitacion ===== */
+.tabla-cuenta {
+    -fx-background-color: -color-blanco;
+    -fx-border-color: -color-gris-borde;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+.tabla-cuenta .column-header, .tabla-cuenta .filler {
+    -fx-background-color: -color-fondo;
+    -fx-border-color: transparent transparent -color-gris-borde transparent;
+}
+.tabla-cuenta .column-header .label {
+    -fx-text-fill: -color-marron-oscuro;
+    -fx-font-weight: bold;
+}
+.tabla-cuenta .table-row-cell:selected {
+    -fx-background-color: -color-dorado-premium;
+}
+.tabla-cuenta .table-row-cell:selected .table-cell {
+    -fx-text-fill: -color-texto;
+}
+.valor-grande.texto-egreso { -fx-text-fill: -color-egreso; }
+.valor-grande.texto-ingreso { -fx-text-fill: -color-ingreso; }
+
+/* ===== Campo con dato incorrecto (lo marca util/CampoValidacion) ===== */
+.text-field.campo-invalido,
+.text-field.campo-invalido:focused,
+.combo-box-base.campo-invalido,
+.combo-box-base.campo-invalido:focused,
+.spinner.campo-invalido,
+.spinner.campo-invalido:focused {
+    -fx-border-color: -color-egreso;
+    -fx-border-width: 1.5px;
+}
