@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/26"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.Reserva.ReservasProgramadasController"
+            prefWidth="1100"
+            prefHeight="720"
+            style="-fx-background-color: #F7F8FA;">
+
+    <fx:define>
+        <ToggleGroup fx:id="grupoEstados"/>
+    </fx:define>
+
+    <!-- ====================================================== -->
+    <!-- ENCABEZADO                                             -->
+    <!-- ====================================================== -->
+
+    <top>
+
+        <VBox spacing="12"
+              style="-fx-background-color: #F7F8FA;">
+
+            <HBox alignment="CENTER_LEFT"
+                  spacing="12"
+                  prefHeight="72"
+                  style="-fx-background-color: white;">
+
+                <padding>
+                    <Insets left="20" right="20"/>
+                </padding>
+
+                <Button text="☰"
+                        prefWidth="38"
+                        style="-fx-background-color: transparent;
+                               -fx-text-fill: #946117;
+                               -fx-font-size: 24px;"/>
+
+                <VBox spacing="0">
+
+                    <Label text="Reservas programadas"
+                           style="-fx-font-size: 23px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #17120F;"/>
+
+                    <Label text="Administra las reservas confirmadas y pendientes"
+                           style="-fx-text-fill: #777777;
+                                  -fx-font-size: 11px;"/>
+
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <TextField fx:id="txtBuscar"
+                           promptText="Buscar reserva, huésped o habitación..."
+                           prefWidth="280"
+                           minWidth="180"
+                           prefHeight="36"
+                           style="-fx-background-color: white;
+                                  -fx-border-color: #E3E3E3;
+                                  -fx-border-radius: 18;
+                                  -fx-background-radius: 18;
+                                  -fx-padding: 0 14;"/>
+
+            </HBox>
+
+
+            <!-- FILTROS DE ESTADO -->
+
+            <HBox spacing="5">
+
+                <padding>
+                    <Insets left="20" right="20"/>
+                </padding>
+
+                <ToggleButton fx:id="btnTodas"
+                              text="Todas"
+                              selected="true"
+                              toggleGroup="$grupoEstados"
+                              onAction="#filtrarEstado"
+                              maxWidth="Infinity"
+                              HBox.hgrow="ALWAYS"
+                              prefHeight="45"/>
+
+                <ToggleButton fx:id="btnPendientes"
+                              text="Pendientes"
+                              toggleGroup="$grupoEstados"
+                              onAction="#filtrarEstado"
+                              maxWidth="Infinity"
+                              HBox.hgrow="ALWAYS"
+                              prefHeight="45"/>
+
+                <ToggleButton fx:id="btnConfirmadas"
+                              text="Confirmadas"
+                              toggleGroup="$grupoEstados"
+                              onAction="#filtrarEstado"
+                              maxWidth="Infinity"
+                              HBox.hgrow="ALWAYS"
+                              prefHeight="45"/>
+
+                <ToggleButton fx:id="btnPorLlegar"
+                              text="Por llegar"
+                              toggleGroup="$grupoEstados"
+                              onAction="#filtrarEstado"
+                              maxWidth="Infinity"
+                              HBox.hgrow="ALWAYS"
+                              prefHeight="45"/>
+
+                <ToggleButton fx:id="btnFinalizadas"
+                              text="Finalizadas"
+                              toggleGroup="$grupoEstados"
+                              onAction="#filtrarEstado"
+                              maxWidth="Infinity"
+                              HBox.hgrow="ALWAYS"
+                              prefHeight="45"/>
+
+                <ToggleButton fx:id="btnCanceladas"
+                              text="Canceladas"
+                              toggleGroup="$grupoEstados"
+                              onAction="#filtrarEstado"
+                              maxWidth="Infinity"
+                              HBox.hgrow="ALWAYS"
+                              prefHeight="45"/>
+
+            </HBox>
+
+        </VBox>
+
+    </top>
+
+
+    <!-- ====================================================== -->
+    <!-- CONTENIDO                                              -->
+    <!-- ====================================================== -->
+
+    <center>
+
+        <VBox spacing="14">
+
+            <padding>
+                <Insets top="15"
+                        right="20"
+                        bottom="15"
+                        left="20"/>
+            </padding>
+
+
+            <!-- FILTRO FECHA -->
+
+            <HBox alignment="CENTER_LEFT"
+                  spacing="10"
+                  style="-fx-background-color: white;
+                         -fx-background-radius: 9;
+                         -fx-border-color: #E5E5E5;
+                         -fx-border-radius: 9;
+                         -fx-padding: 14;">
+
+                <Label text="Desde"/>
+
+                <DatePicker fx:id="dpDesde"
+                            prefWidth="150"/>
+
+                <Label text="Hasta"/>
+
+                <DatePicker fx:id="dpHasta"
+                            prefWidth="150"/>
+
+                <Button text="Filtrar"
+                        onAction="#filtrarFechas"
+                        prefHeight="35"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="+  Nueva reserva"
+                        onAction="#abrirNuevaReserva"
+                        prefWidth="155"
+                        prefHeight="40"
+                        style="-fx-background-color: #A56D17;
+                               -fx-background-radius: 7;
+                               -fx-text-fill: white;
+                               -fx-font-weight: bold;"/>
+
+            </HBox>
+
+
+            <!-- TABLA -->
+
+            <TableView fx:id="tablaReservas"
+                       VBox.vgrow="ALWAYS">
+
+                <placeholder>
+                    <Label text="No existen reservas para mostrar."
+                           style="-fx-text-fill: #999999;
+                                  -fx-font-size: 13px;"/>
+                </placeholder>
+
+                <columns>
+
+                    <TableColumn fx:id="colCodigo"
+                                 text="Código"/>
+
+                    <TableColumn fx:id="colCliente"
+                                 text="Huésped / Empresa"/>
+
+                    <TableColumn fx:id="colHabitacion"
+                                 text="Habitación"/>
+
+                    <TableColumn fx:id="colIngreso"
+                                 text="Ingreso"/>
+
+                    <TableColumn fx:id="colSalida"
+                                 text="Salida"/>
+
+                    <TableColumn fx:id="colEstado"
+                                 text="Estado"/>
+
+                    <TableColumn fx:id="colAcciones"
+                                 text="Acciones"/>
+
+                </columns>
+
+            </TableView>
+
+
+            <!-- PAGINACIÓN -->
+
+            <HBox alignment="CENTER_LEFT"
+                  spacing="6">
+
+                <Label fx:id="lblCantidad"
+                       text="0 reservas"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="‹"
+                        onAction="#paginaAnterior"/>
+
+                <Button fx:id="btnPagina"
+                        text="1"
+                        style="-fx-background-color: #A46C16;
+                               -fx-text-fill: white;"/>
+
+                <Button text="›"
+                        onAction="#paginaSiguiente"/>
+
+            </HBox>
+
+        </VBox>
+
+    </center>
+
+</BorderPane>
