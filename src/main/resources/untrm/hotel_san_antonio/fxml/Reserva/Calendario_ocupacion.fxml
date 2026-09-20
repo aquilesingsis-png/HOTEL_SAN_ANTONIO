@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/26"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.Reserva.CalendarioOcupacionController"
+            prefWidth="1100.0"
+            prefHeight="720.0"
+            minWidth="800.0"
+            minHeight="600.0"
+            style="-fx-background-color: #F7F8FA;">
+
+    <!-- ===================================================== -->
+    <!-- ENCABEZADO                                            -->
+    <!-- ===================================================== -->
+
+    <top>
+        <HBox alignment="CENTER_LEFT"
+              spacing="12.0"
+              prefHeight="72.0"
+              minHeight="72.0"
+              style="-fx-background-color: white;">
+
+            <padding>
+                <Insets top="10.0"
+                        right="20.0"
+                        bottom="10.0"
+                        left="20.0"/>
+            </padding>
+
+            <Button text="☰"
+                    prefWidth="40.0"
+                    prefHeight="40.0"
+                    style="-fx-background-color: transparent;
+                           -fx-text-fill: #946117;
+                           -fx-font-size: 24px;
+                           -fx-cursor: hand;"/>
+
+            <VBox spacing="0.0">
+                <Label text="Calendario de ocupación"
+                       style="-fx-font-size: 23px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #17120F;"/>
+
+                <Label text="Visualiza la disponibilidad de habitaciones"
+                       style="-fx-text-fill: #777777;
+                              -fx-font-size: 11px;"/>
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <TextField fx:id="txtBuscarHabitacion"
+                       promptText="Buscar habitaciones..."
+                       prefWidth="250.0"
+                       minWidth="160.0"
+                       prefHeight="36.0"
+                       style="-fx-background-color: white;
+                              -fx-border-color: #E3E3E3;
+                              -fx-background-radius: 18;
+                              -fx-border-radius: 18;
+                              -fx-padding: 0 14 0 14;"/>
+        </HBox>
+    </top>
+
+    <!-- ===================================================== -->
+    <!-- CONTENIDO                                             -->
+    <!-- ===================================================== -->
+
+    <center>
+        <VBox spacing="14.0">
+            <padding>
+                <Insets top="18.0"
+                        right="20.0"
+                        bottom="18.0"
+                        left="20.0"/>
+            </padding>
+
+            <!-- ================================================= -->
+            <!-- CONTROLES SUPERIORES                              -->
+            <!-- ================================================= -->
+
+            <HBox alignment="CENTER_LEFT"
+                  spacing="12.0">
+
+                <!-- MES / SEMANA -->
+
+                <HBox alignment="CENTER"
+                      spacing="12.0"
+                      HBox.hgrow="ALWAYS"
+                      prefHeight="50.0"
+                      style="-fx-background-color: white;
+                             -fx-background-radius: 9;
+                             -fx-border-color: #E5E5E5;
+                             -fx-border-radius: 9;
+                             -fx-padding: 8;">
+
+                    <Button text="&lt;"
+                            onAction="#periodoAnterior"
+                            prefWidth="38.0"
+                            prefHeight="35.0"
+                            style="-fx-background-color: transparent;
+                                   -fx-font-size: 20px;
+                                   -fx-text-fill: #9A6517;
+                                   -fx-cursor: hand;"/>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Label fx:id="lblPeriodo"
+                           text="Mes actual"
+                           style="-fx-font-size: 17px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #222222;"/>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Button text="&gt;"
+                            onAction="#periodoSiguiente"
+                            prefWidth="38.0"
+                            prefHeight="35.0"
+                            style="-fx-background-color: transparent;
+                                   -fx-font-size: 20px;
+                                   -fx-text-fill: #9A6517;
+                                   -fx-cursor: hand;"/>
+                </HBox>
+
+                <ToggleButton fx:id="btnSemana"
+                              text="Semana"
+                              onAction="#cambiarVista"
+                              prefWidth="120.0"
+                              prefHeight="48.0"/>
+
+                <ToggleButton fx:id="btnMes"
+                              text="Mes"
+                              selected="true"
+                              onAction="#cambiarVista"
+                              prefWidth="120.0"
+                              prefHeight="48.0"/>
+
+                <!-- PISO -->
+
+                <ChoiceBox fx:id="cbPiso"
+                           prefWidth="180.0"
+                           prefHeight="48.0"/>
+            </HBox>
+
+            <!-- ================================================= -->
+            <!-- LEYENDA                                           -->
+            <!-- ================================================= -->
+
+            <HBox spacing="25.0"
+                  alignment="CENTER_LEFT"
+                  prefHeight="45.0">
+
+                <Label text="● Disponible"
+                       style="-fx-text-fill: #2CB95F;
+                              -fx-font-size: 13px;"/>
+
+                <Label text="● Ocupada"
+                       style="-fx-text-fill: #EF4141;
+                              -fx-font-size: 13px;"/>
+
+                <Label text="● Reservada"
+                       style="-fx-text-fill: #2E88DD;
+                              -fx-font-size: 13px;"/>
+
+                <Label text="● En limpieza"
+                       style="-fx-text-fill: #EAB851;
+                              -fx-font-size: 13px;"/>
+
+                <Label text="● Mantenimiento"
+                       style="-fx-text-fill: #AFA79C;
+                              -fx-font-size: 13px;"/>
+            </HBox>
+
+            <!-- ================================================= -->
+            <!-- CALENDARIO                                        -->
+            <!-- ================================================= -->
+
+            <VBox VBox.vgrow="ALWAYS"
+                  spacing="0.0"
+                  style="-fx-background-color: white;
+                         -fx-background-radius: 9;
+                         -fx-border-radius: 9;
+                         -fx-border-color: #E5E5E5;">
+
+                <!-- CABECERA DEL CALENDARIO -->
+
+                <GridPane fx:id="gridCabecera"
+                          prefHeight="65.0"
+                          minHeight="65.0"
+                          style="-fx-background-color: #FAFAFA;
+                                 -fx-border-color: transparent transparent #E5E5E5 transparent;">
+
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="10.0"/>
+                        <ColumnConstraints percentWidth="12.85"/>
+                        <ColumnConstraints percentWidth="12.85"/>
+                        <ColumnConstraints percentWidth="12.85"/>
+                        <ColumnConstraints percentWidth="12.85"/>
+                        <ColumnConstraints percentWidth="12.85"/>
+                        <ColumnConstraints percentWidth="12.85"/>
+                        <ColumnConstraints percentWidth="12.90"/>
+                    </columnConstraints>
+
+                    <!-- HABITACIÓN -->
+
+                    <Label text="Hab."
+                           GridPane.columnIndex="0"
+                           maxWidth="Infinity"
+                           alignment="CENTER"
+                           style="-fx-font-size: 13px;
+                                  -fx-font-weight: bold;"/>
+
+                    <!-- DÍA 1 -->
+
+                    <Label fx:id="lblDia1"
+                           text="-"
+                           GridPane.columnIndex="1"
+                           maxWidth="Infinity"
+                           alignment="CENTER"
+                           wrapText="true"
+                           style="-fx-font-size: 12px;
+                                  -fx-font-weight: bold;"/>
+
+                    <!-- DÍA 2 -->
+
+                    <Label fx:id="lblDia2"
+                           text="-"
+                           GridPane.columnIndex="2"
+                           maxWidth="Infinity"
+                           alignment="CENTER"
+                           wrapText="true"
+                           style="-fx-font-size: 12px;
+                                  -fx-font-weight: bold;"/>
+
+                    <!-- DÍA 3 -->
+
+                    <Label fx:id="lblDia3"
+                           text="-"
+                           GridPane.columnIndex="3"
+                           maxWidth="Infinity"
+                           alignment="CENTER"
+                           wrapText="true"
+                           style="-fx-font-size: 12px;
+                                  -fx-font-weight: bold;"/>
+
+                    <!-- DÍA 4 -->
+
+                    <Label fx:id="lblDia4"
+                           text="-"
+                           GridPane.columnIndex="4"
+                           maxWidth="Infinity"
+                           alignment="CENTER"
+                           wrapText="true"
+                           style="-fx-font-size: 12px;
+                                  -fx-font-weight: bold;"/>
+
+                    <!-- DÍA 5 -->
+
+                    <Label fx:id="lblDia5"
+                           text="-"
+                           GridPane.columnIndex="5"
+                           maxWidth="Infinity"
+                           alignment="CENTER"
+                           wrapText="true"
+                           style="-fx-font-size: 12px;
+                                  -fx-font-weight: bold;"/>
+
+                    <!-- DÍA 6 -->
+
+                    <Label fx:id="lblDia6"
+                           text="-"
+                           GridPane.columnIndex="6"
+                           maxWidth="Infinity"
+                           alignment="CENTER"
+                           wrapText="true"
+                           style="-fx-font-size: 12px;
+                                  -fx-font-weight: bold;"/>
+
+                    <!-- DÍA 7 -->
+
+                    <Label fx:id="lblDia7"
+                           text="-"
+                           GridPane.columnIndex="7"
+                           maxWidth="Infinity"
+                           alignment="CENTER"
+                           wrapText="true"
+                           style="-fx-font-size: 12px;
+                                  -fx-font-weight: bold;"/>
+                </GridPane>
+
+                <!-- ================================================= -->
+                <!-- HABITACIONES DESDE MYSQL                          -->
+                <!-- ================================================= -->
+
+                <VBox fx:id="contenedorHabitaciones"
+                      alignment="CENTER"
+                      spacing="3.0"
+                      VBox.vgrow="ALWAYS"
+                      style="-fx-padding: 10;">
+
+                    <Label fx:id="lblSinHabitaciones"
+                           text="No hay habitaciones cargadas."
+                           style="-fx-text-fill: #999999;
+                                  -fx-font-size: 13px;"/>
+                </VBox>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

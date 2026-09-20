@@ -1,0 +1,1059 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/26"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="untrm.hotel_san_antonio.controlador.Reserva.Nueva_reservaController"
+      fx:id="contenidoNuevaReserva"
+      prefWidth="1130.0"
+      prefHeight="768.0"
+      minWidth="780.0"
+      minHeight="650.0"
+      spacing="8.0"
+      style="-fx-background-color: #F7F8FA;">
+
+    <!-- ====================================================== -->
+    <!-- ENCABEZADO                                             -->
+    <!-- ====================================================== -->
+
+    <HBox alignment="CENTER_LEFT"
+          prefHeight="66.0"
+          minHeight="66.0"
+          spacing="12.0"
+          style="-fx-background-color: white;
+                 -fx-border-color: transparent transparent #E7E7E7 transparent;
+                 -fx-border-width: 0 0 1 0;">
+
+        <padding>
+            <Insets left="18.0"
+                    right="18.0"/>
+        </padding>
+
+        <Button text="≡"
+                prefWidth="38.0"
+                prefHeight="38.0"
+                style="-fx-background-color: transparent;
+                       -fx-text-fill: #916219;
+                       -fx-font-size: 25px;
+                       -fx-font-weight: bold;
+                       -fx-cursor: hand;"/>
+
+        <VBox spacing="0.0">
+
+            <Label text="Nueva reserva"
+                   style="-fx-text-fill: #18120F;
+                          -fx-font-size: 21px;
+                          -fx-font-weight: bold;"/>
+
+            <Label text="Registra una nueva reserva para tus clientes"
+                   style="-fx-text-fill: #777777;
+                          -fx-font-size: 10px;"/>
+
+        </VBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <TextField fx:id="txtBusquedaGeneral"
+                   promptText="Buscar huésped, reserva o habitación..."
+                   prefWidth="285.0"
+                   maxWidth="310.0"
+                   minWidth="170.0"
+                   prefHeight="35.0"
+                   style="-fx-background-color: white;
+                          -fx-border-color: #E1E1E1;
+                          -fx-background-radius: 18;
+                          -fx-border-radius: 18;
+                          -fx-padding: 0 15;
+                          -fx-font-size: 10px;"/>
+
+        <Label text="Recepcionista"
+               style="-fx-font-size: 11px;
+                      -fx-font-weight: bold;
+                      -fx-text-fill: #222222;"/>
+
+    </HBox>
+
+
+    <!-- ====================================================== -->
+    <!-- INDICADOR DE PASOS                                     -->
+    <!-- ====================================================== -->
+
+    <HBox alignment="CENTER"
+          prefHeight="65.0"
+          minHeight="65.0"
+          spacing="4.0">
+
+        <padding>
+            <Insets left="30.0"
+                    right="30.0"/>
+        </padding>
+
+
+        <!-- PASO 1 -->
+
+        <VBox alignment="CENTER"
+              spacing="2.0">
+
+            <StackPane prefWidth="30.0"
+                       prefHeight="30.0"
+                       minWidth="30.0"
+                       minHeight="30.0"
+                       maxWidth="30.0"
+                       maxHeight="30.0"
+                       style="-fx-background-color: #185922;
+                              -fx-background-radius: 50;">
+
+                <Label text="1"
+                       style="-fx-text-fill: white;
+                              -fx-font-size: 11px;
+                              -fx-font-weight: bold;"/>
+
+            </StackPane>
+
+            <Label text="Datos del cliente"
+                   style="-fx-font-size: 9px;
+                          -fx-font-weight: bold;"/>
+
+        </VBox>
+
+        <Region prefHeight="2.0"
+                minWidth="20.0"
+                HBox.hgrow="ALWAYS"
+                style="-fx-background-color: #A06C1C;"/>
+
+
+        <!-- PASO 2 -->
+
+        <VBox alignment="CENTER"
+              spacing="2.0">
+
+            <StackPane prefWidth="30.0"
+                       prefHeight="30.0"
+                       minWidth="30.0"
+                       minHeight="30.0"
+                       maxWidth="30.0"
+                       maxHeight="30.0"
+                       style="-fx-background-color: #898989;
+                              -fx-background-radius: 50;">
+
+                <Label text="2"
+                       style="-fx-text-fill: white;
+                              -fx-font-size: 11px;
+                              -fx-font-weight: bold;"/>
+
+            </StackPane>
+
+            <Label text="Datos de la reserva"
+                   style="-fx-font-size: 9px;
+                          -fx-text-fill: #666666;"/>
+
+        </VBox>
+
+        <Region prefHeight="2.0"
+                minWidth="20.0"
+                HBox.hgrow="ALWAYS"
+                style="-fx-background-color: #C8C8C8;"/>
+
+
+        <!-- PASO 3 -->
+
+        <VBox alignment="CENTER"
+              spacing="2.0">
+
+            <StackPane prefWidth="30.0"
+                       prefHeight="30.0"
+                       minWidth="30.0"
+                       minHeight="30.0"
+                       maxWidth="30.0"
+                       maxHeight="30.0"
+                       style="-fx-background-color: #898989;
+                              -fx-background-radius: 50;">
+
+                <Label text="3"
+                       style="-fx-text-fill: white;
+                              -fx-font-size: 11px;
+                              -fx-font-weight: bold;"/>
+
+            </StackPane>
+
+            <Label text="Selección de habitación"
+                   style="-fx-font-size: 9px;
+                          -fx-text-fill: #666666;"/>
+
+        </VBox>
+
+        <Region prefHeight="2.0"
+                minWidth="20.0"
+                HBox.hgrow="ALWAYS"
+                style="-fx-background-color: #C8C8C8;"/>
+
+
+        <!-- PASO 4 -->
+
+        <VBox alignment="CENTER"
+              spacing="2.0">
+
+            <StackPane prefWidth="30.0"
+                       prefHeight="30.0"
+                       minWidth="30.0"
+                       minHeight="30.0"
+                       maxWidth="30.0"
+                       maxHeight="30.0"
+                       style="-fx-background-color: #898989;
+                              -fx-background-radius: 50;">
+
+                <Label text="4"
+                       style="-fx-text-fill: white;
+                              -fx-font-size: 11px;
+                              -fx-font-weight: bold;"/>
+
+            </StackPane>
+
+            <Label text="Pago y comprobante"
+                   style="-fx-font-size: 9px;
+                          -fx-text-fill: #666666;"/>
+
+        </VBox>
+
+    </HBox>
+
+
+    <!-- ====================================================== -->
+    <!-- CUATRO COLUMNAS                                        -->
+    <!-- ====================================================== -->
+
+    <GridPane fx:id="gridReserva"
+              hgap="10.0"
+              VBox.vgrow="ALWAYS">
+
+        <padding>
+            <Insets left="10.0"
+                    right="10.0"/>
+        </padding>
+
+        <columnConstraints>
+
+            <ColumnConstraints percentWidth="25.0"
+                               hgrow="ALWAYS"/>
+
+            <ColumnConstraints percentWidth="25.0"
+                               hgrow="ALWAYS"/>
+
+            <ColumnConstraints percentWidth="25.0"
+                               hgrow="ALWAYS"/>
+
+            <ColumnConstraints percentWidth="25.0"
+                               hgrow="ALWAYS"/>
+
+        </columnConstraints>
+
+
+        <!-- ================================================== -->
+        <!-- COLUMNA 1: CLIENTE                                 -->
+        <!-- ================================================== -->
+
+        <VBox GridPane.columnIndex="0"
+              spacing="7.0"
+              maxWidth="Infinity"
+              maxHeight="Infinity"
+              style="-fx-background-color: white;
+                     -fx-background-radius: 9;
+                     -fx-border-color: #E3E3E3;
+                     -fx-border-radius: 9;
+                     -fx-padding: 11;">
+
+            <HBox alignment="CENTER_LEFT"
+                  spacing="7.0">
+
+                <StackPane prefWidth="34.0"
+                           prefHeight="34.0"
+                           minWidth="34.0"
+                           minHeight="34.0"
+                           style="-fx-background-color: #AA7625;
+                                  -fx-background-radius: 8;">
+
+                    <Label text="P"
+                           style="-fx-text-fill: white;
+                                  -fx-font-size: 14px;
+                                  -fx-font-weight: bold;"/>
+
+                </StackPane>
+
+                <VBox spacing="0.0">
+
+                    <Label text="Datos del cliente"
+                           style="-fx-font-size: 13px;
+                                  -fx-font-weight: bold;"/>
+
+                    <Label text="Busca y registra la información del cliente"
+                           style="-fx-font-size: 8px;
+                                  -fx-text-fill: #777777;"/>
+
+                </VBox>
+
+            </HBox>
+
+
+            <!-- PERSONA / EMPRESA -->
+
+            <HBox spacing="4.0">
+
+                <ToggleButton fx:id="btnPersonaNatural"
+                              text="Persona Natural"
+                              selected="true"
+                              HBox.hgrow="ALWAYS"
+                              maxWidth="Infinity"
+                              prefHeight="33.0"
+                              style="-fx-background-color: #A87425;
+                                     -fx-background-radius: 7;
+                                     -fx-text-fill: white;
+                                     -fx-font-size: 9px;
+                                     -fx-font-weight: bold;"/>
+
+                <ToggleButton fx:id="btnEmpresa"
+                              text="Empresa"
+                              HBox.hgrow="ALWAYS"
+                              maxWidth="Infinity"
+                              prefHeight="33.0"
+                              style="-fx-background-color: #F2F2F2;
+                                     -fx-background-radius: 7;
+                                     -fx-text-fill: #222222;
+                                     -fx-font-size: 9px;"/>
+
+            </HBox>
+
+
+            <Label fx:id="lblTipoDocumento"
+                   text="DNI del cliente *"
+                   style="-fx-font-size: 9px;
+                          -fx-font-weight: bold;"/>
+
+            <HBox spacing="5.0">
+
+                <TextField fx:id="txtDocumento"
+                           promptText="Ingrese DNI"
+                           HBox.hgrow="ALWAYS"
+                           prefHeight="31.0"
+                           style="-fx-font-size: 9px;"/>
+
+                <Button fx:id="btnBuscarCliente"
+                        text="Buscar"
+                        onAction="#buscarCliente"
+                        prefWidth="72.0"
+                        prefHeight="31.0"
+                        style="-fx-background-color: #A87425;
+                               -fx-background-radius: 6;
+                               -fx-text-fill: white;
+                               -fx-font-size: 9px;
+                               -fx-font-weight: bold;
+                               -fx-cursor: hand;"/>
+
+            </HBox>
+
+
+            <!-- MENSAJE INICIAL -->
+
+            <VBox fx:id="panelSinCliente"
+                  alignment="CENTER"
+                  VBox.vgrow="ALWAYS"
+                  style="-fx-background-color: #F8F8F8;
+                         -fx-background-radius: 7;
+                         -fx-border-color: #E7E7E7;
+                         -fx-border-radius: 7;
+                         -fx-padding: 15;">
+
+                <Label text="Ingrese un DNI o RUC para buscar al cliente."
+                       wrapText="true"
+                       alignment="CENTER"
+                       style="-fx-text-fill: #999999;
+                              -fx-font-size: 9px;"/>
+
+            </VBox>
+
+
+            <!-- CLIENTE ENCONTRADO -->
+
+            <VBox fx:id="panelClienteEncontrado"
+                  visible="false"
+                  managed="false"
+                  spacing="4.0"
+                  VBox.vgrow="ALWAYS"
+                  style="-fx-background-color: #EAF8ED;
+                         -fx-background-radius: 7;
+                         -fx-border-color: #CAE8D0;
+                         -fx-border-radius: 7;
+                         -fx-padding: 9;">
+
+                <Label text="Cliente encontrado en nuestra base de datos"
+                       wrapText="true"
+                       style="-fx-text-fill: #137128;
+                              -fx-font-size: 9px;
+                              -fx-font-weight: bold;"/>
+
+                <Region prefHeight="3.0"/>
+
+                <HBox>
+                    <Label text="Nombres:"
+                           prefWidth="70.0"
+                           style="-fx-font-size: 8px;"/>
+                    <Label fx:id="lblNombres"
+                           text="--"
+                           style="-fx-font-size: 8px;"/>
+                </HBox>
+
+                <HBox>
+                    <Label text="Apellidos:"
+                           prefWidth="70.0"
+                           style="-fx-font-size: 8px;"/>
+                    <Label fx:id="lblApellidos"
+                           text="--"
+                           style="-fx-font-size: 8px;"/>
+                </HBox>
+
+                <HBox>
+                    <Label text="Nacimiento:"
+                           prefWidth="70.0"
+                           style="-fx-font-size: 8px;"/>
+                    <Label fx:id="lblNacimiento"
+                           text="--"
+                           style="-fx-font-size: 8px;"/>
+                </HBox>
+
+                <HBox>
+                    <Label text="Celular:"
+                           prefWidth="70.0"
+                           style="-fx-font-size: 8px;"/>
+                    <Label fx:id="lblCelular"
+                           text="--"
+                           style="-fx-font-size: 8px;"/>
+                </HBox>
+
+                <HBox>
+                    <Label text="Correo:"
+                           prefWidth="70.0"
+                           style="-fx-font-size: 8px;"/>
+                    <Label fx:id="lblCorreo"
+                           text="--"
+                           style="-fx-font-size: 8px;"/>
+                </HBox>
+
+                <HBox>
+                    <Label text="Dirección:"
+                           prefWidth="70.0"
+                           style="-fx-font-size: 8px;"/>
+                    <Label fx:id="lblDireccion"
+                           text="--"
+                           wrapText="true"
+                           style="-fx-font-size: 8px;"/>
+                </HBox>
+
+                <Region VBox.vgrow="ALWAYS"/>
+
+                <Button text="Editar datos"
+                        onAction="#editarCliente"
+                        maxWidth="Infinity"
+                        prefHeight="30.0"
+                        style="-fx-background-color: white;
+                               -fx-border-color: #D3D3D3;
+                               -fx-border-radius: 5;
+                               -fx-background-radius: 5;
+                               -fx-font-size: 9px;
+                               -fx-cursor: hand;"/>
+
+            </VBox>
+
+        </VBox>
+
+
+        <!-- ================================================== -->
+        <!-- COLUMNA 2: DATOS RESERVA                           -->
+        <!-- ================================================== -->
+
+        <VBox GridPane.columnIndex="1"
+              spacing="7.0"
+              maxWidth="Infinity"
+              maxHeight="Infinity"
+              style="-fx-background-color: white;
+                     -fx-background-radius: 9;
+                     -fx-border-color: #E3E3E3;
+                     -fx-border-radius: 9;
+                     -fx-padding: 11;">
+
+            <HBox alignment="CENTER_LEFT"
+                  spacing="7.0">
+
+                <StackPane prefWidth="34.0"
+                           prefHeight="34.0"
+                           minWidth="34.0"
+                           minHeight="34.0"
+                           style="-fx-background-color: #AA7625;
+                                  -fx-background-radius: 8;">
+
+                    <Label text="F"
+                           style="-fx-text-fill: white;
+                                  -fx-font-size: 14px;
+                                  -fx-font-weight: bold;"/>
+
+                </StackPane>
+
+                <VBox spacing="0.0">
+
+                    <Label text="Datos de la reserva"
+                           style="-fx-font-size: 13px;
+                                  -fx-font-weight: bold;"/>
+
+                    <Label text="Selecciona las fechas y detalles de la estadía"
+                           style="-fx-font-size: 8px;
+                                  -fx-text-fill: #777777;"/>
+
+                </VBox>
+
+            </HBox>
+
+
+            <!-- INGRESO -->
+
+            <HBox spacing="5.0">
+
+                <VBox spacing="2.0"
+                      HBox.hgrow="ALWAYS">
+
+                    <Label text="Fecha de ingreso *"
+                           style="-fx-font-size: 8px;"/>
+
+                    <DatePicker fx:id="dpFechaIngreso"
+                                onAction="#actualizarReserva"
+                                maxWidth="Infinity"
+                                prefHeight="30.0"/>
+
+                </VBox>
+
+                <VBox spacing="2.0"
+                      HBox.hgrow="ALWAYS">
+
+                    <Label text="Hora ingreso *"
+                           style="-fx-font-size: 8px;"/>
+
+                    <ChoiceBox fx:id="cbHoraIngreso"
+                               maxWidth="Infinity"
+                               prefHeight="30.0"/>
+
+                </VBox>
+
+            </HBox>
+
+
+            <!-- SALIDA -->
+
+            <HBox spacing="5.0">
+
+                <VBox spacing="2.0"
+                      HBox.hgrow="ALWAYS">
+
+                    <Label text="Fecha de salida *"
+                           style="-fx-font-size: 8px;"/>
+
+                    <DatePicker fx:id="dpFechaSalida"
+                                onAction="#actualizarReserva"
+                                maxWidth="Infinity"
+                                prefHeight="30.0"/>
+
+                </VBox>
+
+                <VBox spacing="2.0"
+                      HBox.hgrow="ALWAYS">
+
+                    <Label text="Hora salida *"
+                           style="-fx-font-size: 8px;"/>
+
+                    <ChoiceBox fx:id="cbHoraSalida"
+                               maxWidth="Infinity"
+                               prefHeight="30.0"/>
+
+                </VBox>
+
+            </HBox>
+
+
+            <!-- NOCHES / HUÉSPEDES -->
+
+            <HBox spacing="5.0">
+
+                <VBox spacing="2.0"
+                      HBox.hgrow="ALWAYS">
+
+                    <Label text="Noches"
+                           style="-fx-font-size: 8px;"/>
+
+                    <StackPane prefHeight="32.0"
+                               maxWidth="Infinity"
+                               style="-fx-background-color: #F3F3F3;
+                                      -fx-background-radius: 6;">
+
+                        <Label fx:id="lblNoches"
+                               text="1"
+                               style="-fx-font-size: 10px;
+                                      -fx-font-weight: bold;"/>
+
+                    </StackPane>
+
+                </VBox>
+
+                <VBox spacing="2.0"
+                      HBox.hgrow="ALWAYS">
+
+                    <Label text="N.º de huéspedes"
+                           style="-fx-font-size: 8px;"/>
+
+                    <Spinner fx:id="spHuespedes"
+                             maxWidth="Infinity"
+                             prefHeight="32.0"/>
+
+                </VBox>
+
+            </HBox>
+
+
+            <Label text="Observaciones (opcional)"
+                   style="-fx-font-size: 8px;"/>
+
+            <TextArea fx:id="txtObservaciones"
+                      promptText="Ej. Llegada estimada, solicitudes especiales..."
+                      wrapText="true"
+                      VBox.vgrow="ALWAYS"
+                      style="-fx-font-size: 8px;"/>
+
+            <Label fx:id="lblContadorObservaciones"
+                   text="0 / 300"
+                   maxWidth="Infinity"
+                   alignment="CENTER_RIGHT"
+                   style="-fx-text-fill: #999999;
+                          -fx-font-size: 8px;"/>
+
+        </VBox>
+
+
+        <!-- ================================================== -->
+        <!-- COLUMNA 3: HABITACIONES                            -->
+        <!-- ================================================== -->
+
+        <VBox GridPane.columnIndex="2"
+              spacing="6.0"
+              maxWidth="Infinity"
+              maxHeight="Infinity"
+              style="-fx-background-color: white;
+                     -fx-background-radius: 9;
+                     -fx-border-color: #E3E3E3;
+                     -fx-border-radius: 9;
+                     -fx-padding: 11;">
+
+            <HBox alignment="CENTER_LEFT"
+                  spacing="7.0">
+
+                <StackPane prefWidth="34.0"
+                           prefHeight="34.0"
+                           minWidth="34.0"
+                           minHeight="34.0"
+                           style="-fx-background-color: #AA7625;
+                                  -fx-background-radius: 8;">
+
+                    <Label text="H"
+                           style="-fx-text-fill: white;
+                                  -fx-font-size: 14px;
+                                  -fx-font-weight: bold;"/>
+
+                </StackPane>
+
+                <VBox spacing="0.0">
+
+                    <Label text="Selección de habitación"
+                           style="-fx-font-size: 13px;
+                                  -fx-font-weight: bold;"/>
+
+                    <Label text="Elige una habitación disponible"
+                           style="-fx-font-size: 8px;
+                                  -fx-text-fill: #777777;"/>
+
+                </VBox>
+
+            </HBox>
+
+
+            <!-- FILTROS -->
+
+            <HBox spacing="5.0">
+
+                <ChoiceBox fx:id="cbPiso"
+                           HBox.hgrow="ALWAYS"
+                           maxWidth="Infinity"
+                           prefHeight="30.0"/>
+
+                <ChoiceBox fx:id="cbTipoHabitacion"
+                           HBox.hgrow="ALWAYS"
+                           maxWidth="Infinity"
+                           prefHeight="30.0"/>
+
+            </HBox>
+
+
+            <!-- LEYENDA -->
+
+            <HBox spacing="9.0">
+
+                <Label text="● Disponible"
+                       style="-fx-text-fill: #1C9748;
+                              -fx-font-size: 7px;"/>
+
+                <Label text="● Ocupada"
+                       style="-fx-text-fill: #E33E3E;
+                              -fx-font-size: 7px;"/>
+
+                <Label text="● Reservada"
+                       style="-fx-text-fill: #2F7CDC;
+                              -fx-font-size: 7px;"/>
+
+            </HBox>
+
+
+            <!-- HABITACIONES DINÁMICAS -->
+
+            <VBox fx:id="contenedorHabitaciones"
+                  spacing="5.0"
+                  VBox.vgrow="ALWAYS"
+                  style="-fx-background-color: #FAFAFA;
+                         -fx-background-radius: 6;
+                         -fx-padding: 7;">
+
+                <Label fx:id="lblSinHabitaciones"
+                       text="No hay habitaciones cargadas."
+                       wrapText="true"
+                       maxWidth="Infinity"
+                       alignment="CENTER"
+                       style="-fx-text-fill: #999999;
+                              -fx-font-size: 9px;"/>
+
+            </VBox>
+
+        </VBox>
+
+
+        <!-- ================================================== -->
+        <!-- COLUMNA 4: PAGO                                   -->
+        <!-- ================================================== -->
+
+        <VBox GridPane.columnIndex="3"
+              spacing="6.0"
+              maxWidth="Infinity"
+              maxHeight="Infinity"
+              style="-fx-background-color: white;
+                     -fx-background-radius: 9;
+                     -fx-border-color: #E3E3E3;
+                     -fx-border-radius: 9;
+                     -fx-padding: 11;">
+
+            <HBox alignment="CENTER_LEFT"
+                  spacing="7.0">
+
+                <StackPane prefWidth="34.0"
+                           prefHeight="34.0"
+                           minWidth="34.0"
+                           minHeight="34.0"
+                           style="-fx-background-color: #AA7625;
+                                  -fx-background-radius: 8;">
+
+                    <Label text="S/"
+                           style="-fx-text-fill: white;
+                                  -fx-font-size: 12px;
+                                  -fx-font-weight: bold;"/>
+
+                </StackPane>
+
+                <VBox spacing="0.0">
+
+                    <Label text="Pago y comprobante"
+                           style="-fx-font-size: 13px;
+                                  -fx-font-weight: bold;"/>
+
+                    <Label text="Completa el pago y genera el comprobante"
+                           style="-fx-font-size: 8px;
+                                  -fx-text-fill: #777777;"/>
+
+                </VBox>
+
+            </HBox>
+
+
+            <!-- RESUMEN -->
+
+            <VBox spacing="4.0"
+                  style="-fx-background-color: #FFF7E7;
+                         -fx-background-radius: 7;
+                         -fx-padding: 8;">
+
+                <Label text="Resumen de la reserva"
+                       style="-fx-font-size: 9px;
+                              -fx-font-weight: bold;"/>
+
+                <HBox>
+
+                    <Label text="Habitación:"
+                           HBox.hgrow="ALWAYS"
+                           style="-fx-font-size: 8px;"/>
+
+                    <Label fx:id="lblHabitacionResumen"
+                           text="--"
+                           style="-fx-font-size: 8px;
+                                  -fx-font-weight: bold;"/>
+
+                </HBox>
+
+                <HBox>
+
+                    <Label text="Noches:"
+                           HBox.hgrow="ALWAYS"
+                           style="-fx-font-size: 8px;"/>
+
+                    <Label fx:id="lblNochesResumen"
+                           text="1"
+                           style="-fx-font-size: 8px;"/>
+
+                </HBox>
+
+                <HBox>
+
+                    <Label text="Precio por noche:"
+                           HBox.hgrow="ALWAYS"
+                           style="-fx-font-size: 8px;"/>
+
+                    <Label fx:id="lblPrecioNoche"
+                           text="S/ 0.00"
+                           style="-fx-font-size: 8px;"/>
+
+                </HBox>
+
+                <Region prefHeight="1.0"
+                        style="-fx-background-color: #DDCFB1;"/>
+
+                <HBox>
+
+                    <Label text="Total a pagar:"
+                           HBox.hgrow="ALWAYS"
+                           style="-fx-font-size: 10px;
+                                  -fx-font-weight: bold;"/>
+
+                    <Label fx:id="lblTotal"
+                           text="S/ 0.00"
+                           style="-fx-font-size: 13px;
+                                  -fx-font-weight: bold;"/>
+
+                </HBox>
+
+            </VBox>
+
+
+            <!-- MÉTODO PAGO -->
+
+            <Label text="Método de pago"
+                   style="-fx-font-size: 9px;
+                          -fx-font-weight: bold;"/>
+
+            <HBox spacing="3.0">
+
+                <ToggleButton fx:id="btnEfectivo"
+                              text="Efectivo"
+                              selected="true"
+                              HBox.hgrow="ALWAYS"
+                              maxWidth="Infinity"
+                              prefHeight="30.0"
+                              style="-fx-background-color: #A87425;
+                                     -fx-text-fill: white;
+                                     -fx-font-size: 7px;"/>
+
+                <ToggleButton fx:id="btnTarjeta"
+                              text="Tarjeta"
+                              HBox.hgrow="ALWAYS"
+                              maxWidth="Infinity"
+                              prefHeight="30.0"
+                              style="-fx-font-size: 7px;"/>
+
+                <ToggleButton fx:id="btnTransferencia"
+                              text="Transfer."
+                              HBox.hgrow="ALWAYS"
+                              maxWidth="Infinity"
+                              prefHeight="30.0"
+                              style="-fx-font-size: 7px;"/>
+
+                <ToggleButton fx:id="btnYape"
+                              text="Yape/Plin"
+                              HBox.hgrow="ALWAYS"
+                              maxWidth="Infinity"
+                              prefHeight="30.0"
+                              style="-fx-font-size: 7px;"/>
+
+            </HBox>
+
+
+            <!-- MONTO / VUELTO -->
+
+            <HBox spacing="5.0">
+
+                <VBox HBox.hgrow="ALWAYS">
+
+                    <Label text="Monto recibido"
+                           style="-fx-font-size: 8px;"/>
+
+                    <TextField fx:id="txtMontoRecibido"
+                               promptText="S/ 0.00"
+                               maxWidth="Infinity"
+                               prefHeight="29.0"/>
+
+                </VBox>
+
+                <VBox HBox.hgrow="ALWAYS">
+
+                    <Label text="Vuelto"
+                           style="-fx-font-size: 8px;"/>
+
+                    <TextField fx:id="txtVuelto"
+                               text="S/ 0.00"
+                               editable="false"
+                               maxWidth="Infinity"
+                               prefHeight="29.0"
+                               style="-fx-background-color: #EAF8ED;"/>
+
+                </VBox>
+
+            </HBox>
+
+
+            <!-- COMPROBANTE -->
+
+            <Label text="Tipo de comprobante"
+                   style="-fx-font-size: 9px;
+                          -fx-font-weight: bold;"/>
+
+            <HBox spacing="10.0">
+
+                <RadioButton fx:id="rbBoleta"
+                             text="Boleta electrónica"
+                             selected="true"
+                             style="-fx-font-size: 8px;"/>
+
+                <RadioButton fx:id="rbFactura"
+                             text="Factura electrónica"
+                             style="-fx-font-size: 8px;"/>
+
+            </HBox>
+
+
+            <VBox style="-fx-background-color: #EAF8ED;
+                         -fx-background-radius: 6;
+                         -fx-padding: 7;">
+
+                <Label text="El comprobante utilizará los datos del cliente seleccionado."
+                       wrapText="true"
+                       style="-fx-text-fill: #26783A;
+                              -fx-font-size: 8px;"/>
+
+            </VBox>
+
+
+            <!-- DATOS COMPROBANTE -->
+
+            <Label text="Datos para el comprobante"
+                   style="-fx-font-size: 9px;
+                          -fx-font-weight: bold;"/>
+
+            <Label text="DNI / RUC"
+                   style="-fx-font-size: 7px;"/>
+
+            <TextField fx:id="txtDocumentoComprobante"
+                       editable="false"
+                       prefHeight="27.0"
+                       style="-fx-font-size: 8px;"/>
+
+            <Label text="Nombre / Razón social"
+                   style="-fx-font-size: 7px;"/>
+
+            <TextField fx:id="txtNombreComprobante"
+                       editable="false"
+                       prefHeight="27.0"
+                       style="-fx-font-size: 8px;"/>
+
+        </VBox>
+
+    </GridPane>
+
+
+    <!-- ====================================================== -->
+    <!-- BOTONES INFERIORES                                     -->
+    <!-- ====================================================== -->
+
+    <HBox alignment="CENTER_LEFT"
+          spacing="8.0"
+          prefHeight="54.0"
+          minHeight="54.0">
+
+        <padding>
+            <Insets left="12.0"
+                    right="12.0"
+                    bottom="8.0"/>
+        </padding>
+
+        <Button fx:id="btnCancelar"
+                text="X  Cancelar"
+                onAction="#cancelarFormulario"
+                prefWidth="110.0"
+                prefHeight="37.0"
+                style="-fx-background-color: white;
+                       -fx-border-color: #DCDCDC;
+                       -fx-border-radius: 7;
+                       -fx-background-radius: 7;
+                       -fx-font-size: 10px;
+                       -fx-cursor: hand;"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button fx:id="btnGuardarPendiente"
+                text="Guardar como pendiente"
+                onAction="#guardarPendiente"
+                prefWidth="180.0"
+                prefHeight="37.0"
+                style="-fx-background-color: #FFF0D4;
+                       -fx-background-radius: 7;
+                       -fx-text-fill: #754B0C;
+                       -fx-font-size: 10px;
+                       -fx-font-weight: bold;
+                       -fx-cursor: hand;"/>
+
+        <Button fx:id="btnConfirmarReserva"
+                text="Confirmar reserva"
+                onAction="#confirmarReserva"
+                prefWidth="160.0"
+                prefHeight="37.0"
+                style="-fx-background-color: linear-gradient(to bottom, #B47B20, #8C5C12);
+                       -fx-background-radius: 7;
+                       -fx-text-fill: white;
+                       -fx-font-size: 10px;
+                       -fx-font-weight: bold;
+                       -fx-cursor: hand;"/>
+
+    </HBox>
+
+</VBox>
