@@ -23,7 +23,7 @@ public class App extends Application {
     public void start(Stage stage) throws Exception {
         Navegacion.setStagePrincipal(stage);
 
-        Parent raiz = FXMLLoader.load(getClass().getResource("/untrm/hotel_san_antonio/fxml/login.fxml"));
+        Parent raiz = FXMLLoader.load(getClass().getResource("/untrm/hotel_san_antonio/fxml/dashboard_2.fxml"));
 
         var pantalla = Screen.getPrimary().getVisualBounds();
         double ancho = Math.max(1024, pantalla.getWidth() * 0.75);
