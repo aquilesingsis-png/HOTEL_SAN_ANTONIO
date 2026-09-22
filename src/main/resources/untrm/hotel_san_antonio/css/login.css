@@ -101,6 +101,27 @@
     -fx-border-color: transparent;
 }
 
+.login-combo {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 1px 0;
+    -fx-font-size: 15px;
+}
+
+.login-combo > .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-texto;
+    -fx-padding: 7px 2px;
+}
+
+.login-combo > .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.login-combo > .arrow-button > .arrow {
+    -fx-background-color: -color-dorado;
+}
+
 .login-btn-ver {
     -fx-background-color: transparent;
     -fx-padding: 7px 4px;

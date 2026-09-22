@@ -2,8 +2,10 @@ package untrm.hotel_san_antonio.controlador;
 
 import javafx.concurrent.Task;
 import javafx.css.PseudoClass;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressIndicator;
@@ -22,10 +24,13 @@ import java.sql.SQLException;
 
 public class LoginController {
 
+    private static final String ROL_ADMINISTRADOR = "ADMINISTRADOR";
+    private static final String ROL_RECEPCIONISTA = "RECEPCIONISTA";
     private static final PseudoClass ESTADO_ERROR = PseudoClass.getPseudoClass("error");
     private static final PseudoClass ESTADO_FOCO = PseudoClass.getPseudoClass("focused");
 
     @FXML private TextField txtUsuario;
+    @FXML private ComboBox<String> cmbRol;
     @FXML private PasswordField txtContrasena;
     @FXML private TextField txtContrasenaVisible;
     @FXML private Label lblError;
@@ -34,13 +39,16 @@ public class LoginController {
     @FXML private ProgressIndicator progresoLogin;
     @FXML private HBox contenedorUsuario;
     @FXML private HBox contenedorContrasena;
+    @FXML private HBox contenedorRol;
 
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
     @FXML
     private void initialize() {
+        cmbRol.setItems(FXCollections.observableArrayList("Administrador", "Recepcionista"));
         txtContrasenaVisible.textProperty().bindBidirectional(txtContrasena.textProperty());
 
+        cmbRol.valueProperty().addListener((observable, anterior, actual) -> ocultarError());
         txtUsuario.textProperty().addListener((observable, anterior, actual) -> ocultarError());
         txtContrasena.textProperty().addListener((observable, anterior, actual) -> ocultarError());
         txtUsuario.focusedProperty().addListener((observable, anterior, actual) ->
@@ -57,15 +65,22 @@ public class LoginController {
 
         String usuario = txtUsuario.getText().trim();
         String contrasena = txtContrasena.getText();
+        String rolSeleccionado = obtenerRolSeleccionado();
+
+        if (rolSeleccionado == null) {
+            mostrarError("Selecciona el tipo de usuario.", false, false, true);
+            cmbRol.requestFocus();
+            return;
+        }
 
         if (usuario.isEmpty()) {
-            mostrarError("Ingresa tu usuario.", true, false);
+            mostrarError("Ingresa tu usuario.", true, false, false);
             txtUsuario.requestFocus();
             return;
         }
 
         if (contrasena.isEmpty()) {
-            mostrarError("Ingresa tu contraseña.", false, true);
+            mostrarError("Ingresa tu contraseña.", false, true, false);
             campoContrasenaActivo().requestFocus();
             return;
         }
@@ -89,24 +104,36 @@ public class LoginController {
             Usuario encontrado = tareaAutenticacion.getValue();
 
             if (encontrado == null) {
-                mostrarError("Usuario o contraseña incorrectos.", true, true);
                 txtContrasena.clear();
+                mostrarError("Usuario o contraseña incorrectos.", true, true, false);
                 campoContrasenaActivo().requestFocus();
                 return;
             }
 
-            if (!"ADMINISTRADOR".equals(encontrado.getRol())
-                    && !"RECEPCIONISTA".equals(encontrado.getRol())) {
-                mostrarError("El usuario no tiene un rol autorizado.", true, true);
+            String rolRegistrado = encontrado.getRol() == null
+                    ? "" : encontrado.getRol().trim().toUpperCase();
+
+            if (!ROL_ADMINISTRADOR.equals(rolRegistrado)
+                    && !ROL_RECEPCIONISTA.equals(rolRegistrado)) {
+                mostrarError("El usuario no tiene un rol autorizado.", true, true, true);
+                return;
+            }
+
+            if (!rolSeleccionado.equals(rolRegistrado)) {
+                txtContrasena.clear();
+                mostrarError("Las credenciales no corresponden al rol seleccionado.",
+                        true, true, true);
+                campoContrasenaActivo().requestFocus();
                 return;
             }
 
             try {
                 SesionActual.iniciar(encontrado);
-                Navegacion.irA("/untrm/hotel_san_antonio/fxml/dashboard.fxml");
+                Navegacion.irA(rutaSegunRol(rolRegistrado));
             } catch (IOException e) {
                 SesionActual.cerrar();
-                Alertas.mostrarError("Error", "No se pudo cargar el Dashboard.\n\n" + e.getMessage());
+                Alertas.mostrarError("Error", "No se pudo cargar la pantalla principal.\n\n"
+                        + e.getMessage());
             }
         });
 
@@ -142,17 +169,30 @@ public class LoginController {
         return btnMostrarContrasena.isSelected() ? txtContrasenaVisible : txtContrasena;
     }
 
+    private String obtenerRolSeleccionado() {
+        String rol = cmbRol.getValue();
+        return rol == null ? null : rol.trim().toUpperCase();
+    }
+
+    private String rutaSegunRol(String rol) {
+        return ROL_ADMINISTRADOR.equals(rol)
+                ? "/untrm/hotel_san_antonio/fxml/administrador.fxml"
+                : "/untrm/hotel_san_antonio/fxml/recepcionista.fxml";
+    }
+
     private void actualizarFocoContrasena() {
         contenedorContrasena.pseudoClassStateChanged(ESTADO_FOCO,
                 txtContrasena.isFocused() || txtContrasenaVisible.isFocused());
     }
 
-    private void mostrarError(String mensaje, boolean errorUsuario, boolean errorContrasena) {
+    private void mostrarError(String mensaje, boolean errorUsuario,
+            boolean errorContrasena, boolean errorRol) {
         lblError.setText(mensaje);
         lblError.setVisible(true);
         lblError.setManaged(true);
         contenedorUsuario.pseudoClassStateChanged(ESTADO_ERROR, errorUsuario);
         contenedorContrasena.pseudoClassStateChanged(ESTADO_ERROR, errorContrasena);
+        contenedorRol.pseudoClassStateChanged(ESTADO_ERROR, errorRol);
     }
 
     private void ocultarError() {
@@ -160,6 +200,7 @@ public class LoginController {
         lblError.setManaged(false);
         contenedorUsuario.pseudoClassStateChanged(ESTADO_ERROR, false);
         contenedorContrasena.pseudoClassStateChanged(ESTADO_ERROR, false);
+        contenedorRol.pseudoClassStateChanged(ESTADO_ERROR, false);
     }
 
     private void cambiarEstadoCarga(boolean cargando) {
@@ -171,5 +212,6 @@ public class LoginController {
         txtContrasena.setDisable(cargando);
         txtContrasenaVisible.setDisable(cargando);
         btnMostrarContrasena.setDisable(cargando);
+        cmbRol.setDisable(cargando);
     }
 }

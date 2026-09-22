@@ -41,6 +41,21 @@ public class DashboardController {
     }
 
     @FXML
+    private void onAbrirAlmacen() {
+        Alertas.mostrarInfo("Almacén", "Pantalla en construcción por el equipo.");
+    }
+
+    @FXML
+    private void onAbrirUsuarios() {
+        Alertas.mostrarInfo("Usuarios", "Pantalla en construcción por el equipo.");
+    }
+
+    @FXML
+    private void onAbrirReportes() {
+        Alertas.mostrarInfo("Reportes", "Pantalla en construcción por el equipo.");
+    }
+
+    @FXML
     private void onCerrarSesion() {
         if (Alertas.confirmar("Cerrar sesión", "¿Seguro que deseas cerrar sesión?")) {
             SesionActual.cerrar();

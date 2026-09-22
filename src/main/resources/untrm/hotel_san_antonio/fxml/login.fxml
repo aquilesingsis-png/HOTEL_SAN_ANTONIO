@@ -3,6 +3,7 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ProgressIndicator?>
@@ -68,6 +69,11 @@
             </VBox>
 
             <VBox maxWidth="Infinity" spacing="12.0">
+                <HBox fx:id="contenedorRol" alignment="CENTER_LEFT" maxWidth="Infinity" spacing="12.0" styleClass="login-campo">
+                    <SVGPath content="M2,2 L14,2 L14,5 L2,5 Z M3,7 L7,7 L7,11 L3,11 Z M9,7 L13,7 L13,11 L9,11 Z M3,13 L7,13 L7,17 L3,17 Z M9,13 L13,13 L13,17 L9,17 Z" scaleX="1.05" scaleY="1.05" styleClass="login-campo-icono" />
+                    <ComboBox fx:id="cmbRol" maxWidth="Infinity" promptText="Seleccione su rol" styleClass="login-combo" HBox.hgrow="ALWAYS" />
+                </HBox>
+
                 <HBox fx:id="contenedorUsuario" alignment="CENTER_LEFT" maxWidth="Infinity" spacing="12.0" styleClass="login-campo">
                     <SVGPath content="M3,14 C2,14 2,13 2,13 C2,9 6,8 8,8 C10,8 14,9 14,13 C14,13 14,14 13,14 Z M8,7 C5.8,7 4,5.2 4,3 C4,0.8 5.8,-1 8,-1 C10.2,-1 12,0.8 12,3 C12,5.2 10.2,7 8,7 Z" scaleX="1.15" scaleY="1.15" styleClass="login-campo-icono" />
                     <TextField fx:id="txtUsuario" maxWidth="Infinity" onAction="#onIngresar" promptText="Usuario" styleClass="login-campo-control" HBox.hgrow="ALWAYS" />

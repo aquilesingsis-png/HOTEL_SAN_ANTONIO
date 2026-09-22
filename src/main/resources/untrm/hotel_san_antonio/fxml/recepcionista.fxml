@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            stylesheets="@../css/estilos.css"
+            fx:controller="untrm.hotel_san_antonio.controlador.DashboardController"
+            prefWidth="900" prefHeight="600">
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="panel-encabezado">
+            <padding><Insets top="14" right="20" bottom="14" left="20"/></padding>
+            <Label text="Hotel San Antonio · Recepción" styleClass="titulo-encabezado"/>
+            <Label fx:id="lblUsuarioActual" style="-fx-text-fill: white; -fx-opacity: 0.8;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnCarrito" text="🛒 Tiendita" styleClass="btn-carrito" onAction="#onAbrirCarrito"/>
+            <Button text="Cerrar sesión" styleClass="btn-secundario"
+                    style="-fx-text-fill: white; -fx-border-color: white;" onAction="#onCerrarSesion"/>
+        </HBox>
+    </top>
+    <center>
+        <VBox spacing="20" alignment="TOP_LEFT">
+            <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+            <Label text="Panel de recepción" styleClass="titulo-seccion"/>
+            <Label text="Gestiona la atención diaria de los huéspedes."
+                   styleClass="texto-secundario"/>
+            <FlowPane hgap="20" vgap="20">
+                <VBox styleClass="tarjeta" spacing="10" prefWidth="220" onMouseClicked="#onAbrirHabitaciones">
+                    <Label text="🛏️ Habitaciones" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                    <Label text="Ver estado de las 24 habitaciones" wrapText="true" styleClass="texto-secundario"/>
+                </VBox>
+                <VBox styleClass="tarjeta" spacing="10" prefWidth="220" onMouseClicked="#onAbrirReservas">
+                    <Label text="📅 Reservas" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                    <Label text="Crear y consultar reservas" wrapText="true" styleClass="texto-secundario"/>
+                </VBox>
+            </FlowPane>
+        </VBox>
+    </center>
+</BorderPane>
