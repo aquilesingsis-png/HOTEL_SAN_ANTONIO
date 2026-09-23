@@ -7,8 +7,6 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -380,11 +378,6 @@
                            <children>
                               <HBox alignment="CENTER_LEFT" spacing="26.0">
                                  <children>
-                                    <ImageView fitHeight="135.0" fitWidth="385.0" preserveRatio="false" style="-fx-background-radius: 10;">
-                                       <image>
-                                          <Image url="@room.jpg" />
-                                       </image>
-                                    </ImageView>
                                     <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                        <children>
                                           <Label text="Brindamos más que alojamiento," wrapText="true" style="-fx-font-size: 19px; -fx-text-fill: #2C2118;" />
