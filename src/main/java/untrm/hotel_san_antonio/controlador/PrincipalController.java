@@ -160,6 +160,11 @@ public class PrincipalController {
             boton.setSelected(true);
             return;
         }
+        // Si se eligio una opcion fuera de un submenu (ej. "Comprobantes"), se pliega el
+        // submenu que hubiera quedado abierto (ej. "Reservas"); si se eligio una opcion DE
+        // un submenu (ej. "Nueva reserva"), ese submenu se queda desplegado.
+        Object padre = boton.getParent();
+        plegarGrupos(padre instanceof VBox ? (VBox) padre : null);
         abrir(boton);
     }
 
@@ -171,7 +176,7 @@ public class PrincipalController {
         Node submenu = barraLateral.getChildren().get(posicion + 1);
         boolean mostrar = !submenu.isVisible();
         if (mostrar) {
-            plegarGrupos(); // solo un grupo abierto a la vez
+            plegarGrupos(null); // solo un grupo abierto a la vez
         }
         establecerDesplegado(boton, submenu, mostrar);
         if (mostrar) {
@@ -199,10 +204,11 @@ public class PrincipalController {
         });
     }
 
-    private void plegarGrupos() {
+    /** Pliega todos los submenus abiertos, salvo "excepto" (para no cerrar el submenu que se esta usando). */
+    private void plegarGrupos(VBox excepto) {
         var hijos = barraLateral.getChildren();
         for (int i = 1; i < hijos.size(); i++) {
-            if (hijos.get(i) instanceof VBox) {
+            if (hijos.get(i) instanceof VBox && hijos.get(i) != excepto) {
                 establecerDesplegado((Button) hijos.get(i - 1), hijos.get(i), false);
             }
         }
