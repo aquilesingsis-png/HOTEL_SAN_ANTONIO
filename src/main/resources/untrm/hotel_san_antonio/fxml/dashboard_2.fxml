@@ -7,8 +7,6 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -21,6 +19,7 @@
     "Buscar reserva, huesped, habitacion" que traia este encabezado se quito junto con el;
     si se necesita, puede volver a ponerse dentro del contenido en vez de en un encabezado propio.
 -->
+
 <BorderPane fx:id="rootPane" prefHeight="1020.0" prefWidth="1536.0" styleClass="root-bg" stylesheets="@../css/estilos.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="untrm.hotel_san_antonio.controlador.DashboardController">
 
    <!-- ================= CENTER (contenido) ================= -->
@@ -365,11 +364,6 @@
                            <children>
                               <HBox alignment="CENTER_LEFT" spacing="26.0">
                                  <children>
-                                    <ImageView fitHeight="135.0" fitWidth="385.0" preserveRatio="false" styleClass="promo-image">
-                                       <image>
-                                          <Image url="@room.jpg" />
-                                       </image>
-                                    </ImageView>
                                     <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                        <children>
                                           <Label styleClass="promo-title" text="Brindamos más que alojamiento," wrapText="true" />
