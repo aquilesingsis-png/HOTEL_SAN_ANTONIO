@@ -43,22 +43,22 @@
 
                     <Label text="OPERACIÓN" style="-fx-text-fill: #D4A84C; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 6px 0 0 8px;"/>
                     <ToggleButton fx:id="btnInicio" text="Inicio" toggleGroup="$grupoMenu" selected="true"
-                                  userData="/untrm/hotel_san_antonio/fxml/dashboard.fxml" onAction="#onMenu"/>
+                                  userData="/untrm/hotel_san_antonio/fxml/dashboard_2.fxml" onAction="#onMenu"/>
                     <ToggleButton text="Habitaciones" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/habitaciones/habitaciones.fxml" onAction="#onMenu"/>
 
                     <Button text="Reservas  ▸" onAction="#onGrupo"/>
                     <VBox userData="Reservas" visible="false" managed="false" spacing="2">
                         <ToggleButton text="Nueva reserva" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/reservas/nueva_reserva.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Nueva_reserva.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Reserva programada" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/reservas/reserva_programada.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Reservas_programadas.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Calendario de ocupación" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/reservas/calendario_ocupacion.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Calendario_ocupacion.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Confirmar reserva" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/reservas/confirmar_reserva.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Confirmar_reserva.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Cancelar reserva" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/reservas/cancelar_reserva.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Cancelar_reserva.fxml" onAction="#onMenu"/>
                     </VBox>
 
                     <ToggleButton text="Comprobantes" toggleGroup="$grupoMenu"
