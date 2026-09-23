@@ -1,66 +1,326 @@
 package untrm.hotel_san_antonio.controlador;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+
+import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.Navegacion;
 import untrm.hotel_san_antonio.util.SesionActual;
 
-import java.io.IOException;
-
 public class DashboardController {
 
-    private static final String TARJETA = "-fx-background-color: white; -fx-background-radius: 8px; "
-            + "-fx-border-color: #E5E5E5; -fx-border-radius: 8px; -fx-padding: 16px; -fx-cursor: hand;";
-    private static final String TARJETA_HOVER = "-fx-background-color: white; -fx-background-radius: 8px; "
-            + "-fx-border-color: #E6C77A; -fx-border-radius: 8px; -fx-padding: 16px; -fx-cursor: hand;";
+    // =========================================================
+    // ELEMENTOS DEL DASHBOARD
+    // =========================================================
 
-    @FXML private Label lblUsuarioActual;
-    @FXML private VBox tarjetaHabitaciones;
-    @FXML private VBox tarjetaReservas;
+    @FXML
+    private Label lblFecha;
+
+    @FXML
+    private Label lblPlaceholderTitulo;
+
+    @FXML
+    private VBox dashboardView;
+
+    @FXML
+    private VBox placeholderView;
+
+    @FXML
+    private TextField txtBuscar;
+
+    @FXML
+    private StackPane contenedorGraficoIngresos;
+
+    @FXML
+    private Label lblHora;
+
+    @FXML
+    private Label lblOcupadas;
+
+    @FXML
+    private Label lblDisponibles;
+
+    @FXML
+    private Label lblHuespedes;
+
+    @FXML
+    private Label lblReservasHoy;
+
+    @FXML
+    private Label lblIngresosDia;
+
+    @FXML
+    private Label lblVentasTienda;
+
+    @FXML
+    private javafx.scene.chart.PieChart chartOcupacion;
+
+    @FXML
+    private Label lblPorcentajeOcupacion;
+
+    @FXML
+    private Label lblLeyOcupadas;
+
+    @FXML
+    private Label lblLeyDisponibles;
+
+    @FXML
+    private Label lblLeyLimpieza;
+
+    @FXML
+    private Label lblLeyMantenimiento;
+
+    @FXML
+    private javafx.scene.chart.PieChart chartDistribucion;
+
+    @FXML
+    private Label lblTotalIngresos;
+
+    @FXML
+    private VBox listaAlertas;
+
+
+    // =========================================================
+    // INICIALIZACIÓN
+    // =========================================================
 
     @FXML
     public void initialize() {
+
+        // Mostrar la fecha actual
+        if (lblFecha != null) {
+
+            DateTimeFormatter formato =
+                    DateTimeFormatter.ofPattern(
+                            "EEEE, dd 'de' MMMM 'de' yyyy",
+                            new Locale("es", "ES")
+                    );
+
+            String fecha = LocalDate.now()
+                    .format(formato);
+
+            // Primera letra en mayúscula
+            fecha = fecha.substring(0, 1).toUpperCase()
+                    + fecha.substring(1);
+
+            lblFecha.setText("Hoy es " + fecha);
+        }
+
+        // Crear gráfico de ingresos
+        crearGraficoIngresos();
+
+        // Mostrar Dashboard al iniciar
+        mostrarDashboard();
+    }
+
+
+    // =========================================================
+    // CREAR GRÁFICO DE INGRESOS
+    // =========================================================
+
+    private void crearGraficoIngresos() {
+
+        CategoryAxis ejeX = new CategoryAxis();
+
+        NumberAxis ejeY = new NumberAxis();
+
+        AreaChart<String, Number> grafico =
+                new AreaChart<>(ejeX, ejeY);
+
+        grafico.setLegendVisible(false);
+
+        grafico.setAnimated(false);
+
+        grafico.setPrefHeight(230);
+
+        ejeY.setLowerBound(0);
+
+        ejeY.setUpperBound(4000);
+
+        ejeY.setTickUnit(1000);
+
+        if (contenedorGraficoIngresos != null) {
+
+            contenedorGraficoIngresos
+                    .getChildren()
+                    .add(grafico);
+        }
+    }
+
+
+    // =========================================================
+    // MOSTRAR DASHBOARD
+    // =========================================================
+
+    @FXML
+    private void mostrarDashboard() {
+
+        if (dashboardView != null) {
+
+            dashboardView.setVisible(true);
+
+            dashboardView.setManaged(true);
+        }
+
+        if (placeholderView != null) {
+
+            placeholderView.setVisible(false);
+
+            placeholderView.setManaged(false);
+        }
+    }
+
+
+    // =========================================================
+    // MOSTRAR OTRAS SECCIONES
+    // =========================================================
+
+    @FXML
+    private void mostrarSeccion(ActionEvent event) {
+
+        if (dashboardView != null) {
+
+            dashboardView.setVisible(false);
+
+            dashboardView.setManaged(false);
+        }
+
+        if (placeholderView != null) {
+
+            placeholderView.setVisible(true);
+
+            placeholderView.setManaged(true);
+        }
+
+        if (lblPlaceholderTitulo != null) {
+
+            lblPlaceholderTitulo.setText(
+                    "Sección en construcción"
+            );
+        }
+    }
+
+
+    // =========================================================
+    // NOTIFICACIONES
+    // =========================================================
+
+    @FXML
+    private void mostrarNotificaciones() {
+
+        Alertas.mostrarInfo(
+                "Notificaciones",
+                "No tienes nuevas notificaciones."
+        );
+    }
+
+
+    // =========================================================
+    // PERFIL
+    // =========================================================
+
+    @FXML
+    private void verPerfil() {
+
+        String mensaje = "Información del usuario";
+
         if (SesionActual.getUsuario() != null) {
-            lblUsuarioActual.setText("· " + SesionActual.getUsuario().getNombreCompleto()
-                    + " (" + SesionActual.getUsuario().getRol() + ")");
+
+            mensaje =
+                    "Usuario: "
+                    + SesionActual.getUsuario().getNombreCompleto()
+                    + "\nRol: "
+                    + SesionActual.getUsuario().getRol();
         }
-        // El resaltado al pasar el mouse no se puede fijar en el FXML (no hay archivo .css con :hover)
-        for (VBox tarjeta : new VBox[]{tarjetaHabitaciones, tarjetaReservas}) {
-            tarjeta.setOnMouseEntered(e -> tarjeta.setStyle(TARJETA_HOVER));
-            tarjeta.setOnMouseExited(e -> tarjeta.setStyle(TARJETA));
+
+        Alertas.mostrarInfo(
+                "Mi perfil",
+                mensaje
+        );
+    }
+
+
+    // =========================================================
+    // CONFIGURACIÓN
+    // =========================================================
+
+    @FXML
+    private void verConfiguracion() {
+
+        Alertas.mostrarInfo(
+                "Configuración",
+                "La configuración estará disponible próximamente."
+        );
+    }
+
+
+    // =========================================================
+    // BUSCADOR
+    // =========================================================
+
+    @FXML
+    private void filtrarLlegadas() {
+
+        if (txtBuscar == null) {
+            return;
         }
-        // TODO (Unidad II/III): si SesionActual.esAdministrador(), mostrar ademas
-        // las tarjetas de Almacen, Usuarios y Reportes.
+
+        String texto = txtBuscar.getText();
+
+        if (texto == null) {
+            texto = "";
+        }
+
+        texto = texto.trim();
+
+        // Por ahora solamente obtenemos el texto.
+        // Aquí posteriormente podemos conectar
+        // la búsqueda con las tablas del Dashboard.
     }
 
-    @FXML
-    private void onAbrirHabitaciones() {
-        // TODO: reemplazar por Navegacion.irA(".../fxml/habitaciones.fxml") cuando esa pantalla exista
-        Alertas.mostrarInfo("Habitaciones", "Pantalla en construcción por el equipo.");
-    }
+
+    // =========================================================
+    // CERRAR SESIÓN
+    // =========================================================
 
     @FXML
-    private void onAbrirReservas() {
-        // TODO: reemplazar por Navegacion.irA(".../fxml/reservas.fxml") cuando esa pantalla exista
-        Alertas.mostrarInfo("Reservas", "Pantalla en construcción por el equipo.");
-    }
+    private void cerrarSesion() {
 
-    @FXML
-    private void onAbrirCarrito() {
-        // TODO: reemplazar por Navegacion.abrirModal(".../fxml/carrito_tienda.fxml", "Carrito") cuando exista
-        Alertas.mostrarInfo("Tiendita", "Carrito flotante en construcción por el equipo.");
-    }
+        if (Alertas.confirmar(
+                "Cerrar sesión",
+                "¿Seguro que deseas cerrar sesión?"
+        )) {
 
-    @FXML
-    private void onCerrarSesion() {
-        if (Alertas.confirmar("Cerrar sesión", "¿Seguro que deseas cerrar sesión?")) {
             SesionActual.cerrar();
+
             try {
-                Navegacion.irA("/untrm/hotel_san_antonio/fxml/login.fxml");
+
+                Navegacion.irA(
+                        "/untrm/hotel_san_antonio/fxml/login.fxml"
+                );
+
             } catch (IOException e) {
-                Alertas.mostrarError("Error", "No se pudo volver al Login.\n\n" + e.getMessage());
+
+                Alertas.mostrarError(
+                        "Error",
+                        "No se pudo volver al Login.\n\n"
+                        + e.getMessage()
+                );
             }
         }
     }
