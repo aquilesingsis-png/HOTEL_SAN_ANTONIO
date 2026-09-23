@@ -4,12 +4,9 @@
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
@@ -18,53 +15,13 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
+<!--
+    Sin encabezado propio: el titulo de la seccion, el buscador rapido, el carrito y el
+    usuario/rol ya los pone el marco principal (menu lateral + encabezado). El buscador de
+    "Buscar reserva, huesped, habitacion" que traia este encabezado se quito junto con el;
+    si se necesita, puede volver a ponerse dentro del contenido en vez de en un encabezado propio.
+-->
 <BorderPane fx:id="rootPane" prefHeight="1020.0" prefWidth="1536.0" styleClass="root-bg" stylesheets="@../css/estilos.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="untrm.hotel_san_antonio.controlador.DashboardController">
-   <!-- ================= TOP BAR ================= -->
-   <top>
-      <HBox alignment="CENTER_LEFT" prefHeight="72.0" styleClass="topbar" BorderPane.alignment="CENTER">
-         <children>
-            <Label styleClass="menu-icon" text="≡" />
-            <VBox alignment="CENTER_LEFT">
-               <children>
-                  <Label styleClass="page-title" text="Dashboard" />
-                  <Label styleClass="page-subtitle" text="Resumen general de la operación del hotel" />
-               </children>
-               <padding>
-                  <Insets left="12.0" />
-               </padding>
-            </VBox>
-
-            <Region HBox.hgrow="ALWAYS" />
-
-            <TextField fx:id="txtBuscar" onKeyReleased="#filtrarLlegadas" promptText="🔍  Buscar reserva, huésped, habitación..." styleClass="search-field" />
-
-            <StackPane styleClass="bell-stack">
-               <children>
-                  <Button fx:id="btnNotificaciones" mnemonicParsing="false" onAction="#mostrarNotificaciones" styleClass="icon-button" text="🔔" />
-                  <Label styleClass="badge-red" text="3" StackPane.alignment="TOP_RIGHT" />
-               </children>
-            </StackPane>
-
-            <StackPane styleClass="bell-stack">
-               <children>
-                  <Button fx:id="btnCarrito" mnemonicParsing="false" onAction="#mostrarSeccion" styleClass="icon-button" text="🛒" />
-                  <Label styleClass="badge-purple" text="2" StackPane.alignment="TOP_RIGHT" />
-               </children>
-            </StackPane>
-
-            <MenuButton fx:id="menuPerfil" mnemonicParsing="false" styleClass="profile-menu" text="👤  Administrador  ▾">
-               <items>
-                  <MenuItem mnemonicParsing="false" onAction="#verPerfil" text="Mi perfil" />
-                  <MenuItem mnemonicParsing="false" onAction="#verConfiguracion" text="Configuración" />
-                  <MenuItem mnemonicParsing="false" onAction="#cerrarSesion" text="Cerrar sesión" />
-               </items>
-            </MenuButton>
-         </children>
-         <padding>
-            <Insets left="20.0" right="24.0" />
-         </padding>
-      </HBox>
-   </top>
 
    <!-- ================= CENTER (contenido) ================= -->
    <center>

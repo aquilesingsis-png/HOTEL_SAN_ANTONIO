@@ -36,23 +36,7 @@
                 <Insets left="20" right="20"/>
             </padding>
 
-            <Button text="☰"
-                    style="-fx-background-color: transparent;
-                           -fx-text-fill: #946117;
-                           -fx-font-size: 24px;"/>
-
-            <VBox spacing="0">
-
-                <Label text="Confirmar reserva"
-                       style="-fx-font-size: 23px;
-                              -fx-font-weight: bold;"/>
-
-                <Label text="Valida y confirma una reserva existente"
-                       style="-fx-text-fill: #777777;
-                              -fx-font-size: 11px;"/>
-
-            </VBox>
-
+            <!-- Sin icono ni titulo propio: el marco principal ya los pone; se deja el buscador. -->
             <Region HBox.hgrow="ALWAYS"/>
 
             <TextField fx:id="txtBuscarReserva"

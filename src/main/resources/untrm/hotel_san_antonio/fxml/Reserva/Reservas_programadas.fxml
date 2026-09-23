@@ -34,49 +34,7 @@
         <VBox spacing="12"
               style="-fx-background-color: #F7F8FA;">
 
-            <HBox alignment="CENTER_LEFT"
-                  spacing="12"
-                  prefHeight="72"
-                  style="-fx-background-color: white;">
-
-                <padding>
-                    <Insets left="20" right="20"/>
-                </padding>
-
-                <Button text="☰"
-                        prefWidth="38"
-                        style="-fx-background-color: transparent;
-                               -fx-text-fill: #946117;
-                               -fx-font-size: 24px;"/>
-
-                <VBox spacing="0">
-
-                    <Label text="Reservas programadas"
-                           style="-fx-font-size: 23px;
-                                  -fx-font-weight: bold;
-                                  -fx-text-fill: #17120F;"/>
-
-                    <Label text="Administra las reservas confirmadas y pendientes"
-                           style="-fx-text-fill: #777777;
-                                  -fx-font-size: 11px;"/>
-
-                </VBox>
-
-                <Region HBox.hgrow="ALWAYS"/>
-
-                <TextField fx:id="txtBuscar"
-                           promptText="Buscar reserva, huésped o habitación..."
-                           prefWidth="280"
-                           minWidth="180"
-                           prefHeight="36"
-                           style="-fx-background-color: white;
-                                  -fx-border-color: #E3E3E3;
-                                  -fx-border-radius: 18;
-                                  -fx-background-radius: 18;
-                                  -fx-padding: 0 14;"/>
-
-            </HBox>
-
+            <!-- Sin encabezado propio (icono, titulo y buscador): el marco principal ya los pone. -->
 
             <!-- FILTROS DE ESTADO -->
 

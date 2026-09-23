@@ -40,25 +40,7 @@
                         left="20.0"/>
             </padding>
 
-            <Button text="☰"
-                    prefWidth="40.0"
-                    prefHeight="40.0"
-                    style="-fx-background-color: transparent;
-                           -fx-text-fill: #946117;
-                           -fx-font-size: 24px;
-                           -fx-cursor: hand;"/>
-
-            <VBox spacing="0.0">
-                <Label text="Calendario de ocupación"
-                       style="-fx-font-size: 23px;
-                              -fx-font-weight: bold;
-                              -fx-text-fill: #17120F;"/>
-
-                <Label text="Visualiza la disponibilidad de habitaciones"
-                       style="-fx-text-fill: #777777;
-                              -fx-font-size: 11px;"/>
-            </VBox>
-
+            <!-- Sin icono ni titulo propio: el marco principal ya los pone; se deja el buscador. -->
             <Region HBox.hgrow="ALWAYS"/>
 
             <TextField fx:id="txtBuscarHabitacion"

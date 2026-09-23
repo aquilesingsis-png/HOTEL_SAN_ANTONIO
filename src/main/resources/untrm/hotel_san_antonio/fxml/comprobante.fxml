@@ -15,33 +15,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<!-- Sin encabezado propio (logo y "Recepcionista"): el marco principal ya los pone. -->
 <BorderPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: #F8F6F2;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="untrm.hotel_san_antonio.controlador.ComprobanteController">
-   <top>
-      <HBox alignment="CENTER_LEFT" prefHeight="50.0" style="-fx-background-color: #2F1A0C;" BorderPane.alignment="CENTER">
-         <children>
-            <VBox prefHeight="50.0" prefWidth="180.0">
-               <children>
-                  <Label alignment="CENTER" prefHeight="30.0" prefWidth="198.0" text="San Antonio" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="20.0" />
-                     </font>
-                  </Label>
-                  <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="15.0" prefWidth="178.0" text="H O T E L" textFill="#b8862d">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Label>
-               </children>
-            </VBox>
-            <Region HBox.hgrow="ALWAYS" />
-            <Label text="Recepcionista" textFill="WHITE">
-               <HBox.margin>
-                  <Insets right="20.0" />
-               </HBox.margin>
-            </Label>
-         </children>
-      </HBox>
-   </top>
    <center>
       <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #F8F6F2;" BorderPane.alignment="CENTER">
          <content>

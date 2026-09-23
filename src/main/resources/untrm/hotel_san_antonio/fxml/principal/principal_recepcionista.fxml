@@ -84,12 +84,11 @@
     <center>
         <BorderPane>
             <top>
-                <HBox alignment="CENTER_LEFT" spacing="14"
-                      style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-border-width: 0 0 1px 0;">
+                <HBox alignment="CENTER_LEFT" spacing="14" style="-fx-background-color: #3B210F;">
                     <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
                     <VBox spacing="1">
-                        <Label fx:id="lblTitulo" text="Inicio" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
-                        <Label fx:id="lblFecha" text="domingo, 20 de septiembre de 2026" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
+                        <Label fx:id="lblTitulo" text="Inicio" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                        <Label fx:id="lblFecha" text="domingo, 20 de septiembre de 2026" style="-fx-font-size: 12px; -fx-text-fill: #E6C77A;"/>
                     </VBox>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Button text="🛒  Carrito" onAction="#onCarrito"
