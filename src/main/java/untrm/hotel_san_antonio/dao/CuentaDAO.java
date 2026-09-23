@@ -44,6 +44,8 @@ public class CuentaDAO {
 
                 cuenta.setIdReserva(rs.getInt("id_reserva"));
                 cuenta.setIdHabitacion(idHabitacion);
+                cuenta.setIdHuesped(idHuesped);
+                cuenta.setIngreso(ingreso);
                 cuenta.setHuesped(rs.getString("nombres") + " " + rs.getString("apellidos"));
                 cuenta.setTipoDocumento(rs.getString("tipo_documento"));
                 cuenta.setNumDocumento(rs.getString("num_documento"));

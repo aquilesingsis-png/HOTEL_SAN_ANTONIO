@@ -54,6 +54,57 @@ public class VentaTiendaDAO {
         }
     }
 
+    /** Una venta que todavia no tiene comprobante (id_comprobante IS NULL), o null si no existe o ya se facturo. */
+    public VentaTienda buscarPendientePorId(Connection con, int idVenta) throws SQLException {
+        String sql = "SELECT * FROM venta_tienda WHERE id_venta = ? AND id_comprobante IS NULL";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idVenta);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                VentaTienda v = new VentaTienda();
+                v.setIdVenta(rs.getInt("id_venta"));
+                int idHuesped = rs.getInt("id_huesped");
+                v.setIdHuesped(rs.wasNull() ? null : idHuesped);
+                int idHabitacion = rs.getInt("id_habitacion");
+                v.setIdHabitacion(rs.wasNull() ? null : idHabitacion);
+                v.setIdUsuario(rs.getInt("id_usuario"));
+                v.setClienteExterno(rs.getString("cliente_externo"));
+                v.setFechaVenta(rs.getTimestamp("fecha_venta").toLocalDateTime());
+                v.setTotal(rs.getBigDecimal("total"));
+                return v;
+            }
+        }
+    }
+
+    /** Enlaza a un comprobante recien generado la venta indicada (para el origen "Venta de tienda"). */
+    public void enlazarComprobante(Connection con, int idVenta, int idComprobante) throws SQLException {
+        String sql = "UPDATE venta_tienda SET id_comprobante = ? WHERE id_venta = ? AND id_comprobante IS NULL";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idComprobante);
+            ps.setInt(2, idVenta);
+            ps.executeUpdate();
+        }
+    }
+
+    /**
+     * Enlaza a un comprobante recien generado todos los consumos de tienda que quedaron pendientes
+     * durante una estadia (mismos que arma CuentaDAO para la cuenta de la habitacion).
+     */
+    public void enlazarComprobantePorEstadia(Connection con, int idHabitacion, int idHuesped,
+                                              LocalDate ingreso, int idComprobante) throws SQLException {
+        String sql = "UPDATE venta_tienda SET id_comprobante = ? WHERE id_habitacion = ? AND id_huesped = ? "
+                + "AND id_comprobante IS NULL AND fecha_venta >= ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idComprobante);
+            ps.setInt(2, idHabitacion);
+            ps.setInt(3, idHuesped);
+            ps.setDate(4, Date.valueOf(ingreso));
+            ps.executeUpdate();
+        }
+    }
+
     /** Cuanto se vendio hoy en la tiendita, para el Dashboard. */
     public BigDecimal sumarHoy(Connection con) throws SQLException {
         String sql = "SELECT COALESCE(SUM(total), 0) FROM venta_tienda WHERE DATE(fecha_venta) = CURDATE()";

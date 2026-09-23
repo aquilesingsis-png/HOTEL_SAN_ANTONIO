@@ -110,6 +110,33 @@ public class HabitacionDAO {
         return lista;
     }
 
+    /** Busca una habitacion por su numero (ej. "207"), o null si no existe. */
+    public Habitacion buscarPorNumero(Connection con, String numero) throws SQLException {
+        String sql = "SELECT h.id_habitacion, h.numero, h.id_tipo, h.piso, h.estado, "
+                + "t.nombre AS tipo_nombre, t.capacidad, t.precio_base "
+                + "FROM habitacion h JOIN tipo_habitacion t ON t.id_tipo = h.id_tipo WHERE h.numero = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, numero);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                Habitacion h = new Habitacion(
+                        rs.getInt("id_habitacion"),
+                        rs.getString("numero"),
+                        rs.getInt("id_tipo"),
+                        rs.getInt("piso"),
+                        rs.getString("estado"));
+                h.setTipo(new TipoHabitacion(
+                        rs.getInt("id_tipo"),
+                        rs.getString("tipo_nombre"),
+                        rs.getInt("capacidad"),
+                        rs.getBigDecimal("precio_base")));
+                return h;
+            }
+        }
+    }
+
     /** Los nombres de tipo de habitacion en uso (para el filtro de tipos). */
     public List<String> listarNombresTipo(Connection con) throws SQLException {
         List<String> lista = new ArrayList<>();

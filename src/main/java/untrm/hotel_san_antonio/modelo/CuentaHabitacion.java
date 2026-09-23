@@ -15,6 +15,8 @@ public class CuentaHabitacion {
 
     private int idReserva;
     private int idHabitacion;
+    private int idHuesped;
+    private LocalDate ingreso;
     private String huesped;
     private String tipoDocumento;
     private String numDocumento;
@@ -78,6 +80,7 @@ public class CuentaHabitacion {
         public String getDetalle() { return detalle; }
         public int getCantidad() { return cantidad; }
         public String getPrecio() { return formato(precio); }
+        public BigDecimal getPrecioValor() { return precio; }
         public String getSubtotal() { return formato(subtotal); }
         public BigDecimal getSubtotalValor() { return subtotal; }
     }
@@ -108,6 +111,12 @@ public class CuentaHabitacion {
 
     public int getIdHabitacion() { return idHabitacion; }
     public void setIdHabitacion(int idHabitacion) { this.idHabitacion = idHabitacion; }
+
+    public int getIdHuesped() { return idHuesped; }
+    public void setIdHuesped(int idHuesped) { this.idHuesped = idHuesped; }
+
+    public LocalDate getIngreso() { return ingreso; }
+    public void setIngreso(LocalDate ingreso) { this.ingreso = ingreso; }
 
     public String getHuesped() { return huesped; }
     public void setHuesped(String huesped) { this.huesped = huesped; }
