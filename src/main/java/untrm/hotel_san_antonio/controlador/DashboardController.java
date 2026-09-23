@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
+import javafx.FXML;
 
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.CategoryAxis;
@@ -256,6 +256,20 @@ public class DashboardController {
 
 
     // =========================================================
+    // TIENDITA / CARRITO
+    // =========================================================
+
+    @FXML
+    private void onAbrirCarrito() {
+        try {
+            Navegacion.abrirModal("/untrm/hotel_san_antonio/fxml/carrito_tienda.fxml", "Tiendita / Carrito");
+        } catch (IOException e) {
+            Alertas.mostrarError("Tiendita", "No se pudo abrir el carrito.\n\n" + e.getMessage());
+        }
+    }
+
+
+    // =========================================================
     // CONFIGURACIÓN
     // =========================================================
 
@@ -289,8 +303,6 @@ public class DashboardController {
         texto = texto.trim();
 
         // Por ahora solamente obtenemos el texto.
-        // Aquí posteriormente podemos conectar
-        // la búsqueda con las tablas del Dashboard.
     }
 
 

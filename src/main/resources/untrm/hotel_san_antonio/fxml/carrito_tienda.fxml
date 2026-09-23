@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+ fx:controller="untrm.hotel_san_antonio.controlador.CarritoTiendaController"
+ stylesheets="@../css/estilos.css" prefWidth="1280" prefHeight="760" styleClass="venta-root">
+ <fx:define>
+   <ToggleGroup fx:id="tipoComprobante"/>
+   <ToggleGroup fx:id="formaPago"/>
+ </fx:define>
+ <top>
+  <HBox alignment="CENTER_LEFT" spacing="14" styleClass="venta-header">
+   <padding><Insets top="13" right="20" bottom="13" left="20"/></padding>
+   <Label text="Carrito" styleClass="icono-dorado"/>
+   <VBox spacing="1"><Label text="Carrito de venta" styleClass="venta-titulo"/><Label text="Registra los productos y emite el comprobante" styleClass="venta-subtitulo"/></VBox>
+   <Region HBox.hgrow="ALWAYS"/>
+   <Button text="X" onAction="#onCerrar" styleClass="btn-icono"/>
+  </HBox>
+ </top>
+ <center>
+  <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED" styleClass="venta-scroll">
+   <content>
+    <HBox spacing="8" minWidth="1180" minHeight="650" styleClass="venta-contenido">
+     <padding><Insets top="8" right="8" bottom="8" left="8"/></padding>
+
+     <VBox spacing="10" prefWidth="310" minWidth="285" styleClass="venta-columna">
+      <Label text="Tipo de comprobante" styleClass="titulo-seccion"/>
+      <HBox spacing="8">
+       <ToggleButton fx:id="btnBoleta" text="Boleta" selected="true" toggleGroup="$tipoComprobante" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="btn-opcion"></ToggleButton>
+       <ToggleButton fx:id="btnFactura" text="Factura" toggleGroup="$tipoComprobante" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="btn-opcion"></ToggleButton>
+      </HBox>
+      <Label fx:id="lblDatosCliente" text="Datos del cliente (Boleta)" styleClass="subtitulo-bloque"/>
+      <HBox spacing="0"><TextField fx:id="txtBuscarDni" promptText="Buscar por DNI..." HBox.hgrow="ALWAYS"/><Button styleClass="btn-buscar" onAction="#onBuscarCliente"></Button></HBox>
+      <Label text="DNI *" styleClass="etiqueta-campo"/><TextField fx:id="txtDni" promptText="Ingrese DNI"/>
+      <Label text="Nombre completo" styleClass="etiqueta-campo"/><TextField fx:id="txtNombreCliente" promptText="Nombres y apellidos"/>
+      <Label text="Dirección" styleClass="etiqueta-campo"/><TextField fx:id="txtDireccion" promptText="Dirección del cliente (opcional)"/>
+      <Label text="Teléfono" styleClass="etiqueta-campo"/><TextField fx:id="txtTelefono" promptText="Teléfono (opcional)"/>
+      <Separator/>
+      <Label text="Datos adicionales" styleClass="titulo-seccion"/>
+      <Label text="Habitación (opcional)" styleClass="etiqueta-campo"/><ComboBox fx:id="cmbHabitacion" maxWidth="Infinity" promptText="Seleccione habitación"/>
+      <Label text="Observaciones" styleClass="etiqueta-campo"/><TextArea fx:id="txtObservaciones" promptText="Ingrese observaciones..." prefRowCount="3" wrapText="true"/>
+     </VBox>
+
+     <VBox spacing="9" HBox.hgrow="ALWAYS" minWidth="480" styleClass="venta-columna">
+      <Label text="BUSCAR PRODUCTOS" styleClass="titulo-seccion"/>
+      <HBox spacing="0"><TextField fx:id="txtBuscar" promptText="Buscar producto por nombre o marca..." HBox.hgrow="ALWAYS"/><Button styleClass="btn-buscar" onAction="#onBuscarProducto"></Button></HBox>
+      <Label text="FILTRAR POR PRODUCTO" styleClass="etiqueta-filtro"/>
+      <ComboBox fx:id="cmbCategoria" maxWidth="Infinity" promptText="Todas las categorías"/>
+      <TableView fx:id="tablaProductos" VBox.vgrow="ALWAYS" styleClass="tabla-venta">
+       <columns>
+        <TableColumn fx:id="colCodigo" text="Código" prefWidth="62"/>
+        <TableColumn fx:id="colProducto" text="Producto" prefWidth="155"/>
+        <TableColumn fx:id="colCategoria" text="Categoría" prefWidth="110"/>
+        <TableColumn fx:id="colPrecio" text="Precio" prefWidth="78"/>
+        <TableColumn fx:id="colStock" text="Stock" prefWidth="60"/>
+        <TableColumn fx:id="colAcciones" text="Acciones" prefWidth="92"/>
+       </columns>
+       <placeholder><Label text="No se encontraron productos."/></placeholder>
+      </TableView>
+      <HBox alignment="CENTER_LEFT"><Label fx:id="lblMostrando" text="Mostrando 0 productos" styleClass="texto-secundario"/><Region HBox.hgrow="ALWAYS"/><Button text="‹" disable="true" styleClass="btn-pagina"/><Button text="1" styleClass="btn-pagina-activa"/><Button text="›" disable="true" styleClass="btn-pagina"/></HBox>
+     </VBox>
+
+     <VBox spacing="8" prefWidth="405" minWidth="370" styleClass="venta-columna">
+      <HBox alignment="CENTER_LEFT"><Label text="Productos en el carrito" styleClass="titulo-seccion"/><Region HBox.hgrow="ALWAYS"/><Button text="Vaciar carrito" onAction="#onVaciarCarrito" styleClass="btn-vaciar"></Button></HBox>
+      <TableView fx:id="tablaCarrito" prefHeight="215" styleClass="tabla-venta">
+       <columns>
+        <TableColumn fx:id="colCarritoProducto" text="Producto" prefWidth="135"/>
+        <TableColumn fx:id="colCantidad" text="Cant." prefWidth="52"/>
+        <TableColumn fx:id="colCarritoPrecio" text="P. Unit." prefWidth="70"/>
+        <TableColumn fx:id="colSubtotal" text="Subtotal" prefWidth="75"/>
+       </columns>
+       <placeholder><VBox alignment="CENTER" spacing="8"><Label text="Carrito" styleClass="icono-vacio"/><Label text="El carrito está vacío." styleClass="texto-secundario"/></VBox></placeholder>
+      </TableView>
+      <HBox alignment="CENTER_RIGHT" spacing="6"><Button onAction="#onRestarCantidad" styleClass="btn-cantidad"></Button><Button onAction="#onSumarCantidad" styleClass="btn-cantidad"></Button><Button text="Quitar" onAction="#onQuitarProducto" styleClass="btn-secundario"></Button></HBox>
+      <VBox spacing="6" styleClass="caja-totales">
+       <HBox><Label text="Subtotal"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="lblSubtotal" text="S/ 0.00" styleClass="monto-azul"/></HBox>
+       <HBox><Label text="IGV (18%)"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="lblIgv" text="S/ 0.00" styleClass="monto-azul"/></HBox>
+       <Separator/>
+       <HBox alignment="CENTER_LEFT"><Label text="Total" styleClass="total-etiqueta"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="lblTotal" text="S/ 0.00" styleClass="total-valor"/></HBox>
+      </VBox>
+      <Label text="Forma de pago" styleClass="titulo-seccion"/>
+      <HBox spacing="6">
+       <ToggleButton fx:id="btnEfectivo" text="Efectivo" selected="true" toggleGroup="$formaPago" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-pago"></ToggleButton>
+       <ToggleButton fx:id="btnTarjeta" text="Tarjeta" toggleGroup="$formaPago" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-pago"></ToggleButton>
+       <ToggleButton fx:id="btnYape" text="Yape/Plin" toggleGroup="$formaPago" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-pago"></ToggleButton>
+       <ToggleButton fx:id="btnTransferencia" text="Transferencia" toggleGroup="$formaPago" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-pago"></ToggleButton>
+      </HBox>
+      <Label text="Monto recibido" styleClass="etiqueta-campo"/><TextField fx:id="txtMontoRecibido" promptText="S/ 0.00"/>
+      <HBox alignment="CENTER_LEFT" styleClass="caja-vuelto"><Label text="Vuelto" styleClass="vuelto-etiqueta"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="lblVuelto" text="S/ 0.00" styleClass="vuelto-valor"/></HBox>
+      <Region VBox.vgrow="ALWAYS"/>
+      <HBox spacing="10"><Button text="Cancelar" onAction="#onCancelar" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-cancelar"></Button><Button text="Emitir comprobante" onAction="#onConfirmarVenta" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-emitir"></Button></HBox>
+     </VBox>
+    </HBox>
+   </content>
+  </ScrollPane>
+ </center>
+</BorderPane>
