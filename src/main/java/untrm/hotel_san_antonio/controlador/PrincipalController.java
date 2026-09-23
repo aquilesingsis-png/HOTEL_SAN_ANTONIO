@@ -32,10 +32,10 @@ import java.util.Locale;
  */
 public class PrincipalController {
 
-    private static final String RUTA_LOGIN = "/untrm/hotel_san_antonio/fxml/login.fxml";
+    private static final String RUTA_LOGIN = "/untrm/hotel_san_antonio/fxml/login/login.fxml";
     private static final String RUTA_MARCO_RECEPCIONISTA = "/untrm/hotel_san_antonio/fxml/principal/principal_recepcionista.fxml";
     private static final String RUTA_MARCO_ADMIN = "/untrm/hotel_san_antonio/fxml/principal/principal_administrador.fxml";
-    private static final String RUTA_CARRITO = "/untrm/hotel_san_antonio/fxml/carrito_tienda.fxml";
+    private static final String RUTA_CARRITO = "/untrm/hotel_san_antonio/fxml/carrito/carrito_tienda.fxml";
 
     // Botones de opcion (Inicio, Habitaciones, y los de dentro de un submenu)
     private static final String ITEM = "-fx-background-color: transparent; -fx-text-fill: #F3ECDD; -fx-font-size: 14px; "

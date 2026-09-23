@@ -661,7 +661,7 @@ public class DashboardController {
             try {
 
                 Navegacion.irA(
-                        "/untrm/hotel_san_antonio/fxml/login.fxml"
+                        "/untrm/hotel_san_antonio/fxml/login/login.fxml"
                 );
 
             } catch (IOException e) {

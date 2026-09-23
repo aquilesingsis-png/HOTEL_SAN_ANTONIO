@@ -44,7 +44,7 @@
                 <VBox fx:id="barraLateral" spacing="6">
                     <Label text="OPERACIÓN" style="-fx-text-fill: #D4A84C; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 6px 0 0 8px;"/>
                     <ToggleButton fx:id="btnInicio" text="Inicio" toggleGroup="$grupoMenu" selected="true"
-                                  userData="/untrm/hotel_san_antonio/fxml/dashboard_2.fxml" onAction="#onMenu"/>
+                                  userData="/untrm/hotel_san_antonio/fxml/dashboard/dashboard_2.fxml" onAction="#onMenu"/>
                     <ToggleButton text="Habitaciones" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/habitaciones/habitaciones.fxml" onAction="#onMenu"/>
 
@@ -63,7 +63,7 @@
                     </VBox>
 
                     <ToggleButton text="Comprobantes" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/comprobante.fxml" onAction="#onMenu"/>
+                                  userData="/untrm/hotel_san_antonio/fxml/comprobante/comprobante.fxml" onAction="#onMenu"/>
                     <ToggleButton text="Caja y pagos" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/caja/caja.fxml" onAction="#onMenu"/>
                 </VBox>

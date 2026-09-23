@@ -43,7 +43,7 @@
 
             <ImageView fitHeight="104.0" preserveRatio="true" smooth="true">
                 <image>
-                    <Image url="@../images/logo_san_antonio.png" />
+                    <Image url="@../../images/logo_san_antonio.png" />
                 </image>
             </ImageView>
             <Label text="Hotel San Antonio"
@@ -64,7 +64,7 @@
 
             <ImageView fitHeight="92.0" preserveRatio="true" smooth="true">
                 <image>
-                    <Image url="@../images/logo_san_antonio.png" />
+                    <Image url="@../../images/logo_san_antonio.png" />
                 </image>
             </ImageView>
 
