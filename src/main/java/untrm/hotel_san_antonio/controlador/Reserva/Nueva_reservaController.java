@@ -1568,6 +1568,7 @@ public class Nueva_reservaController {
         Pago pago = new Pago();
         pago.setMonto(java.math.BigDecimal.valueOf(totalReserva).setScale(2, RoundingMode.HALF_UP));
         pago.setMetodoPago(metodoPagoSeleccionado());
+        pago.setTipoPago("COMPLETO");
 
         try {
             int idReserva = reservaService.registrar(huesped, empresaEncontrada, construirReserva(),
