@@ -3,22 +3,37 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package untrm.hotel_san_antonio.controlador.Reserva;
-import java.time.LocalDate;
+
+import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.layout.HBox;
+
+import untrm.hotel_san_antonio.modelo.Reserva;
+import untrm.hotel_san_antonio.servicio.ReservaService;
+import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Navegacion;
+
 /**
  *
  * @author HP
  */
 
 public class ReservasProgramadasController {
+
+    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final int TAMANO_PAGINA = 10;
 
     @FXML
     private TextField txtBuscar;
@@ -48,28 +63,28 @@ public class ReservasProgramadasController {
     private ToggleButton btnCanceladas;
 
     @FXML
-    private TableView<Object> tablaReservas;
+    private TableView<Reserva> tablaReservas;
 
     @FXML
-    private TableColumn<Object, String> colCodigo;
+    private TableColumn<Reserva, String> colCodigo;
 
     @FXML
-    private TableColumn<Object, String> colCliente;
+    private TableColumn<Reserva, String> colCliente;
 
     @FXML
-    private TableColumn<Object, String> colHabitacion;
+    private TableColumn<Reserva, String> colHabitacion;
 
     @FXML
-    private TableColumn<Object, String> colIngreso;
+    private TableColumn<Reserva, String> colIngreso;
 
     @FXML
-    private TableColumn<Object, String> colSalida;
+    private TableColumn<Reserva, String> colSalida;
 
     @FXML
-    private TableColumn<Object, String> colEstado;
+    private TableColumn<Reserva, String> colEstado;
 
     @FXML
-    private TableColumn<Object, String> colAcciones;
+    private TableColumn<Reserva, Void> colAcciones;
 
     @FXML
     private Label lblCantidad;
@@ -77,6 +92,10 @@ public class ReservasProgramadasController {
     @FXML
     private Button btnPagina;
 
+
+    private final ReservaService reservaService = new ReservaService();
+
+    private List<Reserva> resultadoCompleto = java.util.List.of();
 
     private int paginaActual = 1;
 
@@ -88,21 +107,15 @@ public class ReservasProgramadasController {
 
         configurarTabla();
 
-        actualizarContador();
-
-        actualizarPagina();
+        buscarYMostrar();
     }
 
 
     private void configurarFechas() {
 
-        LocalDate hoy = LocalDate.now();
+        dpDesde.setValue(null);
 
-        dpDesde.setValue(hoy);
-
-        dpHasta.setValue(
-                hoy.plusDays(30)
-        );
+        dpHasta.setValue(null);
     }
 
 
@@ -112,56 +125,192 @@ public class ReservasProgramadasController {
                 TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN
         );
 
-        // La tabla inicia completamente vacía.
-        tablaReservas.getItems().clear();
+        colCodigo.setCellValueFactory(datos ->
+                new javafx.beans.property.SimpleStringProperty(datos.getValue().getCodigo()));
+
+        colCliente.setCellValueFactory(datos ->
+                new javafx.beans.property.SimpleStringProperty(datos.getValue().getNombreHuesped()));
+
+        colHabitacion.setCellValueFactory(datos ->
+                new javafx.beans.property.SimpleStringProperty(
+                        datos.getValue().getNumeroHabitacion() + " · " + datos.getValue().getNombreTipoHabitacion()));
+
+        colIngreso.setCellValueFactory(datos ->
+                new javafx.beans.property.SimpleStringProperty(datos.getValue().getFechaCheckin().format(FORMATO_FECHA)));
+
+        colSalida.setCellValueFactory(datos ->
+                new javafx.beans.property.SimpleStringProperty(datos.getValue().getFechaCheckout().format(FORMATO_FECHA)));
+
+        colEstado.setCellValueFactory(datos ->
+                new javafx.beans.property.SimpleStringProperty(textoEstado(datos.getValue().getEstado())));
+        colEstado.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String estado, boolean vacio) {
+                super.updateItem(estado, vacio);
+                if (vacio || estado == null) {
+                    setText(null);
+                    setStyle("");
+                    return;
+                }
+                setText(estado);
+                setStyle("-fx-text-fill: " + colorEstado(getTableRow().getItem() == null
+                        ? "" : getTableRow().getItem().getEstado()) + "; -fx-font-weight: bold;");
+            }
+        });
+
+        colAcciones.setCellFactory(col -> new TableCell<>() {
+            private final Button btnConfirmar = new Button("Confirmar");
+            private final Button btnCancelar = new Button("Cancelar");
+            private final HBox caja = new HBox(6, btnConfirmar, btnCancelar);
+            {
+                btnConfirmar.setStyle("-fx-background-color: #2E88DD; -fx-text-fill: white; -fx-font-size: 10px; "
+                        + "-fx-background-radius: 5; -fx-cursor: hand;");
+                btnCancelar.setStyle("-fx-background-color: #E24C4C; -fx-text-fill: white; -fx-font-size: 10px; "
+                        + "-fx-background-radius: 5; -fx-cursor: hand;");
+                btnConfirmar.setOnAction(e -> confirmarDesdeTabla(getTableRow().getItem()));
+                btnCancelar.setOnAction(e -> cancelarDesdeTabla(getTableRow().getItem()));
+            }
+
+            @Override
+            protected void updateItem(Void valor, boolean vacio) {
+                super.updateItem(valor, vacio);
+                Reserva r = vacio ? null : getTableRow().getItem();
+                if (r == null) {
+                    setGraphic(null);
+                    return;
+                }
+                btnConfirmar.setVisible("PENDIENTE".equals(r.getEstado()));
+                btnConfirmar.setManaged("PENDIENTE".equals(r.getEstado()));
+                boolean cancelable = "PENDIENTE".equals(r.getEstado()) || "CONFIRMADA".equals(r.getEstado());
+                btnCancelar.setVisible(cancelable);
+                btnCancelar.setManaged(cancelable);
+                setGraphic(cancelable || "PENDIENTE".equals(r.getEstado()) ? caja : null);
+            }
+        });
+    }
+
+
+    private String textoEstado(String estado) {
+        return switch (estado) {
+            case "PENDIENTE" -> "Pendiente";
+            case "CONFIRMADA" -> "Confirmada";
+            case "CHECKIN" -> "Con check-in";
+            case "FINALIZADA" -> "Finalizada";
+            case "CANCELADA" -> "Cancelada";
+            default -> estado;
+        };
+    }
+
+    private String colorEstado(String estado) {
+        return switch (estado == null ? "" : estado) {
+            case "PENDIENTE" -> "#C98A1B";
+            case "CONFIRMADA" -> "#2E88DD";
+            case "CHECKIN" -> "#2CB95F";
+            case "FINALIZADA" -> "#6A5F52";
+            case "CANCELADA" -> "#D9433A";
+            default -> "#2C2118";
+        };
+    }
+
+
+    private void confirmarDesdeTabla(Reserva r) {
+        if (r == null) {
+            return;
+        }
+        if (!Alertas.confirmar("Confirmar reserva", "¿Confirmar la reserva " + r.getCodigo() + " de "
+                + r.getNombreHuesped() + "?")) {
+            return;
+        }
+        try {
+            reservaService.confirmar(r.getIdReserva(), r.getEstado());
+            buscarYMostrar();
+        } catch (IllegalStateException e) {
+            Alertas.mostrarError("No se puede confirmar", e.getMessage());
+        } catch (SQLException e) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo confirmar la reserva.\n\n" + e.getMessage());
+        }
+    }
+
+    private void cancelarDesdeTabla(Reserva r) {
+        if (r == null) {
+            return;
+        }
+        if (!Alertas.confirmar("Cancelar reserva", "¿Cancelar la reserva " + r.getCodigo() + " de "
+                + r.getNombreHuesped() + "?")) {
+            return;
+        }
+        try {
+            reservaService.cancelar(r.getIdReserva(), r.getEstado(), "Otro", "Cancelada desde el listado de reservas.");
+            buscarYMostrar();
+        } catch (IllegalStateException e) {
+            Alertas.mostrarError("No se puede cancelar", e.getMessage());
+        } catch (SQLException e) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo cancelar la reserva.\n\n" + e.getMessage());
+        }
+    }
+
+
+    private String estadoSeleccionado() {
+        if (btnPendientes.isSelected()) {
+            return "PENDIENTE";
+        }
+        if (btnConfirmadas.isSelected()) {
+            return "CONFIRMADA";
+        }
+        if (btnPorLlegar.isSelected()) {
+            return "POR_LLEGAR";
+        }
+        if (btnFinalizadas.isSelected()) {
+            return "FINALIZADA";
+        }
+        if (btnCanceladas.isSelected()) {
+            return "CANCELADA";
+        }
+        return null;
     }
 
 
     @FXML
     private void filtrarEstado() {
 
-        /*
-         * Cuando tengas MySQL:
-         *
-         * String estado = obtenerEstadoSeleccionado();
-         * reservaService.buscarPorEstado(estado);
-         */
+        paginaActual = 1;
 
-        tablaReservas.getItems().clear();
-
-        actualizarContador();
+        buscarYMostrar();
     }
 
 
     @FXML
     private void filtrarFechas() {
 
-        LocalDate desde = dpDesde.getValue();
-        LocalDate hasta = dpHasta.getValue();
+        paginaActual = 1;
 
-        if (desde == null || hasta == null) {
-            return;
+        buscarYMostrar();
+    }
+
+
+    private void buscarYMostrar() {
+
+        String texto = txtBuscar == null ? null : txtBuscar.getText();
+
+        try {
+            resultadoCompleto = reservaService.buscar(texto, estadoSeleccionado(), dpDesde.getValue(), dpHasta.getValue());
+        } catch (SQLException e) {
+            Alertas.mostrarError("Error de base de datos", "No se pudieron cargar las reservas.\n\n" + e.getMessage());
+            resultadoCompleto = java.util.List.of();
         }
 
-        /*
-         * FUTURO:
-         *
-         * reservaService.buscarPorFechas(desde, hasta);
-         */
-
-        tablaReservas.getItems().clear();
-
-        actualizarContador();
+        actualizarPagina();
     }
 
 
     @FXML
     private void abrirNuevaReserva() {
 
-        /*
-         * La navegación será manejada
-         * posteriormente desde PrimaryController.
-         */
+        try {
+            Navegacion.mostrar("/untrm/hotel_san_antonio/fxml/Reserva/Nueva_reserva.fxml");
+        } catch (java.io.IOException e) {
+            Alertas.mostrarError("Error", "No se pudo abrir Nueva reserva.\n\n" + e.getMessage());
+        }
     }
 
 
@@ -179,32 +328,45 @@ public class ReservasProgramadasController {
     @FXML
     private void paginaSiguiente() {
 
-        /*
-         * Cuando exista la BD se verificará
-         * si hay otra página.
-         */
+        int totalPaginas = totalPaginas();
 
-        paginaActual++;
+        if (paginaActual < totalPaginas) {
+            paginaActual++;
+        }
 
         actualizarPagina();
     }
 
 
+    private int totalPaginas() {
+        return Math.max(1, (int) Math.ceil(resultadoCompleto.size() / (double) TAMANO_PAGINA));
+    }
+
+
     private void actualizarPagina() {
 
-        btnPagina.setText(
-                String.valueOf(paginaActual)
-        );
+        int totalPaginas = totalPaginas();
+        if (paginaActual > totalPaginas) {
+            paginaActual = totalPaginas;
+        }
+
+        int desde = (paginaActual - 1) * TAMANO_PAGINA;
+        int hasta = Math.min(desde + TAMANO_PAGINA, resultadoCompleto.size());
+
+        tablaReservas.getItems().setAll(desde < hasta ? resultadoCompleto.subList(desde, hasta) : java.util.List.of());
+
+        btnPagina.setText(String.valueOf(paginaActual));
+
+        actualizarContador();
     }
 
 
     private void actualizarContador() {
 
-        int cantidad =
-                tablaReservas.getItems().size();
+        int cantidad = resultadoCompleto.size();
 
         lblCantidad.setText(
-                cantidad + " reservas"
+                cantidad + (cantidad == 1 ? " reserva" : " reservas")
         );
     }
 }

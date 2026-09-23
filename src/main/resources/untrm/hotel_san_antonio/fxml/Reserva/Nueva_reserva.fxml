@@ -28,67 +28,11 @@
       spacing="8.0"
       style="-fx-background-color: #F7F8FA;">
 
-    <!-- ====================================================== -->
-    <!-- ENCABEZADO                                             -->
-    <!-- ====================================================== -->
-
-    <HBox alignment="CENTER_LEFT"
-          prefHeight="66.0"
-          minHeight="66.0"
-          spacing="12.0"
-          style="-fx-background-color: white;
-                 -fx-border-color: transparent transparent #E7E7E7 transparent;
-                 -fx-border-width: 0 0 1 0;">
-
-        <padding>
-            <Insets left="18.0"
-                    right="18.0"/>
-        </padding>
-
-        <Button text="≡"
-                prefWidth="38.0"
-                prefHeight="38.0"
-                style="-fx-background-color: transparent;
-                       -fx-text-fill: #916219;
-                       -fx-font-size: 25px;
-                       -fx-font-weight: bold;
-                       -fx-cursor: hand;"/>
-
-        <VBox spacing="0.0">
-
-            <Label text="Nueva reserva"
-                   style="-fx-text-fill: #18120F;
-                          -fx-font-size: 21px;
-                          -fx-font-weight: bold;"/>
-
-            <Label text="Registra una nueva reserva para tus clientes"
-                   style="-fx-text-fill: #777777;
-                          -fx-font-size: 10px;"/>
-
-        </VBox>
-
-        <Region HBox.hgrow="ALWAYS"/>
-
-        <TextField fx:id="txtBusquedaGeneral"
-                   promptText="Buscar huésped, reserva o habitación..."
-                   prefWidth="285.0"
-                   maxWidth="310.0"
-                   minWidth="170.0"
-                   prefHeight="35.0"
-                   style="-fx-background-color: white;
-                          -fx-border-color: #E1E1E1;
-                          -fx-background-radius: 18;
-                          -fx-border-radius: 18;
-                          -fx-padding: 0 15;
-                          -fx-font-size: 10px;"/>
-
-        <Label text="Recepcionista"
-               style="-fx-font-size: 11px;
-                      -fx-font-weight: bold;
-                      -fx-text-fill: #222222;"/>
-
-    </HBox>
-
+    <!--
+        Sin encabezado propio: el titulo "Nueva reserva" y el usuario/rol ya los pone el
+        marco principal (menu lateral + encabezado). El buscador (sin uso en el controlador)
+        se quito junto con el.
+    -->
 
     <!-- ====================================================== -->
     <!-- INDICADOR DE PASOS                                     -->
@@ -365,6 +309,22 @@
                                -fx-cursor: hand;"/>
 
             </HBox>
+
+
+            <!-- DNI DEL HUÉSPED (solo cuando se factura a una empresa: alguien igual se hospeda) -->
+
+            <VBox fx:id="filaDocumentoHuesped" spacing="4.0" visible="false" managed="false">
+
+                <Label text="DNI del huésped que se hospeda *"
+                       style="-fx-font-size: 9px;
+                              -fx-font-weight: bold;"/>
+
+                <TextField fx:id="txtDocumentoHuesped"
+                           promptText="Ingrese DNI del huésped"
+                           prefHeight="31.0"
+                           style="-fx-font-size: 9px;"/>
+
+            </VBox>
 
 
             <!-- MENSAJE INICIAL -->

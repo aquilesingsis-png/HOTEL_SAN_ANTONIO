@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
+
+<!--
+    Pantalla de inicio de sesion. Sin archivo .css: todo el estilo es inline.
+    La imagen de fondo (antes -fx-background-image en login.css) la pone LoginController al
+    iniciar, con la API de Background/BackgroundImage de Java, porque una imagen de fondo
+    inline no se resuelve de forma confiable sin una hoja de estilos.
+    Lo que cambia con el mouse o el foco (los "campo" al enfocarse o marcarse en rojo, los
+    botones al pasar el mouse, el ComboBox) tambien lo resuelve LoginController con setStyle(),
+    ya que eso no se puede fijar de antemano en el FXML.
+-->
+<StackPane fx:id="rootLogin"
+           prefHeight="768.0" prefWidth="1366.0"
+           xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="untrm.hotel_san_antonio.controlador.LoginController">
+
+    <Region style="-fx-background-color: linear-gradient(to right, rgba(37,20,8,0.78) 0%, rgba(54,28,9,0.55) 43%, rgba(36,20,10,0.16) 70%, rgba(28,15,7,0.34) 100%);" />
+
+    <HBox alignment="CENTER_RIGHT" spacing="56.0">
+        <padding>
+            <Insets bottom="40.0" left="58.0" right="58.0" top="40.0" />
+        </padding>
+
+        <VBox alignment="CENTER_LEFT" maxWidth="620.0" minWidth="300.0" spacing="14.0" HBox.hgrow="ALWAYS">
+            <Region VBox.vgrow="ALWAYS" />
+
+            <ImageView fitHeight="104.0" preserveRatio="true" smooth="true">
+                <image>
+                    <Image url="@../../images/logo_san_antonio.png" />
+                </image>
+            </ImageView>
+            <Label text="Hotel San Antonio"
+                   style="-fx-font-family: Georgia; -fx-font-size: 44px; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(39,18,4,0.72), 12, 0.25, 0, 2);" />
+            <Label text="★  ★  ★" style="-fx-font-size: 19px; -fx-text-fill: #E6C77A;" />
+            <Label maxWidth="450.0" wrapText="true" text="Tu mejor experiencia turística en Bagua"
+                   style="-fx-font-family: Georgia; -fx-font-size: 24px; -fx-font-style: italic; -fx-text-fill: rgba(255,255,255,0.94); -fx-effect: dropshadow(gaussian, rgba(39,18,4,0.76), 10, 0.2, 0, 2);" />
+            <Region prefHeight="4.0" prefWidth="76.0" style="-fx-background-color: #D4A84C; -fx-background-radius: 3px; -fx-max-height: 4px;" />
+
+            <Region VBox.vgrow="ALWAYS" />
+        </VBox>
+
+        <VBox alignment="TOP_CENTER" maxWidth="438.0" minWidth="398.0" prefWidth="438.0" spacing="18.0"
+              style="-fx-background-color: rgba(255,255,255,0.97); -fx-background-radius: 28px; -fx-border-color: rgba(255,255,255,0.72); -fx-border-radius: 28px; -fx-border-width: 1px; -fx-effect: dropshadow(gaussian, rgba(39,20,7,0.34), 32, 0.18, 0, 9);">
+            <padding>
+                <Insets bottom="36.0" left="42.0" right="42.0" top="34.0" />
+            </padding>
+
+            <ImageView fitHeight="92.0" preserveRatio="true" smooth="true">
+                <image>
+                    <Image url="@../../images/logo_san_antonio.png" />
+                </image>
+            </ImageView>
+
+            <VBox alignment="CENTER" spacing="3.0">
+                <Label text="Bienvenido" style="-fx-font-family: Georgia; -fx-font-size: 34px; -fx-font-weight: bold; -fx-text-fill: #3B210F;" />
+                <Label text="Inicia sesión para continuar" style="-fx-font-size: 13px; -fx-text-fill: #777777;" />
+            </VBox>
+
+            <VBox maxWidth="Infinity" spacing="12.0">
+                <HBox fx:id="contenedorRol" alignment="CENTER_LEFT" maxWidth="Infinity" spacing="12.0">
+                    <SVGPath content="M2,2 L14,2 L14,5 L2,5 Z M3,7 L7,7 L7,11 L3,11 Z M9,7 L13,7 L13,11 L9,11 Z M3,13 L7,13 L7,17 L3,17 Z M9,13 L13,13 L13,17 L9,17 Z" scaleX="1.05" scaleY="1.05" style="-fx-fill: #3B210F;" />
+                    <ComboBox fx:id="cmbRol" maxWidth="Infinity" promptText="Seleccione su rol" HBox.hgrow="ALWAYS"
+                              style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 1px 0; -fx-font-size: 15px;" />
+                </HBox>
+
+                <HBox fx:id="contenedorUsuario" alignment="CENTER_LEFT" maxWidth="Infinity" spacing="12.0">
+                    <SVGPath content="M3,14 C2,14 2,13 2,13 C2,9 6,8 8,8 C10,8 14,9 14,13 C14,13 14,14 13,14 Z M8,7 C5.8,7 4,5.2 4,3 C4,0.8 5.8,-1 8,-1 C10.2,-1 12,0.8 12,3 C12,5.2 10.2,7 8,7 Z" scaleX="1.15" scaleY="1.15" style="-fx-fill: #3B210F;" />
+                    <TextField fx:id="txtUsuario" maxWidth="Infinity" onAction="#onIngresar" promptText="Usuario" HBox.hgrow="ALWAYS"
+                               style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 7px 2px; -fx-font-size: 15px; -fx-text-fill: #2B2B2B; -fx-prompt-text-fill: #929292;" />
+                </HBox>
+
+                <HBox fx:id="contenedorContrasena" alignment="CENTER_LEFT" maxWidth="Infinity" spacing="12.0">
+                    <SVGPath content="M4,7 L4,5 C4,2.8 5.8,1 8,1 C10.2,1 12,2.8 12,5 L12,7 L13,7 C14.1,7 15,7.9 15,9 L15,14 C15,15.1 14.1,16 13,16 L3,16 C1.9,16 1,15.1 1,14 L1,9 C1,7.9 1.9,7 3,7 Z M6,7 L10,7 L10,5 C10,3.9 9.1,3 8,3 C6.9,3 6,3.9 6,5 Z" scaleX="1.1" scaleY="1.1" style="-fx-fill: #3B210F;" />
+                    <StackPane HBox.hgrow="ALWAYS">
+                        <PasswordField fx:id="txtContrasena" maxWidth="Infinity" onAction="#onIngresar" promptText="Contraseña"
+                                       style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 7px 2px; -fx-font-size: 15px; -fx-text-fill: #2B2B2B; -fx-prompt-text-fill: #929292;" />
+                        <TextField fx:id="txtContrasenaVisible" managed="false" maxWidth="Infinity" onAction="#onIngresar" promptText="Contraseña" visible="false"
+                                   style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 7px 2px; -fx-font-size: 15px; -fx-text-fill: #2B2B2B; -fx-prompt-text-fill: #929292;" />
+                    </StackPane>
+                    <ToggleButton fx:id="btnMostrarContrasena" mnemonicParsing="false" onAction="#onMostrarContrasena" text="Ver" />
+                </HBox>
+            </VBox>
+
+            <Label fx:id="lblError" managed="false" maxWidth="Infinity" visible="false" wrapText="true" text="Usuario o contraseña incorrectos."
+                   style="-fx-background-color: #FFF0ED; -fx-background-radius: 8px; -fx-padding: 8px 11px; -fx-font-size: 12px; -fx-text-fill: #9C3421;" />
+
+            <StackPane maxWidth="Infinity">
+                <Button fx:id="btnIngresar" defaultButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#onIngresar" text="INGRESAR" />
+                <ProgressIndicator fx:id="progresoLogin" managed="false" maxHeight="22.0" maxWidth="22.0" mouseTransparent="true" progress="-1.0" visible="false"
+                                    style="-fx-progress-color: white;" />
+            </StackPane>
+
+            <Label text="Acceso exclusivo para personal autorizado" style="-fx-font-size: 11px; -fx-text-fill: #8C8C8C;" />
+        </VBox>
+    </HBox>
+</StackPane>

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<!-- Sin encabezado propio (logo y "Recepcionista"): el marco principal ya los pone. -->
+<BorderPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: #F8F6F2;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="untrm.hotel_san_antonio.controlador.ComprobanteController">
+   <center>
+      <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #F8F6F2;" BorderPane.alignment="CENTER">
+         <content>
+            <VBox spacing="20.0">
+               <padding>
+                  <Insets bottom="30.0" left="40.0" right="40.0" top="20.0" />
+               </padding>
+                              <VBox spacing="5.0">
+                  <HBox alignment="CENTER_LEFT">
+                     <Label text="Generar comprobante" textFill="#2b2b2b">
+                        <font>
+                           <Font name="System Bold" size="24.0" />
+                        </font>
+                     </Label>
+                     <Region HBox.hgrow="ALWAYS" />
+                  </HBox>
+                  <Label text="Revisa el cliente y los conceptos de la operación." textFill="#666666" />
+               </VBox>
+               <HBox spacing="20.0">
+                                    <VBox spacing="20.0" HBox.hgrow="ALWAYS">
+                                          <VBox spacing="15.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #E5E5E5; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 20;">
+                        <Label text="Operación de origen" textFill="#3b210f">
+                           <font><Font name="System Bold" size="14.0" /></font>
+                        </Label>
+                        <HBox alignment="BOTTOM_LEFT" spacing="15.0">
+                           <VBox spacing="5.0">
+                              <Label text="Origen" textFill="#2b2b2b" />
+                              <ComboBox fx:id="cmbOrigen" prefWidth="200.0" promptText="Cuenta de habitación" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-border-radius: 3;" />
+                           </VBox>
+                           <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                              <Label fx:id="lblEtiquetaReferencia" text="Referencia" textFill="#2b2b2b" />
+                              <TextField fx:id="txtReferencia" promptText="Código de reserva o N.º de habitación" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-border-radius: 3;" />
+                           </VBox>
+                           <Button fx:id="btnCargarOperacion" onAction="#onCargarOperacion" style="-fx-background-color: white; -fx-border-color: #b8862d; -fx-text-fill: #b8862d; -fx-border-radius: 3;" text="Cargar cuenta" />
+                        </HBox>
+                     </VBox>
+                     <VBox spacing="15.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #E5E5E5; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 20;">
+                        <Label text="Datos del comprobante" textFill="#3b210f">
+                           <font><Font name="System Bold" size="14.0" /></font>
+                        </Label>
+                        <HBox spacing="15.0">
+                           <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                              <Label text="Tipo" textFill="#2b2b2b" />
+                              <ComboBox fx:id="cmbTipoComprobante" maxWidth="1.7976931348623157E308" promptText="Boleta" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-border-radius: 3;" />
+                           </VBox>
+                           <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                              <Label text="Número" textFill="#2b2b2b" />
+                              <TextField fx:id="txtNumero" editable="false" promptText="Se asigna al generar" style="-fx-background-color: #F3EEE7; -fx-border-color: #E5E5E5; -fx-border-radius: 3;" />
+                           </VBox>
+                           <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                              <Label text="Fecha" textFill="#2b2b2b" />
+                              <DatePicker fx:id="dpFecha" disable="true" maxWidth="1.7976931348623157E308" style="-fx-background-color: #F3EEE7; -fx-border-color: #E5E5E5; -fx-border-radius: 3;" />
+                           </VBox>
+                        </HBox>
+                     </VBox>
+                     <VBox spacing="15.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #E5E5E5; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 20;">
+                        <Label text="Datos del cliente" textFill="#3b210f">
+                           <font><Font name="System Bold" size="14.0" /></font>
+                        </Label>
+                        <HBox alignment="BOTTOM_LEFT" spacing="15.0">
+                           <VBox spacing="5.0">
+                              <Label text="Documento" textFill="#2b2b2b" />
+                              <ComboBox fx:id="cmbTipoDocumento" prefWidth="120.0" promptText="DNI" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-border-radius: 3;" />
+                           </VBox>
+                           <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                              <Label text="N.º de documento" textFill="#2b2b2b" />
+                              <TextField fx:id="txtDocumento" promptText="00000000" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-border-radius: 3;" />
+                           </VBox>
+                           <Button fx:id="btnBuscarCliente" onAction="#onBuscarCliente" style="-fx-background-color: white; -fx-border-color: #b8862d; -fx-text-fill: #b8862d; -fx-border-radius: 3;" text="Buscar" />
+                        </HBox>
+                        <VBox spacing="5.0">
+                           <Label text="Nombres o razón social" textFill="#2b2b2b" />
+                           <TextField fx:id="txtCliente" promptText="Nombre del cliente externo" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-border-radius: 3;" />
+                        </VBox>
+                        <VBox spacing="5.0">
+                           <Label text="Dirección" textFill="#2b2b2b" />
+                           <TextField fx:id="txtDireccion" promptText="Dirección (Requerido para Facturas)" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-border-radius: 3;" />
+                        </VBox>
+                     </VBox>
+                     <VBox spacing="15.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #E5E5E5; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 20;">
+                        <Label text="Detalle de la operación" textFill="#3b210f">
+                           <font><Font name="System Bold" size="14.0" /></font>
+                        </Label>
+                        <TableView fx:id="tblDetalle" prefHeight="200.0" style="-fx-border-color: #E5E5E5;">
+                          <columns>
+                            <TableColumn fx:id="colConcepto" prefWidth="300.0" text="Concepto" />
+                            <TableColumn fx:id="colCantidad" prefWidth="100.0" text="Cantidad" />
+                            <TableColumn fx:id="colPrecio" prefWidth="120.0" text="Precio" />
+                            <TableColumn fx:id="colImporte" prefWidth="120.0" text="Importe" />
+                          </columns>
+                          <placeholder><Label text="Carga una operación para ver su detalle." textFill="#999999" /></placeholder>
+                        </TableView>
+                     </VBox>
+
+                  </VBox>
+                  <VBox prefWidth="350.0" spacing="20.0">
+                                          <VBox spacing="10.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #E5E5E5; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 20;">
+                        <Label text="Resumen del comprobante" textFill="#3b210f">
+                           <font><Font name="System Bold" size="14.0" /></font>
+                        </Label>
+                        <Label text="Total del comprobante" textFill="#666666" />
+                        <Label fx:id="lblTotal" text="S/ 0.00" textFill="#2b2b2b">
+                           <font>
+                              <Font name="System Bold" size="32.0" />
+                           </font>
+                        </Label>
+                     </VBox>
+                     <VBox spacing="15.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #E5E5E5; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 20;">
+                        <HBox alignment="CENTER_LEFT">
+                           <Label text="Estado de la cuenta" textFill="#3b210f">
+                              <font><Font name="System Bold" size="14.0" /></font>
+                           </Label>
+                           <Region HBox.hgrow="ALWAYS" />
+                           <Label fx:id="lblEstadoCuenta" style="-fx-background-color: #F3EEE7; -fx-padding: 3 8; -fx-background-radius: 3;" text="Sin operación cargada" textFill="#b8862d" />
+                        </HBox>
+                        <HBox>
+                           <Label text="Pagos registrados" textFill="#666666" />
+                           <Region HBox.hgrow="ALWAYS" />
+                           <Label fx:id="lblPagado" text="S/ 0.00" textFill="#2b2b2b">
+                              <font><Font name="System Bold" size="14.0" /></font>
+                           </Label>
+                        </HBox>
+                        <HBox>
+                           <Label text="Saldo pendiente" textFill="#666666" />
+                           <Region HBox.hgrow="ALWAYS" />
+                           <Label fx:id="lblSaldo" text="S/ 0.00" textFill="#b8862d">
+                              <font><Font name="System Bold" size="18.0" /></font>
+                           </Label>
+                        </HBox>
+                     </VBox>
+                     <VBox spacing="15.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #E5E5E5; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 20;">
+                        <Label text="Comprobante" textFill="#3b210f">
+                           <font><Font name="System Bold" size="14.0" /></font>
+                        </Label>
+                        <Label text="Revisa la vista previa antes de generar." textFill="#666666" />
+                        <Button fx:id="btnVistaPrevia" onAction="#onVistaPrevia" maxWidth="1.7976931348623157E308" style="-fx-background-color: white; -fx-border-color: #b8862d; -fx-text-fill: #b8862d; -fx-border-radius: 3;" text="Vista previa" />
+                        <Button fx:id="btnImprimir" onAction="#onImprimir" disable="true" maxWidth="1.7976931348623157E308" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-text-fill: #999999; -fx-border-radius: 3;" text="Imprimir" />
+                     </VBox>
+                     
+                  </VBox>
+               </HBox>
+
+            </VBox>
+         </content>
+      </ScrollPane>
+   </center>
+      <bottom>
+      <HBox alignment="CENTER" prefHeight="70.0" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-border-width: 1 0 0 0;" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="btnCancelar" onAction="#onCancelar" style="-fx-background-color: white; -fx-border-color: #2b2b2b; -fx-text-fill: #2b2b2b; -fx-border-radius: 3; -fx-padding: 10 20;" text="Cancelar" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="btnGenerar" onAction="#onGenerar" style="-fx-background-color: #b8862d; -fx-text-fill: white; -fx-background-radius: 3; -fx-padding: 10 20;" text="Generar comprobante">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Button>
+         </children>
+         <padding>
+            <Insets left="40.0" right="40.0" />
+         </padding>
+      </HBox>
+   </bottom>
+</BorderPane>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<!--
+    Tarjeta de una habitacion. Todo el estilo es inline (sin archivo .css): el color y el borde
+    de aqui son solo la muestra "Disponible" para verla en Scene Builder; el controlador
+    (TarjetaHabitacionController) los reemplaza segun el estado real y aplica el resaltado al pasar el mouse.
+-->
+<VBox fx:id="raiz" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="untrm.hotel_san_antonio.controlador.TarjetaHabitacionController"
+      spacing="5" onMouseClicked="#onClic"
+      style="-fx-padding: 14px 16px; -fx-min-width: 180px; -fx-pref-width: 180px; -fx-cursor: hand; -fx-background-color: #DCFCE7; -fx-border-color: #22C55E; -fx-border-width: 2px; -fx-background-radius: 8px; -fx-border-radius: 8px;">
+
+    <Label fx:id="lblNumero" text="101" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2B2B2B;"/>
+    <Label fx:id="lblTipo" text="Simple · 1 persona" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
+    <HBox alignment="CENTER_LEFT" spacing="7">
+        <Circle fx:id="puntoEstado" radius="5" fill="#22C55E"/>
+        <Label fx:id="lblEstado" text="Disponible" style="-fx-font-weight: bold; -fx-text-fill: #2B2B2B;"/>
+    </HBox>
+    <Label fx:id="lblHuesped" text="Nombre del huésped" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
+</VBox>

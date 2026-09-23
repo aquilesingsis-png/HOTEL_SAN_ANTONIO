@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--
+    Carrito de la tiendita (ventana emergente). Sin archivo .css: todo el estilo es inline.
+    Lo que cambia al pasar el mouse (Boleta/Factura, Efectivo/Tarjeta/Yape/Transferencia, los
+    botones "Buscar" y "Emitir comprobante") y el color de la fila seleccionada en las tablas
+    lo resuelve CarritoTiendaController con setStyle(), porque eso no se puede fijar de
+    antemano en el FXML.
+-->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+ fx:controller="untrm.hotel_san_antonio.controlador.CarritoTiendaController"
+ prefWidth="1280" prefHeight="760" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI';">
+ <fx:define>
+   <ToggleGroup fx:id="tipoComprobante"/>
+   <ToggleGroup fx:id="formaPago"/>
+ </fx:define>
+ <top>
+  <HBox alignment="CENTER_LEFT" spacing="14" style="-fx-background-color: white; -fx-border-color: #E7E1D8; -fx-border-width: 0 0 1 0;">
+   <padding><Insets top="13" right="20" bottom="13" left="20"/></padding>
+   <Label text="Carrito"/>
+   <VBox spacing="1">
+    <Label text="Carrito de venta" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #151515;"/>
+    <Label text="Registra los productos y emite el comprobante" style="-fx-font-size: 12px; -fx-text-fill: #53647A;"/>
+   </VBox>
+   <Region HBox.hgrow="ALWAYS"/>
+   <Button text="X" onAction="#onCerrar" style="-fx-background-color: transparent;"/>
+  </HBox>
+ </top>
+ <center>
+  <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED"
+              style="-fx-background-color: transparent; -fx-background: #F8F6F2; -fx-padding: 0;">
+   <content>
+    <HBox spacing="8" minWidth="1180" minHeight="650" style="-fx-background-color: #F8F6F2;">
+     <padding><Insets top="8" right="8" bottom="8" left="8"/></padding>
+
+     <VBox spacing="10" prefWidth="310" minWidth="285"
+           style="-fx-background-color: white; -fx-background-radius: 7; -fx-border-color: #E6E2DC; -fx-border-radius: 7; -fx-padding: 13;">
+      <Label text="Tipo de comprobante" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #171717;"/>
+      <HBox spacing="8">
+       <ToggleButton fx:id="btnBoleta" text="Boleta" selected="true" toggleGroup="$tipoComprobante" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+       <ToggleButton fx:id="btnFactura" text="Factura" toggleGroup="$tipoComprobante" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+      </HBox>
+      <Label fx:id="lblDatosCliente" text="Datos del cliente (Boleta)" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 6 0 0 0;"/>
+      <Label fx:id="lblEtiquetaDocumento" text="DNI" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <HBox spacing="0">
+       <TextField fx:id="txtBuscarDni" promptText="Ingrese DNI" HBox.hgrow="ALWAYS"
+                  style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6 0 0 6; -fx-background-radius: 6 0 0 6; -fx-min-height: 34;"/>
+       <Button fx:id="btnBuscarCliente" text="🔍" onAction="#onBuscarCliente"
+               style="-fx-background-color: #8B571C; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0 6 6 0; -fx-min-width: 46; -fx-min-height: 34;"/>
+      </HBox>
+      <Label fx:id="lblEtiquetaNombre" text="Nombre completo" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <TextField fx:id="txtNombreCliente" promptText="Nombres y apellidos"
+                 style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
+      <Label text="Dirección" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <TextField fx:id="txtDireccion" promptText="Dirección del cliente"
+                 style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
+      <Label text="Teléfono" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <TextField fx:id="txtTelefono" promptText="Teléfono"
+                 style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
+      <Separator/>
+      <Label text="Datos adicionales" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #171717;"/>
+      <Label text="Habitación" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <ComboBox fx:id="cmbHabitacion" maxWidth="Infinity" promptText="Seleccione habitación"
+                style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
+      <Label text="Observaciones" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <TextArea fx:id="txtObservaciones" promptText="Ingrese observaciones..." prefRowCount="3" wrapText="true"
+                style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+     </VBox>
+
+     <VBox spacing="9" HBox.hgrow="ALWAYS" minWidth="480"
+           style="-fx-background-color: white; -fx-background-radius: 7; -fx-border-color: #E6E2DC; -fx-border-radius: 7; -fx-padding: 13;">
+      <Label text="BUSCAR PRODUCTOS" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #171717;"/>
+      <HBox spacing="0">
+       <TextField fx:id="txtBuscar" promptText="Buscar producto por nombre o marca..." HBox.hgrow="ALWAYS"
+                  style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6 0 0 6; -fx-background-radius: 6 0 0 6; -fx-min-height: 34;"/>
+       <Button fx:id="btnBuscarProducto" text="🔍" onAction="#onBuscarProducto"
+               style="-fx-background-color: #8B571C; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0 6 6 0; -fx-min-width: 46; -fx-min-height: 34;"/>
+      </HBox>
+      <Label text="FILTRAR POR PRODUCTO" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222; -fx-padding: 3 0 0 0;"/>
+      <ComboBox fx:id="cmbCategoria" maxWidth="Infinity" promptText="Todas las categorías"
+                style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
+      <TableView fx:id="tablaProductos" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-border-color: transparent;">
+       <columns>
+        <TableColumn fx:id="colCodigo" text="Código" prefWidth="62"/>
+        <TableColumn fx:id="colProducto" text="Producto" prefWidth="155"/>
+        <TableColumn fx:id="colCategoria" text="Categoría" prefWidth="110"/>
+        <TableColumn fx:id="colPrecio" text="Precio" prefWidth="78"/>
+        <TableColumn fx:id="colStock" text="Stock" prefWidth="60"/>
+        <TableColumn fx:id="colAcciones" text="Acciones" prefWidth="92"/>
+       </columns>
+       <placeholder><Label text="No se encontraron productos."/></placeholder>
+      </TableView>
+      <HBox alignment="CENTER_LEFT">
+       <Label fx:id="lblMostrando" text="Mostrando 0 productos" style="-fx-text-fill: #657187; -fx-font-size: 12px;"/>
+       <Region HBox.hgrow="ALWAYS"/>
+       <Button text="‹" disable="true" style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+       <Button text="1" style="-fx-background-color: #8B571C; -fx-text-fill: white; -fx-background-radius: 5;"/>
+       <Button text="›" disable="true" style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+      </HBox>
+     </VBox>
+
+     <VBox spacing="8" prefWidth="405" minWidth="370"
+           style="-fx-background-color: white; -fx-background-radius: 7; -fx-border-color: #E6E2DC; -fx-border-radius: 7; -fx-padding: 13;">
+      <HBox alignment="CENTER_LEFT">
+       <Label text="Productos en el carrito" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #171717;"/>
+       <Region HBox.hgrow="ALWAYS"/>
+       <Button text="Vaciar carrito" onAction="#onVaciarCarrito"
+               style="-fx-background-color: #FDEBEC; -fx-text-fill: #E02020; -fx-background-radius: 6;"/>
+      </HBox>
+      <TableView fx:id="tablaCarrito" prefHeight="215" style="-fx-background-color: white; -fx-border-color: transparent;">
+       <columns>
+        <TableColumn fx:id="colCarritoProducto" text="Producto" prefWidth="135"/>
+        <TableColumn fx:id="colCantidad" text="Cant." prefWidth="52"/>
+        <TableColumn fx:id="colCarritoPrecio" text="P. Unit." prefWidth="70"/>
+        <TableColumn fx:id="colSubtotal" text="Subtotal" prefWidth="75"/>
+       </columns>
+       <placeholder><VBox alignment="CENTER" spacing="8"><Label text="Carrito"/><Label text="El carrito está vacío." style="-fx-text-fill: #657187; -fx-font-size: 12px;"/></VBox></placeholder>
+      </TableView>
+      <HBox alignment="CENTER_RIGHT" spacing="6">
+       <Button onAction="#onRestarCantidad" style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+       <Button onAction="#onSumarCantidad" style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+       <Button text="Quitar" onAction="#onQuitarProducto" style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+      </HBox>
+      <VBox spacing="6" style="-fx-background-color: #FFF9F1; -fx-border-color: #EADFD1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10;">
+       <HBox><Label text="Subtotal"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="lblSubtotal" text="S/ 0.00" style="-fx-text-fill: #003B7A; -fx-font-weight: bold;"/></HBox>
+       <HBox><Label text="IGV (18%)"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="lblIgv" text="S/ 0.00" style="-fx-text-fill: #003B7A; -fx-font-weight: bold;"/></HBox>
+       <Separator/>
+       <HBox alignment="CENTER_LEFT"><Label text="Total" style="-fx-font-size: 20px; -fx-font-weight: bold;"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="lblTotal" text="S/ 0.00" style="-fx-font-size: 20px; -fx-font-weight: bold;"/></HBox>
+      </VBox>
+      <Label text="Forma de pago" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #171717;"/>
+      <HBox spacing="6">
+       <ToggleButton fx:id="btnEfectivo" text="Efectivo" selected="true" toggleGroup="$formaPago" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+       <ToggleButton fx:id="btnTarjeta" text="Tarjeta" toggleGroup="$formaPago" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+       <ToggleButton fx:id="btnYape" text="Yape/Plin" toggleGroup="$formaPago" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+       <ToggleButton fx:id="btnTransferencia" text="Transferencia" toggleGroup="$formaPago" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+      </HBox>
+      <Label text="Monto recibido" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <TextField fx:id="txtMontoRecibido" promptText="S/ 0.00"
+                 style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
+      <HBox alignment="CENTER_LEFT" style="-fx-background-color: #EAF8ED; -fx-background-radius: 6; -fx-padding: 12;">
+       <Label text="Vuelto" style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
+       <Region HBox.hgrow="ALWAYS"/>
+       <Label fx:id="lblVuelto" text="S/ 0.00" style="-fx-font-size: 21px; -fx-font-weight: bold; -fx-text-fill: #009B28;"/>
+      </HBox>
+      <Region VBox.vgrow="ALWAYS"/>
+      <HBox spacing="10">
+       <Button text="Cancelar" onAction="#onCancelar" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+               style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 44; -fx-font-weight: bold;"/>
+       <Button fx:id="btnEmitir" text="Emitir comprobante" onAction="#onConfirmarVenta" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+               style="-fx-background-color: #8B571C; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-min-height: 44;"/>
+      </HBox>
+     </VBox>
+    </HBox>
+   </content>
+  </ScrollPane>
+ </center>
+</BorderPane>

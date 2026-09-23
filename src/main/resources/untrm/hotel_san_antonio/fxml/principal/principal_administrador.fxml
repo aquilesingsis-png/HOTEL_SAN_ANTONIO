@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+    Marco principal para el ADMINISTRADOR: acceso a todos los modulos. Sin archivo .css (ver
+    principal_recepcionista.fxml para la explicacion). Igual que el del recepcionista (mismo
+    controlador), pero con los modulos de administracion: Usuarios, Reportes y estadisticas,
+    Almacen, y Caja completa. No incluye Huespedes.
+    Cada boton guarda en "userData" la ruta del FXML que abre; si no existe, se muestra "en construccion".
+-->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.PrincipalController">
+
+    <fx:define>
+        <ToggleGroup fx:id="grupoMenu"/>
+    </fx:define>
+
+    <!-- ============ MENU LATERAL ============ -->
+    <left>
+        <VBox spacing="6" style="-fx-background-color: #3B210F; -fx-min-width: 240px; -fx-pref-width: 240px; -fx-max-width: 240px;">
+            <padding><Insets top="22" right="14" bottom="18" left="14"/></padding>
+
+            <VBox spacing="2">
+                <padding><Insets bottom="14" left="8"/></padding>
+                <Label text="Hotel San Antonio" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+                <Label text="Gestión hotelera · Bagua" style="-fx-text-fill: #E6C77A; -fx-font-size: 12px;"/>
+            </VBox>
+
+            <ScrollPane fx:id="scrollMenu" fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS"
+                        style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;">
+                <VBox fx:id="barraLateral" spacing="6">
+
+                    <Label text="OPERACIÓN" style="-fx-text-fill: #D4A84C; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 6px 0 0 8px;"/>
+                    <ToggleButton fx:id="btnInicio" text="Inicio" toggleGroup="$grupoMenu" selected="true"
+                                  userData="/untrm/hotel_san_antonio/fxml/dashboard/dashboard_2.fxml" onAction="#onMenu"/>
+                    <ToggleButton text="Habitaciones" toggleGroup="$grupoMenu"
+                                  userData="/untrm/hotel_san_antonio/fxml/habitaciones/habitaciones.fxml" onAction="#onMenu"/>
+
+                    <Button text="Reservas  ▸" onAction="#onGrupo"/>
+                    <VBox userData="Reservas" visible="false" managed="false" spacing="2">
+                        <ToggleButton text="Nueva reserva" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Nueva_reserva.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Reserva programada" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Reservas_programadas.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Calendario de ocupación" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Calendario_ocupacion.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Confirmar reserva" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Confirmar_reserva.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Cancelar reserva" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Cancelar_reserva.fxml" onAction="#onMenu"/>
+                    </VBox>
+
+                    <ToggleButton text="Comprobantes" toggleGroup="$grupoMenu"
+                                  userData="/untrm/hotel_san_antonio/fxml/comprobante/comprobante.fxml" onAction="#onMenu"/>
+
+                    <Button text="Caja y pagos  ▸" onAction="#onGrupo"/>
+                    <VBox userData="Caja y pagos" visible="false" managed="false" spacing="2">
+                        <ToggleButton text="Registrar pagos" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/caja/registrar_pagos.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Movimientos" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/caja/movimientos.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Totales del día" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/caja/totales_dia.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Cierre de caja" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/caja/cierre_caja.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Arqueo" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/caja/arqueo.fxml" onAction="#onMenu"/>
+                    </VBox>
+
+                    <Label text="ADMINISTRACIÓN" style="-fx-text-fill: #D4A84C; -fx-font-size: 11px; -fx-font-weight: bold;">
+                        <padding><Insets top="14" left="8"/></padding>
+                    </Label>
+
+                    <Button text="Usuarios  ▸" onAction="#onGrupo"/>
+                    <VBox userData="Usuarios" visible="false" managed="false" spacing="2">
+                        <ToggleButton text="Crear usuario" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/usuarios/crear_usuario.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Editar / Desactivar" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/usuarios/editar_usuario.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Asignar rol" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/usuarios/asignar_rol.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Ver historial" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/usuarios/historial_usuarios.fxml" onAction="#onMenu"/>
+                    </VBox>
+
+                    <Button text="Reportes y estadísticas  ▸" onAction="#onGrupo"/>
+                    <VBox userData="Reportes y estadísticas" visible="false" managed="false" spacing="2">
+                        <ToggleButton text="Ocupación" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/reportes/ocupacion.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Ventas" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/reportes/ventas.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Ingresos" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/reportes/ingresos.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Reportes personalizados" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/reportes/reportes_personalizados.fxml" onAction="#onMenu"/>
+                    </VBox>
+
+                    <Button text="Almacén  ▸" onAction="#onGrupo"/>
+                    <VBox userData="Almacén" visible="false" managed="false" spacing="2">
+                        <ToggleButton text="Productos" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/almacen/productos.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Categorías" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/almacen/categorias.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Stock" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/almacen/stock.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Precios" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/almacen/precios.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Alertas de stock bajo" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/almacen/alertas_stock.fxml" onAction="#onMenu"/>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+
+            <Region style="-fx-background-color: #5A3516; -fx-min-height: 1px; -fx-pref-height: 1px; -fx-max-height: 1px;"/>
+            <VBox spacing="2">
+                <padding><Insets top="10" bottom="8" left="8"/></padding>
+                <Label fx:id="lblUsuario" text="Ana Torres" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Label fx:id="lblRol" text="Administrador" style="-fx-text-fill: #E6C77A; -fx-font-size: 12px;"/>
+            </VBox>
+            <Button text="Cerrar sesión" onAction="#onCerrarSesion" maxWidth="Infinity"
+                    style="-fx-background-color: transparent; -fx-text-fill: #F3ECDD; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 7px 14px; -fx-cursor: hand;"/>
+        </VBox>
+    </left>
+
+    <!-- ============ ENCABEZADO + CONTENIDO (a la derecha del menu, de arriba a abajo) ============ -->
+    <center>
+        <BorderPane>
+            <top>
+                <HBox alignment="CENTER_LEFT" spacing="14" style="-fx-background-color: #3B210F;">
+                    <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
+                    <VBox spacing="1">
+                        <Label fx:id="lblTitulo" text="Inicio" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                        <Label fx:id="lblFecha" text="domingo, 20 de septiembre de 2026" style="-fx-font-size: 12px; -fx-text-fill: #E6C77A;"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="🛒  Carrito" onAction="#onCarrito"
+                            style="-fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
+                </HBox>
+            </top>
+
+            <!-- aqui se abre cada pantalla -->
+            <center>
+                <StackPane fx:id="contenido"/>
+            </center>
+        </BorderPane>
+    </center>
+</BorderPane>

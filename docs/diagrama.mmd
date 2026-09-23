@@ -1,11 +1,14 @@
-%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#F3E9DD','primaryBorderColor':'#6B3F22','primaryTextColor':'#2B1D12','lineColor':'#6B3F22','tertiaryColor':'#F3E9DD','fontFamily':'IBM Plex Mono, monospace','fontSize':'13px'}}}%%
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#F3ECDD','primaryBorderColor':'#3B210F','primaryTextColor':'#2B2B2B','lineColor':'#3B210F','tertiaryColor':'#F3ECDD','fontFamily':'Arial, sans-serif','fontSize':'13px'}}}%%
 erDiagram
     TIPO_HABITACION ||--o{ HABITACION : clasifica
     HABITACION ||--o{ RESERVA : aloja
     HUESPED ||--o{ RESERVA : realiza
     USUARIO ||--o{ RESERVA : registra
+    EMPRESA |o--o{ RESERVA : factura_a
     RESERVA ||--o{ PAGO : recibe
+    USUARIO ||--o{ PAGO : cobra
     USUARIO ||--o{ VENTA_TIENDA : vende
+    USUARIO ||--o{ COMPROBANTE : emite
     HUESPED |o--o{ VENTA_TIENDA : compra
     HABITACION |o--o{ VENTA_TIENDA : "carga_a_cuenta"
     VENTA_TIENDA ||--o{ DETALLE_VENTA : contiene
@@ -16,13 +19,13 @@ erDiagram
 
     TIPO_HABITACION {
         int id_tipo PK
-        string nombre
+        string nombre UK
         int capacidad
         decimal precio_base
     }
     HABITACION {
         int id_habitacion PK
-        string numero
+        string numero UK
         int id_tipo FK
         int piso
         string estado
@@ -35,31 +38,43 @@ erDiagram
         string apellidos
         string pais_procedencia
         string telefono
+        string email
+        datetime fecha_registro
     }
     USUARIO {
         int id_usuario PK
         string nombre
         string apellido
-        string usuario
+        string usuario UK
         string contrasena_hash
         string rol
         boolean activo
+        datetime fecha_creacion
     }
     RESERVA {
         int id_reserva PK
         int id_huesped FK
         int id_habitacion FK
         int id_usuario FK
+        datetime fecha_reserva
         date fecha_checkin
         date fecha_checkout
         decimal adelanto
         decimal monto_total
         string estado
         string canal
+        int id_empresa FK
+    }
+    EMPRESA {
+        int id_empresa PK
+        string ruc UK
+        string razon_social
+        string direccion_fiscal
     }
     PAGO {
         int id_pago PK
         int id_reserva FK
+        int id_usuario FK
         decimal monto
         string metodo_pago
         string tipo_pago
@@ -67,16 +82,26 @@ erDiagram
     }
     CATEGORIA {
         int id_categoria PK
-        string nombre
+        string nombre UK
     }
     PRODUCTO {
         int id_producto PK
-        string codigo_barra
+        string codigo_barra UK
         string nombre
         string marca
         int id_categoria FK
         decimal precio
         int stock
+        boolean activo
+    }
+    COMPROBANTE {
+        int id_comprobante PK
+        int id_reserva FK
+        int id_usuario FK
+        string tipo
+        string numero UK
+        datetime fecha_emision
+        decimal monto_total
     }
     VENTA_TIENDA {
         int id_venta PK
@@ -95,12 +120,4 @@ erDiagram
         int cantidad
         decimal precio_unitario
         decimal subtotal
-    }
-    COMPROBANTE {
-        int id_comprobante PK
-        int id_reserva FK
-        string tipo
-        string numero
-        date fecha_emision
-        decimal monto_total
     }

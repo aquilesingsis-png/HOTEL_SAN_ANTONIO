@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+    Solo el contenido del modulo: el menu lateral y el encabezado los pone el marco general.
+    El piso incluido es de muestra (para Scene Builder): el controlador lo reemplaza
+    con un piso por cada piso real de la base de datos.
+-->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="untrm.hotel_san_antonio.controlador.HabitacionesController"
+      spacing="18">
+
+    <padding>
+        <Insets top="18" right="28" bottom="24" left="28"/>
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Region HBox.hgrow="ALWAYS"/>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Label text="Filtrar por:" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
+            <ComboBox fx:id="cmbEstado" promptText="Estado" prefWidth="150" onAction="#onFiltrarEstado">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Todas"/>
+                        <String fx:value="Disponible"/>
+                        <String fx:value="Ocupada"/>
+                        <String fx:value="Limpieza"/>
+                        <String fx:value="Mantenimiento"/>
+                    </FXCollections>
+                </items>
+            </ComboBox>
+            <ComboBox fx:id="cmbTipo" promptText="Tipo" prefWidth="150" onAction="#onFiltrarTipo">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Todos"/>
+                        <String fx:value="Simple"/>
+                        <String fx:value="Ejecutiva"/>
+                        <String fx:value="Doble"/>
+                        <String fx:value="Matrimonial"/>
+                        <String fx:value="Suite"/>
+                        <String fx:value="King"/>
+                    </FXCollections>
+                </items>
+            </ComboBox>
+        </HBox>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;">
+        <VBox fx:id="contenedorPisos" spacing="26">
+            <fx:include source="piso_seccion.fxml"/>
+        </VBox>
+    </ScrollPane>
+</VBox>
