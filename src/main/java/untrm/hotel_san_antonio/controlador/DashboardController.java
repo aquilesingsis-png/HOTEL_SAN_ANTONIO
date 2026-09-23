@@ -36,8 +36,11 @@ public class DashboardController {
 
     @FXML
     private void onAbrirCarrito() {
-        // TODO: reemplazar por Navegacion.abrirModal(".../fxml/carrito_tienda.fxml", "Carrito") cuando exista
-        Alertas.mostrarInfo("Tiendita", "Carrito flotante en construcción por el equipo.");
+        try {
+            Navegacion.abrirModal("/untrm/hotel_san_antonio/fxml/carrito_tienda.fxml", "Tiendita / Carrito");
+        } catch (IOException e) {
+            Alertas.mostrarError("Tiendita", "No se pudo abrir el carrito.\n\n" + e.getMessage());
+        }
     }
 
     @FXML
