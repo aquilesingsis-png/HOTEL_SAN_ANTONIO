@@ -1,7 +1,10 @@
 -- =====================================================================
 -- Hotel San Antonio — Sistema de Gestion Hotelera y Tiendita
 -- Taller de Programacion II — Trabajo de Primera Unidad
--- Script DDL + DML (MySQL / MariaDB — probado para phpMyAdmin)
+-- Script DDL + DML unico (MySQL / MariaDB — probado para phpMyAdmin)
+--
+-- Ejecutar este archivo completo sobre una BD nueva: crea la base de
+-- datos, las 12 tablas, los indices y carga los datos de prueba.
 -- =====================================================================
 
 CREATE DATABASE IF NOT EXISTS hotel_san_antonio
@@ -26,11 +29,12 @@ CREATE TABLE tipo_habitacion (
 -- HABITACION
 -- ---------------------------------------------------------------------
 CREATE TABLE habitacion (
-    id_habitacion INT AUTO_INCREMENT PRIMARY KEY,
-    numero        VARCHAR(10) NOT NULL UNIQUE,
-    id_tipo       INT NOT NULL,
-    piso          TINYINT NOT NULL,
-    estado        ENUM('DISPONIBLE','OCUPADA','LIMPIEZA','MANTENIMIENTO') NOT NULL DEFAULT 'DISPONIBLE',
+    id_habitacion        INT AUTO_INCREMENT PRIMARY KEY,
+    numero               VARCHAR(10) NOT NULL UNIQUE,
+    id_tipo              INT NOT NULL,
+    piso                 TINYINT NOT NULL,
+    estado               ENUM('DISPONIBLE','OCUPADA','LIMPIEZA','MANTENIMIENTO') NOT NULL DEFAULT 'DISPONIBLE',
+    motivo_mantenimiento VARCHAR(200) NULL,
     CONSTRAINT fk_habitacion_tipo FOREIGN KEY (id_tipo) REFERENCES tipo_habitacion(id_tipo)
 );
 
@@ -79,18 +83,22 @@ CREATE TABLE empresa (
 -- RESERVA
 -- ---------------------------------------------------------------------
 CREATE TABLE reserva (
-    id_reserva      INT AUTO_INCREMENT PRIMARY KEY,
-    id_huesped      INT NOT NULL,
-    id_habitacion   INT NOT NULL,
-    id_usuario      INT NOT NULL,
-    fecha_reserva   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    fecha_checkin   DATE NOT NULL,
-    fecha_checkout  DATE NOT NULL,
-    adelanto        DECIMAL(8,2) NOT NULL DEFAULT 0,
-    monto_total     DECIMAL(8,2) NOT NULL,
-    estado          ENUM('PENDIENTE','CONFIRMADA','CHECKIN','FINALIZADA','CANCELADA') NOT NULL DEFAULT 'PENDIENTE',
-    canal           ENUM('TELEFONO','WHATSAPP','BOOKING','PRESENCIAL') NOT NULL,
-    id_empresa      INT NULL,
+    id_reserva          INT AUTO_INCREMENT PRIMARY KEY,
+    id_huesped          INT NOT NULL,
+    id_habitacion       INT NOT NULL,
+    id_usuario          INT NOT NULL,
+    fecha_reserva       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_checkin       DATE NOT NULL,
+    fecha_checkout      DATE NOT NULL,
+    num_huespedes       INT NOT NULL DEFAULT 1,
+    hora_checkin        TIME NULL,
+    adelanto            DECIMAL(8,2) NOT NULL DEFAULT 0,
+    monto_total         DECIMAL(8,2) NOT NULL,
+    estado              ENUM('PENDIENTE','CONFIRMADA','CHECKIN','FINALIZADA','CANCELADA') NOT NULL DEFAULT 'PENDIENTE',
+    canal               ENUM('TELEFONO','WHATSAPP','BOOKING','PRESENCIAL') NOT NULL,
+    id_empresa          INT NULL,
+    motivo_cancelacion  VARCHAR(60)  NULL,
+    detalle_cancelacion VARCHAR(500) NULL,
     CONSTRAINT fk_reserva_huesped    FOREIGN KEY (id_huesped)    REFERENCES huesped(id_huesped),
     CONSTRAINT fk_reserva_habitacion FOREIGN KEY (id_habitacion) REFERENCES habitacion(id_habitacion),
     CONSTRAINT fk_reserva_usuario    FOREIGN KEY (id_usuario)    REFERENCES usuario(id_usuario),
