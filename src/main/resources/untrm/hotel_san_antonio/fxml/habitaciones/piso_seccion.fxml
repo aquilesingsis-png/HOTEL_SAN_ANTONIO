@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
@@ -8,20 +7,15 @@
 
 <!--
     Un piso: titulo + tarjetas de sus habitaciones. La tarjeta incluida es de muestra
-    (para verla en Scene Builder); el controlador la reemplaza con las reales.
+    (para verla en Scene Builder); el controlador la reemplaza con las reales. Sin archivo .css.
 -->
 <VBox fx:id="raiz" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="untrm.hotel_san_antonio.controlador.PisoSeccionController"
       spacing="10">
 
-    <stylesheets>
-        <URL value="@../../css/estilos.css"/>
-        <URL value="@../../css/habitaciones.css"/>
-    </stylesheets>
-
     <HBox alignment="CENTER_LEFT" spacing="10">
-        <Label fx:id="lblTitulo" text="Piso 1" styleClass="titulo-piso"/>
-        <Label fx:id="lblCantidad" text="8 habitaciones" styleClass="texto-secundario"/>
+        <Label fx:id="lblTitulo" text="Piso 1" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+        <Label fx:id="lblCantidad" text="8 habitaciones" style="-fx-text-fill: #777777;"/>
     </HBox>
 
     <FlowPane fx:id="tarjetas" hgap="14" vgap="14">

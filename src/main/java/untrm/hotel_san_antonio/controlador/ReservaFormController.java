@@ -91,6 +91,7 @@ public class ReservaFormController {
 
     @FXML
     public void initialize() {
+        untrm.hotel_san_antonio.util.EstiloBoton.aplicarHoverPrimario(btnGuardar);
         cmbTipoDoc.getItems().addAll(TIPOS_DOC.keySet());
         cmbTipoDoc.setValue("DNI");
         cmbCanal.getItems().addAll(CANALES.keySet());

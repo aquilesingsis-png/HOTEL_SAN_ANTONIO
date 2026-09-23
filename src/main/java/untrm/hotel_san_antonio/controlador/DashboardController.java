@@ -2,6 +2,7 @@ package untrm.hotel_san_antonio.controlador;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.Navegacion;
 import untrm.hotel_san_antonio.util.SesionActual;
@@ -10,13 +11,25 @@ import java.io.IOException;
 
 public class DashboardController {
 
+    private static final String TARJETA = "-fx-background-color: white; -fx-background-radius: 8px; "
+            + "-fx-border-color: #E5E5E5; -fx-border-radius: 8px; -fx-padding: 16px; -fx-cursor: hand;";
+    private static final String TARJETA_HOVER = "-fx-background-color: white; -fx-background-radius: 8px; "
+            + "-fx-border-color: #E6C77A; -fx-border-radius: 8px; -fx-padding: 16px; -fx-cursor: hand;";
+
     @FXML private Label lblUsuarioActual;
+    @FXML private VBox tarjetaHabitaciones;
+    @FXML private VBox tarjetaReservas;
 
     @FXML
     public void initialize() {
         if (SesionActual.getUsuario() != null) {
             lblUsuarioActual.setText("· " + SesionActual.getUsuario().getNombreCompleto()
                     + " (" + SesionActual.getUsuario().getRol() + ")");
+        }
+        // El resaltado al pasar el mouse no se puede fijar en el FXML (no hay archivo .css con :hover)
+        for (VBox tarjeta : new VBox[]{tarjetaHabitaciones, tarjetaReservas}) {
+            tarjeta.setOnMouseEntered(e -> tarjeta.setStyle(TARJETA_HOVER));
+            tarjeta.setOnMouseExited(e -> tarjeta.setStyle(TARJETA));
         }
         // TODO (Unidad II/III): si SesionActual.esAdministrador(), mostrar ademas
         // las tarjetas de Almacen, Usuarios y Reportes.

@@ -24,15 +24,42 @@ import java.util.Locale;
  * Controlador del marco principal (menu lateral + encabezado + contenido). Sirve para
  * cualquier rol: cada rol tiene su propio FXML con sus botones de menu, pero todos
  * comparten esta logica (el boton guarda en userData la ruta de la pantalla que abre).
+ *
+ * Sin archivo .css: el FXML solo trae el estilo fijo de cada boton (color de fondo, texto,
+ * bordes). Lo que cambia segun lo que hace el usuario -pasar el mouse, dejar seleccionado un
+ * boton, marcar un grupo del menu como activo- se resuelve aqui mismo con setStyle(), porque
+ * eso no se puede fijar de antemano en el FXML.
  */
 public class PrincipalController {
 
     private static final String RUTA_LOGIN = "/untrm/hotel_san_antonio/fxml/login.fxml";
     private static final String RUTA_MARCO_RECEPCIONISTA = "/untrm/hotel_san_antonio/fxml/principal/principal_recepcionista.fxml";
     private static final String RUTA_MARCO_ADMIN = "/untrm/hotel_san_antonio/fxml/principal/principal_administrador.fxml";
-    private static final String RUTA_CARRITO = "/untrm/hotel_san_antonio/fxml/tiendita/carrito_tienda.fxml";
+    private static final String RUTA_CARRITO = "/untrm/hotel_san_antonio/fxml/carrito_tienda.fxml";
+
+    // Botones de opcion (Inicio, Habitaciones, y los de dentro de un submenu)
+    private static final String ITEM = "-fx-background-color: transparent; -fx-text-fill: #F3ECDD; -fx-font-size: 14px; "
+            + "-fx-alignment: CENTER_LEFT; -fx-padding: 11px 16px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
+    private static final String ITEM_HOVER = "-fx-background-color: #5A3516; -fx-text-fill: #F3ECDD; -fx-font-size: 14px; "
+            + "-fx-alignment: CENTER_LEFT; -fx-padding: 11px 16px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
+    private static final String ITEM_SELECCIONADO = "-fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; "
+            + "-fx-alignment: CENTER_LEFT; -fx-padding: 11px 16px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
+
+    // Botones dentro de un submenu desplegado: igual, con letra un poco mas chica
+    private static final String SUBITEM = "-fx-background-color: transparent; -fx-text-fill: #F3ECDD; -fx-font-size: 13px; "
+            + "-fx-alignment: CENTER_LEFT; -fx-padding: 8px 14px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
+    private static final String SUBITEM_HOVER = "-fx-background-color: #5A3516; -fx-text-fill: #F3ECDD; -fx-font-size: 13px; "
+            + "-fx-alignment: CENTER_LEFT; -fx-padding: 8px 14px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
+    private static final String SUBITEM_SELECCIONADO = "-fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px; "
+            + "-fx-alignment: CENTER_LEFT; -fx-padding: 8px 14px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
+
+    // Botones que solo despliegan un submenu (ej. "Reservas ▸"): mismo look que ITEM, mas un color
+    // distinto cuando una de sus opciones esta abierta ("Reservas" activo aunque este plegado)
+    private static final String GRUPO_ACTIVO = "-fx-background-color: transparent; -fx-text-fill: #E6C77A; -fx-font-weight: bold; -fx-font-size: 14px; "
+            + "-fx-alignment: CENTER_LEFT; -fx-padding: 11px 16px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
 
     @FXML private StackPane contenido;
+    @FXML private ScrollPane scrollMenu;
     @FXML private VBox barraLateral;
     @FXML private ToggleButton btnInicio;
     @FXML private Label lblTitulo, lblFecha, lblUsuario, lblRol;
@@ -55,7 +82,75 @@ public class PrincipalController {
             lblRol.setText("ADMINISTRADOR".equals(usuario.getRol()) ? "Administrador" : "Recepcionista");
         }
 
+        aplicarEstiloMenu();
+        aplicarTransparenciaViewport();
         abrir(btnInicio);
+    }
+
+    /**
+     * El interior del ScrollPane (su "viewport") pinta blanco por defecto y eso no se puede fijar
+     * desde un style="" (solo un .css con "> .viewport" lo alcanza). Se corrige a mano en cuanto
+     * el ScrollPane arma su piel (skin) -recien ahi existe el nodo "viewport" para buscarlo-, para
+     * que se vea del mismo marron que el menu.
+     */
+    private void aplicarTransparenciaViewport() {
+        if (scrollMenu.getSkin() != null) {
+            teñirViewport();
+        } else {
+            scrollMenu.skinProperty().addListener(new javafx.beans.value.ChangeListener<javafx.scene.control.Skin<?>>() {
+                @Override
+                public void changed(javafx.beans.value.ObservableValue<? extends javafx.scene.control.Skin<?>> obs,
+                                     javafx.scene.control.Skin<?> antes, javafx.scene.control.Skin<?> ahora) {
+                    teñirViewport();
+                    scrollMenu.skinProperty().removeListener(this);
+                }
+            });
+        }
+    }
+
+    private void teñirViewport() {
+        Node viewport = scrollMenu.lookup(".viewport");
+        if (viewport != null) {
+            viewport.setStyle("-fx-background-color: transparent;");
+        }
+    }
+
+    /** Da a cada boton del menu su look normal/mouse-encima/seleccionado (no depende de ningun .css). */
+    private void aplicarEstiloMenu() {
+        for (Node hijo : barraLateral.getChildren()) {
+            if (hijo instanceof ToggleButton) {
+                aplicarItem((ToggleButton) hijo, ITEM, ITEM_HOVER, ITEM_SELECCIONADO);
+            } else if (hijo instanceof Button) {
+                aplicarGrupo((Button) hijo);
+            } else if (hijo instanceof VBox) { // submenu
+                for (Node sub : ((VBox) hijo).getChildren()) {
+                    if (sub instanceof ToggleButton) {
+                        aplicarItem((ToggleButton) sub, SUBITEM, SUBITEM_HOVER, SUBITEM_SELECCIONADO);
+                    }
+                }
+            }
+        }
+    }
+
+    private void aplicarItem(ToggleButton boton, String normal, String hover, String seleccionado) {
+        Runnable actualizar = () -> boton.setStyle(boton.isSelected() ? seleccionado : normal);
+        actualizar.run();
+        boton.selectedProperty().addListener((obs, antes, ahora) -> actualizar.run());
+        boton.setOnMouseEntered(e -> { if (!boton.isSelected()) boton.setStyle(hover); });
+        boton.setOnMouseExited(e -> actualizar.run());
+    }
+
+    private void aplicarGrupo(Button boton) {
+        boton.setStyle(ITEM);
+        boton.setOnMouseEntered(e -> boton.setStyle(ITEM_HOVER));
+        boton.setOnMouseExited(e -> boton.setStyle(esGrupoActivo(boton) ? GRUPO_ACTIVO : ITEM));
+    }
+
+    private boolean esGrupoActivo(Button boton) {
+        int posicion = barraLateral.getChildren().indexOf(boton);
+        Node submenu = barraLateral.getChildren().get(posicion + 1);
+        return ((VBox) submenu).getChildren().stream()
+                .anyMatch(n -> n instanceof ToggleButton && ((ToggleButton) n).isSelected());
     }
 
     @FXML
@@ -107,7 +202,7 @@ public class PrincipalController {
     private void plegarGrupos() {
         var hijos = barraLateral.getChildren();
         for (int i = 1; i < hijos.size(); i++) {
-            if (hijos.get(i).getStyleClass().contains("submenu")) {
+            if (hijos.get(i) instanceof VBox) {
                 establecerDesplegado((Button) hijos.get(i - 1), hijos.get(i), false);
             }
         }
@@ -125,13 +220,9 @@ public class PrincipalController {
         var hijos = barraLateral.getChildren();
         for (int i = 1; i < hijos.size(); i++) {
             Node candidato = hijos.get(i);
-            if (candidato.getStyleClass().contains("submenu")) {
+            if (candidato instanceof VBox) {
                 boolean activo = ((VBox) candidato).getChildren().contains(seleccionado);
-                var clases = hijos.get(i - 1).getStyleClass();
-                clases.remove("menu-grupo-activo");
-                if (activo) {
-                    clases.add("menu-grupo-activo");
-                }
+                ((Button) hijos.get(i - 1)).setStyle(activo ? GRUPO_ACTIVO : ITEM);
             }
         }
     }

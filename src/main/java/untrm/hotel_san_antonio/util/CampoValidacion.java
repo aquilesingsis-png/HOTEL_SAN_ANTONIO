@@ -9,18 +9,20 @@ import javafx.util.Duration;
 
 /**
  * Marca en rojo el campo que tiene un dato incorrecto (en vez de mostrar un mensaje aparte).
- * El motivo queda como ayuda al pasar el mouse por encima. Necesita la clase CSS "campo-invalido".
+ * El motivo queda como ayuda al pasar el mouse por encima. No usa un archivo .css: el borde
+ * rojo se agrega/quita directamente sobre el estilo inline del control (control.getStyle()).
  */
 public final class CampoValidacion {
 
-    private static final String CLASE = "campo-invalido";
+    private static final String ESTILO_INVALIDO = "-fx-border-color: #DC2626; -fx-border-width: 1.5px;";
 
     private CampoValidacion() {
     }
 
     public static void marcar(Control campo, String motivo) {
-        if (!campo.getStyleClass().contains(CLASE)) {
-            campo.getStyleClass().add(CLASE);
+        String estiloActual = campo.getStyle() == null ? "" : campo.getStyle();
+        if (!estiloActual.contains(ESTILO_INVALIDO)) {
+            campo.setStyle(estiloActual + " " + ESTILO_INVALIDO);
         }
         Tooltip ayuda = new Tooltip(motivo);
         ayuda.setShowDelay(Duration.millis(150));
@@ -28,7 +30,10 @@ public final class CampoValidacion {
     }
 
     public static void limpiar(Control campo) {
-        campo.getStyleClass().remove(CLASE);
+        String estiloActual = campo.getStyle();
+        if (estiloActual != null && estiloActual.contains(ESTILO_INVALIDO)) {
+            campo.setStyle(estiloActual.replace(" " + ESTILO_INVALIDO, "").replace(ESTILO_INVALIDO, ""));
+        }
         campo.setTooltip(null);
     }
 

@@ -70,6 +70,7 @@ public class CuentaHabitacionController {
 
     @FXML
     public void initialize() {
+        untrm.hotel_san_antonio.util.EstiloBoton.aplicarHoverPrimario(btnCheckOut);
         cmbMetodo.setValue("Efectivo");
         cmbMetodo2.setValue("Yape");
         txtMonto2.setTextFormatter(new TextFormatter<String>(cambio ->
@@ -116,8 +117,8 @@ public class CuentaHabitacionController {
         lblTotalCuenta.setText("S/ " + CuentaHabitacion.formato(cuenta.getTotalCuenta()));
         lblTotalPagos.setText("S/ " + CuentaHabitacion.formato(cuenta.getTotalPagos()));
         lblSaldo.setText("S/ " + CuentaHabitacion.formato(saldo.max(BigDecimal.ZERO)));
-        lblSaldo.getStyleClass().removeAll("texto-egreso", "texto-ingreso");
-        lblSaldo.getStyleClass().add(pendiente ? "texto-egreso" : "texto-ingreso");
+        lblSaldo.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: "
+                + (pendiente ? "#DC2626;" : "#16A34A;"));
 
         // Sin saldo pendiente no hay nada que cobrar y ya se puede hacer el check-out
         txtMonto.setText(pendiente ? CuentaHabitacion.formato(saldo) : "");

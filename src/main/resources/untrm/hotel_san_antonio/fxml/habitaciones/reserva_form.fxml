@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
@@ -16,34 +15,29 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<!-- Ventana emergente: registrar huesped y reserva desde una habitacion disponible. -->
+<!-- Ventana emergente: registrar huesped y reserva desde una habitacion disponible. Sin archivo .css: todo el estilo es inline. -->
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="untrm.hotel_san_antonio.controlador.ReservaFormController">
 
-    <stylesheets>
-        <URL value="@../../css/estilos.css"/>
-        <URL value="@../../css/habitaciones.css"/>
-    </stylesheets>
-
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="panel-encabezado">
+        <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-background-color: #3B210F;">
             <padding><Insets top="14" right="22" bottom="14" left="22"/></padding>
-            <Label fx:id="lblTitulo" styleClass="titulo-encabezado"/>
+            <Label fx:id="lblTitulo" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="lblEstadoHab" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
         </HBox>
     </top>
 
     <center>
-        <ScrollPane fx:id="scrollForm" fitToWidth="true" styleClass="scroll-transparente">
+        <ScrollPane fx:id="scrollForm" fitToWidth="true" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;">
             <HBox spacing="20" alignment="TOP_LEFT">
                 <padding><Insets top="20" right="22" bottom="20" left="22"/></padding>
 
                 <!-- ============ FORMULARIO ============ -->
                 <VBox spacing="16" HBox.hgrow="ALWAYS">
 
-                    <VBox spacing="12" styleClass="panel-form">
-                        <Label text="Huésped" styleClass="titulo-panel"/>
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #E5E5E5; -fx-border-radius: 8px; -fx-padding: 16px;">
+                        <Label text="Huésped" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                         <GridPane hgap="14" vgap="12">
                             <columnConstraints>
                                 <ColumnConstraints percentWidth="50"/>
@@ -51,44 +45,46 @@
                             </columnConstraints>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                                <Label text="Tipo de documento" styleClass="etiqueta-form"/>
+                                <Label text="Tipo de documento" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <ComboBox fx:id="cmbTipoDoc" maxWidth="Infinity"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                                <Label text="Número de documento" styleClass="etiqueta-form"/>
+                                <Label text="Número de documento" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <HBox spacing="8">
                                     <TextField fx:id="txtDocumento" HBox.hgrow="ALWAYS"/>
-                                    <Button fx:id="btnBuscarDoc" text="Buscar" styleClass="btn-secundario" onAction="#onBuscarDocumento"/>
+                                    <Button fx:id="btnBuscarDoc" text="Buscar"
+                                            style="-fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"
+                                            onAction="#onBuscarDocumento"/>
                                 </HBox>
                             </VBox>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                                <Label text="Nombres" styleClass="etiqueta-form"/>
+                                <Label text="Nombres" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <TextField fx:id="txtNombres"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                <Label text="Apellidos" styleClass="etiqueta-form"/>
+                                <Label text="Apellidos" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <TextField fx:id="txtApellidos"/>
                             </VBox>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="2">
-                                <Label text="País de procedencia" styleClass="etiqueta-form"/>
+                                <Label text="País de procedencia" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <TextField fx:id="txtPais"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                                <Label text="Teléfono (opcional)" styleClass="etiqueta-form"/>
+                                <Label text="Teléfono (opcional)" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <TextField fx:id="txtTelefono" promptText="9XXXXXXXX"/>
                             </VBox>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2">
-                                <Label text="Correo electrónico (opcional)" styleClass="etiqueta-form"/>
+                                <Label text="Correo electrónico (opcional)" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <TextField fx:id="txtEmail"/>
                             </VBox>
                         </GridPane>
                     </VBox>
 
-                    <VBox spacing="12" styleClass="panel-form">
-                        <Label text="Estadía" styleClass="titulo-panel"/>
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #E5E5E5; -fx-border-radius: 8px; -fx-padding: 16px;">
+                        <Label text="Estadía" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                         <GridPane hgap="14" vgap="12">
                             <columnConstraints>
                                 <ColumnConstraints percentWidth="50"/>
@@ -96,27 +92,27 @@
                             </columnConstraints>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                                <Label text="Fecha de ingreso" styleClass="etiqueta-form"/>
+                                <Label text="Fecha de ingreso" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <DatePicker fx:id="dpIngreso" maxWidth="Infinity"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                                <Label text="Fecha de salida" styleClass="etiqueta-form"/>
+                                <Label text="Fecha de salida" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <DatePicker fx:id="dpSalida" maxWidth="Infinity"/>
                             </VBox>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                                <Label text="Canal de reserva" styleClass="etiqueta-form"/>
+                                <Label text="Canal de reserva" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <ComboBox fx:id="cmbCanal" maxWidth="Infinity"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                <Label text="Noches" styleClass="etiqueta-form"/>
-                                <Label fx:id="lblNoches" styleClass="valor-form"/>
+                                <Label text="Noches" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
+                                <Label fx:id="lblNoches" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2B2B2B; -fx-padding: 6px 0 0 0;"/>
                             </VBox>
                         </GridPane>
                     </VBox>
 
-                    <VBox spacing="12" styleClass="panel-form">
-                        <Label fx:id="lblTituloPago" text="Adelanto" styleClass="titulo-panel"/>
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #E5E5E5; -fx-border-radius: 8px; -fx-padding: 16px;">
+                        <Label fx:id="lblTituloPago" text="Adelanto" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                         <GridPane hgap="14" vgap="12">
                             <columnConstraints>
                                 <ColumnConstraints percentWidth="50"/>
@@ -124,11 +120,11 @@
                             </columnConstraints>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                                <Label fx:id="lblMontoPago" text="Monto del adelanto (S/)" styleClass="etiqueta-form"/>
+                                <Label fx:id="lblMontoPago" text="Monto del adelanto (S/)" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <TextField fx:id="txtAdelanto"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                                <Label fx:id="lblMetodo1" text="Método de pago" styleClass="etiqueta-form"/>
+                                <Label fx:id="lblMetodo1" text="Método de pago" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <ComboBox fx:id="cmbMetodo" maxWidth="Infinity"/>
                             </VBox>
                         </GridPane>
@@ -141,34 +137,36 @@
                             </columnConstraints>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                                <Label text="Segundo método" styleClass="etiqueta-form"/>
+                                <Label text="Segundo método" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <ComboBox fx:id="cmbMetodo2" maxWidth="Infinity"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                                <Label text="Monto con el segundo método (S/)" styleClass="etiqueta-form"/>
+                                <Label text="Monto con el segundo método (S/)" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <TextField fx:id="txtMonto2"/>
                             </VBox>
-                            <Label fx:id="lblDivision" styleClass="texto-secundario" wrapText="true"
+                            <Label fx:id="lblDivision" style="-fx-text-fill: #777777;" wrapText="true"
                                    GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2"/>
                         </GridPane>
                     </VBox>
 
-                    <VBox spacing="12" styleClass="panel-form">
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #E5E5E5; -fx-border-radius: 8px; -fx-padding: 16px;">
                         <CheckBox fx:id="chkEmpresa" text="Facturar a una empresa"/>
                         <VBox fx:id="boxEmpresa" spacing="12">
                             <VBox spacing="4">
-                                <Label text="RUC" styleClass="etiqueta-form"/>
+                                <Label text="RUC" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <HBox spacing="8">
                                     <TextField fx:id="txtRuc" HBox.hgrow="ALWAYS"/>
-                                    <Button fx:id="btnBuscarRuc" text="Buscar" styleClass="btn-secundario" onAction="#onBuscarRuc"/>
+                                    <Button fx:id="btnBuscarRuc" text="Buscar"
+                                            style="-fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"
+                                            onAction="#onBuscarRuc"/>
                                 </HBox>
                             </VBox>
                             <VBox spacing="4">
-                                <Label text="Razón social" styleClass="etiqueta-form"/>
+                                <Label text="Razón social" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <TextField fx:id="txtRazonSocial"/>
                             </VBox>
                             <VBox spacing="4">
-                                <Label text="Dirección fiscal" styleClass="etiqueta-form"/>
+                                <Label text="Dirección fiscal" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <TextField fx:id="txtDireccionFiscal"/>
                             </VBox>
                         </VBox>
@@ -177,20 +175,20 @@
 
                 <!-- ============ PANEL LATERAL ============ -->
                 <VBox spacing="16" minWidth="300" prefWidth="300" maxWidth="300">
-                    <VBox spacing="8" styleClass="panel-form">
-                        <Label text="La habitación" styleClass="titulo-panel"/>
-                        <Label fx:id="lblHabNumero" styleClass="valor-grande"/>
-                        <Label fx:id="lblHabTipo" styleClass="texto-secundario"/>
+                    <VBox spacing="8" style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #E5E5E5; -fx-border-radius: 8px; -fx-padding: 16px;">
+                        <Label text="La habitación" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        <Label fx:id="lblHabNumero" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        <Label fx:id="lblHabTipo" style="-fx-text-fill: #777777;"/>
                         <Label fx:id="lblHabCapacidad"/>
                         <Label fx:id="lblHabTarifa"/>
-                        <Label text="Incluye" styleClass="etiqueta-form"/>
-                        <Label fx:id="lblHabIncluye" wrapText="true" styleClass="texto-secundario"/>
+                        <Label text="Incluye" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
+                        <Label fx:id="lblHabIncluye" wrapText="true" style="-fx-text-fill: #777777;"/>
                     </VBox>
 
-                    <VBox spacing="8" styleClass="panel-form">
-                        <Label text="Resumen" styleClass="titulo-panel"/>
-                        <Label fx:id="lblResCalculo" styleClass="texto-secundario"/>
-                        <Label fx:id="lblResTotal" styleClass="valor-grande"/>
+                    <VBox spacing="8" style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #E5E5E5; -fx-border-radius: 8px; -fx-padding: 16px;">
+                        <Label text="Resumen" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        <Label fx:id="lblResCalculo" style="-fx-text-fill: #777777;"/>
+                        <Label fx:id="lblResTotal" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                         <Label fx:id="lblResMinimo"/>
                         <Label fx:id="lblResSaldo"/>
                     </VBox>
@@ -200,12 +198,18 @@
     </center>
 
     <bottom>
-        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="panel-pie">
+        <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-border-width: 1px 0 0 0;">
             <padding><Insets top="14" right="22" bottom="14" left="22"/></padding>
-            <Button fx:id="btnMantenimiento" text="Poner en mantenimiento" styleClass="btn-secundario" onAction="#onMantenimiento"/>
+            <Button fx:id="btnMantenimiento" text="Poner en mantenimiento"
+                    style="-fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"
+                    onAction="#onMantenimiento"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnCancelar" text="Cancelar" styleClass="btn-secundario" onAction="#onCancelar"/>
-            <Button fx:id="btnGuardar" text="Registrar check-in" styleClass="btn-primario" onAction="#onGuardar"/>
+            <Button fx:id="btnCancelar" text="Cancelar"
+                    style="-fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"
+                    onAction="#onCancelar"/>
+            <Button fx:id="btnGuardar" text="Registrar check-in"
+                    style="-fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"
+                    onAction="#onGuardar"/>
         </HBox>
     </bottom>
 </BorderPane>

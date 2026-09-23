@@ -20,10 +20,6 @@
       fx:controller="untrm.hotel_san_antonio.controlador.HabitacionesController"
       spacing="18">
 
-    <stylesheets>
-        <URL value="@../../css/estilos.css"/>
-        <URL value="@../../css/habitaciones.css"/>
-    </stylesheets>
     <padding>
         <Insets top="18" right="28" bottom="24" left="28"/>
     </padding>
@@ -31,7 +27,7 @@
     <HBox alignment="CENTER_LEFT" spacing="12">
         <Region HBox.hgrow="ALWAYS"/>
         <HBox spacing="10" alignment="CENTER_RIGHT">
-            <Label text="Filtrar por:" styleClass="etiqueta-form"/>
+            <Label text="Filtrar por:" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
             <ComboBox fx:id="cmbEstado" promptText="Estado" prefWidth="150" onAction="#onFiltrarEstado">
                 <items>
                     <FXCollections fx:factory="observableArrayList">
@@ -59,7 +55,8 @@
         </HBox>
     </HBox>
 
-    <ScrollPane fitToWidth="true" styleClass="scroll-transparente" VBox.vgrow="ALWAYS">
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;">
         <VBox fx:id="contenedorPisos" spacing="26">
             <fx:include source="piso_seccion.fxml"/>
         </VBox>
