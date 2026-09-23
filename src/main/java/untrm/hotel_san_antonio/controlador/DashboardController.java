@@ -189,9 +189,9 @@ public class DashboardController {
     // =========================================================
     // MOSTRAR OTRAS SECCIONES
     // =========================================================
-
     @FXML
     private void mostrarSeccion(ActionEvent event) {
+
 
         if (dashboardView != null) {
 
