@@ -3,11 +3,18 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package untrm.hotel_san_antonio.controlador.Reserva;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Locale;
 
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -18,7 +25,24 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+
+import untrm.hotel_san_antonio.dao.EmpresaDAO;
+import untrm.hotel_san_antonio.dao.HabitacionDAO;
+import untrm.hotel_san_antonio.dao.HuespedDAO;
+import untrm.hotel_san_antonio.modelo.Empresa;
+import untrm.hotel_san_antonio.modelo.Habitacion;
+import untrm.hotel_san_antonio.modelo.Huesped;
+import untrm.hotel_san_antonio.modelo.Pago;
+import untrm.hotel_san_antonio.modelo.Reserva;
+import untrm.hotel_san_antonio.servicio.ConflictoFechasException;
+import untrm.hotel_san_antonio.servicio.ReniecService;
+import untrm.hotel_san_antonio.servicio.ReservaService;
+import untrm.hotel_san_antonio.servicio.SunatRucService;
+import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.util.Validador;
 /**
  *
  * @author HP
@@ -41,6 +65,15 @@ public class Nueva_reservaController {
 
     @FXML
     private TextField txtDocumento;
+
+    @FXML
+    private Button btnBuscarCliente;
+
+    @FXML
+    private VBox filaDocumentoHuesped;
+
+    @FXML
+    private TextField txtDocumentoHuesped;
 
     @FXML
     private VBox panelSinCliente;
@@ -190,11 +223,23 @@ public class Nueva_reservaController {
 
     private boolean clienteSeleccionado = false;
 
-    private String habitacionSeleccionada = null;
+    private Habitacion habitacionElegida = null;
 
     private double precioNoche = 0.00;
 
     private double totalReserva = 0.00;
+
+    private Huesped huespedEncontrado = null;
+
+    private Empresa empresaEncontrada = null;
+
+    private final HuespedDAO huespedDAO = new HuespedDAO();
+
+    private final EmpresaDAO empresaDAO = new EmpresaDAO();
+
+    private final HabitacionDAO habitacionDAO = new HabitacionDAO();
+
+    private final ReservaService reservaService = new ReservaService();
 
 
     // =========================================================
@@ -224,7 +269,7 @@ public class Nueva_reservaController {
 
         limpiarCliente();
 
-        limpiarHabitaciones();
+        cargarHabitaciones();
 
         actualizarResumen();
     }
@@ -295,6 +340,11 @@ public class Nueva_reservaController {
                     "Ingrese DNI"
             );
         }
+
+        // Si se factura a una empresa, igual se hospeda una persona: se pide su DNI aparte.
+        filaDocumentoHuesped.setVisible(btnEmpresa.isSelected());
+        filaDocumentoHuesped.setManaged(btnEmpresa.isSelected());
+        txtDocumentoHuesped.clear();
 
 
         actualizarEstiloTipoCliente();
@@ -387,28 +437,172 @@ public class Nueva_reservaController {
         }
 
 
-        /*
-         * =====================================================
-         * AQUÍ SE CONECTARÁ MYSQL
-         * =====================================================
-         *
-         * Ejemplo futuro:
-         *
-         * Cliente cliente =
-         *     clienteService.buscarPorDocumento(documento);
-         *
-         * if (cliente != null) {
-         *     cargarCliente(cliente);
-         * }
-         *
-         */
+        if (btnEmpresa.isSelected()) {
+            buscarEmpresaYHuesped(documento);
+        } else {
+            buscarPersonaNatural(documento);
+        }
+    }
 
 
-        mostrarInformacion(
-                "Base de datos pendiente",
-                "El documento es válido. "
-                + "La búsqueda del cliente funcionará cuando conectes MySQL."
+    /** Busca al huesped (persona natural) primero en la BD y, si no esta, en RENIEC. */
+    private void buscarPersonaNatural(String dni) {
+
+        if (!Validador.esDniValido(dni)) {
+            mostrarAdvertencia("DNI inválido", "Ingrese un DNI válido.");
+            return;
+        }
+
+        try {
+            Huesped local = huespedDAO.buscarPorDocumento("DNI", dni);
+            if (local != null) {
+                empresaEncontrada = null;
+                cargarClienteDesdeHuesped(local);
+                return;
+            }
+        } catch (SQLException e) {
+            mostrarError("Error de base de datos", "No se pudo buscar al cliente.\n\n" + e.getMessage());
+            return;
+        }
+
+        btnBuscarCliente.setDisable(true);
+        Task<Huesped> tarea = ReniecService.consultarDni(dni);
+        tarea.setOnSucceeded(e -> {
+            btnBuscarCliente.setDisable(false);
+            Huesped h = tarea.getValue();
+            if (h == null) {
+                mostrarAdvertencia("Cliente no encontrado",
+                        "No se encontraron datos para ese DNI en RENIEC.");
+                return;
+            }
+            h.setPaisProcedencia("Perú");
+            empresaEncontrada = null;
+            cargarClienteDesdeHuesped(h);
+        });
+        tarea.setOnFailed(e -> {
+            btnBuscarCliente.setDisable(false);
+            mostrarInformacion("RENIEC", "No se pudo consultar RENIEC (" + causaError(tarea.getException()) + ").");
+        });
+        iniciarTarea(tarea);
+    }
+
+
+    /**
+     * Modo "Empresa": el RUC solo sirve para la facturación; quien se hospeda sigue siendo una
+     * persona real, por eso tambien se pide y se busca su DNI (txtDocumentoHuesped).
+     */
+    private void buscarEmpresaYHuesped(String ruc) {
+
+        if (!Validador.esRucValido(ruc)) {
+            mostrarAdvertencia("RUC inválido", "Ingrese un RUC válido.");
+            return;
+        }
+
+        String dniHuesped = txtDocumentoHuesped.getText().trim();
+        if (!Validador.esDniValido(dniHuesped)) {
+            mostrarAdvertencia("DNI del huésped requerido",
+                    "Ingrese el DNI de la persona que se va a hospedar.");
+            return;
+        }
+
+        Empresa empresaLocal;
+        try (java.sql.Connection con = ConexionBD.conectar()) {
+            empresaLocal = empresaDAO.buscarPorRuc(con, ruc);
+        } catch (SQLException e) {
+            mostrarError("Error de base de datos", "No se pudo buscar la empresa.\n\n" + e.getMessage());
+            return;
+        }
+
+        if (empresaLocal != null) {
+            continuarConEmpresa(empresaLocal, dniHuesped);
+            return;
+        }
+
+        btnBuscarCliente.setDisable(true);
+        Task<Empresa> tarea = SunatRucService.consultarRuc(ruc);
+        tarea.setOnSucceeded(e -> {
+            btnBuscarCliente.setDisable(false);
+            Empresa empresa = tarea.getValue();
+            if (empresa == null) {
+                mostrarAdvertencia("Empresa no encontrada", "No se encontraron datos para ese RUC en la SUNAT.");
+                return;
+            }
+            continuarConEmpresa(empresa, dniHuesped);
+        });
+        tarea.setOnFailed(e -> {
+            btnBuscarCliente.setDisable(false);
+            mostrarInformacion("SUNAT", "No se pudo consultar la SUNAT (" + causaError(tarea.getException()) + ").");
+        });
+        iniciarTarea(tarea);
+    }
+
+
+    /** Con la empresa ya resuelta, busca (BD y luego RENIEC) al huesped que se va a hospedar. */
+    private void continuarConEmpresa(Empresa empresa, String dniHuesped) {
+
+        try {
+            Huesped local = huespedDAO.buscarPorDocumento("DNI", dniHuesped);
+            if (local != null) {
+                empresaEncontrada = empresa;
+                cargarClienteDesdeHuesped(local);
+                return;
+            }
+        } catch (SQLException e) {
+            mostrarError("Error de base de datos", "No se pudo buscar al huésped.\n\n" + e.getMessage());
+            return;
+        }
+
+        btnBuscarCliente.setDisable(true);
+        Task<Huesped> tarea = ReniecService.consultarDni(dniHuesped);
+        tarea.setOnSucceeded(e -> {
+            btnBuscarCliente.setDisable(false);
+            Huesped h = tarea.getValue();
+            if (h == null) {
+                mostrarAdvertencia("Huésped no encontrado",
+                        "No se encontraron datos para el DNI del huésped en RENIEC.");
+                return;
+            }
+            h.setPaisProcedencia("Perú");
+            empresaEncontrada = empresa;
+            cargarClienteDesdeHuesped(h);
+        });
+        tarea.setOnFailed(e -> {
+            btnBuscarCliente.setDisable(false);
+            mostrarInformacion("RENIEC", "No se pudo consultar RENIEC (" + causaError(tarea.getException()) + ").");
+        });
+        iniciarTarea(tarea);
+    }
+
+
+    private void iniciarTarea(Task<?> tarea) {
+        Thread hilo = new Thread(tarea);
+        hilo.setDaemon(true);
+        hilo.start();
+    }
+
+
+    private String causaError(Throwable t) {
+        return t == null || t.getMessage() == null ? "sin conexión" : t.getMessage();
+    }
+
+
+    private void cargarClienteDesdeHuesped(Huesped h) {
+
+        huespedEncontrado = h;
+
+        cargarCliente(
+                h.getNombres(),
+                h.getApellidos(),
+                "--",
+                h.getTelefono(),
+                h.getEmail(),
+                empresaEncontrada != null
+                        ? "Se factura a " + empresaEncontrada.getRazonSocial() + " (RUC " + empresaEncontrada.getRuc() + ")"
+                        : "--"
         );
+
+        rbFactura.setSelected(empresaEncontrada != null);
+        rbBoleta.setSelected(empresaEncontrada == null);
     }
 
 
@@ -464,21 +658,30 @@ public class Nueva_reservaController {
         panelClienteEncontrado.setVisible(true);
 
 
-        txtDocumentoComprobante.setText(
-                txtDocumento.getText().trim()
-        );
+        if (empresaEncontrada != null) {
+
+            txtDocumentoComprobante.setText(empresaEncontrada.getRuc());
+
+            txtNombreComprobante.setText(empresaEncontrada.getRazonSocial());
+
+        } else {
+
+            txtDocumentoComprobante.setText(
+                    txtDocumento.getText().trim()
+            );
 
 
-        String nombreCompleto =
-                (valorSeguro(nombres)
-                        + " "
-                        + valorSeguro(apellidos))
-                        .trim();
+            String nombreCompleto =
+                    (valorSeguro(nombres)
+                            + " "
+                            + valorSeguro(apellidos))
+                            .trim();
 
 
-        txtNombreComprobante.setText(
-                nombreCompleto
-        );
+            txtNombreComprobante.setText(
+                    nombreCompleto
+            );
+        }
     }
 
 
@@ -499,6 +702,10 @@ public class Nueva_reservaController {
     private void limpiarCliente() {
 
         clienteSeleccionado = false;
+
+        huespedEncontrado = null;
+
+        empresaEncontrada = null;
 
 
         if (panelClienteEncontrado != null) {
@@ -779,11 +986,6 @@ public class Nueva_reservaController {
                         "Todos los pisos"
                 );
 
-        cbPiso.setValue(
-                "Todos los pisos"
-        );
-
-
         cbTipoHabitacion
                 .getItems()
                 .clear();
@@ -793,6 +995,19 @@ public class Nueva_reservaController {
                 .add(
                         "Todos los tipos"
                 );
+
+        try (java.sql.Connection con = ConexionBD.conectar()) {
+            for (Integer piso : habitacionDAO.listarPisos(con)) {
+                cbPiso.getItems().add("Piso " + piso);
+            }
+            cbTipoHabitacion.getItems().addAll(habitacionDAO.listarNombresTipo(con));
+        } catch (SQLException e) {
+            mostrarError("Error de base de datos", "No se pudieron cargar los pisos y tipos.\n\n" + e.getMessage());
+        }
+
+        cbPiso.setValue(
+                "Todos los pisos"
+        );
 
         cbTipoHabitacion.setValue(
                 "Todos los tipos"
@@ -828,33 +1043,96 @@ public class Nueva_reservaController {
 
     private void cargarHabitaciones() {
 
-        /*
-         * =====================================================
-         * AQUÍ SE CONSULTARÁ MYSQL
-         * =====================================================
-         *
-         * Ejemplo futuro:
-         *
-         * List<Habitacion> habitaciones =
-         *         habitacionService.buscarDisponibles(
-         *             dpFechaIngreso.getValue(),
-         *             dpFechaSalida.getValue(),
-         *             cbPiso.getValue(),
-         *             cbTipoHabitacion.getValue()
-         *         );
-         *
-         * dibujarHabitaciones(habitaciones);
-         *
-         */
+        LocalDate ingreso = dpFechaIngreso.getValue();
+        LocalDate salida = dpFechaSalida.getValue();
+
+        if (ingreso == null || salida == null || !salida.isAfter(ingreso)) {
+            limpiarHabitaciones();
+            return;
+        }
+
+        String piso = cbPiso.getValue();
+        Integer numeroPiso = (piso != null && piso.startsWith("Piso "))
+                ? Integer.valueOf(piso.substring("Piso ".length())) : null;
+        String tipo = cbTipoHabitacion.getValue();
+        String nombreTipo = (tipo == null || "Todos los tipos".equals(tipo)) ? null : tipo;
+
+        List<Habitacion> disponibles;
+        try {
+            disponibles = reservaService.buscarDisponibles(ingreso, salida, numeroPiso, nombreTipo);
+        } catch (SQLException e) {
+            mostrarError("Error de base de datos", "No se pudieron cargar las habitaciones.\n\n" + e.getMessage());
+            limpiarHabitaciones();
+            return;
+        }
+
+        habitacionElegida = null;
+        precioNoche = 0.00;
+        contenedorHabitaciones.getChildren().clear();
+
+        if (disponibles.isEmpty()) {
+            lblSinHabitaciones.setText("No hay habitaciones disponibles para esas fechas y filtros.");
+            contenedorHabitaciones.getChildren().add(lblSinHabitaciones);
+        } else {
+            for (Habitacion h : disponibles) {
+                contenedorHabitaciones.getChildren().add(crearTarjetaHabitacion(h));
+            }
+        }
+
+        actualizarResumen();
+    }
 
 
-        limpiarHabitaciones();
+    /** Fila compacta y clickeable de una habitacion disponible, para elegirla. */
+    private HBox crearTarjetaHabitacion(Habitacion h) {
+
+        HBox tarjeta = new HBox(8.0);
+        tarjeta.setStyle(estiloTarjetaHabitacion(false));
+
+        Region punto = new Region();
+        punto.setPrefSize(9.0, 9.0);
+        punto.setMaxSize(9.0, 9.0);
+        punto.setStyle("-fx-background-color: #1C9748; -fx-background-radius: 5;");
+
+        VBox datos = new VBox(1.0);
+        Label lblNumeroTipo = new Label(h.getNumero() + " · " + h.getTipo().getNombre());
+        lblNumeroTipo.setStyle("-fx-font-size: 9px; -fx-font-weight: bold; -fx-text-fill: #222222;");
+        Label lblPrecio = new Label(String.format(Locale.US, "S/ %.2f por noche · Piso %d", h.getTipo().getPrecioBase(), h.getPiso()));
+        lblPrecio.setStyle("-fx-font-size: 8px; -fx-text-fill: #777777;");
+        datos.getChildren().addAll(lblNumeroTipo, lblPrecio);
+
+        HBox.setHgrow(datos, javafx.scene.layout.Priority.ALWAYS);
+        tarjeta.getChildren().addAll(punto, datos);
+        tarjeta.setOnMouseClicked(e -> elegirHabitacion(h, tarjeta));
+
+        return tarjeta;
+    }
+
+    private String estiloTarjetaHabitacion(boolean elegida) {
+        return "-fx-padding: 8px 10px; -fx-background-radius: 6; -fx-cursor: hand; -fx-alignment: CENTER_LEFT; "
+                + (elegida
+                    ? "-fx-background-color: #FBF1E1; -fx-border-color: #A87425; -fx-border-radius: 6; -fx-border-width: 1.4px;"
+                    : "-fx-background-color: white; -fx-border-color: #E7E7E7; -fx-border-radius: 6; -fx-border-width: 1px;");
+    }
+
+    private void elegirHabitacion(Habitacion h, HBox tarjetaElegida) {
+
+        habitacionElegida = h;
+        precioNoche = h.getTipo().getPrecioBase().doubleValue();
+
+        for (javafx.scene.Node nodo : contenedorHabitaciones.getChildren()) {
+            if (nodo instanceof HBox fila) {
+                fila.setStyle(estiloTarjetaHabitacion(fila == tarjetaElegida));
+            }
+        }
+
+        actualizarResumen();
     }
 
 
     private void limpiarHabitaciones() {
 
-        habitacionSeleccionada = null;
+        habitacionElegida = null;
 
         precioNoche = 0.00;
 
@@ -1144,7 +1422,7 @@ public class Nueva_reservaController {
         );
 
 
-        if (habitacionSeleccionada == null) {
+        if (habitacionElegida == null) {
 
             lblHabitacionResumen.setText(
                     "--"
@@ -1153,7 +1431,7 @@ public class Nueva_reservaController {
         } else {
 
             lblHabitacionResumen.setText(
-                    habitacionSeleccionada
+                    habitacionElegida.getNumero() + " · " + habitacionElegida.getTipo().getNombre()
             );
         }
 
@@ -1193,19 +1471,49 @@ public class Nueva_reservaController {
             return;
         }
 
+        if (habitacionElegida == null) {
 
-        /*
-         * FUTURO:
-         *
-         * reservaService.guardarPendiente(...);
-         */
+            mostrarAdvertencia(
+                    "Habitación requerida",
+                    "Seleccione una habitación disponible."
+            );
 
+            return;
+        }
 
-        mostrarInformacion(
-                "Reserva pendiente",
-                "La función está preparada para guardar "
-                + "la reserva en MySQL."
-        );
+        if (dpFechaIngreso.getValue().equals(LocalDate.now())) {
+
+            mostrarAdvertencia(
+                    "Ingreso hoy",
+                    "Para un ingreso hoy, use \"Confirmar reserva\" con el pago; "
+                    + "\"Guardar pendiente\" es solo para fechas futuras."
+            );
+
+            return;
+        }
+
+        Huesped huesped = construirHuesped();
+        if (huesped == null) {
+            return;
+        }
+
+        try {
+            int idReserva = reservaService.registrarPendiente(huesped, empresaEncontrada, construirReserva());
+
+            mostrarInformacion(
+                    "Reserva pendiente guardada",
+                    "La reserva " + String.format("R-%04d", idReserva) + " quedó pendiente de confirmación."
+            );
+
+            limpiarFormulario();
+
+        } catch (ConflictoFechasException e) {
+            mostrarAdvertencia("Fechas no disponibles", e.getMessage());
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            mostrarAdvertencia("No se pudo guardar", e.getMessage());
+        } catch (SQLException e) {
+            mostrarError("Error de base de datos", "No se pudo guardar la reserva.\n\n" + e.getMessage());
+        }
     }
 
 
@@ -1221,7 +1529,7 @@ public class Nueva_reservaController {
         }
 
 
-        if (habitacionSeleccionada == null) {
+        if (habitacionElegida == null) {
 
             mostrarAdvertencia(
                     "Habitación requerida",
@@ -1250,28 +1558,71 @@ public class Nueva_reservaController {
             }
         }
 
+        Huesped huesped = construirHuesped();
+        if (huesped == null) {
+            return;
+        }
 
-        /*
-         * =====================================================
-         * FUTURO
-         * =====================================================
-         *
-         * Reserva reserva = ...
-         *
-         * reservaService.registrar(reserva);
-         *
-         * pagoService.registrar(...);
-         *
-         * comprobanteService.generar(...);
-         *
-         */
+        boolean checkinInmediato = dpFechaIngreso.getValue().equals(LocalDate.now());
+
+        Pago pago = new Pago();
+        pago.setMonto(java.math.BigDecimal.valueOf(totalReserva).setScale(2, RoundingMode.HALF_UP));
+        pago.setMetodoPago(metodoPagoSeleccionado());
+
+        try {
+            int idReserva = reservaService.registrar(huesped, empresaEncontrada, construirReserva(),
+                    List.of(pago), checkinInmediato);
+
+            mostrarInformacion(
+                    "Confirmar reserva",
+                    checkinInmediato
+                            ? "El huésped quedó registrado en la habitación " + habitacionElegida.getNumero() + "."
+                            : "La reserva " + String.format("R-%04d", idReserva) + " quedó confirmada."
+            );
+
+            limpiarFormulario();
+
+        } catch (ConflictoFechasException e) {
+            mostrarAdvertencia("Fechas no disponibles", e.getMessage());
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            mostrarAdvertencia("No se pudo confirmar", e.getMessage());
+        } catch (SQLException e) {
+            mostrarError("Error de base de datos", "No se pudo registrar la reserva.\n\n" + e.getMessage());
+        }
+    }
 
 
-        mostrarInformacion(
-                "Confirmar reserva",
-                "La operación está preparada para "
-                + "registrarse en la base de datos."
-        );
+    private Huesped construirHuesped() {
+        if (huespedEncontrado == null) {
+            mostrarAdvertencia("Cliente requerido", "Debe buscar y seleccionar un cliente.");
+            return null;
+        }
+        return huespedEncontrado;
+    }
+
+
+    private Reserva construirReserva() {
+        Reserva r = new Reserva();
+        r.setIdHabitacion(habitacionElegida.getIdHabitacion());
+        r.setFechaCheckin(dpFechaIngreso.getValue());
+        r.setFechaCheckout(dpFechaSalida.getValue());
+        r.setMontoTotal(java.math.BigDecimal.valueOf(totalReserva).setScale(2, RoundingMode.HALF_UP));
+        r.setCanal("PRESENCIAL");
+        return r;
+    }
+
+
+    private String metodoPagoSeleccionado() {
+        if (btnTarjeta.isSelected()) {
+            return "TARJETA";
+        }
+        if (btnTransferencia.isSelected()) {
+            return "TRANSFERENCIA";
+        }
+        if (btnYape.isSelected()) {
+            return "YAPE";
+        }
+        return "EFECTIVO";
     }
 
 
@@ -1335,9 +1686,6 @@ public class Nueva_reservaController {
         cbTipoHabitacion.setValue(
                 "Todos los tipos"
         );
-
-
-        limpiarHabitaciones();
 
 
         btnEfectivo.setSelected(true);
@@ -1520,6 +1868,26 @@ public class Nueva_reservaController {
         Alert alert =
                 new Alert(
                         Alert.AlertType.INFORMATION
+                );
+
+        alert.setTitle(titulo);
+
+        alert.setHeaderText(null);
+
+        alert.setContentText(mensaje);
+
+        alert.showAndWait();
+    }
+
+
+    private void mostrarError(
+            String titulo,
+            String mensaje
+    ) {
+
+        Alert alert =
+                new Alert(
+                        Alert.AlertType.ERROR
                 );
 
         alert.setTitle(titulo);

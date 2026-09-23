@@ -4,6 +4,8 @@
  */
 package untrm.hotel_san_antonio.controlador.Reserva;
 
+import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -13,7 +15,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
+import untrm.hotel_san_antonio.modelo.Reserva;
+import untrm.hotel_san_antonio.servicio.ReservaService;
+
 public class ConfirmarReservaController {
+
+    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @FXML
     private TextField txtBuscarReserva;
@@ -70,6 +77,11 @@ public class ConfirmarReservaController {
     private CheckBox chkCorreo;
 
 
+    private final ReservaService reservaService = new ReservaService();
+
+    private Reserva reservaActual;
+
+
     @FXML
     public void initialize() {
 
@@ -104,27 +116,63 @@ public class ConfirmarReservaController {
             return;
         }
 
+        try {
+            reservaActual = reservaService.buscarUno(busqueda);
+        } catch (SQLException e) {
+            mostrarError("Error de base de datos", "No se pudo buscar la reserva.\n\n" + e.getMessage());
+            return;
+        }
 
-        /*
-         * AQUÍ SE CONECTARÁ MYSQL.
-         *
-         * Reserva reserva =
-         *     reservaService.buscar(busqueda);
-         *
-         * cargarReserva(reserva);
-         */
+        if (reservaActual == null) {
+            limpiar();
+            mostrarAdvertencia(
+                    "Sin resultados",
+                    "No se encontró ninguna reserva con \"" + busqueda + "\"."
+            );
+            return;
+        }
 
-        mostrarInformacion(
-                "Sin base de datos",
-                "La búsqueda estará disponible cuando conectes MySQL."
-        );
+        cargarReserva(reservaActual);
+    }
+
+
+    private void cargarReserva(Reserva r) {
+
+        lblEstado.setText("Reserva " + textoEstado(r.getEstado()));
+        lblCodigo.setText(r.getCodigo());
+        lblFechaReserva.setText(r.getFechaReserva() == null ? "--"
+                : r.getFechaReserva().toLocalDate().format(FORMATO_FECHA));
+        lblCliente.setText(r.getNombreHuesped());
+        lblDocumento.setText(r.getTipoDocumentoHuesped() + " " + r.getNumDocumentoHuesped());
+        lblTelefono.setText(valorSeguro(r.getTelefonoHuesped()));
+        lblCorreo.setText(valorSeguro(r.getEmailHuesped()));
+        lblIngreso.setText(r.getFechaCheckin().format(FORMATO_FECHA));
+        lblSalida.setText(r.getFechaCheckout().format(FORMATO_FECHA));
+        lblNoches.setText(String.valueOf(java.time.temporal.ChronoUnit.DAYS.between(r.getFechaCheckin(), r.getFechaCheckout())));
+        lblHuespedes.setText("--");
+        lblHabitacion.setText(r.getNumeroHabitacion() + " · " + r.getNombreTipoHabitacion());
+        lblTotal.setText(String.format(java.util.Locale.US, "S/ %.2f", r.getMontoTotal()));
+
+        cbEstado.setValue("PENDIENTE".equals(r.getEstado()) ? "Pendiente" : "Confirmada");
+    }
+
+
+    private String textoEstado(String estado) {
+        return switch (estado) {
+            case "PENDIENTE" -> "pendiente";
+            case "CONFIRMADA" -> "confirmada";
+            case "CHECKIN" -> "con check-in hecho";
+            case "FINALIZADA" -> "finalizada";
+            case "CANCELADA" -> "cancelada";
+            default -> estado;
+        };
     }
 
 
     @FXML
     private void confirmarReserva() {
 
-        if ("--".equals(lblCodigo.getText())) {
+        if (reservaActual == null || "--".equals(lblCodigo.getText())) {
 
             mostrarAdvertencia(
                     "Reserva requerida",
@@ -134,20 +182,32 @@ public class ConfirmarReservaController {
             return;
         }
 
+        if ("Pendiente".equals(cbEstado.getValue())) {
 
-        /*
-         * FUTURO:
-         *
-         * reservaService.confirmar(idReserva);
-         *
-         * habitacionService.actualizarEstado(...);
-         */
+            mostrarAdvertencia(
+                    "Nada que hacer",
+                    "La reserva ya está pendiente; elija \"Confirmada\" para confirmarla."
+            );
 
+            return;
+        }
+
+        try {
+            reservaService.confirmar(reservaActual.getIdReserva(), reservaActual.getEstado());
+        } catch (IllegalStateException e) {
+            mostrarAdvertencia("No se puede confirmar", e.getMessage());
+            return;
+        } catch (SQLException e) {
+            mostrarError("Error de base de datos", "No se pudo confirmar la reserva.\n\n" + e.getMessage());
+            return;
+        }
 
         mostrarInformacion(
-                "Confirmación",
-                "La función está preparada para conectarse a MySQL."
+                "Reserva confirmada",
+                "La reserva " + reservaActual.getCodigo() + " quedó confirmada."
         );
+
+        limpiar();
     }
 
 
@@ -159,6 +219,8 @@ public class ConfirmarReservaController {
 
 
     private void limpiar() {
+
+        reservaActual = null;
 
         lblEstado.setText(
                 "Sin reserva seleccionada"
@@ -196,6 +258,11 @@ public class ConfirmarReservaController {
     }
 
 
+    private String valorSeguro(String valor) {
+        return valor == null || valor.isBlank() ? "--" : valor;
+    }
+
+
     private void mostrarAdvertencia(
             String titulo,
             String mensaje
@@ -225,6 +292,20 @@ public class ConfirmarReservaController {
                 new Alert(
                         Alert.AlertType.INFORMATION
                 );
+
+        alert.setTitle(titulo);
+
+        alert.setHeaderText(null);
+
+        alert.setContentText(mensaje);
+
+        alert.showAndWait();
+    }
+
+
+    private void mostrarError(String titulo, String mensaje) {
+
+        Alert alert = new Alert(Alert.AlertType.ERROR);
 
         alert.setTitle(titulo);
 

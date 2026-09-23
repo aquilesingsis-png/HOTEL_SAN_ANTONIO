@@ -21,8 +21,21 @@ public class Reserva {
     // campos de conveniencia para mostrar en tablas, cargados por el DAO con JOIN
     private String nombreHuesped;
     private String numeroHabitacion;
+    private String tipoDocumentoHuesped;
+    private String numDocumentoHuesped;
+    private String telefonoHuesped;
+    private String emailHuesped;
+    private String nombreTipoHabitacion;
+    private int pisoHabitacion;
+    private String motivoCancelacion;
+    private String detalleCancelacion;
 
     public Reserva() {}
+
+    /** Codigo corto que se muestra al usuario (ej. "R-0005"). */
+    public String getCodigo() {
+        return String.format("R-%04d", idReserva);
+    }
 
     public int getIdReserva() { return idReserva; }
     public void setIdReserva(int idReserva) { this.idReserva = idReserva; }
@@ -65,4 +78,28 @@ public class Reserva {
 
     public String getNumeroHabitacion() { return numeroHabitacion; }
     public void setNumeroHabitacion(String numeroHabitacion) { this.numeroHabitacion = numeroHabitacion; }
+
+    public String getTipoDocumentoHuesped() { return tipoDocumentoHuesped; }
+    public void setTipoDocumentoHuesped(String tipoDocumentoHuesped) { this.tipoDocumentoHuesped = tipoDocumentoHuesped; }
+
+    public String getNumDocumentoHuesped() { return numDocumentoHuesped; }
+    public void setNumDocumentoHuesped(String numDocumentoHuesped) { this.numDocumentoHuesped = numDocumentoHuesped; }
+
+    public String getTelefonoHuesped() { return telefonoHuesped; }
+    public void setTelefonoHuesped(String telefonoHuesped) { this.telefonoHuesped = telefonoHuesped; }
+
+    public String getEmailHuesped() { return emailHuesped; }
+    public void setEmailHuesped(String emailHuesped) { this.emailHuesped = emailHuesped; }
+
+    public String getNombreTipoHabitacion() { return nombreTipoHabitacion; }
+    public void setNombreTipoHabitacion(String nombreTipoHabitacion) { this.nombreTipoHabitacion = nombreTipoHabitacion; }
+
+    public int getPisoHabitacion() { return pisoHabitacion; }
+    public void setPisoHabitacion(int pisoHabitacion) { this.pisoHabitacion = pisoHabitacion; }
+
+    public String getMotivoCancelacion() { return motivoCancelacion; }
+    public void setMotivoCancelacion(String motivoCancelacion) { this.motivoCancelacion = motivoCancelacion; }
+
+    public String getDetalleCancelacion() { return detalleCancelacion; }
+    public void setDetalleCancelacion(String detalleCancelacion) { this.detalleCancelacion = detalleCancelacion; }
 }

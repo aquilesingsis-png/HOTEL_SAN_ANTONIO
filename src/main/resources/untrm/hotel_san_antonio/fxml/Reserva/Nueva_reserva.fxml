@@ -311,6 +311,22 @@
             </HBox>
 
 
+            <!-- DNI DEL HUÉSPED (solo cuando se factura a una empresa: alguien igual se hospeda) -->
+
+            <VBox fx:id="filaDocumentoHuesped" spacing="4.0" visible="false" managed="false">
+
+                <Label text="DNI del huésped que se hospeda *"
+                       style="-fx-font-size: 9px;
+                              -fx-font-weight: bold;"/>
+
+                <TextField fx:id="txtDocumentoHuesped"
+                           promptText="Ingrese DNI del huésped"
+                           prefHeight="31.0"
+                           style="-fx-font-size: 9px;"/>
+
+            </VBox>
+
+
             <!-- MENSAJE INICIAL -->
 
             <VBox fx:id="panelSinCliente"

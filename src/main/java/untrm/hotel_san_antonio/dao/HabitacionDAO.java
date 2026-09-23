@@ -15,6 +15,12 @@ public class HabitacionDAO {
 
     /** Todas las habitaciones con su tipo y, si estan ocupadas, el huesped actual. */
     public List<Habitacion> listar() throws SQLException {
+        try (Connection con = ConexionBD.conectar()) {
+            return listar(con);
+        }
+    }
+
+    public List<Habitacion> listar(Connection con) throws SQLException {
         String sql = "SELECT h.id_habitacion, h.numero, h.id_tipo, h.piso, h.estado, "
                 + "t.nombre AS tipo_nombre, t.capacidad, t.precio_base, "
                 + "(SELECT CONCAT(hu.nombres, ' ', hu.apellidos) "
@@ -30,8 +36,7 @@ public class HabitacionDAO {
                 + "ORDER BY h.piso, h.numero";
 
         List<Habitacion> lista = new ArrayList<>();
-        try (Connection con = ConexionBD.conectar();
-             PreparedStatement ps = con.prepareStatement(sql);
+        try (PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Habitacion h = new Habitacion(
@@ -48,6 +53,82 @@ public class HabitacionDAO {
                 h.setHuespedActual(rs.getString("huesped_actual"));
                 h.setReservaHoy(rs.getString("reserva_hoy"));
                 lista.add(h);
+            }
+        }
+        return lista;
+    }
+
+    /**
+     * Habitaciones que NO estan en mantenimiento y no tienen ninguna reserva vigente que se
+     * cruce con [ingreso, salida). Se usa para elegir habitacion en una reserva nueva.
+     */
+    public List<Habitacion> buscarDisponibles(Connection con, java.time.LocalDate ingreso, java.time.LocalDate salida,
+                                               Integer piso, String tipoNombre) throws SQLException {
+        StringBuilder sql = new StringBuilder(
+                "SELECT h.id_habitacion, h.numero, h.id_tipo, h.piso, h.estado, "
+                + "t.nombre AS tipo_nombre, t.capacidad, t.precio_base "
+                + "FROM habitacion h JOIN tipo_habitacion t ON t.id_tipo = h.id_tipo "
+                + "WHERE h.estado <> 'MANTENIMIENTO' "
+                + "AND NOT EXISTS (SELECT 1 FROM reserva r WHERE r.id_habitacion = h.id_habitacion "
+                + "  AND r.estado IN ('PENDIENTE','CONFIRMADA','CHECKIN') "
+                + "  AND r.fecha_checkin < ? AND r.fecha_checkout > ?) ");
+        List<Object> parametros = new ArrayList<>();
+        parametros.add(java.sql.Date.valueOf(salida));
+        parametros.add(java.sql.Date.valueOf(ingreso));
+        if (piso != null) {
+            sql.append("AND h.piso = ? ");
+            parametros.add(piso);
+        }
+        if (tipoNombre != null && !tipoNombre.isBlank()) {
+            sql.append("AND t.nombre = ? ");
+            parametros.add(tipoNombre);
+        }
+        sql.append("ORDER BY h.piso, h.numero");
+
+        List<Habitacion> lista = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < parametros.size(); i++) {
+                ps.setObject(i + 1, parametros.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Habitacion h = new Habitacion(
+                            rs.getInt("id_habitacion"),
+                            rs.getString("numero"),
+                            rs.getInt("id_tipo"),
+                            rs.getInt("piso"),
+                            rs.getString("estado"));
+                    h.setTipo(new TipoHabitacion(
+                            rs.getInt("id_tipo"),
+                            rs.getString("tipo_nombre"),
+                            rs.getInt("capacidad"),
+                            rs.getBigDecimal("precio_base")));
+                    lista.add(h);
+                }
+            }
+        }
+        return lista;
+    }
+
+    /** Los nombres de tipo de habitacion en uso (para el filtro de tipos). */
+    public List<String> listarNombresTipo(Connection con) throws SQLException {
+        List<String> lista = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement("SELECT nombre FROM tipo_habitacion ORDER BY nombre");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(rs.getString(1));
+            }
+        }
+        return lista;
+    }
+
+    /** Los pisos en uso (para el filtro de pisos). */
+    public List<Integer> listarPisos(Connection con) throws SQLException {
+        List<Integer> lista = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement("SELECT DISTINCT piso FROM habitacion ORDER BY piso");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(rs.getInt(1));
             }
         }
         return lista;
