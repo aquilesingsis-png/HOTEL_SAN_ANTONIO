@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="rootPane" prefHeight="1020.0" prefWidth="1536.0" styleClass="root-bg" stylesheets="@../css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="untrm.hotel_san_antonio.controlador.DashboardController">
+
+   <!-- ================= TOP BAR ================= -->
+   <top>
+      <HBox alignment="CENTER_LEFT" prefHeight="76.0" styleClass="topbar" BorderPane.alignment="CENTER">
+         <children>
+            <Label styleClass="menu-icon" text="≡" />
+            <VBox alignment="CENTER_LEFT">
+               <children>
+                  <Label styleClass="welcome-title" text="Bienvenido, Recepcionista" />
+                  <Label fx:id="lblFecha" styleClass="welcome-subtitle" text="Hoy es ..." />
+               </children>
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS" />
+
+            <TextField fx:id="txtBuscar" onKeyReleased="#filtrarLlegadas" promptText="🔍  Buscar reserva, huesped o habitacion..." styleClass="search-field" />
+
+            <StackPane styleClass="bell-stack">
+               <children>
+                  <Button fx:id="btnNotificaciones" mnemonicParsing="false" onAction="#mostrarNotificaciones" styleClass="icon-button" text="🔔" />
+                  <Label fx:id="lblBadge" styleClass="badge" text="3" StackPane.alignment="TOP_RIGHT" />
+               </children>
+            </StackPane>
+
+            <MenuButton fx:id="menuPerfil" mnemonicParsing="false" styleClass="profile-menu" text="👤  Recepcionista  ▾">
+               <items>
+                  <MenuItem mnemonicParsing="false" onAction="#verPerfil" text="Mi perfil" />
+                  <MenuItem mnemonicParsing="false" onAction="#verConfiguracion" text="Configuracion" />
+                  <MenuItem mnemonicParsing="false" onAction="#cerrarSesion" text="Cerrar sesion" />
+               </items>
+            </MenuButton>
+         </children>
+         <padding>
+            <Insets left="20.0" right="24.0" />
+         </padding>
+      </HBox>
+   </top>
+
+   <!-- ================= CENTER (contenido) ================= -->
+   <center>
+      <ScrollPane fitToWidth="true" styleClass="content-scroll" BorderPane.alignment="CENTER">
+         <content>
+            <StackPane fx:id="centerStack">
+               <children>
+
+                  <!-- ========== VISTA: DASHBOARD ========== -->
+                  <VBox fx:id="dashboardView" spacing="18.0" styleClass="dashboard-view">
+                     <padding>
+                        <Insets bottom="20.0" left="24.0" right="24.0" top="18.0" />
+                     </padding>
+                     <children>
+
+                        <!-- Banner de bienvenida -->
+                        <StackPane styleClass="banner">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                 <children>
+                                    <VBox alignment="CENTER_LEFT" spacing="6.0" HBox.hgrow="ALWAYS">
+                                       <children>
+                                          <Label styleClass="banner-title" text="Bienvenido al" wrapText="true" />
+                                          <Label styleClass="banner-title" text="Hotel San Antonio" wrapText="true" />
+                                          <Label styleClass="banner-subtitle" text="Tu atencion hace la diferencia" />
+                                       </children>
+                                    </VBox>
+                                    <Label alignment="CENTER_RIGHT" styleClass="banner-quote" text="&quot;Huespedes hoy,&#10;recuerdos siempre&quot;" textAlignment="RIGHT" wrapText="true" />
+                                 </children>
+                                 <padding>
+                                    <Insets left="30.0" right="30.0" />
+                                 </padding>
+                              </HBox>
+                           </children>
+                        </StackPane>
+
+                        <!-- Tarjetas de estadisticas -->
+                        <HBox spacing="14.0" styleClass="cards-row">
+                           <children>
+                              <VBox styleClass="stat-card, card-yellow" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label styleClass="stat-icon" text="🛏" />
+                                    <Label fx:id="lblDisponibles" styleClass="stat-number" text="18" />
+                                    <Label styleClass="stat-label" text="Habitaciones disponibles" wrapText="true" />
+                                 </children>
+                              </VBox>
+                              <VBox styleClass="stat-card, card-orange" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label styleClass="stat-icon" text="🛏" />
+                                    <Label fx:id="lblOcupadas" styleClass="stat-number" text="12" />
+                                    <Label styleClass="stat-label" text="Habitaciones ocupadas" wrapText="true" />
+                                 </children>
+                              </VBox>
+                              <VBox styleClass="stat-card, card-blue" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label styleClass="stat-icon" text="👥" />
+                                    <Label fx:id="lblLlegadas" styleClass="stat-number" text="5" />
+                                    <Label styleClass="stat-label" text="Llegadas de hoy" wrapText="true" />
+                                 </children>
+                              </VBox>
+                              <VBox styleClass="stat-card, card-green" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label styleClass="stat-icon" text="🚪" />
+                                    <Label fx:id="lblSalidas" styleClass="stat-number" text="4" />
+                                    <Label styleClass="stat-label" text="Salidas de hoy" wrapText="true" />
+                                 </children>
+                              </VBox>
+                              <VBox styleClass="stat-card, card-red" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label styleClass="stat-icon" text="🗓" />
+                                    <Label fx:id="lblPendientes" styleClass="stat-number" text="3" />
+                                    <Label styleClass="stat-label" text="Reservas pendientes" wrapText="true" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+
+                        <!-- Fila 1: Llegadas / Salidas / Ocupacion -->
+                        <HBox spacing="14.0" styleClass="cards-row">
+                           <children>
+
+                              <VBox spacing="8.0" styleClass="table-card" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT">
+                                       <children>
+                                          <Label styleClass="card-title" text="🛏  Llegadas de hoy" HBox.hgrow="ALWAYS" />
+                                          <Button mnemonicParsing="false" onAction="#mostrarSeccion" styleClass="link-button" text="Ver todas" />
+                                       </children>
+                                    </HBox>
+                                    <TableView fx:id="tablaLlegadas" prefHeight="220.0" styleClass="mini-table">
+                                       <columns>
+                                          <TableColumn fx:id="colLlegadaHora" prefWidth="70.0" text="Hora" />
+                                          <TableColumn fx:id="colLlegadaHuesped" prefWidth="140.0" text="Huesped" />
+                                          <TableColumn fx:id="colLlegadaHabitacion" prefWidth="90.0" text="Habitacion" />
+                                          <TableColumn fx:id="colLlegadaEstado" prefWidth="100.0" text="Estado" />
+                                       </columns>
+                                    </TableView>
+                                 </children>
+                              </VBox>
+
+                              <VBox spacing="8.0" styleClass="table-card" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT">
+                                       <children>
+                                          <Label styleClass="card-title" text="🚪  Salidas de hoy" HBox.hgrow="ALWAYS" />
+                                          <Button mnemonicParsing="false" onAction="#mostrarSeccion" styleClass="link-button" text="Ver todas" />
+                                       </children>
+                                    </HBox>
+                                    <TableView fx:id="tablaSalidas" prefHeight="220.0" styleClass="mini-table">
+                                       <columns>
+                                          <TableColumn fx:id="colSalidaHora" prefWidth="70.0" text="Hora" />
+                                          <TableColumn fx:id="colSalidaHuesped" prefWidth="140.0" text="Huesped" />
+                                          <TableColumn fx:id="colSalidaHabitacion" prefWidth="90.0" text="Habitacion" />
+                                          <TableColumn fx:id="colSalidaEstado" prefWidth="100.0" text="Estado" />
+                                       </columns>
+                                    </TableView>
+                                 </children>
+                              </VBox>
+
+                              <VBox alignment="CENTER" prefWidth="260.0" spacing="6.0" styleClass="table-card">
+                                 <children>
+                                    <Label styleClass="card-title" text="📊  Ocupacion del hotel" />
+                                    <PieChart fx:id="chartOcupacion" labelsVisible="false" legendVisible="false" prefHeight="170.0" styleClass="donut-chart" />
+                                    <Label fx:id="lblPorcentajeOcupacion" styleClass="donut-percent" text="40% Ocupacion" />
+                                    <VBox styleClass="legend-box">
+                                       <children>
+                                          <Label styleClass="legend-item-orange" text="● Ocupadas   12" />
+                                          <Label styleClass="legend-item-gray" text="● Disponibles   18" />
+                                          <Label styleClass="legend-item-blue" text="● En limpieza   0" />
+                                          <Label styleClass="legend-item-pink" text="● En mantenimiento   0" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </VBox>
+
+                           </children>
+                        </HBox>
+
+                        <!-- Fila 2: Reservas proximas / Ventas del dia / Actividades -->
+                        <HBox spacing="14.0" styleClass="cards-row">
+                           <children>
+
+                              <VBox spacing="8.0" styleClass="table-card" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT">
+                                       <children>
+                                          <Label styleClass="card-title" text="📅  Reservas proximas" HBox.hgrow="ALWAYS" />
+                                          <Button mnemonicParsing="false" onAction="#mostrarSeccion" styleClass="link-button" text="Ver todas" />
+                                       </children>
+                                    </HBox>
+                                    <TableView fx:id="tablaReservas" prefHeight="220.0" styleClass="mini-table">
+                                       <columns>
+                                          <TableColumn fx:id="colReservaFecha" prefWidth="90.0" text="Fecha" />
+                                          <TableColumn fx:id="colReservaHuesped" prefWidth="140.0" text="Huesped" />
+                                          <TableColumn fx:id="colReservaHabitacion" prefWidth="90.0" text="Habitacion" />
+                                          <TableColumn fx:id="colReservaEstado" prefWidth="100.0" text="Estado" />
+                                       </columns>
+                                    </TableView>
+                                 </children>
+                              </VBox>
+
+                              <VBox prefWidth="260.0" spacing="10.0" styleClass="table-card">
+                                 <children>
+                                    <Label styleClass="card-title" text="🛒  Ventas del dia" />
+                                    <HBox styleClass="venta-row">
+                                       <children>
+                                          <VBox HBox.hgrow="ALWAYS">
+                                             <children>
+                                                <Label styleClass="venta-label" text="🛏  Habitaciones" />
+                                                <Label fx:id="lblVentasHabitacionesCant" styleClass="venta-sub" text="6 ventas" />
+                                             </children>
+                                          </VBox>
+                                          <Label fx:id="lblVentasHabitaciones" styleClass="venta-monto" text="S/ 1,980.00" />
+                                       </children>
+                                    </HBox>
+                                    <Separator />
+                                    <HBox styleClass="venta-row">
+                                       <children>
+                                          <VBox HBox.hgrow="ALWAYS">
+                                             <children>
+                                                <Label styleClass="venta-label" text="🛒  Tienda interna" />
+                                                <Label fx:id="lblVentasTiendaCant" styleClass="venta-sub" text="12 ventas" />
+                                             </children>
+                                          </VBox>
+                                          <Label fx:id="lblVentasTienda" styleClass="venta-monto" text="S/ 260.00" />
+                                       </children>
+                                    </HBox>
+                                    <VBox styleClass="venta-total-box">
+                                       <children>
+                                          <Label styleClass="venta-total-label" text="Total del dia" />
+                                          <Label fx:id="lblVentasTotal" styleClass="venta-total-monto" text="S/ 2,240.00" />
+                                          <Label fx:id="lblVentasTotalCant" styleClass="venta-sub" text="18 ventas" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </VBox>
+
+                              <VBox prefWidth="300.0" spacing="8.0" styleClass="table-card">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT">
+                                       <children>
+                                          <Label styleClass="card-title" text="🕑  Actividades recientes" HBox.hgrow="ALWAYS" />
+                                          <Button mnemonicParsing="false" onAction="#mostrarSeccion" styleClass="link-button" text="Ver todas" />
+                                       </children>
+                                    </HBox>
+                                    <VBox fx:id="listaActividades" spacing="10.0" />
+                                 </children>
+                              </VBox>
+
+                           </children>
+                        </HBox>
+
+                     </children>
+                  </VBox>
+
+                  <!-- ========== VISTA: PLACEHOLDER (otras secciones) ========== -->
+                  <VBox fx:id="placeholderView" alignment="CENTER" spacing="10.0" styleClass="placeholder-view" visible="false">
+                     <children>
+                        <Label fx:id="lblPlaceholderTitulo" styleClass="placeholder-title" text="Seccion" />
+                        <Label styleClass="placeholder-text" text="Este modulo esta en construccion." />
+                        <Button mnemonicParsing="false" onAction="#mostrarDashboard" styleClass="primary-button" text="Volver al Dashboard" />
+                     </children>
+                  </VBox>
+
+               </children>
+            </StackPane>
+         </content>
+      </ScrollPane>
+   </center>
+
+</BorderPane>

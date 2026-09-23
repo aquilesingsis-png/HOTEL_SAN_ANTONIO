@@ -1,4 +1,6 @@
-/* Paleta oficial Hotel San Antonio (SIGEH) */
+/* =========================================================
+   PALETA OFICIAL HOTEL SAN ANTONIO (SIGEH)
+   ========================================================= */
 * {
     -color-marron-oscuro: #3B210F;
     -color-marron-secundario: #5A3516;
@@ -11,7 +13,7 @@
     -color-gris-texto: #777777;
     -color-texto: #2B2B2B;
 
-    /* estados de habitacion */
+    /* Estados de habitación */
     -color-disponible: #22C55E;
     -color-disponible-fondo: #DCFCE7;
     -color-ocupada: #EF4444;
@@ -21,13 +23,13 @@
     -color-mantenimiento: #64748B;
     -color-mantenimiento-fondo: #E2E8F0;
 
-    /* financieros */
+    /* Financieros */
     -color-ingreso: #16A34A;
     -color-egreso: #DC2626;
     -color-pendiente: #CA8A04;
     -color-confirmado: #059669;
 
-    /* carrito */
+    /* Carrito */
     -color-carrito-fondo: #FFF7E6;
     -color-carrito-alerta: #DC2626;
 }
@@ -38,6 +40,14 @@
     -fx-text-fill: -color-texto;
 }
 
+.root-bg {
+    -fx-background-color: #f3efe7;
+    -fx-font-family: "Segoe UI";
+}
+
+/* =========================================================
+   COMPONENTES GENERALES Y BOTONES
+   ========================================================= */
 .panel-encabezado {
     -fx-background-color: -color-marron-oscuro;
 }
@@ -48,15 +58,15 @@
     -fx-font-weight: bold;
 }
 
-.btn-primario {
+.btn-primario, .primary-button {
     -fx-background-color: -color-dorado;
     -fx-text-fill: -color-blanco;
     -fx-font-weight: bold;
-    -fx-background-radius: 4px;
+    -fx-background-radius: 8px;
     -fx-padding: 8px 20px;
     -fx-cursor: hand;
 }
-.btn-primario:hover {
+.btn-primario:hover, .primary-button:hover {
     -fx-background-color: -color-dorado-claro;
 }
 
@@ -72,15 +82,6 @@
 
 .btn-peligro {
     -fx-background-color: -color-ocupada;
-    -fx-text-fill: -color-blanco;
-    -fx-font-weight: bold;
-    -fx-background-radius: 4px;
-    -fx-padding: 8px 20px;
-    -fx-cursor: hand;
-}
-
-.btn-carrito {
-    -fx-background-color: -color-dorado;
     -fx-text-fill: -color-blanco;
     -fx-font-weight: bold;
     -fx-background-radius: 4px;
@@ -110,7 +111,9 @@
     -fx-border-color: -color-dorado-premium;
 }
 
-/* Estados de habitacion */
+/* =========================================================
+   ESTADOS DE HABITACIÓN
+   ========================================================= */
 .habitacion-disponible {
     -fx-background-color: -color-disponible-fondo;
     -fx-border-color: -color-disponible;
@@ -146,201 +149,123 @@
 .texto-pendiente { -fx-text-fill: -color-pendiente; -fx-font-weight: bold; }
 .texto-confirmado { -fx-text-fill: -color-confirmado; -fx-font-weight: bold; }
 
-/* Carrito de tiendita */
-.panel-carrito {
-    -fx-background-color: -color-carrito-fondo;
-}
-.badge-carrito {
-    -fx-background-color: -color-carrito-alerta;
-    -fx-text-fill: white;
-    -fx-background-radius: 999px;
-    -fx-padding: 2px 7px;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-}
-
 /* =========================================================
-   TIENDITA / CARRITO - Hotel San Antonio
-   Basado en la maqueta del equipo y paleta institucional.
+   SIDEBAR & TOPBAR
    ========================================================= */
-.tienda-root {
-    -fx-background-color: -color-fondo;
+.sidebar {
+    -fx-background-color: linear-gradient(to bottom, #2c2118, #241a13);
 }
-
-.tienda-header {
-    -fx-background-color: -color-marron-oscuro;
-    -fx-border-color: -color-dorado-premium;
-    -fx-border-width: 0 0 2px 0;
+.sidebar-logo-box {
+    -fx-background-color: #f6f0e6;
 }
-
-.tienda-titulo {
-    -fx-text-fill: white;
+.sidebar-logo-box .logo-emblem {
+    -fx-background-color: linear-gradient(to bottom, #caa15c, #8a6329);
+    -fx-background-radius: 10;
+    -fx-text-fill: #fff6e6;
     -fx-font-size: 18px;
     -fx-font-weight: bold;
+    -fx-padding: 8 16 8 16;
 }
-
-.tienda-subtitulo {
-    -fx-text-fill: #F5E6C8;
+.logo-title {
+    -fx-text-fill: #4a3826;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 0 0 0;
+}
+.logo-subtitle {
+    -fx-text-fill: #a98a52;
+    -fx-font-size: 10px;
+    -fx-letter-spacing: 2px;
+}
+.logo-stars {
+    -fx-text-fill: #caa15c;
+    -fx-font-size: 10px;
+    -fx-padding: 4 0 0 0;
+}
+.nav-box {
+    -fx-spacing: 3;
+}
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #d8c9ae;
+    -fx-font-size: 13px;
+    -fx-padding: 11 12 11 14;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+.nav-button:hover {
+    -fx-background-color: #3a2c1e;
+}
+.nav-button:selected {
+    -fx-background-color: linear-gradient(to right, #a97a2e, #8a5a1e);
+    -fx-text-fill: #fff8ec;
+    -fx-font-weight: bold;
+}
+.sidebar-footer .footer-quote {
+    -fx-text-fill: #b99a63;
+    -fx-font-style: italic;
     -fx-font-size: 12px;
 }
 
-.tienda-panel {
+.topbar {
     -fx-background-color: white;
-    -fx-background-radius: 10px;
-    -fx-border-radius: 10px;
-    -fx-border-color: #E5E5E5;
-    -fx-padding: 16px;
-    -fx-effect: dropshadow(gaussian, rgba(59,33,15,0.08), 10, 0.15, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);
 }
-
-.campo-busqueda {
-    -fx-background-color: white;
-    -fx-border-color: #DDD6CE;
-    -fx-border-radius: 6px;
-    -fx-background-radius: 6px;
-    -fx-padding: 8px 10px;
+.menu-icon {
+    -fx-font-size: 20px;
+    -fx-text-fill: #4a4038;
 }
-
-.combo-box, .text-field {
-    -fx-border-color: #DDD6CE;
-    -fx-border-radius: 6px;
-    -fx-background-radius: 6px;
-}
-
-.tabla-tienda {
-    -fx-background-color: white;
-    -fx-border-color: #DDD6CE;
-    -fx-border-radius: 6px;
-    -fx-background-radius: 6px;
-}
-
-.tabla-tienda .column-header-background {
-    -fx-background-color: #F3EEE7;
-}
-
-.tabla-tienda .column-header,
-.tabla-tienda .filler {
-    -fx-background-color: #F3EEE7;
-    -fx-border-color: transparent transparent #DDD6CE transparent;
-}
-
-.tabla-tienda .table-row-cell:hover {
-    -fx-background-color: #FFF7E8;
-}
-
-.tabla-tienda .table-row-cell:selected {
-    -fx-background-color: #F5E6C8;
-    -fx-text-background-color: #2B2B2B;
-}
-
-.subtitulo-bloque,
-.etiqueta-campo {
-    -fx-text-fill: -color-marron-oscuro;
+.page-title {
+    -fx-font-size: 18px;
     -fx-font-weight: bold;
+    -fx-text-fill: #2c2118;
 }
-
-.btn-cantidad {
-    -fx-background-color: #F3EEE7;
-    -fx-text-fill: -color-marron-oscuro;
-    -fx-font-weight: bold;
-    -fx-font-size: 16px;
-    -fx-background-radius: 6px;
+.page-subtitle {
+    -fx-font-size: 11.5px;
+    -fx-text-fill: #8a7f70;
+}
+.search-field {
+    -fx-background-color: #f2efe9;
+    -fx-background-radius: 18;
+    -fx-padding: 8 16 8 16;
+    -fx-pref-width: 320px;
+    -fx-font-size: 12.5px;
+}
+.icon-button {
+    -fx-background-color: #f2efe9;
+    -fx-background-radius: 20;
     -fx-min-width: 38px;
+    -fx-min-height: 38px;
+    -fx-font-size: 15px;
     -fx-cursor: hand;
 }
-
-.btn-cantidad:hover {
-    -fx-background-color: #EAD7B7;
-}
-
-.btn-enlace-peligro {
-    -fx-background-color: transparent;
-    -fx-text-fill: #DC2626;
-    -fx-underline: true;
-    -fx-cursor: hand;
-}
-
-.btn-header-secundario {
-    -fx-background-color: transparent;
+.badge-red {
+    -fx-background-color: #d9433a;
     -fx-text-fill: white;
-    -fx-border-color: #E6C77A;
-    -fx-border-radius: 6px;
-    -fx-background-radius: 6px;
-    -fx-padding: 7px 16px;
-    -fx-cursor: hand;
-}
-
-.resumen-total {
-    -fx-background-color: #FFF7E6;
-    -fx-border-color: #E6C77A;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-padding: 12px;
-}
-
-.total-etiqueta {
-    -fx-font-size: 14px;
+    -fx-font-size: 9px;
     -fx-font-weight: bold;
-    -fx-text-fill: #777777;
+    -fx-background-radius: 10;
+    -fx-padding: 1 5 1 5;
+    -fx-translate-x: 4;
+    -fx-translate-y: -4;
 }
 
-.total-valor {
-    -fx-font-size: 24px;
-    -fx-font-weight: bold;
-    -fx-text-fill: -color-marron-oscuro;
-}
-
-.btn-confirmar-venta {
-    -fx-background-color: -color-dorado;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-size: 14px;
-    -fx-background-radius: 7px;
-    -fx-padding: 12px 20px;
-    -fx-cursor: hand;
-}
-
-.btn-confirmar-venta:hover {
-    -fx-background-color: -color-dorado-claro;
-}
-
-/* ===== Tiendita / Carrito - maqueta final ===== */
+/* =========================================================
+   TIENDITA / CARRITO - Maqueta Final
+   ========================================================= */
 .venta-root { -fx-background-color:#F8F6F2; -fx-font-family:"Segoe UI"; }
 .venta-header { -fx-background-color:white; -fx-border-color:#E7E1D8; -fx-border-width:0 0 1 0; }
 .venta-titulo { -fx-font-size:22px; -fx-font-weight:bold; -fx-text-fill:#151515; }
 .venta-subtitulo { -fx-font-size:12px; -fx-text-fill:#53647A; }
-.icono-dorado { -fx-icon-color:#7A4A18; }
-.venta-scroll { -fx-background-color:transparent; -fx-background:#F8F6F2; -fx-padding:0; }
 .venta-contenido { -fx-background-color:#F8F6F2; }
 .venta-columna { -fx-background-color:white; -fx-background-radius:7; -fx-border-color:#E6E2DC; -fx-border-radius:7; -fx-padding:13; }
-.titulo-seccion { -fx-font-size:14px; -fx-font-weight:bold; -fx-text-fill:#171717; }
-.subtitulo-bloque { -fx-font-size:13px; -fx-font-weight:bold; -fx-padding:6 0 0 0; }
 .etiqueta-campo,.etiqueta-filtro { -fx-font-size:12px; -fx-font-weight:bold; -fx-text-fill:#222; }
-.etiqueta-filtro { -fx-padding:3 0 0 0; }
-.venta-root .text-field,.venta-root .combo-box,.venta-root .text-area { -fx-background-color:white; -fx-border-color:#CFD6DF; -fx-border-radius:6; -fx-background-radius:6; -fx-min-height:34; }
 .btn-buscar { -fx-background-color:#8B571C; -fx-text-fill:white; -fx-background-radius:0 6 6 0; -fx-min-width:46; -fx-min-height:34; }
-.btn-opcion,.btn-pago { -fx-background-color:#8B571C; -fx-text-fill:white; -fx-background-radius:6; -fx-border-radius:6; -fx-border-color:#8B571C; -fx-font-weight:bold; -fx-content-display:TOP; -fx-graphic-text-gap:5; }
-.btn-opcion { -fx-min-height:54; }
-.btn-pago { -fx-min-height:60; -fx-font-size:11px; }
-.btn-opcion:hover,.btn-pago:hover,.btn-buscar:hover,.btn-emitir:hover { -fx-background-color:#704313; }
-.btn-opcion:selected,.btn-pago:selected { -fx-background-color:#8B571C; -fx-text-fill:white; }
+.btn-opcion,.btn-pago { -fx-background-color:#8B571C; -fx-text-fill:white; -fx-background-radius:6; -fx-border-radius:6; -fx-border-color:#8B571C; -fx-font-weight:bold; }
 .tabla-venta { -fx-background-color:white; -fx-border-color:transparent; }
-.tabla-venta .column-header-background { -fx-background-color:white; }
 .tabla-venta .column-header { -fx-background-color:white; -fx-border-color:#E6E8EC; -fx-border-width:0 0 1 0; }
 .tabla-venta .table-row-cell { -fx-background-color:white; -fx-border-color:#EEF0F2; -fx-border-width:0 0 1 0; -fx-cell-size:40px; }
 .tabla-venta .table-row-cell:selected { -fx-background-color:#F4EBDD; -fx-text-background-color:#111; }
-.btn-agregar-tabla { -fx-background-color:#F3ECE3; -fx-text-fill:#151515; -fx-background-radius:6; -fx-font-size:11px; -fx-font-weight:bold; }
-.btn-vaciar { -fx-background-color:#FDEBEC; -fx-text-fill:#E02020; -fx-background-radius:6; }
-.btn-cantidad,.btn-secundario,.btn-cancelar,.btn-pagina { -fx-background-color:white; -fx-border-color:#D7DDE5; -fx-border-radius:6; -fx-background-radius:6; }
-.btn-pagina-activa { -fx-background-color:#8B571C; -fx-text-fill:white; -fx-background-radius:5; }
-.caja-totales { -fx-background-color:#FFF9F1; -fx-border-color:#EADFD1; -fx-border-radius:6; -fx-background-radius:6; -fx-padding:10; }
-.monto-azul { -fx-text-fill:#003B7A; -fx-font-weight:bold; }
+.btn-cantidad { -fx-background-color:white; -fx-border-color:#D7DDE5; -fx-border-radius:6; -fx-background-radius:6; -fx-cursor: hand; }
 .total-etiqueta,.total-valor { -fx-font-size:20px; -fx-font-weight:bold; }
-.caja-vuelto { -fx-background-color:#EAF8ED; -fx-background-radius:6; -fx-padding:12; }
-.vuelto-etiqueta { -fx-font-size:17px; -fx-font-weight:bold; }
-.vuelto-valor { -fx-font-size:21px; -fx-font-weight:bold; -fx-text-fill:#009B28; }
 .btn-emitir { -fx-background-color:#8B571C; -fx-text-fill:white; -fx-background-radius:6; -fx-font-weight:bold; -fx-min-height:44; }
-.btn-cancelar { -fx-min-height:44; -fx-font-weight:bold; }
-.btn-icono { -fx-background-color:transparent; }
-.icono-vacio { -fx-icon-color:#B6B6B6; }
-.texto-secundario { -fx-text-fill:#657187; -fx-font-size:12px; }
