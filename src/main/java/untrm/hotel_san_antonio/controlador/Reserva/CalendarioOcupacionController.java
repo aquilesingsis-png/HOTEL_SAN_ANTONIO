@@ -12,8 +12,10 @@ import java.util.stream.Collectors;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -31,6 +33,7 @@ import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.util.EstiloUtil;
 
 public class CalendarioOcupacionController {
 
@@ -79,6 +82,9 @@ public class CalendarioOcupacionController {
 
     @FXML
     private Label lblDia7;
+
+    @FXML
+    private ScrollPane scrollHabitaciones;
 
     @FXML
     private VBox contenedorHabitaciones;
@@ -143,6 +149,14 @@ public class CalendarioOcupacionController {
 
         inicioSemana = LocalDate.now();
 
+
+        // El interior del ScrollPane pinta blanco por defecto: se corrige apenas arme su piel.
+        EstiloUtil.alArmarPiel(scrollHabitaciones, () -> {
+            Node viewport = scrollHabitaciones.lookup(".viewport");
+            if (viewport != null) {
+                viewport.setStyle("-fx-background-color: transparent;");
+            }
+        });
 
         // Configurar botones Semana / Mes
         configurarVista();

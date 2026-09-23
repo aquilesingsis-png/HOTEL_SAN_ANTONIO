@@ -341,10 +341,10 @@ public class CarritoTiendaController {
     private void actualizarTipoComprobante(){
         boolean factura = btnFactura.isSelected();
         lblDatosCliente.setText(factura ? "Datos del cliente (Factura)" : "Datos del cliente (Boleta)");
-        lblEtiquetaDocumento.setText(factura ? "RUC de la empresa *" : "DNI (opcional)");
-        lblEtiquetaNombre.setText(factura ? "Razón social *" : "Nombre completo (opcional)");
-        txtBuscarDni.setPromptText(factura ? "Ingrese RUC (buscar o escribir)" : "Ingrese DNI (opcional, buscar o escribir)");
-        txtNombreCliente.setPromptText(factura ? "Razón social" : "Nombres y apellidos (opcional)");
+        lblEtiquetaDocumento.setText(factura ? "RUC de la empresa *" : "DNI");
+        lblEtiquetaNombre.setText(factura ? "Razón social *" : "Nombre completo");
+        txtBuscarDni.setPromptText(factura ? "Ingrese RUC" : "Ingrese DNI");
+        txtNombreCliente.setPromptText(factura ? "Razón social" : "Nombres y apellidos");
 
         // Los datos de una persona (telefono) y de una empresa (direccion) no se mezclan entre modos.
         txtBuscarDni.clear();

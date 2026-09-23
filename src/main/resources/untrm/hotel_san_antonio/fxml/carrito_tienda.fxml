@@ -44,25 +44,25 @@
        <ToggleButton fx:id="btnFactura" text="Factura" toggleGroup="$tipoComprobante" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
       </HBox>
       <Label fx:id="lblDatosCliente" text="Datos del cliente (Boleta)" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 6 0 0 0;"/>
-      <Label fx:id="lblEtiquetaDocumento" text="DNI (opcional)" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <Label fx:id="lblEtiquetaDocumento" text="DNI" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
       <HBox spacing="0">
-       <TextField fx:id="txtBuscarDni" promptText="Ingrese DNI (opcional)" HBox.hgrow="ALWAYS"
+       <TextField fx:id="txtBuscarDni" promptText="Ingrese DNI" HBox.hgrow="ALWAYS"
                   style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6 0 0 6; -fx-background-radius: 6 0 0 6; -fx-min-height: 34;"/>
        <Button fx:id="btnBuscarCliente" text="🔍" onAction="#onBuscarCliente"
                style="-fx-background-color: #8B571C; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0 6 6 0; -fx-min-width: 46; -fx-min-height: 34;"/>
       </HBox>
-      <Label fx:id="lblEtiquetaNombre" text="Nombre completo (opcional)" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
-      <TextField fx:id="txtNombreCliente" promptText="Nombres y apellidos (opcional)"
+      <Label fx:id="lblEtiquetaNombre" text="Nombre completo" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <TextField fx:id="txtNombreCliente" promptText="Nombres y apellidos"
                  style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
       <Label text="Dirección" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
-      <TextField fx:id="txtDireccion" promptText="Dirección del cliente (opcional)"
+      <TextField fx:id="txtDireccion" promptText="Dirección del cliente"
                  style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
       <Label text="Teléfono" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
-      <TextField fx:id="txtTelefono" promptText="Teléfono (opcional)"
+      <TextField fx:id="txtTelefono" promptText="Teléfono"
                  style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
       <Separator/>
       <Label text="Datos adicionales" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #171717;"/>
-      <Label text="Habitación (opcional)" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <Label text="Habitación" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
       <ComboBox fx:id="cmbHabitacion" maxWidth="Infinity" promptText="Seleccione habitación"
                 style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
       <Label text="Observaciones" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
