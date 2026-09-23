@@ -4,20 +4,28 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import untrm.hotel_san_antonio.dao.CategoriaDAO;
+import untrm.hotel_san_antonio.dao.EmpresaDAO;
+import untrm.hotel_san_antonio.dao.HuespedDAO;
 import untrm.hotel_san_antonio.dao.ProductoDAO;
 import untrm.hotel_san_antonio.modelo.Categoria;
 import untrm.hotel_san_antonio.modelo.DetalleVenta;
+import untrm.hotel_san_antonio.modelo.Empresa;
+import untrm.hotel_san_antonio.modelo.Huesped;
 import untrm.hotel_san_antonio.modelo.Producto;
 import untrm.hotel_san_antonio.modelo.VentaTienda;
+import untrm.hotel_san_antonio.servicio.ReniecService;
+import untrm.hotel_san_antonio.servicio.SunatRucService;
 import untrm.hotel_san_antonio.servicio.VentaService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.ConexionBD;
 import untrm.hotel_san_antonio.util.SesionActual;
+import untrm.hotel_san_antonio.util.Validador;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -57,8 +65,10 @@ public class CarritoTiendaController {
     private ToggleButton btnBoleta, btnFactura, btnEfectivo, btnTarjeta, btnYape, btnTransferencia;
     @FXML 
     private ToggleGroup tipoComprobante, formaPago;
-    @FXML 
+    @FXML
     private Label lblDatosCliente, lblSubtotal, lblIgv, lblTotal, lblVuelto, lblMostrando;
+    @FXML
+    private Label lblEtiquetaDocumento, lblEtiquetaNombre;
 
     @FXML
     private Button btnBuscarCliente, btnBuscarProducto, btnEmitir;
@@ -85,6 +95,8 @@ public class CarritoTiendaController {
 
     private final ProductoDAO productoDAO = new ProductoDAO();
     private final CategoriaDAO categoriaDAO = new CategoriaDAO();
+    private final HuespedDAO huespedDAO = new HuespedDAO();
+    private final EmpresaDAO empresaDAO = new EmpresaDAO();
     private final VentaService ventaService = new VentaService();
     private final ObservableList<Producto> productos = FXCollections.observableArrayList();
     private final ObservableList<DetalleVenta> carrito = FXCollections.observableArrayList();
@@ -211,13 +223,137 @@ public class CarritoTiendaController {
             Alertas.mostrarError("Tiendita", "No se pudieron cargar las habitaciones ocupadas.\n"+e.getMessage()); }
     }
 
-    @FXML 
+    @FXML
     private void onBuscarProducto(){ cargarProductos(); }
-    @FXML 
-    private void onBuscarCliente(){ Alertas.mostrarInfo("Cliente", "La consulta automática por DNI no se implementará en esta etapa. Puedes ingresar los datos manualmente."); }
 
-    private void actualizarTipoComprobante(){ 
-        lblDatosCliente.setText(btnFactura.isSelected()?"Datos del cliente (Factura)":"Datos del cliente (Boleta)"); }
+    @FXML
+    private void onBuscarCliente() {
+        String documento = txtBuscarDni.getText() == null ? "" : txtBuscarDni.getText().trim();
+        if (documento.isEmpty()) {
+            Alertas.mostrarInfo("Buscar cliente", "Ingrese un DNI o RUC para buscar.");
+            return;
+        }
+        if (btnFactura.isSelected()) {
+            buscarEmpresa(documento);
+        } else {
+            buscarPersona(documento);
+        }
+    }
+
+    /** Boleta: busca a la persona primero en la BD y, si no esta, en RENIEC. */
+    private void buscarPersona(String dni) {
+        if (!Validador.esDniValido(dni)) {
+            Alertas.mostrarInfo("DNI inválido", "Ingrese un DNI válido de 8 dígitos.");
+            return;
+        }
+        try {
+            Huesped local = huespedDAO.buscarPorDocumento("DNI", dni);
+            if (local != null) {
+                aplicarDatosPersona(dni, (local.getNombres() + " " + local.getApellidos()).trim(), local.getTelefono());
+                return;
+            }
+        } catch (SQLException e) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo buscar al cliente.\n\n" + e.getMessage());
+            return;
+        }
+
+        btnBuscarCliente.setDisable(true);
+        Task<Huesped> tarea = ReniecService.consultarDni(dni);
+        tarea.setOnSucceeded(e -> {
+            btnBuscarCliente.setDisable(false);
+            Huesped h = tarea.getValue();
+            if (h == null) {
+                Alertas.mostrarInfo("Cliente no encontrado",
+                        "No se encontraron datos para ese DNI en RENIEC.\nPuedes ingresarlos manualmente o continuar sin ellos.");
+                return;
+            }
+            aplicarDatosPersona(dni, (h.getNombres() + " " + h.getApellidos()).trim(), null);
+        });
+        tarea.setOnFailed(e -> {
+            btnBuscarCliente.setDisable(false);
+            Alertas.mostrarInfo("RENIEC", "No se pudo consultar RENIEC (" + causaError(tarea.getException()) + ").");
+        });
+        iniciarTarea(tarea);
+    }
+
+    /** Factura: busca la empresa primero en la BD y, si no esta, en la SUNAT. */
+    private void buscarEmpresa(String ruc) {
+        if (!Validador.esRucValido(ruc)) {
+            Alertas.mostrarInfo("RUC inválido", "Ingrese un RUC válido de 11 dígitos.");
+            return;
+        }
+        Empresa local;
+        try (Connection con = ConexionBD.conectar()) {
+            local = empresaDAO.buscarPorRuc(con, ruc);
+        } catch (SQLException e) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo buscar la empresa.\n\n" + e.getMessage());
+            return;
+        }
+        if (local != null) {
+            aplicarDatosEmpresa(ruc, local.getRazonSocial(), local.getDireccion());
+            return;
+        }
+
+        btnBuscarCliente.setDisable(true);
+        Task<Empresa> tarea = SunatRucService.consultarRuc(ruc);
+        tarea.setOnSucceeded(e -> {
+            btnBuscarCliente.setDisable(false);
+            Empresa emp = tarea.getValue();
+            if (emp == null) {
+                Alertas.mostrarInfo("Empresa no encontrada", "No se encontraron datos para ese RUC en la SUNAT.");
+                return;
+            }
+            aplicarDatosEmpresa(ruc, emp.getRazonSocial(), emp.getDireccion());
+        });
+        tarea.setOnFailed(e -> {
+            btnBuscarCliente.setDisable(false);
+            Alertas.mostrarInfo("SUNAT", "No se pudo consultar la SUNAT (" + causaError(tarea.getException()) + ").");
+        });
+        iniciarTarea(tarea);
+    }
+
+    private void aplicarDatosPersona(String dni, String nombre, String telefono) {
+        txtDni.setText(dni);
+        txtNombreCliente.setText(nombre);
+        if (telefono != null) {
+            txtTelefono.setText(telefono);
+        }
+    }
+
+    private void aplicarDatosEmpresa(String ruc, String razonSocial, String direccion) {
+        txtDni.setText(ruc);
+        txtNombreCliente.setText(razonSocial);
+        if (direccion != null) {
+            txtDireccion.setText(direccion);
+        }
+    }
+
+    private void iniciarTarea(Task<?> tarea) {
+        Thread hilo = new Thread(tarea);
+        hilo.setDaemon(true);
+        hilo.start();
+    }
+
+    private String causaError(Throwable t) {
+        return t == null || t.getMessage() == null ? "sin conexión" : t.getMessage();
+    }
+
+    private void actualizarTipoComprobante(){
+        boolean factura = btnFactura.isSelected();
+        lblDatosCliente.setText(factura ? "Datos del cliente (Factura)" : "Datos del cliente (Boleta)");
+        lblEtiquetaDocumento.setText(factura ? "RUC de la empresa *" : "DNI (opcional)");
+        lblEtiquetaNombre.setText(factura ? "Razón social *" : "Nombre completo (opcional)");
+        txtBuscarDni.setPromptText(factura ? "Buscar por RUC..." : "Buscar por DNI...");
+        txtDni.setPromptText(factura ? "Ingrese RUC" : "Ingrese DNI (opcional)");
+        txtNombreCliente.setPromptText(factura ? "Razón social" : "Nombres y apellidos (opcional)");
+
+        // Los datos de una persona (telefono) y de una empresa (direccion) no se mezclan entre modos.
+        txtBuscarDni.clear();
+        txtDni.clear();
+        txtNombreCliente.clear();
+        txtDireccion.clear();
+        txtTelefono.clear();
+    }
     private void actualizarFormaPago(){
         boolean efectivo=btnEfectivo.isSelected();
         txtMontoRecibido.setDisable(!efectivo);
@@ -250,19 +386,22 @@ public class CarritoTiendaController {
         String dni = txtDni.getText() == null ? "" : txtDni.getText().trim();
         String nombre = txtNombreCliente.getText() == null ? "" : txtNombreCliente.getText().trim();
 
-        if (dni.isEmpty()) {
-            Alertas.mostrarInfo("Datos incompletos", "Ingrese el DNI del cliente.");
-            txtDni.requestFocus();
-            return;
-        }
-        if (!dni.matches("\\d{8}")) {
+        if (btnFactura.isSelected()) {
+            // Una factura siempre identifica a quien se le factura: el RUC no es opcional.
+            if (!Validador.esRucValido(dni)) {
+                Alertas.mostrarInfo("RUC requerido", "Para una factura, ingrese un RUC válido de 11 dígitos.");
+                txtDni.requestFocus();
+                return;
+            }
+            if (nombre.isEmpty()) {
+                Alertas.mostrarInfo("Datos incompletos", "Ingrese la razón social de la empresa.");
+                txtNombreCliente.requestFocus();
+                return;
+            }
+        } else if (!dni.isEmpty() && !Validador.esDniValido(dni)) {
+            // En una boleta, el cliente puede preferir no dar sus datos: solo se valida si escribio algo.
             Alertas.mostrarInfo("DNI inválido", "El DNI debe contener exactamente 8 dígitos.");
             txtDni.requestFocus();
-            return;
-        }
-        if (nombre.isEmpty()) {
-            Alertas.mostrarInfo("Datos incompletos", "Ingrese el nombre completo del cliente.");
-            txtNombreCliente.requestFocus();
             return;
         }
         if(carrito.isEmpty()){

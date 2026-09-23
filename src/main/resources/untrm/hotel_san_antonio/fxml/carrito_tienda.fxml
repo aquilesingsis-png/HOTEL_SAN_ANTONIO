@@ -50,11 +50,11 @@
        <Button fx:id="btnBuscarCliente" onAction="#onBuscarCliente"
                style="-fx-background-color: #8B571C; -fx-text-fill: white; -fx-background-radius: 0 6 6 0; -fx-min-width: 46; -fx-min-height: 34;"/>
       </HBox>
-      <Label text="DNI *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
-      <TextField fx:id="txtDni" promptText="Ingrese DNI"
+      <Label fx:id="lblEtiquetaDocumento" text="DNI (opcional)" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <TextField fx:id="txtDni" promptText="Ingrese DNI (opcional)"
                  style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
-      <Label text="Nombre completo" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
-      <TextField fx:id="txtNombreCliente" promptText="Nombres y apellidos"
+      <Label fx:id="lblEtiquetaNombre" text="Nombre completo (opcional)" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <TextField fx:id="txtNombreCliente" promptText="Nombres y apellidos (opcional)"
                  style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
       <Label text="Dirección" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
       <TextField fx:id="txtDireccion" promptText="Dirección del cliente (opcional)"
