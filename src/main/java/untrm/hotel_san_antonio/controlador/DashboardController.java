@@ -48,6 +48,9 @@ public class DashboardController {
     // =========================================================
 
     @FXML
+    private Label lblSaludo;
+
+    @FXML
     private Label lblFecha;
 
     @FXML
@@ -184,6 +187,12 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
+
+        // Saludo segun el rol de quien inicio sesion (no siempre es el Administrador)
+        if (lblSaludo != null) {
+            String rol = SesionActual.getUsuario() != null ? SesionActual.getUsuario().getRol() : null;
+            lblSaludo.setText("¡Hola, " + ("RECEPCIONISTA".equals(rol) ? "Recepcionista" : "Administrador") + "!");
+        }
 
         // Mostrar la fecha actual
         if (lblFecha != null) {

@@ -46,7 +46,7 @@
                            <children>
                               <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                  <children>
-                                    <Label text="¡Hola, Administrador!" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
+                                    <Label fx:id="lblSaludo" text="¡Hola, Administrador!" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
                                     <Label text="Aquí tienes un resumen de la actividad del hotel." style="-fx-font-size: 13px; -fx-text-fill: #6A5F52;" />
                                  </children>
                               </VBox>

@@ -44,15 +44,13 @@
        <ToggleButton fx:id="btnFactura" text="Factura" toggleGroup="$tipoComprobante" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
       </HBox>
       <Label fx:id="lblDatosCliente" text="Datos del cliente (Boleta)" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 6 0 0 0;"/>
-      <HBox spacing="0">
-       <TextField fx:id="txtBuscarDni" promptText="Buscar por DNI..." HBox.hgrow="ALWAYS"
-                  style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
-       <Button fx:id="btnBuscarCliente" onAction="#onBuscarCliente"
-               style="-fx-background-color: #8B571C; -fx-text-fill: white; -fx-background-radius: 0 6 6 0; -fx-min-width: 46; -fx-min-height: 34;"/>
-      </HBox>
       <Label fx:id="lblEtiquetaDocumento" text="DNI (opcional)" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
-      <TextField fx:id="txtDni" promptText="Ingrese DNI (opcional)"
-                 style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
+      <HBox spacing="0">
+       <TextField fx:id="txtBuscarDni" promptText="Ingrese DNI (opcional)" HBox.hgrow="ALWAYS"
+                  style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6 0 0 6; -fx-background-radius: 6 0 0 6; -fx-min-height: 34;"/>
+       <Button fx:id="btnBuscarCliente" text="🔍" onAction="#onBuscarCliente"
+               style="-fx-background-color: #8B571C; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0 6 6 0; -fx-min-width: 46; -fx-min-height: 34;"/>
+      </HBox>
       <Label fx:id="lblEtiquetaNombre" text="Nombre completo (opcional)" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
       <TextField fx:id="txtNombreCliente" promptText="Nombres y apellidos (opcional)"
                  style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
@@ -77,9 +75,9 @@
       <Label text="BUSCAR PRODUCTOS" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #171717;"/>
       <HBox spacing="0">
        <TextField fx:id="txtBuscar" promptText="Buscar producto por nombre o marca..." HBox.hgrow="ALWAYS"
-                  style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
-       <Button fx:id="btnBuscarProducto" onAction="#onBuscarProducto"
-               style="-fx-background-color: #8B571C; -fx-text-fill: white; -fx-background-radius: 0 6 6 0; -fx-min-width: 46; -fx-min-height: 34;"/>
+                  style="-fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6 0 0 6; -fx-background-radius: 6 0 0 6; -fx-min-height: 34;"/>
+       <Button fx:id="btnBuscarProducto" text="🔍" onAction="#onBuscarProducto"
+               style="-fx-background-color: #8B571C; -fx-text-fill: white; -fx-font-size: 14px; -fx-background-radius: 0 6 6 0; -fx-min-width: 46; -fx-min-height: 34;"/>
       </HBox>
       <Label text="FILTRAR POR PRODUCTO" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222; -fx-padding: 3 0 0 0;"/>
       <ComboBox fx:id="cmbCategoria" maxWidth="Infinity" promptText="Todas las categorías"

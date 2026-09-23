@@ -54,7 +54,7 @@ public class CarritoTiendaController {
             + "-fx-background-radius: 6; -fx-font-weight: bold; -fx-min-height: 44;";
     private static final String FILA_SELECCIONADA = "-fx-background-color: #F4EBDD; -fx-text-background-color: #111;";
     @FXML 
-    private TextField txtBuscar, txtBuscarDni, txtDni, txtNombreCliente, txtDireccion, txtTelefono, txtMontoRecibido;
+    private TextField txtBuscar, txtBuscarDni, txtNombreCliente, txtDireccion, txtTelefono, txtMontoRecibido;
     @FXML 
     private TextArea txtObservaciones;
     @FXML 
@@ -313,7 +313,7 @@ public class CarritoTiendaController {
     }
 
     private void aplicarDatosPersona(String dni, String nombre, String telefono) {
-        txtDni.setText(dni);
+        txtBuscarDni.setText(dni);
         txtNombreCliente.setText(nombre);
         if (telefono != null) {
             txtTelefono.setText(telefono);
@@ -321,7 +321,7 @@ public class CarritoTiendaController {
     }
 
     private void aplicarDatosEmpresa(String ruc, String razonSocial, String direccion) {
-        txtDni.setText(ruc);
+        txtBuscarDni.setText(ruc);
         txtNombreCliente.setText(razonSocial);
         if (direccion != null) {
             txtDireccion.setText(direccion);
@@ -343,13 +343,11 @@ public class CarritoTiendaController {
         lblDatosCliente.setText(factura ? "Datos del cliente (Factura)" : "Datos del cliente (Boleta)");
         lblEtiquetaDocumento.setText(factura ? "RUC de la empresa *" : "DNI (opcional)");
         lblEtiquetaNombre.setText(factura ? "Razón social *" : "Nombre completo (opcional)");
-        txtBuscarDni.setPromptText(factura ? "Buscar por RUC..." : "Buscar por DNI...");
-        txtDni.setPromptText(factura ? "Ingrese RUC" : "Ingrese DNI (opcional)");
+        txtBuscarDni.setPromptText(factura ? "Ingrese RUC (buscar o escribir)" : "Ingrese DNI (opcional, buscar o escribir)");
         txtNombreCliente.setPromptText(factura ? "Razón social" : "Nombres y apellidos (opcional)");
 
         // Los datos de una persona (telefono) y de una empresa (direccion) no se mezclan entre modos.
         txtBuscarDni.clear();
-        txtDni.clear();
         txtNombreCliente.clear();
         txtDireccion.clear();
         txtTelefono.clear();
@@ -383,14 +381,14 @@ public class CarritoTiendaController {
 
     @FXML 
     private void onConfirmarVenta(){
-        String dni = txtDni.getText() == null ? "" : txtDni.getText().trim();
+        String dni = txtBuscarDni.getText() == null ? "" : txtBuscarDni.getText().trim();
         String nombre = txtNombreCliente.getText() == null ? "" : txtNombreCliente.getText().trim();
 
         if (btnFactura.isSelected()) {
             // Una factura siempre identifica a quien se le factura: el RUC no es opcional.
             if (!Validador.esRucValido(dni)) {
                 Alertas.mostrarInfo("RUC requerido", "Para una factura, ingrese un RUC válido de 11 dígitos.");
-                txtDni.requestFocus();
+                txtBuscarDni.requestFocus();
                 return;
             }
             if (nombre.isEmpty()) {
@@ -401,7 +399,7 @@ public class CarritoTiendaController {
         } else if (!dni.isEmpty() && !Validador.esDniValido(dni)) {
             // En una boleta, el cliente puede preferir no dar sus datos: solo se valida si escribio algo.
             Alertas.mostrarInfo("DNI inválido", "El DNI debe contener exactamente 8 dígitos.");
-            txtDni.requestFocus();
+            txtBuscarDni.requestFocus();
             return;
         }
         if(carrito.isEmpty()){
@@ -485,7 +483,7 @@ public class CarritoTiendaController {
             if(p.getIdProducto()==id)
                 return p;
         return null;}
-    private void limpiarCliente(){txtBuscarDni.clear();txtDni.clear();txtNombreCliente.clear();txtDireccion.clear();txtTelefono.clear();txtObservaciones.clear();txtMontoRecibido.clear();cmbHabitacion.getSelectionModel().clearSelection();}
+    private void limpiarCliente(){txtBuscarDni.clear();txtNombreCliente.clear();txtDireccion.clear();txtTelefono.clear();txtObservaciones.clear();txtMontoRecibido.clear();cmbHabitacion.getSelectionModel().clearSelection();}
     @FXML 
     private void onCerrar(){((Stage)tablaCarrito.getScene().getWindow()).close();}
 
