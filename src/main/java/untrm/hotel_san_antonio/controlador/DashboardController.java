@@ -99,6 +99,24 @@ public class DashboardController {
     private Label lblVentasTiendaCantidad;
 
     @FXML
+    private Label lblTendenciaOcupadas;
+
+    @FXML
+    private Label lblTendenciaDisponibles;
+
+    @FXML
+    private Label lblTendenciaHuespedes;
+
+    @FXML
+    private Label lblTendenciaReservasHoy;
+
+    @FXML
+    private Label lblTendenciaIngresos;
+
+    @FXML
+    private Label lblTendenciaVentas;
+
+    @FXML
     private PieChart chartOcupacion;
 
     @FXML
@@ -257,6 +275,14 @@ public class DashboardController {
         lblTotalHabitaciones.setText(String.valueOf(r.totalHabitaciones));
         lblHuespedes.setText(String.valueOf(r.huespedes));
         lblReservasHoy.setText(String.valueOf(r.reservasHoy));
+
+        // Comparacion real contra ayer (no numeros fijos) en cada tarjeta KPI
+        aplicarTendencia(lblTendenciaOcupadas, r.ocupadas, r.ocupadasAyer);
+        aplicarTendencia(lblTendenciaDisponibles, r.disponibles, r.disponiblesAyer);
+        aplicarTendencia(lblTendenciaHuespedes, r.huespedes, r.huespedesAyer);
+        aplicarTendencia(lblTendenciaReservasHoy, r.reservasHoy, r.reservasAyer);
+        aplicarTendencia(lblTendenciaIngresos, r.getIngresosHoy().doubleValue(), r.ingresosAyer.doubleValue());
+        aplicarTendencia(lblTendenciaVentas, r.ingresosTiendaHoy.doubleValue(), r.ventasTiendaAyer.doubleValue());
         lblIngresosDia.setText(formatoMoneda(r.getIngresosHoy()));
         lblVentasTienda.setText(formatoMoneda(r.ingresosTiendaHoy));
         lblVentasTiendaCantidad.setText(r.ventasTiendaHoyCantidad
@@ -305,6 +331,26 @@ public class DashboardController {
     private int porcentaje(BigDecimal parte, BigDecimal total) {
         return total.signum() == 0 ? 0
                 : parte.multiply(BigDecimal.valueOf(100)).divide(total, 0, java.math.RoundingMode.HALF_UP).intValue();
+    }
+
+    /** Compara "hoy" contra "ayer" y pinta la tarjeta KPI con una flecha y un color reales, no fijos. */
+    private void aplicarTendencia(Label lbl, double hoy, double ayer) {
+        String flecha;
+        String color;
+        long cambio;
+
+        if (ayer <= 0) {
+            cambio = hoy > 0 ? 100 : 0;
+            flecha = hoy > 0 ? "▲" : "—";
+            color = hoy > 0 ? "#2F9E55" : "#8A7F70";
+        } else {
+            cambio = Math.round(((hoy - ayer) / ayer) * 100);
+            flecha = cambio > 0 ? "▲" : cambio < 0 ? "▼" : "—";
+            color = cambio > 0 ? "#2F9E55" : cambio < 0 ? "#D9433A" : "#8A7F70";
+        }
+
+        lbl.setText(flecha + " " + Math.abs(cambio) + "%");
+        lbl.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;");
     }
 
     /**
@@ -373,7 +419,9 @@ public class DashboardController {
 
     private void configurarColumnas() {
 
-        colLlegadaHora.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty("--"));
+        colLlegadaHora.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(
+                d.getValue().getHoraCheckin() == null ? "--"
+                        : d.getValue().getHoraCheckin().format(DateTimeFormatter.ofPattern("HH:mm"))));
         colLlegadaHuesped.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getNombreHuesped()));
         colLlegadaHabitacion.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getNumeroHabitacion()));
         colLlegadaTipo.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getNombreTipoHabitacion()));
@@ -382,7 +430,9 @@ public class DashboardController {
 
         colMantHabitacion.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getNumero()));
         colMantTipo.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getTipo().getNombre()));
-        colMantMotivo.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty("--"));
+        colMantMotivo.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(
+                d.getValue().getMotivoMantenimiento() == null || d.getValue().getMotivoMantenimiento().isBlank()
+                        ? "--" : d.getValue().getMotivoMantenimiento()));
         colMantEstado.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty("Mantenimiento"));
     }
 

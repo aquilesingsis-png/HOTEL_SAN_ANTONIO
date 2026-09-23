@@ -13,7 +13,6 @@ import java.util.Locale;
 
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
@@ -41,6 +40,7 @@ import untrm.hotel_san_antonio.servicio.ConflictoFechasException;
 import untrm.hotel_san_antonio.servicio.ReniecService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.servicio.SunatRucService;
+import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.ConexionBD;
 import untrm.hotel_san_antonio.util.Validador;
 /**
@@ -396,7 +396,7 @@ public class Nueva_reservaController {
 
         if (documento.isEmpty()) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Documento requerido",
                     "Ingrese un DNI o RUC."
             );
@@ -411,7 +411,7 @@ public class Nueva_reservaController {
 
             if (!documento.matches("\\d{8}")) {
 
-                mostrarAdvertencia(
+                Alertas.mostrarAdvertencia(
                         "DNI inválido",
                         "El DNI debe contener exactamente 8 números."
                 );
@@ -425,7 +425,7 @@ public class Nueva_reservaController {
 
             if (!documento.matches("\\d{11}")) {
 
-                mostrarAdvertencia(
+                Alertas.mostrarAdvertencia(
                         "RUC inválido",
                         "El RUC debe contener exactamente 11 números."
                 );
@@ -449,7 +449,7 @@ public class Nueva_reservaController {
     private void buscarPersonaNatural(String dni) {
 
         if (!Validador.esDniValido(dni)) {
-            mostrarAdvertencia("DNI inválido", "Ingrese un DNI válido.");
+            Alertas.mostrarAdvertencia("DNI inválido", "Ingrese un DNI válido.");
             return;
         }
 
@@ -461,7 +461,7 @@ public class Nueva_reservaController {
                 return;
             }
         } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudo buscar al cliente.\n\n" + e.getMessage());
+            Alertas.mostrarError("Error de base de datos", "No se pudo buscar al cliente.\n\n" + e.getMessage());
             return;
         }
 
@@ -471,7 +471,7 @@ public class Nueva_reservaController {
             btnBuscarCliente.setDisable(false);
             Huesped h = tarea.getValue();
             if (h == null) {
-                mostrarAdvertencia("Cliente no encontrado",
+                Alertas.mostrarAdvertencia("Cliente no encontrado",
                         "No se encontraron datos para ese DNI en RENIEC.");
                 return;
             }
@@ -481,7 +481,7 @@ public class Nueva_reservaController {
         });
         tarea.setOnFailed(e -> {
             btnBuscarCliente.setDisable(false);
-            mostrarInformacion("RENIEC", "No se pudo consultar RENIEC (" + causaError(tarea.getException()) + ").");
+            Alertas.mostrarInfo("RENIEC", "No se pudo consultar RENIEC (" + causaError(tarea.getException()) + ").");
         });
         iniciarTarea(tarea);
     }
@@ -494,13 +494,13 @@ public class Nueva_reservaController {
     private void buscarEmpresaYHuesped(String ruc) {
 
         if (!Validador.esRucValido(ruc)) {
-            mostrarAdvertencia("RUC inválido", "Ingrese un RUC válido.");
+            Alertas.mostrarAdvertencia("RUC inválido", "Ingrese un RUC válido.");
             return;
         }
 
         String dniHuesped = txtDocumentoHuesped.getText().trim();
         if (!Validador.esDniValido(dniHuesped)) {
-            mostrarAdvertencia("DNI del huésped requerido",
+            Alertas.mostrarAdvertencia("DNI del huésped requerido",
                     "Ingrese el DNI de la persona que se va a hospedar.");
             return;
         }
@@ -509,7 +509,7 @@ public class Nueva_reservaController {
         try (java.sql.Connection con = ConexionBD.conectar()) {
             empresaLocal = empresaDAO.buscarPorRuc(con, ruc);
         } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudo buscar la empresa.\n\n" + e.getMessage());
+            Alertas.mostrarError("Error de base de datos", "No se pudo buscar la empresa.\n\n" + e.getMessage());
             return;
         }
 
@@ -524,14 +524,14 @@ public class Nueva_reservaController {
             btnBuscarCliente.setDisable(false);
             Empresa empresa = tarea.getValue();
             if (empresa == null) {
-                mostrarAdvertencia("Empresa no encontrada", "No se encontraron datos para ese RUC en la SUNAT.");
+                Alertas.mostrarAdvertencia("Empresa no encontrada", "No se encontraron datos para ese RUC en la SUNAT.");
                 return;
             }
             continuarConEmpresa(empresa, dniHuesped);
         });
         tarea.setOnFailed(e -> {
             btnBuscarCliente.setDisable(false);
-            mostrarInformacion("SUNAT", "No se pudo consultar la SUNAT (" + causaError(tarea.getException()) + ").");
+            Alertas.mostrarInfo("SUNAT", "No se pudo consultar la SUNAT (" + causaError(tarea.getException()) + ").");
         });
         iniciarTarea(tarea);
     }
@@ -548,7 +548,7 @@ public class Nueva_reservaController {
                 return;
             }
         } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudo buscar al huésped.\n\n" + e.getMessage());
+            Alertas.mostrarError("Error de base de datos", "No se pudo buscar al huésped.\n\n" + e.getMessage());
             return;
         }
 
@@ -558,7 +558,7 @@ public class Nueva_reservaController {
             btnBuscarCliente.setDisable(false);
             Huesped h = tarea.getValue();
             if (h == null) {
-                mostrarAdvertencia("Huésped no encontrado",
+                Alertas.mostrarAdvertencia("Huésped no encontrado",
                         "No se encontraron datos para el DNI del huésped en RENIEC.");
                 return;
             }
@@ -568,7 +568,7 @@ public class Nueva_reservaController {
         });
         tarea.setOnFailed(e -> {
             btnBuscarCliente.setDisable(false);
-            mostrarInformacion("RENIEC", "No se pudo consultar RENIEC (" + causaError(tarea.getException()) + ").");
+            Alertas.mostrarInfo("RENIEC", "No se pudo consultar RENIEC (" + causaError(tarea.getException()) + ").");
         });
         iniciarTarea(tarea);
     }
@@ -1002,7 +1002,7 @@ public class Nueva_reservaController {
             }
             cbTipoHabitacion.getItems().addAll(habitacionDAO.listarNombresTipo(con));
         } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudieron cargar los pisos y tipos.\n\n" + e.getMessage());
+            Alertas.mostrarError("Error de base de datos", "No se pudieron cargar los pisos y tipos.\n\n" + e.getMessage());
         }
 
         cbPiso.setValue(
@@ -1061,7 +1061,7 @@ public class Nueva_reservaController {
         try {
             disponibles = reservaService.buscarDisponibles(ingreso, salida, numeroPiso, nombreTipo);
         } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudieron cargar las habitaciones.\n\n" + e.getMessage());
+            Alertas.mostrarError("Error de base de datos", "No se pudieron cargar las habitaciones.\n\n" + e.getMessage());
             limpiarHabitaciones();
             return;
         }
@@ -1473,7 +1473,7 @@ public class Nueva_reservaController {
 
         if (habitacionElegida == null) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Habitación requerida",
                     "Seleccione una habitación disponible."
             );
@@ -1483,7 +1483,7 @@ public class Nueva_reservaController {
 
         if (dpFechaIngreso.getValue().equals(LocalDate.now())) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Ingreso hoy",
                     "Para un ingreso hoy, use \"Confirmar reserva\" con el pago; "
                     + "\"Guardar pendiente\" es solo para fechas futuras."
@@ -1500,7 +1500,7 @@ public class Nueva_reservaController {
         try {
             int idReserva = reservaService.registrarPendiente(huesped, empresaEncontrada, construirReserva());
 
-            mostrarInformacion(
+            Alertas.mostrarInfo(
                     "Reserva pendiente guardada",
                     "La reserva " + String.format("R-%04d", idReserva) + " quedó pendiente de confirmación."
             );
@@ -1508,11 +1508,11 @@ public class Nueva_reservaController {
             limpiarFormulario();
 
         } catch (ConflictoFechasException e) {
-            mostrarAdvertencia("Fechas no disponibles", e.getMessage());
+            Alertas.mostrarAdvertencia("Fechas no disponibles", e.getMessage());
         } catch (IllegalArgumentException | IllegalStateException e) {
-            mostrarAdvertencia("No se pudo guardar", e.getMessage());
+            Alertas.mostrarAdvertencia("No se pudo guardar", e.getMessage());
         } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudo guardar la reserva.\n\n" + e.getMessage());
+            Alertas.mostrarError("Error de base de datos", "No se pudo guardar la reserva.\n\n" + e.getMessage());
         }
     }
 
@@ -1531,7 +1531,7 @@ public class Nueva_reservaController {
 
         if (habitacionElegida == null) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Habitación requerida",
                     "Seleccione una habitación disponible."
             );
@@ -1542,7 +1542,7 @@ public class Nueva_reservaController {
 
         if (totalReserva <= 0) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Total inválido",
                     "No existe un total válido para la reserva."
             );
@@ -1573,7 +1573,7 @@ public class Nueva_reservaController {
             int idReserva = reservaService.registrar(huesped, empresaEncontrada, construirReserva(),
                     List.of(pago), checkinInmediato);
 
-            mostrarInformacion(
+            Alertas.mostrarInfo(
                     "Confirmar reserva",
                     checkinInmediato
                             ? "El huésped quedó registrado en la habitación " + habitacionElegida.getNumero() + "."
@@ -1583,18 +1583,18 @@ public class Nueva_reservaController {
             limpiarFormulario();
 
         } catch (ConflictoFechasException e) {
-            mostrarAdvertencia("Fechas no disponibles", e.getMessage());
+            Alertas.mostrarAdvertencia("Fechas no disponibles", e.getMessage());
         } catch (IllegalArgumentException | IllegalStateException e) {
-            mostrarAdvertencia("No se pudo confirmar", e.getMessage());
+            Alertas.mostrarAdvertencia("No se pudo confirmar", e.getMessage());
         } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudo registrar la reserva.\n\n" + e.getMessage());
+            Alertas.mostrarError("Error de base de datos", "No se pudo registrar la reserva.\n\n" + e.getMessage());
         }
     }
 
 
     private Huesped construirHuesped() {
         if (huespedEncontrado == null) {
-            mostrarAdvertencia("Cliente requerido", "Debe buscar y seleccionar un cliente.");
+            Alertas.mostrarAdvertencia("Cliente requerido", "Debe buscar y seleccionar un cliente.");
             return null;
         }
         return huespedEncontrado;
@@ -1608,6 +1608,10 @@ public class Nueva_reservaController {
         r.setFechaCheckout(dpFechaSalida.getValue());
         r.setMontoTotal(java.math.BigDecimal.valueOf(totalReserva).setScale(2, RoundingMode.HALF_UP));
         r.setCanal("PRESENCIAL");
+        r.setNumHuespedes(spHuespedes.getValue() == null ? 1 : spHuespedes.getValue());
+        if (cbHoraIngreso.getValue() != null) {
+            r.setHoraCheckin(java.time.LocalTime.parse(cbHoraIngreso.getValue()));
+        }
         return r;
     }
 
@@ -1716,7 +1720,7 @@ public class Nueva_reservaController {
 
         if (!clienteSeleccionado) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Cliente requerido",
                     "Debe buscar y seleccionar un cliente."
             );
@@ -1727,7 +1731,7 @@ public class Nueva_reservaController {
 
         if (dpFechaIngreso.getValue() == null) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Fecha requerida",
                     "Seleccione la fecha de ingreso."
             );
@@ -1738,7 +1742,7 @@ public class Nueva_reservaController {
 
         if (dpFechaSalida.getValue() == null) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Fecha requerida",
                     "Seleccione la fecha de salida."
             );
@@ -1756,7 +1760,7 @@ public class Nueva_reservaController {
 
         if (noches <= 0) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Fechas inválidas",
                     "La fecha de salida debe ser posterior "
                     + "a la fecha de ingreso."
@@ -1782,7 +1786,7 @@ public class Nueva_reservaController {
 
         if (valor.isEmpty()) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Monto requerido",
                     "Ingrese el monto recibido."
             );
@@ -1799,7 +1803,7 @@ public class Nueva_reservaController {
 
             if (recibido < totalReserva) {
 
-                mostrarAdvertencia(
+                Alertas.mostrarAdvertencia(
                         "Monto insuficiente",
                         "El monto recibido es menor "
                         + "al total de la reserva."
@@ -1811,7 +1815,7 @@ public class Nueva_reservaController {
 
         } catch (NumberFormatException e) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Monto inválido",
                     "Ingrese un monto numérico válido."
             );
@@ -1840,62 +1844,4 @@ public class Nueva_reservaController {
     }
 
 
-    private void mostrarAdvertencia(
-            String titulo,
-            String mensaje
-    ) {
-
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.WARNING
-                );
-
-        alert.setTitle(titulo);
-
-        alert.setHeaderText(null);
-
-        alert.setContentText(mensaje);
-
-        alert.showAndWait();
-    }
-
-
-    private void mostrarInformacion(
-            String titulo,
-            String mensaje
-    ) {
-
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.INFORMATION
-                );
-
-        alert.setTitle(titulo);
-
-        alert.setHeaderText(null);
-
-        alert.setContentText(mensaje);
-
-        alert.showAndWait();
-    }
-
-
-    private void mostrarError(
-            String titulo,
-            String mensaje
-    ) {
-
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.ERROR
-                );
-
-        alert.setTitle(titulo);
-
-        alert.setHeaderText(null);
-
-        alert.setContentText(mensaje);
-
-        alert.showAndWait();
-    }
 }

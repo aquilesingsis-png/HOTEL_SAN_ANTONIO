@@ -9,6 +9,7 @@ public class Habitacion {
     private String estado; // DISPONIBLE, OCUPADA, LIMPIEZA, MANTENIMIENTO
     private String huespedActual; // solo si esta ocupada con una reserva en CHECKIN (lo carga el DAO)
     private String reservaHoy;    // huesped con reserva CONFIRMADA que llega hoy a esta habitacion libre (lo carga el DAO)
+    private String motivoMantenimiento; // por que esta en MANTENIMIENTO, o null si no aplica
 
     public Habitacion() {}
 
@@ -43,4 +44,7 @@ public class Habitacion {
 
     public String getReservaHoy() { return reservaHoy; }
     public void setReservaHoy(String reservaHoy) { this.reservaHoy = reservaHoy; }
+
+    public String getMotivoMantenimiento() { return motivoMantenimiento; }
+    public void setMotivoMantenimiento(String motivoMantenimiento) { this.motivoMantenimiento = motivoMantenimiento; }
 }

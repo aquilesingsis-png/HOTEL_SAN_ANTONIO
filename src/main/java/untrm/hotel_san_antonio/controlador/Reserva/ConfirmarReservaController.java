@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -17,6 +16,7 @@ import javafx.scene.control.TextField;
 
 import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ReservaService;
+import untrm.hotel_san_antonio.util.Alertas;
 
 public class ConfirmarReservaController {
 
@@ -108,7 +108,7 @@ public class ConfirmarReservaController {
 
         if (busqueda.isEmpty()) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Búsqueda requerida",
                     "Ingrese código, nombre o documento."
             );
@@ -119,13 +119,13 @@ public class ConfirmarReservaController {
         try {
             reservaActual = reservaService.buscarUno(busqueda);
         } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudo buscar la reserva.\n\n" + e.getMessage());
+            Alertas.mostrarError("Error de base de datos", "No se pudo buscar la reserva.\n\n" + e.getMessage());
             return;
         }
 
         if (reservaActual == null) {
             limpiar();
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Sin resultados",
                     "No se encontró ninguna reserva con \"" + busqueda + "\"."
             );
@@ -174,7 +174,7 @@ public class ConfirmarReservaController {
 
         if (reservaActual == null || "--".equals(lblCodigo.getText())) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Reserva requerida",
                     "Primero seleccione una reserva."
             );
@@ -184,7 +184,7 @@ public class ConfirmarReservaController {
 
         if ("Pendiente".equals(cbEstado.getValue())) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Nada que hacer",
                     "La reserva ya está pendiente; elija \"Confirmada\" para confirmarla."
             );
@@ -195,14 +195,14 @@ public class ConfirmarReservaController {
         try {
             reservaService.confirmar(reservaActual.getIdReserva(), reservaActual.getEstado());
         } catch (IllegalStateException e) {
-            mostrarAdvertencia("No se puede confirmar", e.getMessage());
+            Alertas.mostrarAdvertencia("No se puede confirmar", e.getMessage());
             return;
         } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudo confirmar la reserva.\n\n" + e.getMessage());
+            Alertas.mostrarError("Error de base de datos", "No se pudo confirmar la reserva.\n\n" + e.getMessage());
             return;
         }
 
-        mostrarInformacion(
+        Alertas.mostrarInfo(
                 "Reserva confirmada",
                 "La reserva " + reservaActual.getCodigo() + " quedó confirmada."
         );
@@ -263,56 +263,4 @@ public class ConfirmarReservaController {
     }
 
 
-    private void mostrarAdvertencia(
-            String titulo,
-            String mensaje
-    ) {
-
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.WARNING
-                );
-
-        alert.setTitle(titulo);
-
-        alert.setHeaderText(null);
-
-        alert.setContentText(mensaje);
-
-        alert.showAndWait();
-    }
-
-
-    private void mostrarInformacion(
-            String titulo,
-            String mensaje
-    ) {
-
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.INFORMATION
-                );
-
-        alert.setTitle(titulo);
-
-        alert.setHeaderText(null);
-
-        alert.setContentText(mensaje);
-
-        alert.showAndWait();
-    }
-
-
-    private void mostrarError(String titulo, String mensaje) {
-
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-
-        alert.setTitle(titulo);
-
-        alert.setHeaderText(null);
-
-        alert.setContentText(mensaje);
-
-        alert.showAndWait();
-    }
 }

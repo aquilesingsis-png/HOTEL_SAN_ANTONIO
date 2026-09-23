@@ -21,7 +21,7 @@ public class HabitacionDAO {
     }
 
     public List<Habitacion> listar(Connection con) throws SQLException {
-        String sql = "SELECT h.id_habitacion, h.numero, h.id_tipo, h.piso, h.estado, "
+        String sql = "SELECT h.id_habitacion, h.numero, h.id_tipo, h.piso, h.estado, h.motivo_mantenimiento, "
                 + "t.nombre AS tipo_nombre, t.capacidad, t.precio_base, "
                 + "(SELECT CONCAT(hu.nombres, ' ', hu.apellidos) "
                 + "   FROM reserva r JOIN huesped hu ON hu.id_huesped = r.id_huesped "
@@ -52,6 +52,7 @@ public class HabitacionDAO {
                         rs.getBigDecimal("precio_base")));
                 h.setHuespedActual(rs.getString("huesped_actual"));
                 h.setReservaHoy(rs.getString("reserva_hoy"));
+                h.setMotivoMantenimiento(rs.getString("motivo_mantenimiento"));
                 lista.add(h);
             }
         }
@@ -179,13 +180,20 @@ public class HabitacionDAO {
     /**
      * Cambia el estado solo si la habitacion sigue en el estado esperado (evita pisar un cambio hecho
      * por otra persona mientras esta pantalla estaba abierta). Devuelve false si el estado ya era otro.
+     * Al salir de MANTENIMIENTO (o entrar sin dar motivo) se borra el motivo anterior.
      */
     public boolean cambiarEstadoSiEs(int idHabitacion, String estadoEsperado, String nuevoEstado) throws SQLException {
-        String sql = "UPDATE habitacion SET estado = ? WHERE id_habitacion = ? AND estado = ?";
+        return cambiarEstadoSiEs(idHabitacion, estadoEsperado, nuevoEstado, null);
+    }
+
+    /** Igual que cambiarEstadoSiEs, pero dejando registrado el motivo (ej. al entrar a MANTENIMIENTO). */
+    public boolean cambiarEstadoSiEs(int idHabitacion, String estadoEsperado, String nuevoEstado, String motivoMantenimiento) throws SQLException {
+        String sql = "UPDATE habitacion SET estado = ?, motivo_mantenimiento = ? WHERE id_habitacion = ? AND estado = ?";
         try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, nuevoEstado);
-            ps.setInt(2, idHabitacion);
-            ps.setString(3, estadoEsperado);
+            ps.setString(2, motivoMantenimiento);
+            ps.setInt(3, idHabitacion);
+            ps.setString(4, estadoEsperado);
             return ps.executeUpdate() > 0;
         }
     }

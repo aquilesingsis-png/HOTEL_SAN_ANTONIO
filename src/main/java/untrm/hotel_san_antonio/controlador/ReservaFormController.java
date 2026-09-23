@@ -559,14 +559,21 @@ public class ReservaFormController {
     @FXML
     private void onMantenimiento() {
         try {
+            String motivo = Alertas.pedirTexto("Mantenimiento",
+                    "¿Cuál es el motivo? (ej. \"Aire acondicionado dañado\", \"Fuga de agua\")",
+                    "Motivo del mantenimiento");
+            if (motivo == null) {
+                return; // canceló o no escribió nada
+            }
+
             java.time.LocalDate proxima = reservaService.proximaReserva(habitacion.getIdHabitacion());
             String aviso = proxima == null ? "" : "\n\nOjo: la habitación tiene una reserva desde el "
                     + proxima.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ".";
             if (!Alertas.confirmar("Mantenimiento", "¿Poner la habitación " + habitacion.getNumero()
-                    + " en mantenimiento? No se podrán registrar huéspedes hasta que termine." + aviso)) {
+                    + " en mantenimiento por \"" + motivo + "\"? No se podrán registrar huéspedes hasta que termine." + aviso)) {
                 return;
             }
-            if (!habitacionDAO.cambiarEstadoSiEs(habitacion.getIdHabitacion(), "DISPONIBLE", "MANTENIMIENTO")) {
+            if (!habitacionDAO.cambiarEstadoSiEs(habitacion.getIdHabitacion(), "DISPONIBLE", "MANTENIMIENTO", motivo)) {
                 Alertas.mostrarInfo("Mantenimiento", "La habitación ya no está disponible (cambió mientras tenías esta ventana abierta).");
                 if (alGuardar != null) {
                     alGuardar.run();

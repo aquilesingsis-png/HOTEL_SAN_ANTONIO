@@ -3,6 +3,7 @@ package untrm.hotel_san_antonio.modelo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class Reserva {
     private int idReserva;
@@ -17,6 +18,8 @@ public class Reserva {
     private String estado; // PENDIENTE, CONFIRMADA, CHECKIN, FINALIZADA, CANCELADA
     private String canal;  // TELEFONO, WHATSAPP, BOOKING, PRESENCIAL
     private Integer idEmpresa; // null si no se factura a una empresa
+    private int numHuespedes;
+    private LocalTime horaCheckin; // hora en que se espera la llegada (opcional)
 
     // campos de conveniencia para mostrar en tablas, cargados por el DAO con JOIN
     private String nombreHuesped;
@@ -72,6 +75,12 @@ public class Reserva {
 
     public Integer getIdEmpresa() { return idEmpresa; }
     public void setIdEmpresa(Integer idEmpresa) { this.idEmpresa = idEmpresa; }
+
+    public int getNumHuespedes() { return numHuespedes; }
+    public void setNumHuespedes(int numHuespedes) { this.numHuespedes = numHuespedes; }
+
+    public LocalTime getHoraCheckin() { return horaCheckin; }
+    public void setHoraCheckin(LocalTime horaCheckin) { this.horaCheckin = horaCheckin; }
 
     public String getNombreHuesped() { return nombreHuesped; }
     public void setNombreHuesped(String nombreHuesped) { this.nombreHuesped = nombreHuesped; }

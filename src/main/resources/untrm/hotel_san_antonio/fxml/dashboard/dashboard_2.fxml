@@ -85,7 +85,7 @@
                                        </children>
                                        <padding><Insets bottom="14.0" left="16.0" right="14.0" top="14.0" /></padding>
                                     </HBox>
-                                    <Label text="▲ 60%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
+                                    <Label fx:id="lblTendenciaOcupadas" text="▲ 60%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
                                  </children>
                               </StackPane>
 
@@ -106,7 +106,7 @@
                                        </children>
                                        <padding><Insets bottom="14.0" left="16.0" right="14.0" top="14.0" /></padding>
                                     </HBox>
-                                    <Label text="▲ 33%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
+                                    <Label fx:id="lblTendenciaDisponibles" text="▲ 33%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
                                  </children>
                               </StackPane>
 
@@ -127,7 +127,7 @@
                                        </children>
                                        <padding><Insets bottom="14.0" left="16.0" right="14.0" top="14.0" /></padding>
                                     </HBox>
-                                    <Label text="▲ 12%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
+                                    <Label fx:id="lblTendenciaHuespedes" text="▲ 12%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
                                  </children>
                               </StackPane>
 
@@ -148,7 +148,7 @@
                                        </children>
                                        <padding><Insets bottom="14.0" left="16.0" right="14.0" top="14.0" /></padding>
                                     </HBox>
-                                    <Label text="▲ 25%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
+                                    <Label fx:id="lblTendenciaReservasHoy" text="▲ 25%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
                                  </children>
                               </StackPane>
 
@@ -169,7 +169,7 @@
                                        </children>
                                        <padding><Insets bottom="14.0" left="16.0" right="14.0" top="14.0" /></padding>
                                     </HBox>
-                                    <Label text="▲ 18%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
+                                    <Label fx:id="lblTendenciaIngresos" text="▲ 18%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
                                  </children>
                               </StackPane>
 
@@ -190,7 +190,7 @@
                                        </children>
                                        <padding><Insets bottom="14.0" left="16.0" right="14.0" top="14.0" /></padding>
                                     </HBox>
-                                    <Label text="▲ 5%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
+                                    <Label fx:id="lblTendenciaVentas" text="▲ 5%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
                                  </children>
                               </StackPane>
 

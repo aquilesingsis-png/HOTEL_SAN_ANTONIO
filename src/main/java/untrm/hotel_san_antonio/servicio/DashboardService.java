@@ -43,8 +43,7 @@ public class DashboardService {
                     default -> { }
                 }
             }
-            // Sin un conteo de personas por reserva, se usa la habitacion ocupada como aproximacion.
-            r.huespedes = r.ocupadas;
+            r.huespedes = reservaDAO.sumarHuespedesActivos(con);
 
             r.llegadasHoy = reservaDAO.listarLlegadasHoy(con);
             r.reservasHoy = r.llegadasHoy.size();
@@ -55,6 +54,18 @@ public class DashboardService {
             r.ventasTiendaHoyCantidad = ventaTiendaDAO.contarHoy(con);
 
             LocalDate hoy = LocalDate.now();
+            LocalDate ayer = hoy.minusDays(1);
+
+            // Para comparar contra ayer en las tarjetas KPI (con datos reales, no numeros fijos).
+            r.ocupadasAyer = reservaDAO.contarOcupadasEnFecha(con, ayer);
+            r.disponiblesAyer = Math.max(0, r.totalHabitaciones - r.ocupadasAyer);
+            r.huespedesAyer = reservaDAO.sumarHuespedesEnFecha(con, ayer);
+            r.reservasAyer = reservaDAO.contarLlegadasEnFecha(con, ayer);
+            Map<LocalDate, BigDecimal> pagosAyerMapa = pagoDAO.sumarPorDia(con, ayer, ayer);
+            Map<LocalDate, BigDecimal> ventasAyerMapa = ventaTiendaDAO.sumarPorDia(con, ayer, ayer);
+            r.ingresosAyer = pagosAyerMapa.getOrDefault(ayer, BigDecimal.ZERO).add(ventasAyerMapa.getOrDefault(ayer, BigDecimal.ZERO));
+            r.ventasTiendaAyer = ventasAyerMapa.getOrDefault(ayer, BigDecimal.ZERO);
+
             LocalDate hace6Dias = hoy.minusDays(6);
             Map<LocalDate, BigDecimal> pagosPorDia = pagoDAO.sumarPorDia(con, hace6Dias, hoy);
             Map<LocalDate, BigDecimal> ventasPorDia = ventaTiendaDAO.sumarPorDia(con, hace6Dias, hoy);
@@ -80,6 +91,12 @@ public class DashboardService {
         public BigDecimal ingresosHabitacionesHoy = BigDecimal.ZERO;
         public BigDecimal ingresosTiendaHoy = BigDecimal.ZERO;
         public int ventasTiendaHoyCantidad;
+        public int ocupadasAyer;
+        public int disponiblesAyer;
+        public int huespedesAyer;
+        public int reservasAyer;
+        public BigDecimal ingresosAyer = BigDecimal.ZERO;
+        public BigDecimal ventasTiendaAyer = BigDecimal.ZERO;
         public List<Reserva> llegadasHoy = new ArrayList<>();
         public List<Habitacion> enMantenimiento = new ArrayList<>();
         public java.util.LinkedHashMap<LocalDate, BigDecimal> ingresosUltimaSemana = new java.util.LinkedHashMap<>();

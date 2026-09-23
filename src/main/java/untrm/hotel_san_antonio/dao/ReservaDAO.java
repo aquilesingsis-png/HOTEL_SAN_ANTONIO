@@ -47,6 +47,11 @@ public class ReservaDAO {
         r.setIdEmpresa(rs.wasNull() ? null : idEmpresa);
         r.setMotivoCancelacion(rs.getString("motivo_cancelacion"));
         r.setDetalleCancelacion(rs.getString("detalle_cancelacion"));
+        r.setNumHuespedes(rs.getInt("num_huespedes"));
+        java.sql.Time horaCheckin = rs.getTime("hora_checkin");
+        if (horaCheckin != null) {
+            r.setHoraCheckin(horaCheckin.toLocalTime());
+        }
 
         r.setTipoDocumentoHuesped(rs.getString("hu_tipo_doc"));
         r.setNumDocumentoHuesped(rs.getString("hu_num_doc"));
@@ -158,6 +163,58 @@ public class ReservaDAO {
         return lista;
     }
 
+    /** Cuantos huespedes hay hospedados ahora mismo (suma de num_huespedes de las reservas en CHECKIN). */
+    public int sumarHuespedesActivos(Connection con) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(num_huespedes), 0) FROM reserva WHERE estado = 'CHECKIN'";
+        try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            rs.next();
+            return rs.getInt(1);
+        }
+    }
+
+    /**
+     * Cuantas habitaciones (y cuantos huespedes) tenian una estadia en curso en una fecha pasada,
+     * para comparar la ocupacion de hoy contra la de ayer en el Dashboard.
+     */
+    public int contarOcupadasEnFecha(Connection con, LocalDate fecha) throws SQLException {
+        String sql = "SELECT COUNT(DISTINCT id_habitacion) FROM reserva "
+                + "WHERE estado IN ('CHECKIN','FINALIZADA') AND fecha_checkin <= ? AND fecha_checkout > ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(fecha));
+            ps.setDate(2, Date.valueOf(fecha));
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+
+    public int sumarHuespedesEnFecha(Connection con, LocalDate fecha) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(num_huespedes), 0) FROM reserva "
+                + "WHERE estado IN ('CHECKIN','FINALIZADA') AND fecha_checkin <= ? AND fecha_checkout > ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(fecha));
+            ps.setDate(2, Date.valueOf(fecha));
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+
+    /** Reservas cuyo ingreso fue exactamente esa fecha (para comparar las llegadas de hoy contra las de ayer). */
+    public int contarLlegadasEnFecha(Connection con, LocalDate fecha) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM reserva WHERE fecha_checkin = ? "
+                + "AND estado IN ('CONFIRMADA','CHECKIN','FINALIZADA')";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(fecha));
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+
     /** Reservas que llegan hoy (confirmadas o que ya hicieron check-in hoy), para el Dashboard. */
     public List<Reserva> listarLlegadasHoy(Connection con) throws SQLException {
         String sql = SELECT_BASE + "WHERE r.fecha_checkin = CURDATE() AND r.estado IN ('CONFIRMADA','CHECKIN') "
@@ -263,7 +320,8 @@ public class ReservaDAO {
     /** Inserta la reserva y devuelve el id generado. */
     public int insertar(Connection con, Reserva r) throws SQLException {
         String sql = "INSERT INTO reserva (id_huesped, id_habitacion, id_usuario, fecha_checkin, fecha_checkout, "
-                + "adelanto, monto_total, estado, canal, id_empresa) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "adelanto, monto_total, estado, canal, id_empresa, num_huespedes, hora_checkin) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, r.getIdHuesped());
             ps.setInt(2, r.getIdHabitacion());
@@ -278,6 +336,12 @@ public class ReservaDAO {
                 ps.setNull(10, Types.INTEGER);
             } else {
                 ps.setInt(10, r.getIdEmpresa());
+            }
+            ps.setInt(11, r.getNumHuespedes() <= 0 ? 1 : r.getNumHuespedes());
+            if (r.getHoraCheckin() == null) {
+                ps.setNull(12, Types.TIME);
+            } else {
+                ps.setTime(12, java.sql.Time.valueOf(r.getHoraCheckin()));
             }
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {

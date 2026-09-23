@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -18,6 +17,7 @@ import javafx.scene.control.TextField;
 
 import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ReservaService;
+import untrm.hotel_san_antonio.util.Alertas;
 
 public class CancelarReservaController {
 
@@ -112,7 +112,7 @@ public class CancelarReservaController {
 
         if (busqueda.isEmpty()) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Búsqueda requerida",
                     "Ingrese código, nombre o documento."
             );
@@ -123,13 +123,13 @@ public class CancelarReservaController {
         try {
             reservaActual = reservaService.buscarUno(busqueda);
         } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudo buscar la reserva.\n\n" + e.getMessage());
+            Alertas.mostrarError("Error de base de datos", "No se pudo buscar la reserva.\n\n" + e.getMessage());
             return;
         }
 
         if (reservaActual == null) {
             limpiar();
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Sin resultados",
                     "No se encontró ninguna reserva con \"" + busqueda + "\"."
             );
@@ -174,7 +174,7 @@ public class CancelarReservaController {
 
         if (reservaActual == null || "--".equals(lblCodigo.getText())) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Reserva requerida",
                     "Primero seleccione una reserva."
             );
@@ -185,7 +185,7 @@ public class CancelarReservaController {
 
         if (cbMotivo.getValue() == null) {
 
-            mostrarAdvertencia(
+            Alertas.mostrarAdvertencia(
                     "Motivo requerido",
                     "Seleccione un motivo de cancelación."
             );
@@ -197,14 +197,14 @@ public class CancelarReservaController {
             reservaService.cancelar(reservaActual.getIdReserva(), reservaActual.getEstado(),
                     cbMotivo.getValue(), txtDetalle.getText().trim());
         } catch (IllegalStateException e) {
-            mostrarAdvertencia("No se puede cancelar", e.getMessage());
+            Alertas.mostrarAdvertencia("No se puede cancelar", e.getMessage());
             return;
         } catch (SQLException e) {
-            mostrarError("Error de base de datos", "No se pudo cancelar la reserva.\n\n" + e.getMessage());
+            Alertas.mostrarError("Error de base de datos", "No se pudo cancelar la reserva.\n\n" + e.getMessage());
             return;
         }
 
-        mostrarInformacion(
+        Alertas.mostrarInfo(
                 "Cancelación registrada",
                 "La reserva " + reservaActual.getCodigo() + " quedó cancelada."
         );
@@ -265,56 +265,4 @@ public class CancelarReservaController {
     }
 
 
-    private void mostrarAdvertencia(
-            String titulo,
-            String mensaje
-    ) {
-
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.WARNING
-                );
-
-        alert.setTitle(titulo);
-
-        alert.setHeaderText(null);
-
-        alert.setContentText(mensaje);
-
-        alert.showAndWait();
-    }
-
-
-    private void mostrarInformacion(
-            String titulo,
-            String mensaje
-    ) {
-
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.INFORMATION
-                );
-
-        alert.setTitle(titulo);
-
-        alert.setHeaderText(null);
-
-        alert.setContentText(mensaje);
-
-        alert.showAndWait();
-    }
-
-
-    private void mostrarError(String titulo, String mensaje) {
-
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-
-        alert.setTitle(titulo);
-
-        alert.setHeaderText(null);
-
-        alert.setContentText(mensaje);
-
-        alert.showAndWait();
-    }
 }
