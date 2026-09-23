@@ -25,6 +25,26 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class CarritoTiendaController {
+
+    // Boleta/Factura y Efectivo/Tarjeta/Yape/Transferencia se ven igual seleccionados que sin
+    // seleccionar (asi estaba en el diseño original); solo cambian al pasar el mouse.
+    private static final String BTN_MARRON = "-fx-background-color: #8B571C; -fx-text-fill: white; "
+            + "-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #8B571C; -fx-font-weight: bold;";
+    private static final String BTN_MARRON_HOVER = "-fx-background-color: #704313; -fx-text-fill: white; "
+            + "-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #704313; -fx-font-weight: bold;";
+    private static final String BTN_OPCION = BTN_MARRON + " -fx-min-height: 54; -fx-content-display: TOP; -fx-graphic-text-gap: 5;";
+    private static final String BTN_OPCION_HOVER = BTN_MARRON_HOVER + " -fx-min-height: 54; -fx-content-display: TOP; -fx-graphic-text-gap: 5;";
+    private static final String BTN_PAGO = BTN_MARRON + " -fx-min-height: 60; -fx-font-size: 11px; -fx-content-display: TOP; -fx-graphic-text-gap: 5;";
+    private static final String BTN_PAGO_HOVER = BTN_MARRON_HOVER + " -fx-min-height: 60; -fx-font-size: 11px; -fx-content-display: TOP; -fx-graphic-text-gap: 5;";
+    private static final String BTN_BUSCAR = "-fx-background-color: #8B571C; -fx-text-fill: white; "
+            + "-fx-background-radius: 0 6 6 0; -fx-min-width: 46; -fx-min-height: 34;";
+    private static final String BTN_BUSCAR_HOVER = "-fx-background-color: #704313; -fx-text-fill: white; "
+            + "-fx-background-radius: 0 6 6 0; -fx-min-width: 46; -fx-min-height: 34;";
+    private static final String BTN_EMITIR = "-fx-background-color: #8B571C; -fx-text-fill: white; "
+            + "-fx-background-radius: 6; -fx-font-weight: bold; -fx-min-height: 44;";
+    private static final String BTN_EMITIR_HOVER = "-fx-background-color: #704313; -fx-text-fill: white; "
+            + "-fx-background-radius: 6; -fx-font-weight: bold; -fx-min-height: 44;";
+    private static final String FILA_SELECCIONADA = "-fx-background-color: #F4EBDD; -fx-text-background-color: #111;";
     @FXML 
     private TextField txtBuscar, txtBuscarDni, txtDni, txtNombreCliente, txtDireccion, txtTelefono, txtMontoRecibido;
     @FXML 
@@ -40,7 +60,10 @@ public class CarritoTiendaController {
     @FXML 
     private Label lblDatosCliente, lblSubtotal, lblIgv, lblTotal, lblVuelto, lblMostrando;
 
-    @FXML 
+    @FXML
+    private Button btnBuscarCliente, btnBuscarProducto, btnEmitir;
+
+    @FXML
     private TableView<Producto> tablaProductos;
     @FXML 
     private TableColumn<Producto,String> colCodigo, colProducto, colCategoria;
@@ -73,6 +96,7 @@ public class CarritoTiendaController {
         cargarHabitaciones();
         cargarProductos();
         actualizarTotales();
+        aplicarEstiloBotones();
 
         txtBuscar.textProperty().addListener((o,a,n) -> cargarProductos());
         cmbCategoria.valueProperty().addListener((o,a,n) -> cargarProductos());
@@ -83,9 +107,41 @@ public class CarritoTiendaController {
         actualizarFormaPago();
     }
 
+    /** Resalta al pasar el mouse los botones marrones (eso no se puede fijar en el FXML). */
+    private void aplicarEstiloBotones() {
+        aplicarHover(btnBoleta, BTN_OPCION, BTN_OPCION_HOVER);
+        aplicarHover(btnFactura, BTN_OPCION, BTN_OPCION_HOVER);
+        aplicarHover(btnEfectivo, BTN_PAGO, BTN_PAGO_HOVER);
+        aplicarHover(btnTarjeta, BTN_PAGO, BTN_PAGO_HOVER);
+        aplicarHover(btnYape, BTN_PAGO, BTN_PAGO_HOVER);
+        aplicarHover(btnTransferencia, BTN_PAGO, BTN_PAGO_HOVER);
+        aplicarHover(btnBuscarCliente, BTN_BUSCAR, BTN_BUSCAR_HOVER);
+        aplicarHover(btnBuscarProducto, BTN_BUSCAR, BTN_BUSCAR_HOVER);
+        aplicarHover(btnEmitir, BTN_EMITIR, BTN_EMITIR_HOVER);
+    }
+
+    private void aplicarHover(ButtonBase boton, String normal, String hover) {
+        boton.setStyle(normal);
+        boton.setOnMouseEntered(e -> boton.setStyle(hover));
+        boton.setOnMouseExited(e -> boton.setStyle(normal));
+    }
+
+    /** El color de la fila seleccionada de una tabla es una pieza interna: se fija por fila, no en el FXML. */
+    private <T> void resaltarFilaSeleccionada(TableView<T> tabla) {
+        tabla.setFixedCellSize(40);
+        tabla.setRowFactory(t -> {
+            TableRow<T> fila = new TableRow<>();
+            fila.selectedProperty().addListener((obs, antes, seleccionada) ->
+                    fila.setStyle(seleccionada ? FILA_SELECCIONADA : ""));
+            return fila;
+        });
+    }
+
     private void configurarTablas() {
         tablaProductos.setItems(productos);
         tablaCarrito.setItems(carrito);
+        resaltarFilaSeleccionada(tablaProductos);
+        resaltarFilaSeleccionada(tablaCarrito);
         colCodigo.setCellValueFactory(c -> new ReadOnlyStringWrapper(String.format("P%03d", c.getValue().getIdProducto())));
         colProducto.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getNombre()));
         colCategoria.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getNombre()));
@@ -95,7 +151,11 @@ public class CarritoTiendaController {
 
         colAcciones.setCellFactory(col -> new TableCell<Producto,Void>() {
             private final Button boton = new Button("Agregar");
-            { boton.getStyleClass().add("btn-agregar-tabla"); boton.setOnAction(e -> agregarProducto(getTableView().getItems().get(getIndex()))); }
+            {
+                boton.setStyle("-fx-background-color: #F3ECE3; -fx-text-fill: #151515; -fx-background-radius: 6; "
+                        + "-fx-font-size: 11px; -fx-font-weight: bold;");
+                boton.setOnAction(e -> agregarProducto(getTableView().getItems().get(getIndex())));
+            }
             @Override protected void updateItem(Void item, boolean empty) { super.updateItem(item, empty); setGraphic(empty ? null : boton); }
         });
 

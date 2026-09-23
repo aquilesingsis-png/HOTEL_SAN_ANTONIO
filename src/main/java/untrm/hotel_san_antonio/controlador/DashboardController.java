@@ -5,20 +5,27 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
+import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.paint.Color;
 
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.EstiloUtil;
 import untrm.hotel_san_antonio.util.Navegacion;
 import untrm.hotel_san_antonio.util.SesionActual;
 
@@ -94,6 +101,23 @@ public class DashboardController {
     @FXML
     private VBox listaAlertas;
 
+    @FXML
+    private ScrollPane scrollDashboard;
+
+    @FXML
+    private TableView<?> tablaLlegadas;
+
+    @FXML
+    private TableView<?> tablaMantenimiento;
+
+    // Colores de las filas de las mini-tablas (antes en estilos.css, ".mini-table .table-row-cell").
+    private static final String FILA_MINI_NORMAL =
+            "-fx-background-color: #FFFFFF; -fx-border-color: transparent transparent #F0ECE2 transparent;";
+    private static final String FILA_MINI_IMPAR =
+            "-fx-background-color: #FBF9F5; -fx-border-color: transparent transparent #F0ECE2 transparent;";
+    private static final String FILA_MINI_SELECCIONADA =
+            "-fx-background-color: #F5E6C8; -fx-text-fill: #2C2118;";
+
 
     // =========================================================
     // INICIALIZACIÓN
@@ -124,8 +148,90 @@ public class DashboardController {
         // Crear gráfico de ingresos
         crearGraficoIngresos();
 
+        // Interior del ScrollPane transparente (por defecto pinta blanco y no se puede fijar con style="")
+        if (scrollDashboard != null) {
+            EstiloUtil.alArmarPiel(scrollDashboard, () -> {
+                Node viewport = scrollDashboard.lookup(".viewport");
+                if (viewport != null) {
+                    viewport.setStyle("-fx-background-color: transparent;");
+                }
+            });
+        }
+
+        // Estilo de las mini-tablas (encabezado y filas), antes resuelto por ".mini-table" en el .css
+        estilizarMiniTabla(tablaLlegadas);
+        estilizarMiniTabla(tablaMantenimiento);
+
         // Mostrar Dashboard al iniciar
         mostrarDashboard();
+    }
+
+
+    // =========================================================
+    // ESTILO DE LAS MINI-TABLAS (llegadas / mantenimiento)
+    // =========================================================
+
+    private void estilizarMiniTabla(TableView<?> tabla) {
+
+        if (tabla == null) {
+            return;
+        }
+
+        tabla.setStyle("-fx-background-color: transparent; -fx-font-size: 11.5px;");
+
+        aplicarFilasMiniTabla(tabla);
+
+        // Los encabezados de columna del TableView son piezas internas que la piel arma recien
+        // en su primer paso de layout: hace falta esperar un pulso mas alla de "la piel ya existe".
+        EstiloUtil.alArmarPiel(tabla, () -> Platform.runLater(() -> {
+
+            Node fondoEncabezado = tabla.lookup(".column-header-background");
+            if (fondoEncabezado != null) {
+                fondoEncabezado.setStyle("-fx-background-color: transparent;");
+            }
+
+            for (Node encabezado : tabla.lookupAll(".column-header")) {
+                encabezado.setStyle(
+                        "-fx-background-color: transparent; -fx-border-color: transparent transparent #E7E0D3 transparent;");
+            }
+
+            for (Node relleno : tabla.lookupAll(".filler")) {
+                relleno.setStyle(
+                        "-fx-background-color: transparent; -fx-border-color: transparent transparent #E7E0D3 transparent;");
+            }
+
+            for (Node etiqueta : tabla.lookupAll(".column-header .label")) {
+                etiqueta.setStyle("-fx-text-fill: #8A7F70; -fx-font-weight: normal; -fx-font-size: 10.5px;");
+            }
+        }));
+    }
+
+    private <T> void aplicarFilasMiniTabla(TableView<T> tabla) {
+
+        tabla.setFixedCellSize(34);
+
+        tabla.setRowFactory(t -> {
+
+            TableRow<T> fila = new TableRow<>();
+
+            Runnable actualizar = () -> {
+                if (fila.isEmpty()) {
+                    fila.setStyle("");
+                } else if (fila.isSelected()) {
+                    fila.setStyle(FILA_MINI_SELECCIONADA);
+                } else if (fila.getIndex() % 2 != 0) {
+                    fila.setStyle(FILA_MINI_IMPAR);
+                } else {
+                    fila.setStyle(FILA_MINI_NORMAL);
+                }
+            };
+
+            fila.selectedProperty().addListener((obs, antes, ahora) -> actualizar.run());
+            fila.indexProperty().addListener((obs, antes, ahora) -> actualizar.run());
+            fila.itemProperty().addListener((obs, antes, ahora) -> actualizar.run());
+
+            return fila;
+        });
     }
 
 
@@ -148,11 +254,24 @@ public class DashboardController {
 
         grafico.setPrefHeight(230);
 
+        grafico.setStyle("-fx-background-color: transparent; -fx-padding: 0;");
+
+        grafico.setVerticalGridLinesVisible(false);
+
         ejeY.setLowerBound(0);
 
         ejeY.setUpperBound(4000);
 
         ejeY.setTickUnit(1000);
+
+        // Color y tamaño de las etiquetas de los ejes (antes ".income-chart .axis" en el .css)
+        ejeX.setTickLabelFill(Color.web("#A89B89"));
+        ejeY.setTickLabelFill(Color.web("#A89B89"));
+        ejeX.setStyle("-fx-font-size: 10.5px;");
+        ejeY.setStyle("-fx-font-size: 10.5px;");
+        ejeX.setTickMarkVisible(false);
+        ejeY.setTickMarkVisible(false);
+        ejeY.setMinorTickVisible(false);
 
         if (contenedorGraficoIngresos != null) {
 

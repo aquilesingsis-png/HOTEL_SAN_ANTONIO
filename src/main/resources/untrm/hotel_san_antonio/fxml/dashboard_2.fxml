@@ -20,18 +20,24 @@
     usuario/rol ya los pone el marco principal (menu lateral + encabezado). El buscador de
     "Buscar reserva, huesped, habitacion" que traia este encabezado se quito junto con el;
     si se necesita, puede volver a ponerse dentro del contenido en vez de en un encabezado propio.
+    Sin archivo .css: todo el estilo es inline. Lo que una hoja de estilos alcanza pero un
+    style="" no (el interior del ScrollPane, el encabezado y las filas de las mini-tablas)
+    lo resuelve DashboardController con setStyle() apenas cada control arma su piel.
 -->
-<BorderPane fx:id="rootPane" prefHeight="1020.0" prefWidth="1536.0" styleClass="root-bg" stylesheets="@../css/estilos.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="untrm.hotel_san_antonio.controlador.DashboardController">
+<BorderPane fx:id="rootPane" prefHeight="1020.0" prefWidth="1536.0"
+            style="-fx-background-color: #F3EFE7; -fx-font-family: 'Segoe UI';"
+            xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.DashboardController">
 
    <!-- ================= CENTER (contenido) ================= -->
    <center>
-      <ScrollPane fitToWidth="true" styleClass="content-scroll" BorderPane.alignment="CENTER">
+      <ScrollPane fx:id="scrollDashboard" fitToWidth="true" style="-fx-background-color: transparent;" BorderPane.alignment="CENTER">
          <content>
             <StackPane fx:id="centerStack">
                <children>
 
                   <!-- ========== VISTA: DASHBOARD ========== -->
-                  <VBox fx:id="dashboardView" spacing="18.0" styleClass="dashboard-view">
+                  <VBox fx:id="dashboardView" spacing="18.0" style="-fx-background-color: #F3EFE7;">
                      <padding>
                         <Insets bottom="24.0" left="24.0" right="24.0" top="18.0" />
                      </padding>
@@ -42,17 +48,17 @@
                            <children>
                               <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                  <children>
-                                    <Label styleClass="greeting-title" text="¡Hola, Administrador!" />
-                                    <Label styleClass="greeting-subtitle" text="Aquí tienes un resumen de la actividad del hotel." />
+                                    <Label text="¡Hola, Administrador!" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
+                                    <Label text="Aquí tienes un resumen de la actividad del hotel." style="-fx-font-size: 13px; -fx-text-fill: #6A5F52;" />
                                  </children>
                               </VBox>
-                              <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="date-card">
+                              <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #F5E6C8; -fx-background-radius: 10; -fx-padding: 10 18 10 14;">
                                  <children>
-                                    <Label styleClass="date-icon" text="📅" />
+                                    <Label text="📅" style="-fx-font-size: 16px;" />
                                     <VBox>
                                        <children>
-                                          <Label fx:id="lblFecha" styleClass="date-text" text="Sábado, 20 de septiembre de 2026" />
-                                          <Label fx:id="lblHora" styleClass="date-hora" text="10:24 a. m." />
+                                          <Label fx:id="lblFecha" text="Sábado, 20 de septiembre de 2026" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;" />
+                                          <Label fx:id="lblHora" text="10:24 a. m." style="-fx-font-size: 12px; -fx-text-fill: #2C2118; -fx-font-weight: bold;" />
                                        </children>
                                     </VBox>
                                  </children>
@@ -61,132 +67,132 @@
                         </HBox>
 
                         <!-- Tarjetas KPI -->
-                        <HBox spacing="14.0" styleClass="cards-row">
+                        <HBox spacing="14.0">
                            <children>
 
-                              <StackPane styleClass="kpi-card, kpi-green" HBox.hgrow="ALWAYS">
+                              <StackPane style="-fx-background-color: #E6F6EA; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);" HBox.hgrow="ALWAYS">
                                  <children>
                                     <HBox alignment="CENTER_LEFT" spacing="12.0">
                                        <children>
-                                          <StackPane styleClass="kpi-icon, kpi-icon-green">
-                                             <children><Label styleClass="kpi-icon-symbol" text="🛏" /></children>
+                                          <StackPane style="-fx-min-width: 42px; -fx-min-height: 42px; -fx-max-width: 42px; -fx-max-height: 42px; -fx-background-radius: 21; -fx-background-color: #2FA85A;">
+                                             <children><Label text="🛏" style="-fx-text-fill: white; -fx-font-size: 16px;" /></children>
                                           </StackPane>
                                           <VBox spacing="2.0">
                                              <children>
-                                                <Label styleClass="kpi-title" text="Habitaciones ocupadas" wrapText="true" />
-                                                <Label fx:id="lblOcupadas" styleClass="kpi-number" text="18" />
-                                                <Label styleClass="kpi-subtitle" text="de 30 habitaciones" />
+                                                <Label text="Habitaciones ocupadas" wrapText="true" style="-fx-font-size: 11.5px; -fx-font-weight: bold; -fx-text-fill: #4A3826; -fx-max-width: 130px;" />
+                                                <Label fx:id="lblOcupadas" text="18" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
+                                                <Label text="de 30 habitaciones" style="-fx-font-size: 10.5px; -fx-text-fill: #8A7F70; -fx-max-width: 140px;" />
                                              </children>
                                           </VBox>
                                        </children>
                                        <padding><Insets bottom="14.0" left="16.0" right="14.0" top="14.0" /></padding>
                                     </HBox>
-                                    <Label styleClass="kpi-badge" text="▲ 60%" StackPane.alignment="TOP_RIGHT" />
+                                    <Label text="▲ 60%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
                                  </children>
                               </StackPane>
 
-                              <StackPane styleClass="kpi-card, kpi-blue" HBox.hgrow="ALWAYS">
+                              <StackPane style="-fx-background-color: #E3EDFC; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);" HBox.hgrow="ALWAYS">
                                  <children>
                                     <HBox alignment="CENTER_LEFT" spacing="12.0">
                                        <children>
-                                          <StackPane styleClass="kpi-icon, kpi-icon-blue">
-                                             <children><Label styleClass="kpi-icon-symbol" text="🛏" /></children>
+                                          <StackPane style="-fx-min-width: 42px; -fx-min-height: 42px; -fx-max-width: 42px; -fx-max-height: 42px; -fx-background-radius: 21; -fx-background-color: #3F7BD0;">
+                                             <children><Label text="🛏" style="-fx-text-fill: white; -fx-font-size: 16px;" /></children>
                                           </StackPane>
                                           <VBox spacing="2.0">
                                              <children>
-                                                <Label styleClass="kpi-title" text="Habitaciones disponibles" wrapText="true" />
-                                                <Label fx:id="lblDisponibles" styleClass="kpi-number" text="10" />
-                                                <Label styleClass="kpi-subtitle" text="de 30 habitaciones" />
+                                                <Label text="Habitaciones disponibles" wrapText="true" style="-fx-font-size: 11.5px; -fx-font-weight: bold; -fx-text-fill: #4A3826; -fx-max-width: 130px;" />
+                                                <Label fx:id="lblDisponibles" text="10" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
+                                                <Label text="de 30 habitaciones" style="-fx-font-size: 10.5px; -fx-text-fill: #8A7F70; -fx-max-width: 140px;" />
                                              </children>
                                           </VBox>
                                        </children>
                                        <padding><Insets bottom="14.0" left="16.0" right="14.0" top="14.0" /></padding>
                                     </HBox>
-                                    <Label styleClass="kpi-badge" text="▲ 33%" StackPane.alignment="TOP_RIGHT" />
+                                    <Label text="▲ 33%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
                                  </children>
                               </StackPane>
 
-                              <StackPane styleClass="kpi-card, kpi-tan" HBox.hgrow="ALWAYS">
+                              <StackPane style="-fx-background-color: #FAF0D9; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);" HBox.hgrow="ALWAYS">
                                  <children>
                                     <HBox alignment="CENTER_LEFT" spacing="12.0">
                                        <children>
-                                          <StackPane styleClass="kpi-icon, kpi-icon-tan">
-                                             <children><Label styleClass="kpi-icon-symbol" text="👥" /></children>
+                                          <StackPane style="-fx-min-width: 42px; -fx-min-height: 42px; -fx-max-width: 42px; -fx-max-height: 42px; -fx-background-radius: 21; -fx-background-color: #C99A4E;">
+                                             <children><Label text="👥" style="-fx-text-fill: white; -fx-font-size: 16px;" /></children>
                                           </StackPane>
                                           <VBox spacing="2.0">
                                              <children>
-                                                <Label styleClass="kpi-title" text="Huéspedes" />
-                                                <Label fx:id="lblHuespedes" styleClass="kpi-number" text="24" />
-                                                <Label styleClass="kpi-subtitle" text="en el hotel" />
+                                                <Label text="Huéspedes" style="-fx-font-size: 11.5px; -fx-font-weight: bold; -fx-text-fill: #4A3826; -fx-max-width: 130px;" />
+                                                <Label fx:id="lblHuespedes" text="24" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
+                                                <Label text="en el hotel" style="-fx-font-size: 10.5px; -fx-text-fill: #8A7F70; -fx-max-width: 140px;" />
                                              </children>
                                           </VBox>
                                        </children>
                                        <padding><Insets bottom="14.0" left="16.0" right="14.0" top="14.0" /></padding>
                                     </HBox>
-                                    <Label styleClass="kpi-badge" text="▲ 12%" StackPane.alignment="TOP_RIGHT" />
+                                    <Label text="▲ 12%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
                                  </children>
                               </StackPane>
 
-                              <StackPane styleClass="kpi-card, kpi-red" HBox.hgrow="ALWAYS">
+                              <StackPane style="-fx-background-color: #FCE3E1; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);" HBox.hgrow="ALWAYS">
                                  <children>
                                     <HBox alignment="CENTER_LEFT" spacing="12.0">
                                        <children>
-                                          <StackPane styleClass="kpi-icon, kpi-icon-red">
-                                             <children><Label styleClass="kpi-icon-symbol" text="📅" /></children>
+                                          <StackPane style="-fx-min-width: 42px; -fx-min-height: 42px; -fx-max-width: 42px; -fx-max-height: 42px; -fx-background-radius: 21; -fx-background-color: #E0453B;">
+                                             <children><Label text="📅" style="-fx-text-fill: white; -fx-font-size: 16px;" /></children>
                                           </StackPane>
                                           <VBox spacing="2.0">
                                              <children>
-                                                <Label styleClass="kpi-title" text="Reservas de hoy" wrapText="true" />
-                                                <Label fx:id="lblReservasHoy" styleClass="kpi-number" text="5" />
-                                                <Label styleClass="kpi-subtitle" text="Llegadas programadas" wrapText="true" />
+                                                <Label text="Reservas de hoy" wrapText="true" style="-fx-font-size: 11.5px; -fx-font-weight: bold; -fx-text-fill: #4A3826; -fx-max-width: 130px;" />
+                                                <Label fx:id="lblReservasHoy" text="5" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
+                                                <Label text="Llegadas programadas" wrapText="true" style="-fx-font-size: 10.5px; -fx-text-fill: #8A7F70; -fx-max-width: 140px;" />
                                              </children>
                                           </VBox>
                                        </children>
                                        <padding><Insets bottom="14.0" left="16.0" right="14.0" top="14.0" /></padding>
                                     </HBox>
-                                    <Label styleClass="kpi-badge" text="▲ 25%" StackPane.alignment="TOP_RIGHT" />
+                                    <Label text="▲ 25%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
                                  </children>
                               </StackPane>
 
-                              <StackPane styleClass="kpi-card, kpi-mint" HBox.hgrow="ALWAYS">
+                              <StackPane style="-fx-background-color: #E2F5E7; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);" HBox.hgrow="ALWAYS">
                                  <children>
                                     <HBox alignment="CENTER_LEFT" spacing="12.0">
                                        <children>
-                                          <StackPane styleClass="kpi-icon, kpi-icon-mint">
-                                             <children><Label styleClass="kpi-icon-symbol" text="💲" /></children>
+                                          <StackPane style="-fx-min-width: 42px; -fx-min-height: 42px; -fx-max-width: 42px; -fx-max-height: 42px; -fx-background-radius: 21; -fx-background-color: #2FA85A;">
+                                             <children><Label text="💲" style="-fx-text-fill: white; -fx-font-size: 16px;" /></children>
                                           </StackPane>
                                           <VBox spacing="2.0">
                                              <children>
-                                                <Label styleClass="kpi-title" text="Ingresos del día" wrapText="true" />
-                                                <Label fx:id="lblIngresosDia" styleClass="kpi-number-sm" text="S/ 2,680.00" />
-                                                <Label styleClass="kpi-subtitle" text="Habitaciones + Tienda" wrapText="true" />
+                                                <Label text="Ingresos del día" wrapText="true" style="-fx-font-size: 11.5px; -fx-font-weight: bold; -fx-text-fill: #4A3826; -fx-max-width: 130px;" />
+                                                <Label fx:id="lblIngresosDia" text="S/ 2,680.00" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
+                                                <Label text="Habitaciones + Tienda" wrapText="true" style="-fx-font-size: 10.5px; -fx-text-fill: #8A7F70; -fx-max-width: 140px;" />
                                              </children>
                                           </VBox>
                                        </children>
                                        <padding><Insets bottom="14.0" left="16.0" right="14.0" top="14.0" /></padding>
                                     </HBox>
-                                    <Label styleClass="kpi-badge" text="▲ 18%" StackPane.alignment="TOP_RIGHT" />
+                                    <Label text="▲ 18%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
                                  </children>
                               </StackPane>
 
-                              <StackPane styleClass="kpi-card, kpi-purple" HBox.hgrow="ALWAYS">
+                              <StackPane style="-fx-background-color: #F1EAFB; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);" HBox.hgrow="ALWAYS">
                                  <children>
                                     <HBox alignment="CENTER_LEFT" spacing="12.0">
                                        <children>
-                                          <StackPane styleClass="kpi-icon, kpi-icon-purple">
-                                             <children><Label styleClass="kpi-icon-symbol" text="🛒" /></children>
+                                          <StackPane style="-fx-min-width: 42px; -fx-min-height: 42px; -fx-max-width: 42px; -fx-max-height: 42px; -fx-background-radius: 21; -fx-background-color: #8B5CF6;">
+                                             <children><Label text="🛒" style="-fx-text-fill: white; -fx-font-size: 16px;" /></children>
                                           </StackPane>
                                           <VBox spacing="2.0">
                                              <children>
-                                                <Label styleClass="kpi-title" text="Ventas en tienda" wrapText="true" />
-                                                <Label fx:id="lblVentasTienda" styleClass="kpi-number-sm" text="S/ 350.00" />
-                                                <Label styleClass="kpi-subtitle" text="8 ventas realizadas" wrapText="true" />
+                                                <Label text="Ventas en tienda" wrapText="true" style="-fx-font-size: 11.5px; -fx-font-weight: bold; -fx-text-fill: #4A3826; -fx-max-width: 130px;" />
+                                                <Label fx:id="lblVentasTienda" text="S/ 350.00" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
+                                                <Label text="8 ventas realizadas" wrapText="true" style="-fx-font-size: 10.5px; -fx-text-fill: #8A7F70; -fx-max-width: 140px;" />
                                              </children>
                                           </VBox>
                                        </children>
                                        <padding><Insets bottom="14.0" left="16.0" right="14.0" top="14.0" /></padding>
                                     </HBox>
-                                    <Label styleClass="kpi-badge" text="▲ 5%" StackPane.alignment="TOP_RIGHT" />
+                                    <Label text="▲ 5%" style="-fx-text-fill: #2F9E55; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;" StackPane.alignment="TOP_RIGHT" />
                                  </children>
                               </StackPane>
 
@@ -194,52 +200,53 @@
                         </HBox>
 
                         <!-- Fila de graficos -->
-                        <HBox spacing="14.0" styleClass="cards-row">
+                        <HBox spacing="14.0">
                            <children>
 
-                              <VBox alignment="CENTER" prefWidth="330.0" spacing="6.0" styleClass="table-card">
+                              <VBox alignment="CENTER" prefWidth="330.0" spacing="6.0"
+                                    style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
                                  <children>
                                     <HBox alignment="CENTER_LEFT">
                                        <children>
-                                          <Label styleClass="card-title" text="📊  Ocupación del hotel" HBox.hgrow="ALWAYS" />
-                                          <Label styleClass="card-select" text="Hoy ▾" />
+                                          <Label text="📊  Ocupación del hotel" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" HBox.hgrow="ALWAYS" />
+                                          <Label text="Hoy ▾" style="-fx-font-size: 11px; -fx-text-fill: #6A5F52; -fx-background-color: #F2EFE9; -fx-background-radius: 8; -fx-padding: 4 10 4 10;" />
                                        </children>
                                     </HBox>
                                     <HBox alignment="CENTER_LEFT" spacing="18.0">
                                        <children>
                                           <StackPane>
                                              <children>
-                                                <PieChart fx:id="chartOcupacion" labelsVisible="false" legendVisible="false" prefHeight="190.0" prefWidth="190.0" styleClass="donut-chart" />
+                                                <PieChart fx:id="chartOcupacion" labelsVisible="false" legendVisible="false" prefHeight="190.0" prefWidth="190.0" startAngle="90.0" />
                                                 <VBox alignment="CENTER" mouseTransparent="true">
                                                    <children>
-                                                      <Label fx:id="lblPorcentajeOcupacion" styleClass="donut-percent" text="60%" />
-                                                      <Label styleClass="donut-percent-label" text="Ocupación actual" />
+                                                      <Label fx:id="lblPorcentajeOcupacion" text="60%" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
+                                                      <Label text="Ocupación actual" style="-fx-font-size: 10px; -fx-text-fill: #8A7F70;" />
                                                    </children>
                                                 </VBox>
                                              </children>
                                           </StackPane>
                                           <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                              <children>
-                                                <HBox styleClass="legend-row"><children>
-                                                   <Label styleClass="legend-dot-brown" text="●  Ocupadas" HBox.hgrow="ALWAYS" />
-                                                   <Label fx:id="lblLeyOcupadas" styleClass="legend-value" text="18" />
+                                                <HBox style="-fx-alignment: CENTER_LEFT;"><children>
+                                                   <Label text="●  Ocupadas" style="-fx-text-fill: #6B4A1E; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label fx:id="lblLeyOcupadas" text="18" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
-                                                <HBox styleClass="legend-row"><children>
-                                                   <Label styleClass="legend-dot-beige" text="●  Disponibles" HBox.hgrow="ALWAYS" />
-                                                   <Label fx:id="lblLeyDisponibles" styleClass="legend-value" text="10" />
+                                                <HBox style="-fx-alignment: CENTER_LEFT;"><children>
+                                                   <Label text="●  Disponibles" style="-fx-text-fill: #D8C39A; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label fx:id="lblLeyDisponibles" text="10" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
-                                                <HBox styleClass="legend-row"><children>
-                                                   <Label styleClass="legend-dot-gold" text="●  En limpieza" HBox.hgrow="ALWAYS" />
-                                                   <Label fx:id="lblLeyLimpieza" styleClass="legend-value" text="2" />
+                                                <HBox style="-fx-alignment: CENTER_LEFT;"><children>
+                                                   <Label text="●  En limpieza" style="-fx-text-fill: #D9A53B; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label fx:id="lblLeyLimpieza" text="2" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
-                                                <HBox styleClass="legend-row"><children>
-                                                   <Label styleClass="legend-dot-gray" text="●  En mantenimiento" HBox.hgrow="ALWAYS" />
-                                                   <Label fx:id="lblLeyMantenimiento" styleClass="legend-value" text="0" />
+                                                <HBox style="-fx-alignment: CENTER_LEFT;"><children>
+                                                   <Label text="●  En mantenimiento" style="-fx-text-fill: #B3ACA2; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label fx:id="lblLeyMantenimiento" text="0" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
-                                                <Region styleClass="legend-sep" />
-                                                <HBox styleClass="legend-row"><children>
-                                                   <Label styleClass="legend-total-label" text="Total de habitaciones" HBox.hgrow="ALWAYS" />
-                                                   <Label styleClass="legend-total-value" text="30" />
+                                                <Region style="-fx-pref-height: 1; -fx-background-color: #EEE7D9;" />
+                                                <HBox style="-fx-alignment: CENTER_LEFT;"><children>
+                                                   <Label text="Total de habitaciones" style="-fx-font-size: 11.5px; -fx-text-fill: #6A5F52; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
+                                                   <Label text="30" style="-fx-font-size: 12.5px; -fx-text-fill: #2C2118; -fx-font-weight: bold;" />
                                                 </children></HBox>
                                              </children>
                                           </VBox>
@@ -248,49 +255,51 @@
                                  </children>
                               </VBox>
 
-                              <VBox spacing="8.0" styleClass="table-card" HBox.hgrow="ALWAYS">
+                              <VBox spacing="8.0" HBox.hgrow="ALWAYS"
+                                    style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
                                  <children>
                                     <HBox alignment="CENTER_LEFT">
                                        <children>
-                                          <Label styleClass="card-title" text="📈  Ingresos de la semana" HBox.hgrow="ALWAYS" />
-                                          <Label styleClass="card-select" text="Últimos 7 días ▾" />
+                                          <Label text="📈  Ingresos de la semana" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" HBox.hgrow="ALWAYS" />
+                                          <Label text="Últimos 7 días ▾" style="-fx-font-size: 11px; -fx-text-fill: #6A5F52; -fx-background-color: #F2EFE9; -fx-background-radius: 8; -fx-padding: 4 10 4 10;" />
                                        </children>
                                     </HBox>
-                                    
-                                <StackPane fx:id="contenedorGraficoIngresos" prefHeight="230.0" styleClass="income-chart" />
+
+                                <StackPane fx:id="contenedorGraficoIngresos" prefHeight="230.0" />
 
                                  </children>
                               </VBox>
 
-                              <VBox alignment="CENTER" prefWidth="330.0" spacing="6.0" styleClass="table-card">
+                              <VBox alignment="CENTER" prefWidth="330.0" spacing="6.0"
+                                    style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
                                  <children>
-                                    <Label styleClass="card-title" text="🧾  Distribución de ingresos (Hoy)" />
+                                    <Label text="🧾  Distribución de ingresos (Hoy)" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                     <HBox alignment="CENTER_LEFT" spacing="18.0">
                                        <children>
                                           <StackPane>
                                              <children>
-                                                <PieChart fx:id="chartDistribucion" labelsVisible="false" legendVisible="false" prefHeight="190.0" prefWidth="190.0" styleClass="donut-chart" />
+                                                <PieChart fx:id="chartDistribucion" labelsVisible="false" legendVisible="false" prefHeight="190.0" prefWidth="190.0" startAngle="90.0" />
                                                 <VBox alignment="CENTER" mouseTransparent="true">
                                                    <children>
-                                                      <Label fx:id="lblTotalIngresos" styleClass="donut-percent" text="S/ 2,680" />
-                                                      <Label styleClass="donut-percent-label" text="Total" />
+                                                      <Label fx:id="lblTotalIngresos" text="S/ 2,680" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
+                                                      <Label text="Total" style="-fx-font-size: 10px; -fx-text-fill: #8A7F70;" />
                                                    </children>
                                                 </VBox>
                                              </children>
                                           </StackPane>
                                           <VBox spacing="10.0" HBox.hgrow="ALWAYS">
                                              <children>
-                                                <HBox styleClass="legend-row"><children>
-                                                   <Label styleClass="legend-dot-brown" text="●  Habitaciones" HBox.hgrow="ALWAYS" />
-                                                   <Label styleClass="legend-value" text="76%" />
+                                                <HBox style="-fx-alignment: CENTER_LEFT;"><children>
+                                                   <Label text="●  Habitaciones" style="-fx-text-fill: #6B4A1E; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label text="76%" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
-                                                <HBox styleClass="legend-row"><children>
-                                                   <Label styleClass="legend-dot-gold" text="●  Tienda" HBox.hgrow="ALWAYS" />
-                                                   <Label styleClass="legend-value" text="13%" />
+                                                <HBox style="-fx-alignment: CENTER_LEFT;"><children>
+                                                   <Label text="●  Tienda" style="-fx-text-fill: #D9A53B; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label text="13%" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
-                                                <HBox styleClass="legend-row"><children>
-                                                   <Label styleClass="legend-dot-beige" text="●  Otros servicios" HBox.hgrow="ALWAYS" />
-                                                   <Label styleClass="legend-value" text="11%" />
+                                                <HBox style="-fx-alignment: CENTER_LEFT;"><children>
+                                                   <Label text="●  Otros servicios" style="-fx-text-fill: #D8C39A; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label text="11%" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
                                              </children>
                                           </VBox>
@@ -303,18 +312,20 @@
                         </HBox>
 
                         <!-- Fila de tablas / alertas -->
-                        <HBox spacing="14.0" styleClass="cards-row">
+                        <HBox spacing="14.0">
                            <children>
 
-                              <VBox spacing="8.0" styleClass="table-card" HBox.hgrow="ALWAYS">
+                              <VBox spacing="8.0" HBox.hgrow="ALWAYS"
+                                    style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
                                  <children>
                                     <HBox alignment="CENTER_LEFT">
                                        <children>
-                                          <Label styleClass="card-title" text="📅  Próximas llegadas (Hoy)" HBox.hgrow="ALWAYS" />
-                                          <Button mnemonicParsing="false" onAction="#mostrarSeccion" styleClass="link-button" text="Ver todas" />
+                                          <Label text="📅  Próximas llegadas (Hoy)" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" HBox.hgrow="ALWAYS" />
+                                          <Button mnemonicParsing="false" onAction="#mostrarSeccion" text="Ver todas"
+                                                  style="-fx-background-color: #F5E6C8; -fx-text-fill: #8A5A1E; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 5 12 5 12; -fx-cursor: hand;" />
                                        </children>
                                     </HBox>
-                                    <TableView fx:id="tablaLlegadas" prefHeight="210.0" styleClass="mini-table">
+                                    <TableView fx:id="tablaLlegadas" prefHeight="210.0">
                                        <columns>
                                           <TableColumn fx:id="colLlegadaHora" prefWidth="55.0" text="Hora" />
                                           <TableColumn fx:id="colLlegadaHuesped" prefWidth="150.0" text="Huésped / Empresa" />
@@ -326,15 +337,17 @@
                                  </children>
                               </VBox>
 
-                              <VBox spacing="8.0" styleClass="table-card" HBox.hgrow="ALWAYS">
+                              <VBox spacing="8.0" HBox.hgrow="ALWAYS"
+                                    style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
                                  <children>
                                     <HBox alignment="CENTER_LEFT">
                                        <children>
-                                          <Label styleClass="card-title" text="🔧  Habitaciones en mantenimiento" HBox.hgrow="ALWAYS" />
-                                          <Button mnemonicParsing="false" onAction="#mostrarSeccion" styleClass="link-button" text="Ver todas" />
+                                          <Label text="🔧  Habitaciones en mantenimiento" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" HBox.hgrow="ALWAYS" />
+                                          <Button mnemonicParsing="false" onAction="#mostrarSeccion" text="Ver todas"
+                                                  style="-fx-background-color: #F5E6C8; -fx-text-fill: #8A5A1E; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 5 12 5 12; -fx-cursor: hand;" />
                                        </children>
                                     </HBox>
-                                    <TableView fx:id="tablaMantenimiento" prefHeight="210.0" styleClass="mini-table">
+                                    <TableView fx:id="tablaMantenimiento" prefHeight="210.0">
                                        <columns>
                                           <TableColumn fx:id="colMantHabitacion" prefWidth="55.0" text="Hab." />
                                           <TableColumn fx:id="colMantTipo" prefWidth="65.0" text="Tipo" />
@@ -345,12 +358,14 @@
                                  </children>
                               </VBox>
 
-                              <VBox prefWidth="300.0" spacing="10.0" styleClass="table-card">
+                              <VBox prefWidth="300.0" spacing="10.0"
+                                    style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
                                  <children>
                                     <HBox alignment="CENTER_LEFT">
                                        <children>
-                                          <Label styleClass="card-title" text="🔔  Alertas y pendientes" HBox.hgrow="ALWAYS" />
-                                          <Button mnemonicParsing="false" onAction="#mostrarSeccion" styleClass="link-button" text="Ver todas" />
+                                          <Label text="🔔  Alertas y pendientes" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" HBox.hgrow="ALWAYS" />
+                                          <Button mnemonicParsing="false" onAction="#mostrarSeccion" text="Ver todas"
+                                                  style="-fx-background-color: #F5E6C8; -fx-text-fill: #8A5A1E; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 5 12 5 12; -fx-cursor: hand;" />
                                        </children>
                                     </HBox>
                                     <VBox fx:id="listaAlertas" spacing="4.0" />
@@ -361,26 +376,26 @@
                         </HBox>
 
                         <!-- Banner inferior -->
-                        <StackPane styleClass="promo-banner">
+                        <StackPane style="-fx-background-color: #F5ECDB; -fx-background-radius: 14;">
                            <children>
                               <HBox alignment="CENTER_LEFT" spacing="26.0">
                                  <children>
-                                    <ImageView fitHeight="135.0" fitWidth="385.0" preserveRatio="false" styleClass="promo-image">
+                                    <ImageView fitHeight="135.0" fitWidth="385.0" preserveRatio="false" style="-fx-background-radius: 10;">
                                        <image>
                                           <Image url="@room.jpg" />
                                        </image>
                                     </ImageView>
                                     <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                        <children>
-                                          <Label styleClass="promo-title" text="Brindamos más que alojamiento," wrapText="true" />
-                                          <Label styleClass="promo-title-italic" text="creamos experiencias inolvidables." wrapText="true" />
+                                          <Label text="Brindamos más que alojamiento," wrapText="true" style="-fx-font-size: 19px; -fx-text-fill: #2C2118;" />
+                                          <Label text="creamos experiencias inolvidables." wrapText="true" style="-fx-font-size: 19px; -fx-font-style: italic; -fx-text-fill: #8A5A1E;" />
                                        </children>
                                     </VBox>
-                                    <Region styleClass="promo-divider" />
+                                    <Region style="-fx-pref-width: 1.5; -fx-min-width: 1.5; -fx-pref-height: 46; -fx-background-color: #D9C9A8;" />
                                     <VBox alignment="CENTER_LEFT" spacing="2.0">
                                        <children>
-                                          <Label styleClass="promo-hotel-name" text="Hotel San Antonio" />
-                                          <Label styleClass="promo-hotel-sub" text="Tu comodidad, nuestra prioridad" />
+                                          <Label text="Hotel San Antonio" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
+                                          <Label text="Tu comodidad, nuestra prioridad" style="-fx-font-size: 11px; -fx-text-fill: #8A7F70;" />
                                        </children>
                                     </VBox>
                                  </children>
@@ -395,11 +410,13 @@
                   </VBox>
 
                   <!-- ========== VISTA: PLACEHOLDER (otras secciones) ========== -->
-                  <VBox fx:id="placeholderView" alignment="CENTER" spacing="10.0" styleClass="placeholder-view" visible="false">
+                  <VBox fx:id="placeholderView" alignment="CENTER" spacing="10.0" visible="false"
+                        style="-fx-background-color: #F3EFE7; -fx-min-height: 500px;">
                      <children>
-                        <Label fx:id="lblPlaceholderTitulo" styleClass="placeholder-title" text="Sección" />
-                        <Label styleClass="placeholder-text" text="Este módulo está en construcción." />
-                        <Button mnemonicParsing="false" onAction="#mostrarDashboard" styleClass="primary-button" text="Volver al Dashboard" />
+                        <Label fx:id="lblPlaceholderTitulo" text="Sección" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
+                        <Label text="Este módulo está en construcción." style="-fx-font-size: 13px; -fx-text-fill: #8A7F70;" />
+                        <Button mnemonicParsing="false" onAction="#mostrarDashboard" text="Volver al Dashboard"
+                                style="-fx-background-color: #B8863F; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 22 10 22; -fx-cursor: hand;" />
                      </children>
                   </VBox>
 
