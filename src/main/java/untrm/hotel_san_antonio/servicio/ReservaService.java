@@ -276,6 +276,60 @@ public class ReservaService {
         }
     }
 
+    public List<Pago> listarPagos(int idReserva) throws SQLException {
+        try (Connection conexion = ConexionBD.conectar()) {
+            return pagoDAO.listarPorReserva(conexion, idReserva);
+        }
+    }
+
+    /**
+     * Cobra todo o parte del saldo de una reserva confirmada que todavia no llego (despues del check-in
+     * el saldo se cobra en la cuenta de la habitacion).
+     * @return el saldo que queda por cobrar
+     */
+    public BigDecimal cobrarSaldo(int idReserva, String metodo, BigDecimal monto) throws SQLException {
+        if (monto == null || monto.signum() <= 0) {
+            throw new IllegalArgumentException("Ingrese un monto mayor a cero.");
+        }
+        if (monto.scale() > 2) {
+            throw new IllegalArgumentException("El monto puede tener como maximo dos decimales.");
+        }
+        validarMetodoPago(metodo);
+        int idUsuario = obtenerIdUsuarioAutenticado();
+        try (Connection conexion = ConexionBD.conectar()) {
+            conexion.setAutoCommit(false);
+            try {
+                Reserva reserva = reservaDAO.buscarPorId(conexion, idReserva, true);
+                if (reserva == null || !"CONFIRMADA".equals(reserva.getEstado())) {
+                    throw new IllegalStateException("Solo se puede cobrar el saldo de una reserva confirmada.");
+                }
+                BigDecimal saldo = valorMonetario(reserva.getMontoTotal())
+                        .subtract(pagoDAO.sumarPorReserva(conexion, idReserva));
+                if (saldo.signum() <= 0) {
+                    throw new IllegalStateException("La reserva no tiene saldo pendiente.");
+                }
+                if (monto.compareTo(saldo) > 0) {
+                    throw new IllegalArgumentException("El pago no puede superar el saldo de S/ "
+                            + saldo.setScale(2, RoundingMode.HALF_UP) + ".");
+                }
+                Pago pago = new Pago();
+                pago.setIdReserva(idReserva);
+                pago.setIdUsuario(idUsuario);
+                pago.setMonto(monto);
+                pago.setMetodoPago(metodo);
+                pago.setTipoPago("SALDO");
+                pagoDAO.insertar(conexion, pago);
+                auditoriaDAO.registrar(conexion, idUsuario, "COBRO_SALDO", "reserva", idReserva,
+                        "S/ " + monto.setScale(2, RoundingMode.HALF_UP) + " por " + metodo);
+                conexion.commit();
+                return saldo.subtract(monto);
+            } catch (SQLException | RuntimeException error) {
+                conexion.rollback();
+                throw error;
+            }
+        }
+    }
+
     /** Cancela solo si el estado persistido continúa siendo PENDIENTE o CONFIRMADA. */
     public void cancelar(int idReserva, String motivo, String detalle) throws SQLException {
         obtenerIdUsuarioAutenticado();

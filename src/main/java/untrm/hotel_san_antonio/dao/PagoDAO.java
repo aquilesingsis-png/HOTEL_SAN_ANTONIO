@@ -37,6 +37,29 @@ public class PagoDAO {
         }
     }
 
+    /** Los pagos de una reserva, del mas antiguo al mas reciente. */
+    public java.util.List<Pago> listarPorReserva(Connection con, int idReserva) throws SQLException {
+        String sql = "SELECT id_pago, monto, metodo_pago, tipo_pago, fecha_pago FROM pago "
+                + "WHERE id_reserva = ? ORDER BY fecha_pago, id_pago";
+        java.util.List<Pago> lista = new java.util.ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idReserva);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Pago p = new Pago();
+                    p.setIdPago(rs.getInt("id_pago"));
+                    p.setIdReserva(idReserva);
+                    p.setMonto(rs.getBigDecimal("monto"));
+                    p.setMetodoPago(rs.getString("metodo_pago"));
+                    p.setTipoPago(rs.getString("tipo_pago"));
+                    p.setFechaPago(rs.getTimestamp("fecha_pago").toLocalDateTime());
+                    lista.add(p);
+                }
+            }
+        }
+        return lista;
+    }
+
     public void insertarRetroactivo(Connection con, Pago p, LocalDate fechaEvento,
                                     String motivo, int usuario) throws SQLException {
         String sql = "INSERT INTO pago (id_reserva, id_usuario, monto, metodo_pago, tipo_pago, "

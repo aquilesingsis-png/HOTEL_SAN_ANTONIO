@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -23,10 +24,23 @@
                 <Label text="Huéspedes" style="-fx-font-weight: bold;"/>
                 <Label fx:id="lblHuespedes" text="Cargando..." wrapText="true"/>
             </VBox>
+            <VBox spacing="8" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #E8E2D9; -fx-border-radius: 10;">
+                <padding><Insets top="14" right="20" bottom="14" left="20"/></padding>
+                <Label text="Pagos" style="-fx-font-weight: bold;"/>
+                <Label fx:id="lblResumenPagos" text="Cargando..." style="-fx-font-weight: bold;"/>
+                <Label fx:id="lblPagos" wrapText="true"/>
+                <HBox fx:id="boxCobro" spacing="10" alignment="CENTER_LEFT" visible="false" managed="false">
+                    <ChoiceBox fx:id="cbMetodoCobro" prefWidth="160" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                    <TextField fx:id="txtMontoCobro" promptText="Monto" prefWidth="120" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                    <Button fx:id="btnCobrar" text="Cobrar saldo" onAction="#cobrarSaldo" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+                </HBox>
+                <Label fx:id="lblAvisoCobro" wrapText="true" style="-fx-text-fill: #6A625A;"/>
+            </VBox>
             <VBox fx:id="boxCancelar" spacing="10" visible="false" managed="false"
                   style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #D9433A; -fx-border-radius: 10;">
                 <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
                 <Label text="Motivo de cancelación" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <Label fx:id="lblAvisoCancelacion" wrapText="true" style="-fx-text-fill: #B64832; -fx-font-weight: bold;"/>
                 <ChoiceBox fx:id="cbMotivo" prefWidth="320" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                 <TextArea fx:id="txtDetalle" promptText="Detalle opcional (máximo 500 caracteres)" prefRowCount="3" wrapText="true" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                 <HBox spacing="10">
