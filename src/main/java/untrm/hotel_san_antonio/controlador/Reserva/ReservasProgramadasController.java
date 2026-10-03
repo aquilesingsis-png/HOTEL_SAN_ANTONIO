@@ -1,39 +1,36 @@
 package untrm.hotel_san_antonio.controlador.Reserva;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Locale;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
-import javafx.concurrent.Task;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import untrm.hotel_san_antonio.modelo.Reserva;
-import untrm.hotel_san_antonio.modelo.Huesped;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.Navegacion;
 
+/** Vista "Lista" de la pantalla Reservas. El texto a buscar se lo pasa ReservasController. */
 public class ReservasProgramadasController {
+
+    static final String RUTA_DETALLE = "/untrm/hotel_san_antonio/fxml/Reserva/Detalle_reserva_ventana.fxml";
 
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final int TAMANO_PAGINA = 10;
 
-    @FXML private TextField txtBuscar;
     @FXML private DatePicker dpDesde;
     @FXML private DatePicker dpHasta;
     @FXML private ToggleButton btnTodas;
-    @FXML private ToggleButton btnPendientes;
-    @FXML private ToggleButton btnConfirmadas;
     @FXML private ToggleButton btnPorLlegar;
+    @FXML private ToggleButton btnEnCasa;
     @FXML private ToggleButton btnFinalizadas;
     @FXML private ToggleButton btnCanceladas;
     @FXML private TableView<Reserva> tablaReservas;
@@ -48,22 +45,35 @@ public class ReservasProgramadasController {
     @FXML private Button btnAnterior;
     @FXML private Button btnSiguiente;
     @FXML private Button btnVerDetalle;
-    @FXML private Button btnCambiarHabitacion;
 
     private final ReservaService reservaService = new ReservaService();
     private List<Reserva> resultadoCompleto = List.of();
+    private String textoBusqueda = "";
     private int paginaActual = 1;
 
     @FXML
     public void initialize() {
         configurarTabla();
         tablaReservas.getSelectionModel().selectedItemProperty().addListener(
-                (observable, anterior, actual) -> {
-                    btnVerDetalle.setDisable(actual == null);
-                    btnCambiarHabitacion.setDisable(actual == null || !("CONFIRMADA".equals(actual.getEstado())
-                            || "CHECKIN".equals(actual.getEstado())));
-                });
+                (observable, anterior, actual) -> btnVerDetalle.setDisable(actual == null));
+        tablaReservas.setOnMouseClicked(evento -> {
+            if (evento.getClickCount() == 2) {
+                verDetalle();
+            }
+        });
         btnTodas.setSelected(true);
+        buscarYMostrar();
+    }
+
+    /** Lo llama ReservasController cuando se escribe en el buscador del encabezado. */
+    public void buscarTexto(String texto) {
+        textoBusqueda = texto == null ? "" : texto.trim();
+        paginaActual = 1;
+        buscarYMostrar();
+    }
+
+    /** Vuelve a consultar la base (por ejemplo, despues de cancelar o cambiar una reserva). */
+    public void recargar() {
         buscarYMostrar();
     }
 
@@ -94,7 +104,6 @@ public class ReservasProgramadasController {
 
     @FXML
     private void limpiarFiltros() {
-        txtBuscar.clear();
         dpDesde.setValue(null);
         dpHasta.setValue(null);
         btnTodas.setSelected(true);
@@ -105,7 +114,7 @@ public class ReservasProgramadasController {
     private void buscarYMostrar() {
         try {
             resultadoCompleto = reservaService.buscar(
-                    txtBuscar.getText(), estadoSeleccionado(), dpDesde.getValue(), dpHasta.getValue());
+                    textoBusqueda, estadoSeleccionado(), dpDesde.getValue(), dpHasta.getValue());
         } catch (IllegalArgumentException error) {
             Alertas.mostrarAdvertencia("Filtro inválido", error.getMessage());
             return;
@@ -122,59 +131,11 @@ public class ReservasProgramadasController {
         if (reserva == null) {
             return;
         }
-        Task<List<Huesped>> tarea = new Task<>() {
-            @Override protected List<Huesped> call() throws Exception {
-                return reservaService.listarHuespedes(reserva.getIdReserva());
-            }
-        };
-        tarea.setOnSucceeded(e -> mostrarDetalle(reserva, tarea.getValue()));
-        tarea.setOnFailed(e -> Alertas.mostrarError("Detalle de reserva",
-                "No se pudieron cargar los huéspedes de la reserva."));
-        Thread hilo = new Thread(tarea, "detalle-huespedes");
-        hilo.setDaemon(true);
-        hilo.start();
-    }
-
-    private void mostrarDetalle(Reserva reserva, List<Huesped> huespedes) {
-        long noches = ChronoUnit.DAYS.between(reserva.getFechaCheckin(), reserva.getFechaCheckout());
-        String nombres = huespedes.stream()
-                .map(h -> h.getNombres() + " " + h.getApellidos() + " (" + h.getNumDocumento() + ")")
-                .collect(java.util.stream.Collectors.joining("\n  "));
-        String detalle = "Código: " + reserva.getCodigo()
-                + "\nCliente: " + reserva.getNombreHuesped()
-                + "\nDocumento: " + reserva.getTipoDocumentoHuesped() + " " + reserva.getNumDocumentoHuesped()
-                + "\nHabitación: " + reserva.getNumeroHabitacion() + " · " + reserva.getNombreTipoHabitacion()
-                + "\nIngreso: " + reserva.getFechaCheckin().format(FORMATO_FECHA)
-                + "\nSalida: " + reserva.getFechaCheckout().format(FORMATO_FECHA)
-                + "\nNoches: " + noches
-                + "\nHuéspedes: " + reserva.getNumHuespedes()
-                + "\n  " + nombres
-                + "\nEstado: " + textoEstado(reserva.getEstado())
-                + String.format(Locale.US, "\nTotal: S/ %.2f", reserva.getMontoTotal());
-        Alertas.mostrarInfo("Detalle de " + reserva.getCodigo(), detalle);
-    }
-
-    @FXML private void cambiarHabitacion() {
-        Reserva seleccionada = tablaReservas.getSelectionModel().getSelectedItem();
-        if (seleccionada == null) {
-            Alertas.mostrarInfo("Cambio de habitación", "Seleccione una reserva activa.");
-            return;
-        }
         try {
-            Navegacion.<CambiarHabitacionController>abrirModal(
-                    "/untrm/hotel_san_antonio/fxml/Reserva/cambiar_habitacion.fxml",
-                    "Cambiar habitación", controlador -> controlador.iniciar(seleccionada, this::buscarYMostrar));
-        } catch (java.io.IOException | SecurityException error) {
-            Alertas.mostrarError("Error", "No se pudo abrir el cambio de habitación.");
-        }
-    }
-
-    @FXML
-    private void abrirNuevaReserva() {
-        try {
-            Navegacion.mostrar("/untrm/hotel_san_antonio/fxml/Reserva/Nueva_reserva.fxml");
-        } catch (java.io.IOException error) {
-            Alertas.mostrarError("Error", "No se pudo abrir Nueva reserva.\n\n" + error.getMessage());
+            Navegacion.<DetalleReservaVentanaController>abrirModal(RUTA_DETALLE, "Detalle de reserva",
+                    controlador -> controlador.iniciar(reserva, this::buscarYMostrar));
+        } catch (IOException | SecurityException error) {
+            Alertas.mostrarError("Error", "No se pudo abrir el detalle de la reserva.\n\n" + error.getMessage());
         }
     }
 
@@ -214,9 +175,8 @@ public class ReservasProgramadasController {
     }
 
     private String estadoSeleccionado() {
-        if (btnPendientes.isSelected()) return "PENDIENTE";
-        if (btnConfirmadas.isSelected()) return "CONFIRMADA";
         if (btnPorLlegar.isSelected()) return "POR_LLEGAR";
+        if (btnEnCasa.isSelected()) return "CHECKIN";
         if (btnFinalizadas.isSelected()) return "FINALIZADA";
         if (btnCanceladas.isSelected()) return "CANCELADA";
         return null;

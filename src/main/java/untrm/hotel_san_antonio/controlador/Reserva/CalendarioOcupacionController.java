@@ -17,7 +17,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
@@ -27,6 +26,7 @@ import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Navegacion;
 
 public class CalendarioOcupacionController {
 
@@ -37,7 +37,7 @@ public class CalendarioOcupacionController {
     private static final Locale LOCALE_ES = Locale.of("es", "PE");
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    @FXML private TextField txtBuscarHabitacion;
+    @FXML private Label lblAyuda;
     @FXML private Label lblPeriodo;
     @FXML private ToggleButton btnSemana;
     @FXML private ToggleButton btnMes;
@@ -54,6 +54,7 @@ public class CalendarioOcupacionController {
     private LocalDate finPeriodo;
     private List<Habitacion> habitaciones = List.of();
     private Map<Integer, List<Reserva>> reservasPorHabitacion = Map.of();
+    private String textoCliente = "";
 
     @FXML
     public void initialize() {
@@ -66,7 +67,6 @@ public class CalendarioOcupacionController {
             }
         });
         configurarPisos();
-        txtBuscarHabitacion.textProperty().addListener((observable, anterior, actual) -> renderizarHabitaciones());
         cbPiso.valueProperty().addListener((observable, anterior, actual) -> renderizarHabitaciones());
         actualizarPeriodoYCargar();
     }
@@ -159,16 +159,19 @@ public class CalendarioOcupacionController {
             return;
         }
         Integer piso = obtenerPisoSeleccionado();
-        String busqueda = txtBuscarHabitacion.getText() == null
-                ? "" : txtBuscarHabitacion.getText().trim().toLowerCase(Locale.ROOT);
+        String busqueda = textoCliente;
+        // con texto: las habitaciones cuyo numero o tipo lo contienen, o que tienen una reserva de esa persona
         List<Habitacion> filtradas = habitaciones.stream()
                 .filter(habitacion -> piso == null || habitacion.getPiso() == piso)
                 .filter(habitacion -> busqueda.isEmpty()
                         || habitacion.getNumero().toLowerCase(Locale.ROOT).contains(busqueda)
-                        || habitacion.getTipo().getNombre().toLowerCase(Locale.ROOT).contains(busqueda))
+                        || habitacion.getTipo().getNombre().toLowerCase(Locale.ROOT).contains(busqueda)
+                        || reservasPorHabitacion.getOrDefault(habitacion.getIdHabitacion(), List.of())
+                                .stream().anyMatch(this::coincide))
                 .toList();
         if (filtradas.isEmpty()) {
-            mostrarSinDatos("No hay habitaciones para los filtros seleccionados.");
+            mostrarSinDatos(busqueda.isEmpty() ? "No hay habitaciones para los filtros seleccionados."
+                    : "No hay reservas de \"" + busqueda + "\" en este periodo. Cambie de semana o use la vista Lista.");
             return;
         }
         contenedorHabitaciones.getChildren().clear();
@@ -202,11 +205,58 @@ public class CalendarioOcupacionController {
         Label texto = (Label) cargador.getNamespace().get("lblCelda");
         Tooltip ayuda = (Tooltip) cargador.getNamespace().get("tooltipCelda");
         EstadoDia estado = estadoParaDia(habitacion, reservas, fecha);
-        texto.setText(estado.abreviatura());
+        Reserva reserva = reservaDelDia(reservas, fecha);
+        texto.setText(reserva == null ? estado.abreviatura() : apellido(reserva));
         texto.setStyle(texto.getStyle() + " -fx-background-color: " + estado.color() + ";");
         ayuda.setText("Habitación " + habitacion.getNumero() + " · " + fecha.format(FORMATO_FECHA)
-                + " · " + estado.descripcion());
+                + " · " + estado.descripcion() + (reserva == null ? "" : " · " + reserva.getNombreHuesped()));
+        if (reserva != null) {
+            texto.setStyle(texto.getStyle() + " -fx-cursor: hand;"
+                    + (coincide(reserva) && !textoCliente.isEmpty()
+                            ? " -fx-border-color: #3B210F; -fx-border-width: 2; -fx-border-radius: 5;" : ""));
+            texto.setOnMouseClicked(evento -> abrirDetalle(reserva));
+        }
         return celda;
+    }
+
+    private Reserva reservaDelDia(List<Reserva> reservas, LocalDate fecha) {
+        for (Reserva reserva : reservas) {
+            if (!fecha.isBefore(reserva.getFechaCheckin()) && fecha.isBefore(reserva.getFechaCheckout())) {
+                return reserva;
+            }
+        }
+        return null;
+    }
+
+    /** Ultima palabra del nombre (el apellido), recortada para que entre en la celda. */
+    private String apellido(Reserva reserva) {
+        String nombre = reserva.getNombreHuesped() == null ? "" : reserva.getNombreHuesped().trim();
+        String ultima = nombre.contains(" ") ? nombre.substring(nombre.lastIndexOf(' ') + 1) : nombre;
+        return ultima.length() > 8 ? ultima.substring(0, 8) : ultima;
+    }
+
+    private void abrirDetalle(Reserva reserva) {
+        try {
+            Navegacion.<DetalleReservaVentanaController>abrirModal(ReservasProgramadasController.RUTA_DETALLE,
+                    "Detalle de reserva", controlador -> controlador.iniciar(reserva, this::cargarDatos));
+        } catch (IOException | SecurityException error) {
+            Alertas.mostrarError("Error", "No se pudo abrir el detalle de la reserva.\n\n" + error.getMessage());
+        }
+    }
+
+    /** true si la reserva es de la persona que se esta buscando (nombre o codigo). */
+    private boolean coincide(Reserva reserva) {
+        if (textoCliente.isEmpty()) {
+            return true;
+        }
+        String nombre = reserva.getNombreHuesped() == null ? "" : reserva.getNombreHuesped().toLowerCase(Locale.ROOT);
+        return nombre.contains(textoCliente) || reserva.getCodigo().toLowerCase(Locale.ROOT).contains(textoCliente);
+    }
+
+    /** Lo llama ReservasController cuando se escribe en el buscador del encabezado. */
+    public void buscarTexto(String texto) {
+        textoCliente = texto == null ? "" : texto.trim().toLowerCase(Locale.ROOT);
+        renderizarHabitaciones();
     }
 
     private EstadoDia estadoParaDia(Habitacion habitacion, List<Reserva> reservas, LocalDate fecha) {

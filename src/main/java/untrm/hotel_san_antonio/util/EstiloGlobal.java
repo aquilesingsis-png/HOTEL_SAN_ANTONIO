@@ -20,6 +20,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseEvent;
 
 /**
@@ -46,6 +47,8 @@ public final class EstiloGlobal {
     private static final String HOVER_PELIGRO = "-fx-background-color: #FFF0ED;";
 
     private static final String FOCO = "-fx-border-color: #B8862D;";
+
+    private static final String ELEGIDO = "-fx-background-color: #704313; -fx-text-fill: white;";
 
     private static final String FILA_SELECCIONADA = "-fx-background-color: #704313; -fx-text-background-color: white;";
 
@@ -116,6 +119,8 @@ public final class EstiloGlobal {
             bordeAlEnfocar(nodo);
         } else if (nodo instanceof Button boton) {
             efectoBoton(boton);
+        } else if (nodo instanceof ToggleButton opcion) {
+            marcarElegido(opcion);
         } else if (nodo instanceof TableView<?> tabla) {
             estilizarTabla(tabla);
         } else if (nodo instanceof TabPane pestanas && "tabs-nuevos".equals(pestanas.getUserData())) {
@@ -134,6 +139,23 @@ public final class EstiloGlobal {
                 }
             } else {
                 campo.setStyle(estilo.replace(" " + FOCO, ""));
+            }
+        });
+    }
+
+    /** Una opcion elegida (Semana, Lista...) se ve en marron; si trae su propio color, se respeta. */
+    private static void marcarElegido(ToggleButton opcion) {
+        if (opcion.isSelected() && !opcion.getStyle().contains("-fx-background-color")) {
+            opcion.setStyle(opcion.getStyle() + " " + ELEGIDO);
+        }
+        opcion.selectedProperty().addListener((obs, antes, ahora) -> {
+            String estilo = opcion.getStyle();
+            if (ahora) {
+                if (!estilo.contains("-fx-background-color")) {
+                    opcion.setStyle(estilo + " " + ELEGIDO);
+                }
+            } else {
+                opcion.setStyle(estilo.replace(" " + ELEGIDO, "").replace(";" + ELEGIDO, ""));
             }
         });
     }

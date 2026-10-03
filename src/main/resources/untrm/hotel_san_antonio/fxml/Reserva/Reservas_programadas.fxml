@@ -1,40 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.VBox?>
 
+<!-- Vista "Lista" de la pantalla Reservas (Reservas.fxml). El buscador por cliente, DNI, codigo
+     o habitacion esta en el encabezado de Reservas y se comparte con la vista Calendario. -->
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="untrm.hotel_san_antonio.controlador.Reserva.ReservasProgramadasController"
-      spacing="14" style="-fx-background-color: #F7F4EF;">
+      spacing="12">
     <fx:define><ToggleGroup fx:id="grupoEstados"/></fx:define>
-    <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
-    <HBox alignment="CENTER_LEFT" spacing="12">
-        <VBox spacing="3" HBox.hgrow="ALWAYS">
-            <Label text="Reservas programadas" style="-fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: #2C2118;"/>
-            <Label text="Busca, filtra, pagina y revisa el detalle de las reservas." style="-fx-text-fill: #6A625A;"/>
-        </VBox>
-        <Button text="+ Nueva reserva" onAction="#abrirNuevaReserva" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
-    </HBox>
     <HBox spacing="7">
         <ToggleButton fx:id="btnTodas" text="Todas" toggleGroup="$grupoEstados" selected="true" onAction="#filtrarEstado"/>
-        <ToggleButton fx:id="btnPendientes" text="Pendientes" toggleGroup="$grupoEstados" onAction="#filtrarEstado"/>
-        <ToggleButton fx:id="btnConfirmadas" text="Confirmadas" toggleGroup="$grupoEstados" onAction="#filtrarEstado"/>
         <ToggleButton fx:id="btnPorLlegar" text="Por llegar" toggleGroup="$grupoEstados" onAction="#filtrarEstado"/>
+        <ToggleButton fx:id="btnEnCasa" text="Con check-in" toggleGroup="$grupoEstados" onAction="#filtrarEstado"/>
         <ToggleButton fx:id="btnFinalizadas" text="Finalizadas" toggleGroup="$grupoEstados" onAction="#filtrarEstado"/>
         <ToggleButton fx:id="btnCanceladas" text="Canceladas" toggleGroup="$grupoEstados" onAction="#filtrarEstado"/>
     </HBox>
     <HBox spacing="9" alignment="CENTER_LEFT">
-        <TextField fx:id="txtBuscar" promptText="Código, nombre, DNI o habitación" prefWidth="280" onAction="#buscarReservas" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
         <DatePicker fx:id="dpDesde" promptText="Ingreso desde" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
         <DatePicker fx:id="dpHasta" promptText="Ingreso hasta" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
         <Button text="Buscar" onAction="#buscarReservas" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
@@ -52,9 +41,8 @@
         <placeholder><Label text="No existen reservas para mostrar."/></placeholder>
     </TableView>
     <HBox alignment="CENTER_LEFT" spacing="10">
-        <Label fx:id="lblCantidad" text="0 reservas" HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblCantidad" text="0 reservas" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
         <Button fx:id="btnVerDetalle" text="Ver detalle" onAction="#verDetalle" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
-        <Button fx:id="btnCambiarHabitacion" text="Cambiar habitación" onAction="#cambiarHabitacion" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
         <Button fx:id="btnAnterior" text="Anterior" onAction="#paginaAnterior" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
         <Label fx:id="lblPagina" text="1 / 1" style="-fx-font-weight: bold;"/>
         <Button fx:id="btnSiguiente" text="Siguiente" onAction="#paginaSiguiente" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>

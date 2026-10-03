@@ -569,26 +569,6 @@ public class Nueva_reservaController {
     }
 
     @FXML
-    private void guardarPendiente() {
-        try {
-            List<Huesped> huespedes = acompanantes.obtener(construirHuesped());
-            Empresa empresa = construirEmpresa();
-            Reserva reserva = construirReserva();
-            int idReserva = reservaService.registrarPendiente(huespedes, empresa, reserva);
-            Alertas.mostrarInfo("Reserva pendiente guardada",
-                    "La reserva " + String.format("R-%04d", idReserva) + " quedó pendiente.");
-            limpiarFormulario();
-        } catch (ConflictoFechasException error) {
-            Alertas.mostrarAdvertencia("Fechas no disponibles", error.getMessage());
-            cargarHabitaciones();
-        } catch (IllegalArgumentException | IllegalStateException error) {
-            Alertas.mostrarAdvertencia("No se pudo guardar", error.getMessage());
-        } catch (SQLException error) {
-            Alertas.mostrarError("Error de base de datos", "No se pudo guardar la reserva.\n\n" + error.getMessage());
-        }
-    }
-
-    @FXML
     private void confirmarReserva() {
         try {
             List<Huesped> huespedes = acompanantes.obtener(construirHuesped());

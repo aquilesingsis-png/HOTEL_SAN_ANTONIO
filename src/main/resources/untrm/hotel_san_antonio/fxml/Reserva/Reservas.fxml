@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Pantalla Reservas: ver y gestionar las reservas existentes, en Calendario o en Lista.
+     Para crear una reserva se usa "Nueva reserva". Las dos vistas comparten el buscador. -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="untrm.hotel_san_antonio.controlador.Reserva.ReservasController"
+      spacing="14" style="-fx-background-color: #F7F4EF;">
+    <fx:define><ToggleGroup fx:id="grupoVista"/></fx:define>
+    <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="Reservas" style="-fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: #2C2118;"/>
+            <Label text="Consulta la ocupación y abre una reserva para cancelarla o cambiar de habitación." style="-fx-text-fill: #6A625A;"/>
+        </VBox>
+        <TextField fx:id="txtBuscar" promptText="Buscar por cliente, DNI, código o habitación" prefWidth="340" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+        <ToggleButton fx:id="btnCalendario" text="Calendario" toggleGroup="$grupoVista" selected="true" onAction="#mostrarCalendario"/>
+        <ToggleButton fx:id="btnLista" text="Lista" toggleGroup="$grupoVista" onAction="#mostrarLista"/>
+    </HBox>
+    <StackPane VBox.vgrow="ALWAYS">
+        <fx:include fx:id="calendario" source="Calendario_ocupacion.fxml"/>
+        <fx:include fx:id="lista" source="Reservas_programadas.fxml"/>
+    </StackPane>
+</VBox>

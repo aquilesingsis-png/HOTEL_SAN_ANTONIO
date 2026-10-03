@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Ventana emergente: detalle de una reserva, con Cancelar y Cambiar habitacion.
+     Se abre desde el Calendario y desde la Lista de la pantalla Reservas. -->
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.Reserva.DetalleReservaVentanaController"
+            fitToWidth="true" style="-fx-background: #F7F4EF; -fx-background-color: #F7F4EF;">
+    <content>
+        <VBox spacing="14" style="-fx-background-color: #F7F4EF;">
+            <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
+            <fx:include fx:id="detalleReserva" source="Detalle_reserva.fxml"/>
+            <VBox spacing="6" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #E8E2D9; -fx-border-radius: 10;">
+                <padding><Insets top="14" right="20" bottom="14" left="20"/></padding>
+                <Label text="Huéspedes" style="-fx-font-weight: bold;"/>
+                <Label fx:id="lblHuespedes" text="Cargando..." wrapText="true"/>
+            </VBox>
+            <VBox fx:id="boxCancelar" spacing="10" visible="false" managed="false"
+                  style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #D9433A; -fx-border-radius: 10;">
+                <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
+                <Label text="Motivo de cancelación" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <ChoiceBox fx:id="cbMotivo" prefWidth="320" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                <TextArea fx:id="txtDetalle" promptText="Detalle opcional (máximo 500 caracteres)" prefRowCount="3" wrapText="true" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                <HBox spacing="10">
+                    <Button text="Confirmar cancelación" onAction="#confirmarCancelacion" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #D9433A; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                    <Button text="Volver" onAction="#volverDeCancelar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+                </HBox>
+            </VBox>
+            <Label fx:id="lblMensaje" wrapText="true" style="-fx-text-fill: #B64832;"/>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button fx:id="btnCambiar" text="Cambiar habitación" onAction="#cambiarHabitacion" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+                <Button fx:id="btnCancelar" text="Cancelar reserva" onAction="#mostrarCancelacion" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+                <Button text="Cerrar" onAction="#cerrar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+            </HBox>
+        </VBox>
+    </content>
+</ScrollPane>

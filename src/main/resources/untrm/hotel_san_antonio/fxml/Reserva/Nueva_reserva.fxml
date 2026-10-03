@@ -145,8 +145,7 @@
 
             <HBox spacing="10">
                 <Button text="Limpiar" onAction="#cancelarFormulario" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
-                <Button text="Guardar pendiente" onAction="#guardarPendiente" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #C98A1B; -fx-text-fill: white; -fx-font-weight: bold;"/>
-                <Button text="Confirmar con pago" onAction="#confirmarReserva" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #2E88DD; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button text="Confirmar reserva" onAction="#confirmarReserva" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #2E88DD; -fx-text-fill: white; -fx-font-weight: bold;"/>
             </HBox>
         </VBox>
     </content>

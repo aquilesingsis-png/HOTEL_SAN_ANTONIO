@@ -192,9 +192,11 @@ public class ReservaDAO {
 
     /** Reservas que bloquean habitación y se cruzan con el rango, para el calendario. */
     public List<Reserva> listarEnRango(Connection con, LocalDate desde, LocalDate hasta) throws SQLException {
-        String sql = "SELECT id_habitacion, fecha_checkin, fecha_checkout, estado FROM reserva "
-                + "WHERE estado IN ('PENDIENTE','CONFIRMADA','CHECKIN') "
-                + "AND fecha_checkin <= ? AND fecha_checkout > ?";
+        String sql = "SELECT r.id_reserva, r.id_habitacion, r.fecha_checkin, r.fecha_checkout, r.estado, "
+                + "hu.nombres AS hu_nombres, hu.apellidos AS hu_apellidos "
+                + "FROM reserva r JOIN huesped hu ON hu.id_huesped = r.id_huesped "
+                + "WHERE r.estado IN ('PENDIENTE','CONFIRMADA','CHECKIN') "
+                + "AND r.fecha_checkin <= ? AND r.fecha_checkout > ?";
         List<Reserva> lista = new ArrayList<>();
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setDate(1, Date.valueOf(hasta));
@@ -202,10 +204,12 @@ public class ReservaDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Reserva r = new Reserva();
+                    r.setIdReserva(rs.getInt("id_reserva"));
                     r.setIdHabitacion(rs.getInt("id_habitacion"));
                     r.setFechaCheckin(rs.getDate("fecha_checkin").toLocalDate());
                     r.setFechaCheckout(rs.getDate("fecha_checkout").toLocalDate());
                     r.setEstado(rs.getString("estado"));
+                    r.setNombreHuesped((rs.getString("hu_nombres") + " " + rs.getString("hu_apellidos")).trim());
                     lista.add(r);
                 }
             }
