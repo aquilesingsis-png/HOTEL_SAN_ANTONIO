@@ -1,13 +1,11 @@
 package untrm.hotel_san_antonio.util;
 
 import java.io.IOException;
-import java.util.Set;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import untrm.hotel_san_antonio.controlador.ModulosNuevosController;
 
 /**
  * Utilidad central de navegacion: cambiar la pantalla principal, o abrir
@@ -17,22 +15,6 @@ import untrm.hotel_san_antonio.controlador.ModulosNuevosController;
 public class Navegacion {
 
     private static final String EN_CONSTRUCCION = "/untrm/hotel_san_antonio/fxml/principal/en_construccion.fxml";
-    private static final String NUEVOS = "/untrm/hotel_san_antonio/fxml/nuevos/";
-    // Estas vistas ya tienen controladores específicos; las demás comparten
-    // el controlador de administración que activa sus botones y datos.
-    private static final Set<String> MODULOS_OPERATIVOS_NUEVOS = Set.of(
-            NUEVOS + "caja/gastos.fxml",
-            NUEVOS + "caja/libro_caja.fxml",
-            NUEVOS + "reportes/reportes.fxml",
-            NUEVOS + "almacen/almacen.fxml",
-            NUEVOS + "almacen/producto_form.fxml",
-            NUEVOS + "almacen/stock_form.fxml",
-            NUEVOS + "almacen/categorias_form.fxml",
-            NUEVOS + "caja/cierre_arqueo.fxml",
-            NUEVOS + "usuarios/crear_usuario.fxml",
-            NUEVOS + "usuarios/asignar_rol.fxml",
-            NUEVOS + "usuarios/recuperacion_admin.fxml");
-
     private static Stage stagePrincipal;
     private static javafx.scene.layout.Pane centro;
 
@@ -65,16 +47,10 @@ public class Navegacion {
      */
     public static void mostrar(String rutaFxml) throws IOException {
         Permisos.requerirRuta(rutaFxml);
-        boolean moduloGenerico = rutaFxml.startsWith(NUEVOS)
-                && !MODULOS_OPERATIVOS_NUEVOS.contains(rutaFxml);
         java.net.URL url = existe(rutaFxml) ? Navegacion.class.getResource(rutaFxml)
                 : Navegacion.class.getResource(EN_CONSTRUCCION);
         FXMLLoader cargador = new FXMLLoader(url);
         Parent vista = cargador.load();
-        if (moduloGenerico && existe(rutaFxml)) {
-            String modulo = rutaFxml.substring(NUEVOS.length()).replace(".fxml", "");
-            new ModulosNuevosController(modulo, cargador.getNamespace()).iniciar();
-        }
         centro.getChildren().setAll(vista);
     }
 

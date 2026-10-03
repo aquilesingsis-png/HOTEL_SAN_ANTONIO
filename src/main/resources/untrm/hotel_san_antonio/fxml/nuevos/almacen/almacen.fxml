@@ -84,7 +84,7 @@
                         </FlowPane>
                         <TableView fx:id="tabla" minHeight="320" prefHeight="520" VBox.vgrow="ALWAYS" userData="tabla-nuevos" style="-fx-background-color: white; -fx-border-color: #E8E2D9; -fx-border-color: #E7E1D8; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 0; -fx-fixed-cell-size: 40;">
                             <columns>
-                                <TableColumn fx:id="colCodigo" text="Código" prefWidth="80" minWidth="60"/>
+                                <TableColumn fx:id="colCodigo" text="Código" prefWidth="95" minWidth="85"/>
                                 <TableColumn fx:id="colBarras" text="Código de barras" prefWidth="140" minWidth="90"/>
                                 <TableColumn fx:id="colProducto" text="Producto" prefWidth="260" minWidth="140"/>
                                 <TableColumn fx:id="colMarca" text="Marca" prefWidth="120" minWidth="80"/>

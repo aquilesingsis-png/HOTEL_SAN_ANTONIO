@@ -6,10 +6,8 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,7 +18,6 @@ import java.util.TreeMap;
 import untrm.hotel_san_antonio.util.ConexionBD;
 import untrm.hotel_san_antonio.util.Permisos;
 import untrm.hotel_san_antonio.util.SesionActual;
-import untrm.hotel_san_antonio.util.Validador;
 
 /** Consultas y cambios de las pantallas administrativas antiguas. */
 public class ModulosDAO {
@@ -44,44 +41,6 @@ public class ModulosDAO {
                 || valor.compareTo(new BigDecimal("99999999.99")) > 0) {
             throw new IllegalArgumentException(campo + " debe ser un importe no negativo con hasta dos decimales.");
         }
-    }
-
-    public List<Registro> consultar(String modulo) throws SQLException {
-        return switch (modulo) {
-            case "usuarios/editar_usuario" -> filas(
-                "SELECT u.id_usuario,CONCAT('U',LPAD(u.id_usuario,3,'0')),u.nombre,u.apellido,u.usuario,"
-                + "u.rol,IF(u.activo=1,'Activo','Inactivo'),u.fecha_creacion FROM usuario u ORDER BY u.nombre,u.apellido");
-            case "usuarios/historial_usuarios" -> filas(
-                "SELECT a.id_auditoria,a.fecha,COALESCE(afectado.usuario,CONCAT('#',a.id_entidad)),a.accion,"
-                + "COALESCE(SUBSTRING_INDEX(a.detalle,' → ',1),''),"
-                + "COALESCE(SUBSTRING_INDEX(a.detalle,' → ',-1),''),actor.usuario,COALESCE(a.detalle,'') "
-                + "FROM auditoria a JOIN usuario actor ON actor.id_usuario=a.id_usuario "
-                + "LEFT JOIN usuario afectado ON afectado.id_usuario=a.id_entidad "
-                + "WHERE a.entidad='usuario' ORDER BY a.fecha DESC");
-            default -> throw new IllegalArgumentException("Módulo desconocido: " + modulo);
-        };
-    }
-
-    private List<Registro> filas(String sql, Object... valores) throws SQLException {
-        List<Registro> resultado = new ArrayList<>();
-        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql)) {
-            for (int i = 0; i < valores.length; i++) ps.setObject(i + 1, valores[i]);
-            try (ResultSet rs = ps.executeQuery()) {
-                ResultSetMetaData meta = rs.getMetaData();
-                while (rs.next()) {
-                    List<String> celdas = new ArrayList<>();
-                    LocalDate fecha = null;
-                    for (int i = 2; i <= meta.getColumnCount(); i++) {
-                        Object valor = rs.getObject(i);
-                        celdas.add(valor == null ? "" : valor.toString());
-                        if (fecha == null && valor instanceof Date d) fecha = d.toLocalDate();
-                        if (fecha == null && valor instanceof Timestamp t) fecha = t.toLocalDateTime().toLocalDate();
-                    }
-                    resultado.add(new Registro(rs.getInt(1), celdas, fecha));
-                }
-            }
-        }
-        return resultado;
     }
 
     private static final class OcupacionDia {
@@ -350,39 +309,6 @@ public class ModulosDAO {
                     auditoria.registrar(con, usuario(), confirmar ? "CAJA_CIERRE" : "CAJA_BORRADOR",
                             "cierre_caja", afectado, datos.fecha() + " / " + datos.turno());
                 }
-                con.commit();
-            } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
-        }
-    }
-
-    public void editarUsuario(int id, String nombre, String apellido, boolean activo) throws SQLException {
-        admin();
-        if (!Validador.esNombreValido(nombre) || !Validador.esNombreValido(apellido))
-            throw new IllegalArgumentException("Revise nombres y apellidos.");
-        if (!activo && id == usuario())
-            throw new IllegalArgumentException("No puede desactivar su propia cuenta.");
-        try (Connection con = ConexionBD.conectar()) {
-            con.setAutoCommit(false);
-            try {
-                String rol;
-                try (PreparedStatement ps = con.prepareStatement(
-                        "SELECT rol FROM usuario WHERE id_usuario=? FOR UPDATE")) {
-                    ps.setInt(1, id);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (!rs.next()) throw new IllegalArgumentException("El usuario ya no existe.");
-                        rol = rs.getString(1);
-                    }
-                }
-                if (!activo && "ADMINISTRADOR".equals(rol)
-                        && new UsuarioDAO().contarAdministradoresActivos(con) <= 1)
-                    throw new IllegalStateException("Debe permanecer al menos un administrador activo.");
-                try (PreparedStatement ps = con.prepareStatement(
-                        "UPDATE usuario SET nombre=?,apellido=?,activo=? WHERE id_usuario=?")) {
-                    ps.setString(1, nombre.trim()); ps.setString(2, apellido.trim());
-                    ps.setBoolean(3, activo); ps.setInt(4, id); ps.executeUpdate();
-                }
-                auditoria.registrar(con, usuario(), "USUARIO_EDITAR", "usuario", id,
-                        nombre.trim() + " " + apellido.trim() + " / " + (activo ? "Activo" : "Inactivo"));
                 con.commit();
             } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
         }

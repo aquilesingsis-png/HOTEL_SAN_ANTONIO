@@ -87,6 +87,15 @@ public class UsuarioDAO {
         }
     }
 
+    public void actualizarDatos(Connection con, int idUsuario, String nombre, String apellido, boolean activo)
+            throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE usuario SET nombre = ?, apellido = ?, activo = ? WHERE id_usuario = ?")) {
+            ps.setString(1, nombre); ps.setString(2, apellido); ps.setBoolean(3, activo); ps.setInt(4, idUsuario);
+            if (ps.executeUpdate() != 1) throw new SQLException("No se pudo actualizar el usuario.");
+        }
+    }
+
     public void actualizarHashLegacy(int idUsuario, String hashAnterior, String hashNuevo) throws SQLException {
         String sql = "UPDATE usuario SET contrasena_hash = ? WHERE id_usuario = ? AND contrasena_hash = ?";
         try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -134,6 +143,8 @@ public class UsuarioDAO {
         u.setContrasenaHash(rs.getString("contrasena_hash"));
         u.setRol(rs.getString("rol"));
         u.setActivo(rs.getBoolean("activo"));
+        java.sql.Timestamp creado = rs.getTimestamp("fecha_creacion");
+        if (creado != null) u.setFechaCreacion(creado.toLocalDateTime());
         return u;
     }
 }

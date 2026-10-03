@@ -1,90 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import java.lang.String?>
-<?import javafx.collections.FXCollections?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.chart.*?>
-<!-- Interfaz visual independiente: sin controlador ni acciones de negocio. -->
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
-    <center>
-        <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0" userData="tabs-nuevos">
-            <Tab text="Listado">
-                <content>
-                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" style="-fx-background: #F8F6F2; -fx-background-color: #F8F6F2; -fx-background-insets: 0; -fx-padding: 0;">
-                        <content>
-                            <VBox spacing="18" fillWidth="true" style="-fx-padding: 20 24 26 24; -fx-background-color: #F8F6F2;">
-                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
-                                    <Label text="Filtros de consulta" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
-                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Buscar usuario" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
-                                            <TextField fx:id="filtroBuscarUsuario" maxWidth="Infinity" promptText="Buscar usuario" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
-                                        </VBox>
-                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Desde" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
-                                            <DatePicker fx:id="filtroDesde" maxWidth="Infinity" promptText="dd/mm/aaaa" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
-                                        </VBox>
-                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Hasta" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
-                                            <DatePicker fx:id="filtroHasta" maxWidth="Infinity" promptText="dd/mm/aaaa" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
-                                        </VBox>
-                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Acción" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
-                                            <ComboBox fx:id="filtroAccion" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;">
-                                                <items>
-                                                    <FXCollections fx:factory="observableArrayList">
-                                                        <String fx:value="Creación de usuario"/>
-                                                        <String fx:value="Edición de datos"/>
-                                                        <String fx:value="Cambio de rol"/>
-                                                        <String fx:value="Activación"/>
-                                                        <String fx:value="Desactivación"/>
-                                                    </FXCollections>
-                                                </items>
-                                            </ComboBox>
-                                        </VBox>
-                                    </FlowPane>
-                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                        <Button fx:id="btnFiltroBuscar" text="Buscar" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
-                                        <Button fx:id="btnFiltroLimpiarFiltros" text="Limpiar filtros" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
-                                    </FlowPane>
-                                </VBox>
-                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
-                                    <Label text="Detalle de historial de usuarios" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
-                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                        <Button fx:id="btnListaConsultar" text="Consultar" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
-                                        <Button fx:id="btnListaActualizarLista" text="Actualizar lista" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
-                                        <Button fx:id="btnListaVerDetalle" text="Ver detalle" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
-                                        <Button fx:id="btnListaExportar" text="Exportar" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
-                                    </FlowPane>
-                                    <TableView fx:id="tblRegistros" minHeight="240" prefHeight="330" VBox.vgrow="ALWAYS" userData="tabla-nuevos" style="-fx-background-color: white; -fx-border-color: #E8E2D9; -fx-border-color: #E7E1D8; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 0; -fx-fixed-cell-size: 40;">
-                                        <columns>
-                                            <TableColumn fx:id="colFechaYHora" text="Fecha y hora" prefWidth="145" minWidth="90"/>
-                                            <TableColumn fx:id="colUsuarioAfectado" text="Usuario afectado" prefWidth="145" minWidth="90"/>
-                                            <TableColumn fx:id="colAccion" text="Acción" prefWidth="145" minWidth="90"/>
-                                            <TableColumn fx:id="colValorAnterior" text="Valor anterior" prefWidth="145" minWidth="90"/>
-                                            <TableColumn fx:id="colValorNuevo" text="Valor nuevo" prefWidth="145" minWidth="90"/>
-                                            <TableColumn fx:id="colRealizadoPor" text="Realizado por" prefWidth="145" minWidth="90"/>
-                                            <TableColumn fx:id="colDetalle" text="Detalle" prefWidth="145" minWidth="90"/>
-                                        </columns>
-                                        <placeholder>
-                                            <VBox alignment="CENTER" spacing="8">
-                                                <Label text="Sin registros para mostrar" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #5A3516; -fx-font-size: 15px; -fx-font-weight: bold;"/>
-                                                <Label text="Los resultados de la consulta aparecerán en este listado." wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
-                                            </VBox>
-                                        </placeholder>
-                                    </TableView>
-                                    <HBox alignment="CENTER_LEFT">
-                                        <Label text="0 registros" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
-                                        <Region HBox.hgrow="ALWAYS"/>
-                                        <Label text="Hotel San Antonio" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
-                                    </HBox>
-                                </VBox>
-                            </VBox>
-                        </content>
-                    </ScrollPane>
-                </content>
-            </Tab>
-        </TabPane>
-    </center>
-</BorderPane>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Ventana emergente: historial de cambios de usuarios (solo Administrador). -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="untrm.hotel_san_antonio.controlador.HistorialUsuariosController"
+      spacing="12" prefWidth="940" prefHeight="620" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
+    <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
+    <Label text="Historial de usuarios" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+    <TextField fx:id="txtBuscar" promptText="Buscar por usuario, acción, detalle o quién lo hizo" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+    <Label fx:id="lblCantidad" text="TOTAL DE REGISTROS: 0" style="-fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+    <TableView fx:id="tabla" VBox.vgrow="ALWAYS" userData="tabla-nuevos" style="-fx-background-color: white; -fx-border-color: #E8E2D9; -fx-border-color: #E7E1D8; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 0; -fx-fixed-cell-size: 40;">
+        <columns>
+            <TableColumn fx:id="colFecha" text="Fecha y hora" prefWidth="130" minWidth="100"/>
+            <TableColumn fx:id="colAfectado" text="Usuario afectado" prefWidth="140" minWidth="100"/>
+            <TableColumn fx:id="colAccion" text="Acción" prefWidth="210" minWidth="120"/>
+            <TableColumn fx:id="colDetalle" text="Detalle" prefWidth="270" minWidth="120"/>
+            <TableColumn fx:id="colRealizadoPor" text="Realizado por" prefWidth="130" minWidth="100"/>
+        </columns>
+        <placeholder>
+            <Label text="Aún no hay cambios registrados." style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+        </placeholder>
+    </TableView>
+    <HBox alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cerrar" onAction="#cerrar" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+    </HBox>
+</VBox>

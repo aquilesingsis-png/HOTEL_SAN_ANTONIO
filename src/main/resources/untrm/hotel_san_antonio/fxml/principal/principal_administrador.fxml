@@ -78,20 +78,8 @@
                         <padding><Insets top="14" left="8"/></padding>
                     </Label>
 
-                    <Button text="Usuarios  ▸" onAction="#onGrupo" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
-                    <VBox userData="Usuarios" visible="false" managed="false" spacing="2"
-                          style="-fx-background-color: #2E1909; -fx-background-radius: 0 6px 6px 0; -fx-border-color: #B8862D; -fx-border-width: 0 0 0 2px; -fx-padding: 4px 0 4px 0;">
-                        <ToggleButton text="Crear usuario" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/crear_usuario.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Editar / Desactivar" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/editar_usuario.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Asignar rol" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/asignar_rol.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Ver historial" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/historial_usuarios.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Recuperar contraseña" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/recuperacion_admin.fxml" onAction="#onMenu"/>
-                    </VBox>
+                    <ToggleButton text="Usuarios" toggleGroup="$grupoMenu"
+                                  userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/usuarios.fxml" onAction="#onMenu"/>
 
                     <ToggleButton text="Reportes" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/nuevos/reportes/reportes.fxml" onAction="#onMenu"/>
