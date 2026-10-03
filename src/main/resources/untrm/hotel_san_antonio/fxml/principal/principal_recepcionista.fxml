@@ -59,7 +59,7 @@
 
                     <ToggleButton text="Comprobantes" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/comprobante/comprobante.fxml" onAction="#onMenu"/>
-                    <ToggleButton text="Caja y pagos" toggleGroup="$grupoMenu"
+                    <ToggleButton text="Pagos" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/registrar_pagos.fxml" onAction="#onMenu"/>
                 </VBox>
             </ScrollPane>

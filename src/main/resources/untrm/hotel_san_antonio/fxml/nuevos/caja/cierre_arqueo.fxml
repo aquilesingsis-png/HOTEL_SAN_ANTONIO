@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<!-- Caja: Cierre y arqueo. Reune dos pantallas como pestanas; cada una se carga al abrirla
+     (ver PestanasModulosController). -->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.PestanasModulosController"
+            prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300" style="-fx-background-color: #F8F6F2;">
+    <center>
+        <TabPane fx:id="pestanas" tabClosingPolicy="UNAVAILABLE" minWidth="0" userData="tabs-nuevos">
+            <Tab text="Cierre de caja" userData="caja/cierre_caja"/>
+            <Tab text="Arqueo de caja" userData="caja/arqueo"/>
+        </TabPane>
+    </center>
+</BorderPane>

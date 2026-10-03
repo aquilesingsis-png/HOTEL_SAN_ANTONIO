@@ -18,10 +18,12 @@ public class Navegacion {
 
     private static final String EN_CONSTRUCCION = "/untrm/hotel_san_antonio/fxml/principal/en_construccion.fxml";
     private static final String NUEVOS = "/untrm/hotel_san_antonio/fxml/nuevos/";
-    // Estas cuatro vistas ya tienen controladores específicos; las demás comparten
+    // Estas vistas ya tienen controladores específicos; las demás comparten
     // el controlador de administración que activa sus botones y datos.
     private static final Set<String> MODULOS_OPERATIVOS_NUEVOS = Set.of(
             NUEVOS + "caja/gastos.fxml",
+            NUEVOS + "caja/movimientos_totales.fxml",
+            NUEVOS + "caja/cierre_arqueo.fxml",
             NUEVOS + "usuarios/crear_usuario.fxml",
             NUEVOS + "usuarios/asignar_rol.fxml",
             NUEVOS + "usuarios/recuperacion_admin.fxml");

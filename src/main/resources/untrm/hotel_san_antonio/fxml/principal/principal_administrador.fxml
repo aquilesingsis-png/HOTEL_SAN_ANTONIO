@@ -65,19 +65,13 @@
                     <ToggleButton text="Registro de días pasados" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/Reserva/registro_historico.fxml" onAction="#onMenu"/>
 
-                    <Button text="Caja y pagos  ▸" onAction="#onGrupo" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
-                    <VBox userData="Caja y pagos" visible="false" managed="false" spacing="2"
+                    <Button text="Caja  ▸" onAction="#onGrupo" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+                    <VBox userData="Caja" visible="false" managed="false" spacing="2"
                           style="-fx-background-color: #2E1909; -fx-background-radius: 0 6px 6px 0; -fx-border-color: #B8862D; -fx-border-width: 0 0 0 2px; -fx-padding: 4px 0 4px 0;">
-                        <ToggleButton text="Registrar pagos" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/registrar_pagos.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Movimientos" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/movimientos.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Totales del día" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/totales_dia.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Cierre de caja" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/cierre_caja.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Arqueo" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/arqueo.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Movimientos y totales" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/movimientos_totales.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Cierre y arqueo" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/cierre_arqueo.fxml" onAction="#onMenu"/>
                     </VBox>
 
                     <Label text="ADMINISTRACIÓN" style="-fx-text-fill: #D4A84C; -fx-font-size: 11px; -fx-font-weight: bold;">

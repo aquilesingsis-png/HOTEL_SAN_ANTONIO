@@ -52,6 +52,15 @@ public class ModulosNuevosController {
         this.tabla = (TableView<Registro>) nodos.get("tblRegistros");
     }
 
+    /** Carga la pantalla de un modulo (por ejemplo "caja/arqueo") ya conectada a sus datos, para usarla dentro de otra. */
+    public static javafx.scene.Parent cargarModulo(String modulo) throws IOException {
+        javafx.fxml.FXMLLoader cargador = new javafx.fxml.FXMLLoader(ModulosNuevosController.class.getResource(
+                "/untrm/hotel_san_antonio/fxml/nuevos/" + modulo + ".fxml"));
+        javafx.scene.Parent raiz = cargador.load();
+        new ModulosNuevosController(modulo, cargador.getNamespace()).iniciar();
+        return raiz;
+    }
+
     public void iniciar() {
         if (tabla == null) throw new IllegalStateException("Falta la tabla del módulo " + modulo);
         tabla.setItems(visibles);
@@ -583,13 +592,6 @@ public class ModulosNuevosController {
                         dinero("txtEfectivoEntregadoS"), dinero("txtFondoParaSiguienteTurnoS"),
                         observacion), confirmar);
             }
-            case "caja/registrar_pagos" -> {
-                LocalDate fechaPago = fecha("dpFechaDelPago");
-                if (fechaPago != null && !fechaPago.equals(LocalDate.now()))
-                    throw new IllegalArgumentException("Este formulario registra pagos del día actual.");
-                dao.registrarPago(codigoReserva(texto("txtCodigoDeReserva")),
-                        normalizar(combo("cmbMetodoDePago")), dinero("txtMontoAPagarS"));
-            }
             case "usuarios/editar_usuario" -> {
                 if (editando == null) throw new IllegalArgumentException("Seleccione primero un usuario.");
                 dao.editarUsuario(editando, texto("txtNombres"), texto("txtApellidos"),
@@ -601,12 +603,6 @@ public class ModulosNuevosController {
         editando = null;
         tab(0);
         cargar();
-    }
-
-    private int codigoReserva(String codigo) {
-        String digitos = codigo.replaceAll("\\D", "");
-        if (digitos.isEmpty()) throw new IllegalArgumentException("Ingrese el código de la reserva.");
-        return Integer.parseInt(digitos);
     }
 
     private void exigirFechaActual(String id) {
@@ -676,35 +672,6 @@ public class ModulosNuevosController {
                 }
             });
         }
-        if (modulo.equals("caja/registrar_pagos")) {
-            ComboBox<?> tipo = nodo("cmbTipoDePago", ComboBox.class);
-            if (tipo != null) tipo.setDisable(true); // El tipo depende del saldo real en MySQL.
-            TextField monto = nodo("txtMontoAPagarS", TextField.class);
-            if (monto != null) monto.textProperty().addListener((obs, antes, ahora) -> recalcularTipoPago());
-            TextField codigo = nodo("txtCodigoDeReserva", TextField.class);
-            if (codigo != null) {
-                codigo.setOnAction(evento -> cargarReservaPago());
-                codigo.focusedProperty().addListener((obs, antes, ahora) -> {
-                    if (!ahora && !codigo.getText().isBlank()) cargarReservaPago();
-                });
-            }
-        }
-    }
-
-    private void cargarReservaPago() {
-        try {
-            String[] datos = dao.reservaParaPago(codigoReserva(texto("txtCodigoDeReserva")));
-            if (datos == null) throw new IllegalArgumentException("No se encontró la reserva.");
-            if (List.of("CANCELADA", "FINALIZADA").contains(datos[5]))
-                throw new IllegalArgumentException("Esta reserva no acepta nuevos pagos.");
-            campo("txtHuesped", datos[0]); campo("txtDocumento", datos[1]);
-            campo("txtHabitacion", datos[2]); campo("txtTotalDeLaCuentaS", datos[3]);
-            campo("txtSaldoPendienteS", datos[4]);
-            campo("txtResponsable", SesionActual.getUsuario().getNombreCompleto());
-            recalcularTipoPago();
-        } catch (SQLException | IllegalArgumentException error) {
-            Alertas.mostrarError("Reserva", error.getMessage());
-        }
     }
 
     private void recalcularStock() {
@@ -730,16 +697,6 @@ public class ModulosNuevosController {
         campo("txtVariacion", anterior.signum() == 0 ? "—" : diferencia
                 .multiply(BigDecimal.valueOf(100)).divide(anterior, 1,
                         java.math.RoundingMode.HALF_UP).toPlainString() + " %");
-    }
-
-    private void recalcularTipoPago() {
-        BigDecimal saldo = decimalOpcional("txtSaldoPendienteS");
-        BigDecimal total = decimalOpcional("txtTotalDeLaCuentaS");
-        BigDecimal pago = decimalOpcional("txtMontoAPagarS");
-        String tipo = saldo.compareTo(total) == 0
-                ? pago.compareTo(saldo) == 0 && pago.signum() > 0 ? "Completo" : "Adelanto"
-                : "Saldo";
-        seleccionarCombo("cmbTipoDePago", tipo);
     }
 
     private void recalcularArqueo() {

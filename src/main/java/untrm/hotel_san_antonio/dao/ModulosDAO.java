@@ -649,60 +649,6 @@ public class ModulosDAO {
         }
     }
 
-    public String[] reservaParaPago(int idReserva) throws SQLException {
-        String sql = "SELECT CONCAT(h.nombres,' ',h.apellidos),h.num_documento,hab.numero,r.monto_total,"
-                + "r.monto_total-COALESCE((SELECT SUM(p.monto) FROM pago p WHERE p.id_reserva=r.id_reserva),0),"
-                + "r.estado FROM reserva r JOIN huesped h ON h.id_huesped=r.id_huesped "
-                + "JOIN habitacion hab ON hab.id_habitacion=r.id_habitacion WHERE r.id_reserva=?";
-        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, idReserva);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) return null;
-                String[] datos = new String[6];
-                for (int i = 0; i < datos.length; i++) datos[i] = rs.getString(i + 1);
-                return datos;
-            }
-        }
-    }
-
-    public void registrarPago(int idReserva, String metodo, BigDecimal monto) throws SQLException {
-        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
-        if (!List.of("EFECTIVO", "TARJETA", "TRANSFERENCIA", "YAPE").contains(metodo))
-            throw new IllegalArgumentException("Seleccione un método de pago válido.");
-        validarImporte(monto, "El pago");
-        if (monto.signum() == 0) throw new IllegalArgumentException("El pago debe ser mayor que cero.");
-        try (Connection con = ConexionBD.conectar()) {
-            con.setAutoCommit(false);
-            try {
-                BigDecimal total;
-                String estado;
-                try (PreparedStatement ps = con.prepareStatement(
-                        "SELECT monto_total,estado FROM reserva WHERE id_reserva=? FOR UPDATE")) {
-                    ps.setInt(1, idReserva);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (!rs.next()) throw new IllegalArgumentException("No existe la reserva indicada.");
-                        total = rs.getBigDecimal(1); estado = rs.getString(2);
-                    }
-                }
-                if (List.of("CANCELADA", "FINALIZADA").contains(estado))
-                    throw new IllegalStateException("No se puede cobrar una reserva cancelada o finalizada.");
-                BigDecimal abonado = new PagoDAO().sumarPorReserva(con, idReserva);
-                if (monto.compareTo(total.subtract(abonado)) > 0)
-                    throw new IllegalArgumentException("El pago supera el saldo de la reserva.");
-                String tipo = abonado.signum() == 0 && monto.compareTo(total) == 0 ? "COMPLETO"
-                        : abonado.signum() == 0 ? "ADELANTO" : "SALDO";
-                try (PreparedStatement ps = con.prepareStatement(
-                        "INSERT INTO pago(id_reserva,id_usuario,monto,metodo_pago,tipo_pago) VALUES (?,?,?,?,?)")) {
-                    ps.setInt(1, idReserva); ps.setInt(2, usuario()); ps.setBigDecimal(3, monto);
-                    ps.setString(4, metodo); ps.setString(5, tipo); ps.executeUpdate();
-                }
-                auditoria.registrar(con, usuario(), "RESERVA_PAGO", "reserva", idReserva,
-                        tipo + " " + monto + " " + metodo);
-                con.commit();
-            } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
-        }
-    }
-
     public void editarUsuario(int id, String nombre, String apellido, boolean activo) throws SQLException {
         admin();
         if (!Validador.esNombreValido(nombre) || !Validador.esNombreValido(apellido))

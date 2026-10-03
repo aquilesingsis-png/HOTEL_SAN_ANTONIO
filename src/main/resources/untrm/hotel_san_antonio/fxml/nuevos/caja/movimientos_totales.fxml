@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<!-- Caja: Movimientos y totales. Reune tres pantallas como pestanas; cada una se carga al abrirla
+     (ver PestanasModulosController). Los pagos se registran en la reserva y en la cuenta de la habitacion. -->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.PestanasModulosController"
+            prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300" style="-fx-background-color: #F8F6F2;">
+    <center>
+        <TabPane fx:id="pestanas" tabClosingPolicy="UNAVAILABLE" minWidth="0" userData="tabs-nuevos">
+            <Tab text="Totales del día" userData="caja/totales_dia"/>
+            <Tab text="Movimientos de caja" userData="caja/movimientos"/>
+            <Tab text="Pagos de alojamiento" userData="caja/registrar_pagos"/>
+        </TabPane>
+    </center>
+</BorderPane>
