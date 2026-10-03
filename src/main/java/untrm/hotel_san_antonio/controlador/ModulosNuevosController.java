@@ -233,11 +233,6 @@ public class ModulosNuevosController {
                     if (!fila.celdas().get(indiceEstado).equalsIgnoreCase(elegido)) return false;
                     continue;
                 }
-                if (id.equals("filtroOrigen") && modulo.equals("caja/totales_dia")) {
-                    int indice = elegido.equals("tienda") ? 2 : 1;
-                    if (numero(fila, indice).signum() == 0) return false;
-                    continue;
-                }
                 if (id.equals("filtroAccion") && modulo.equals("usuarios/historial_usuarios")) {
                     String accion = fila.celdas().get(2);
                     String detalle = fila.celdas().get(6).toLowerCase(Locale.ROOT);
@@ -468,15 +463,6 @@ public class ModulosNuevosController {
         }
         ComboBox<String> roles = nodo("filtroRol", ComboBox.class);
         if (roles != null && !roles.getItems().contains("Limpieza")) roles.getItems().add("Limpieza");
-        if (modulo.equals("caja/totales_dia")) {
-            try {
-                ComboBox<String> responsables = nodo("filtroResponsable", ComboBox.class);
-                if (responsables != null) {
-                    for (String persona : dao.responsables())
-                        if (!responsables.getItems().contains(persona)) responsables.getItems().add(persona);
-                }
-            } catch (SQLException error) { Alertas.mostrarError("Personal", error.getMessage()); }
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -553,13 +539,6 @@ public class ModulosNuevosController {
                 dao.moverStock(dao.idProductoPorCodigo(texto("txtCodigoDelProducto")),
                         normalizar(combo("cmbTipoDeMovimiento")), cantidad("spnCantidad"),
                         combo("cmbMotivo"), texto("txtReferenciaSustento"), texto("txtObservaciones"));
-            }
-            case "caja/movimientos" -> {
-                exigirFechaActual("dpFecha");
-                dao.guardarMovimientoCaja(normalizar(combo("cmbTipo")),
-                        combo("cmbConcepto"), normalizar(combo("cmbMetodoDePago")),
-                        dinero("txtMontoS"), texto("txtReferenciaSustento"),
-                        texto("txtObservaciones"), texto("txtTurnoCaja"));
             }
             case "caja/arqueo" -> {
                 exigirFechaActual("dpFecha");
@@ -843,21 +822,6 @@ public class ModulosNuevosController {
                 etiqueta("lblEfectivoEsperadoS", sumar(4).toPlainString());
                 etiqueta("lblEfectivoContadoS", sumar(5).toPlainString());
                 etiqueta("lblDiferenciaS", sumar(6).toPlainString());
-            }
-            case "caja/movimientos" -> {
-                etiqueta("lblIngresosS", sumar(6).toPlainString());
-                etiqueta("lblEgresosS", sumar(7).toPlainString());
-                etiqueta("lblNetoS", sumar(6).subtract(sumar(7)).toPlainString());
-            }
-            case "caja/registrar_pagos" -> {
-                etiqueta("lblTotalCobradoS", sumar(7).toPlainString());
-                etiqueta("lblPagosRegistrados", String.valueOf(total));
-                etiqueta("lblSaldoDeLaCuentaS", texto("txtSaldoPendienteS"));
-            }
-            case "caja/totales_dia" -> {
-                etiqueta("lblAlojamientoS", sumar(1).toPlainString());
-                etiqueta("lblTiendaS", sumar(2).toPlainString());
-                etiqueta("lblCobrosDelDiaS", sumar(3).toPlainString());
             }
             case "reportes/ingresos" -> {
                 etiqueta("lblCobrosDeAlojamientoS", sumaPorOrigen("Alojamiento").toPlainString());

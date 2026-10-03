@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Ventana emergente: registrar a mano un ingreso o un egreso de caja (solo Administrador). -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="untrm.hotel_san_antonio.controlador.MovimientoCajaFormController"
+      spacing="12" prefWidth="600" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
+    <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
+    <Label text="Nuevo movimiento de caja" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+    <HBox spacing="14">
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="Tipo *" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+            <ChoiceBox fx:id="cmbTipo" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+        </VBox>
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="Medio de pago *" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+            <ChoiceBox fx:id="cmbMetodo" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+        </VBox>
+    </HBox>
+    <VBox spacing="6">
+        <Label text="Concepto *" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+        <TextField fx:id="txtConcepto" promptText="Ej.: Retiro de efectivo, ingreso adicional, ajuste de caja" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+    </VBox>
+    <HBox spacing="14">
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="Monto (S/) *" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+            <TextField fx:id="txtMonto" promptText="0.00" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+        </VBox>
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="Turno / caja *" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+            <TextField fx:id="txtTurno" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+        </VBox>
+    </HBox>
+    <VBox spacing="6">
+        <Label text="Referencia / sustento" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+        <TextField fx:id="txtReferencia" promptText="Opcional: número de recibo, operación, etc." style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+    </VBox>
+    <VBox spacing="6">
+        <Label text="Observaciones" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+        <TextArea fx:id="txtObservacion" prefRowCount="3" wrapText="true" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-prompt-text-fill: #847B70;"/>
+    </VBox>
+    <Label fx:id="lblMensaje" wrapText="true" style="-fx-text-fill: #B64832;"/>
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cancelar" onAction="#cerrar" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+        <Button text="Guardar movimiento" onAction="#guardar" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
+    </HBox>
+</VBox>

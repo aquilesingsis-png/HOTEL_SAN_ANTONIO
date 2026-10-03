@@ -22,7 +22,7 @@ public class Navegacion {
     // el controlador de administración que activa sus botones y datos.
     private static final Set<String> MODULOS_OPERATIVOS_NUEVOS = Set.of(
             NUEVOS + "caja/gastos.fxml",
-            NUEVOS + "caja/movimientos_totales.fxml",
+            NUEVOS + "caja/libro_caja.fxml",
             NUEVOS + "caja/cierre_arqueo.fxml",
             NUEVOS + "usuarios/crear_usuario.fxml",
             NUEVOS + "usuarios/asignar_rol.fxml",

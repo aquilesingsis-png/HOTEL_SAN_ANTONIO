@@ -81,24 +81,6 @@ public class ModulosDAO {
                 "SELECT c.id_cierre,c.id_cierre,c.fecha,c.turno,CONCAT(u.nombre,' ',u.apellido),"
                 + "c.efectivo_esperado,c.efectivo_contado,c.diferencia,c.estado FROM cierre_caja c "
                 + "JOIN usuario u ON u.id_usuario=c.id_usuario ORDER BY c.fecha DESC,c.id_cierre DESC");
-            case "caja/movimientos" -> filas(
-                "SELECT m.id_movimiento,m.fecha,m.id_movimiento,m.tipo,m.concepto,COALESCE(m.referencia,''),"
-                + "m.metodo_pago,IF(m.tipo='INGRESO',m.monto,0),IF(m.tipo='EGRESO',m.monto,0),"
-                + "CONCAT(u.nombre,' ',u.apellido) FROM movimiento_caja m JOIN usuario u "
-                + "ON u.id_usuario=m.id_usuario ORDER BY m.fecha DESC");
-            case "caja/registrar_pagos" -> filas(
-                "SELECT p.id_pago,p.id_pago,p.fecha_pago,CONCAT('R-',LPAD(r.id_reserva,4,'0'))," 
-                + "CONCAT(h.nombres,' ',h.apellidos),hab.numero,p.tipo_pago,p.metodo_pago,p.monto,"
-                + "CONCAT(u.nombre,' ',u.apellido) FROM pago p JOIN reserva r ON r.id_reserva=p.id_reserva "
-                + "JOIN huesped h ON h.id_huesped=r.id_huesped JOIN habitacion hab ON hab.id_habitacion=r.id_habitacion "
-                + "JOIN usuario u ON u.id_usuario=p.id_usuario ORDER BY p.fecha_pago DESC");
-            case "caja/totales_dia" -> filas(
-                "SELECT 0,CONCAT(p.metodo_pago,' · ',u.nombre,' ',u.apellido),SUM(p.monto),0,"
-                + "SUM(p.monto),COUNT(*) FROM pago p JOIN usuario u ON u.id_usuario=p.id_usuario "
-                + "WHERE DATE(p.fecha_pago)=? GROUP BY p.metodo_pago,p.id_usuario UNION ALL "
-                + "SELECT 0,CONCAT('NO REGISTRADO · ',u.nombre,' ',u.apellido),0,SUM(v.total),"
-                + "SUM(v.total),COUNT(*) FROM venta_tienda v JOIN usuario u ON u.id_usuario=v.id_usuario "
-                + "WHERE DATE(v.fecha_venta)=? GROUP BY v.id_usuario", Date.valueOf(dia), Date.valueOf(dia));
             case "reportes/ingresos" -> filas(
                 "SELECT 0,DATE(p.fecha_pago),'Alojamiento',p.metodo_pago,COUNT(*),SUM(p.monto) "
                 + "FROM pago p GROUP BY DATE(p.fecha_pago),p.metodo_pago UNION ALL "

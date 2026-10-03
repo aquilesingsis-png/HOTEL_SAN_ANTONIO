@@ -68,8 +68,8 @@
                     <Button text="Caja  ▸" onAction="#onGrupo" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
                     <VBox userData="Caja" visible="false" managed="false" spacing="2"
                           style="-fx-background-color: #2E1909; -fx-background-radius: 0 6px 6px 0; -fx-border-color: #B8862D; -fx-border-width: 0 0 0 2px; -fx-padding: 4px 0 4px 0;">
-                        <ToggleButton text="Movimientos y totales" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/movimientos_totales.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Movimientos de caja" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/libro_caja.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Cierre y arqueo" toggleGroup="$grupoMenu"
                                       userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/cierre_arqueo.fxml" onAction="#onMenu"/>
                     </VBox>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Caja: una sola lista con todo el dinero que entra y sale (alojamiento, carrito, movimientos manuales
+     y gastos). Los filtros de arriba dejan ver solo una parte. El titulo lo da el marco principal. -->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.LibroCajaController" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" style="-fx-background: #F8F6F2; -fx-background-color: #F8F6F2; -fx-background-insets: 0; -fx-padding: 0;">
+            <content>
+                <VBox spacing="18" fillWidth="true" style="-fx-padding: 20 24 26 24; -fx-background-color: #F8F6F2;">
+                    <VBox spacing="14" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                        <Label text="Filtros de consulta" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        <FlowPane hgap="12" vgap="12">
+                            <VBox spacing="6" prefWidth="190">
+                                <Label text="Desde" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <DatePicker fx:id="dpDesde" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
+                            </VBox>
+                            <VBox spacing="6" prefWidth="190">
+                                <Label text="Hasta" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <DatePicker fx:id="dpHasta" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
+                            </VBox>
+                            <VBox spacing="6" prefWidth="170">
+                                <Label text="Origen" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <ChoiceBox fx:id="cmbOrigen" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                            </VBox>
+                            <VBox spacing="6" prefWidth="190">
+                                <Label text="Tipo" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <ChoiceBox fx:id="cmbTipo" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                            </VBox>
+                            <VBox spacing="6" prefWidth="170">
+                                <Label text="Medio de pago" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <ChoiceBox fx:id="cmbMetodo" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                            </VBox>
+                            <VBox spacing="6" prefWidth="300">
+                                <Label text="Buscar" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <TextField fx:id="txtBuscar" promptText="Concepto, cliente, responsable o documento" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+                            </VBox>
+                        </FlowPane>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Button text="Buscar" onAction="#buscar" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
+                            <Button text="Limpiar filtros" onAction="#limpiar" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="btnNuevo" text="+ Nuevo movimiento" onAction="#nuevo" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
+                            <Button fx:id="btnCerrarCaja" text="Cerrar caja" onAction="#cerrarCaja" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                        </HBox>
+                    </VBox>
+
+                    <FlowPane hgap="12" vgap="12">
+                        <VBox spacing="8" prefWidth="235" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                            <Label text="Ingresos" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                            <Label fx:id="lblIngresos" text="S/ 0.00" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        </VBox>
+                        <VBox spacing="8" prefWidth="235" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                            <Label text="Egresos" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                            <Label fx:id="lblEgresos" text="S/ 0.00" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        </VBox>
+                        <VBox spacing="8" prefWidth="235" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                            <Label text="Neto" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                            <Label fx:id="lblNeto" text="S/ 0.00" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        </VBox>
+                        <VBox spacing="8" prefWidth="235" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                            <Label text="Efectivo en caja" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                            <Label fx:id="lblEfectivo" text="S/ 0.00" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        </VBox>
+                    </FlowPane>
+
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label fx:id="lblCantidad" text="TOTAL DE REGISTROS: 0" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="btnAnterior" text="Anterior" onAction="#paginaAnterior" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                            <Label fx:id="lblPagina" text="1 / 1" style="-fx-font-weight: bold;"/>
+                            <Button fx:id="btnSiguiente" text="Siguiente" onAction="#paginaSiguiente" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                        </HBox>
+                        <TableView fx:id="tabla" minHeight="320" prefHeight="520" VBox.vgrow="ALWAYS" userData="tabla-nuevos" style="-fx-background-color: white; -fx-border-color: #E8E2D9; -fx-border-color: #E7E1D8; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 0; -fx-fixed-cell-size: 40;">
+                            <columns>
+                                <TableColumn fx:id="colFecha" text="Fecha" prefWidth="125" minWidth="90"/>
+                                <TableColumn fx:id="colTipo" text="Tipo" prefWidth="130" minWidth="70"/>
+                                <TableColumn fx:id="colConcepto" text="Concepto" prefWidth="390" minWidth="150"/>
+                                <TableColumn fx:id="colMonto" text="Monto (S/)" prefWidth="95" minWidth="80"/>
+                                <TableColumn fx:id="colMetodo" text="Medio de pago" prefWidth="115" minWidth="90"/>
+                                <TableColumn fx:id="colCaja" text="Caja / Banco" prefWidth="130" minWidth="90"/>
+                                <TableColumn fx:id="colDocumento" text="Documento" prefWidth="120" minWidth="80"/>
+                                <TableColumn fx:id="colCliente" text="Cliente" prefWidth="170" minWidth="100"/>
+                                <TableColumn fx:id="colResponsable" text="Registrado por" prefWidth="150" minWidth="100"/>
+                            </columns>
+                            <placeholder>
+                                <VBox alignment="CENTER" spacing="8">
+                                    <Label text="Sin movimientos para mostrar" style="-fx-text-fill: #5A3516; -fx-font-size: 15px; -fx-font-weight: bold;"/>
+                                    <Label text="Cambia los filtros o el rango de fechas." style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+                                </VBox>
+                            </placeholder>
+                        </TableView>
+                        <Label text="Importes en soles. Las ventas cargadas a una habitación se cobran con el saldo de la habitación y no suman en los totales."
+                               wrapText="true" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

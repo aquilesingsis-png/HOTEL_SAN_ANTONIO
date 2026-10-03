@@ -15,7 +15,7 @@ public final class Permisos {
             BASE + "habitaciones/tarjeta_habitacion.fxml",
             BASE + "carrito/carrito_tienda.fxml",
             BASE + "comprobante/comprobante.fxml",
-            BASE + "nuevos/caja/registrar_pagos.fxml");
+            BASE + "nuevos/caja/libro_caja.fxml");
 
     private Permisos() {}
 
