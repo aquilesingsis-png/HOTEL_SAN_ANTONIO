@@ -17,10 +17,7 @@
     <fx:define><ToggleGroup fx:id="grupoVista"/></fx:define>
     <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
     <HBox spacing="12" alignment="CENTER_LEFT">
-        <VBox spacing="3" HBox.hgrow="ALWAYS">
-            <Label text="Reservas" style="-fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: #2C2118;"/>
-            <Label text="Consulta la ocupación y abre una reserva para cancelarla o cambiar de habitación." style="-fx-text-fill: #6A625A;"/>
-        </VBox>
+        <HBox HBox.hgrow="ALWAYS"/>
         <TextField fx:id="txtBuscar" promptText="Buscar por cliente, DNI, código o habitación" prefWidth="340" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
         <ToggleButton fx:id="btnCalendario" text="Calendario" toggleGroup="$grupoVista" selected="true" onAction="#mostrarCalendario"/>
         <ToggleButton fx:id="btnLista" text="Lista" toggleGroup="$grupoVista" onAction="#mostrarLista"/>

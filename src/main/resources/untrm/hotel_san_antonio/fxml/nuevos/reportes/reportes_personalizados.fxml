@@ -7,13 +7,6 @@
 <?import javafx.scene.chart.*?>
 <!-- Interfaz visual independiente: sin controlador ni acciones de negocio. -->
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
-    <top>
-        <VBox spacing="7" style="-fx-padding: 22 26 18 26; -fx-background-color: white; -fx-border-color: #E7E1D8; -fx-border-width: 0 0 1 0;">
-            <Label text="REPORTES  /  HOTEL SAN ANTONIO" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #8A601D; -fx-font-size: 10px; -fx-font-weight: bold;"/>
-            <Label text="Reportes personalizados" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
-            <Label text="Define el período, las columnas y la agrupación del informe." wrapText="true" maxWidth="Infinity" style="-fx-font-size: 13px; -fx-text-fill: #6A5F52;"/>
-        </VBox>
-    </top>
     <center>
         <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0" userData="tabs-nuevos">
             <Tab text="Configuración">

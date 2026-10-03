@@ -22,7 +22,6 @@
     <content>
         <VBox spacing="16" style="-fx-background-color: #F7F4EF;">
             <padding><Insets top="24" right="28" bottom="28" left="28"/></padding>
-            <Label text="Nueva reserva" style="-fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: #2C2118;"/>
 
             <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #E8E2D9; -fx-border-radius: 10;">
                 <padding><Insets top="18" right="20" bottom="18" left="20"/></padding>
