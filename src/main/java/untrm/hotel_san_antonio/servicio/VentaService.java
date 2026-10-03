@@ -56,6 +56,14 @@ public class VentaService {
             throw new IllegalArgumentException("El total supera el máximo admitido para una venta.");
         }
         venta.setTotal(total);
+        if (venta.getIdHabitacion() == null) {
+            if (venta.getMetodoPago() == null
+                    || !Set.of("EFECTIVO", "YAPE", "TRANSFERENCIA", "TARJETA").contains(venta.getMetodoPago())) {
+                throw new IllegalArgumentException("Seleccione el medio de pago de la venta.");
+            }
+        } else {
+            venta.setMetodoPago(null); // lo cargado a una habitacion se cobra despues, con la cuenta
+        }
 
         try (Connection cn = ConexionBD.conectar()) {
             boolean autoCommitAnterior = cn.getAutoCommit();

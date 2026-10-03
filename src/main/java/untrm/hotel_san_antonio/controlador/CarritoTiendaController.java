@@ -487,7 +487,9 @@ public class CarritoTiendaController {
             venta.setClienteExterno(null);
         } else {
             venta.setIdHuesped(null);
-            venta.setIdHabitacion(null);String n=txtNombreCliente.getText()==null?"":txtNombreCliente.getText().trim();
+            venta.setIdHabitacion(null);
+            venta.setMetodoPago(btnTarjeta.isSelected() ? "TARJETA" : btnYape.isSelected() ? "YAPE"
+                    : btnTransferencia.isSelected() ? "TRANSFERENCIA" : "EFECTIVO");String n=txtNombreCliente.getText()==null?"":txtNombreCliente.getText().trim();
             venta.setClienteExterno(n.isEmpty()?"Cliente varios":n);}
         if(!Alertas.confirmar("Emitir comprobante","Total: "+lblTotal.getText()+"\n¿Registrar la venta?"))return;
         try {

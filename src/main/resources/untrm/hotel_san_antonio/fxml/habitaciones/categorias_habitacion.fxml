@@ -9,7 +9,6 @@
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="untrm.hotel_san_antonio.controlador.CategoriasHabitacionController"
     spacing="14" style="-fx-background-color: #F7F4EF; -fx-padding: 24;">
-    <Label text="Orden de categorías de habitación" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
     <Label text="Configure el nivel comercial de cada tipo con el hotel. Un número mayor representa una categoría superior. La capacidad se valida por separado. Sin nivel configurado solo se permiten cambios al mismo tipo." wrapText="true"/>
     <TableView fx:id="tabla" VBox.vgrow="ALWAYS" prefHeight="360" style="-fx-background-color: white; -fx-border-color: #E8E2D9;">
         <columns>

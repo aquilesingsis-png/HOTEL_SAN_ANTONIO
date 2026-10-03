@@ -6,10 +6,8 @@ Aplicación de escritorio Java 21 + JavaFX 21, FXML, Maven, JDBC y MySQL/MariaDB
 
 1. En XAMPP, encienda **MySQL**. La configuración local incluida apunta a `localhost:3306`, base `hotel_san_antonio`, usuario MySQL `root` y contraseña vacía. Estos valores fueron probados en el XAMPP local. Si su instalación usa otra clave, puerto o usuario, edite `config.properties` antes de iniciar. También puede usar `HOTEL_DB_URL`, `HOTEL_DB_USER` y `HOTEL_DB_PASSWORD`; tienen prioridad sobre el archivo.
 2. Para una base **nueva y vacía**, importe **una sola vez** `sql/INSTALACION_COMPLETA_XAMPP.sql` desde phpMyAdmin. Crea las 21 tablas, los tipos, las 24 habitaciones, el catálogo de tienda y las cuentas de administrador y recepcionista. Las claves temporales están en `ACCESOS_INICIALES.txt`; sus hashes PBKDF2 son los únicos valores guardados en MySQL. No importe este archivo en una base con tablas o datos.
-3. Para una base **existente** con las 17 tablas de la entrega anterior, respáldela y ejecute `sql/migrations/002_modulos_operativos.sql`. Añade cuatro tablas sin borrar datos. En el XAMPP local de esta entrega, la migración 002 ya quedó aplicada. Si la base tiene solo 12 tablas, ejecute primero `sql/migrations/001_operacion_segura.sql` y después la 002. Si aún faltan cuentas, use `sql/CREAR_ADMIN_Y_RECEPCIONISTA.sql` o `BootstrapAdmin` de forma interactiva.
+3. Para una base **existente** de una entrega anterior, respáldela, bórrela e importe de nuevo `sql/INSTALACION_COMPLETA_XAMPP.sql`. El proyecto ya no trae migraciones ni scripts sueltos: ese archivo es el único SQL. Si solo falta la columna `venta_tienda.metodo_pago` (medio de pago de las ventas del carrito), basta con `ALTER TABLE venta_tienda ADD COLUMN metodo_pago ENUM('EFECTIVO','YAPE','TRANSFERENCIA','TARJETA') NULL AFTER cliente_externo;`.
 4. Abra `pom.xml` en NetBeans o ejecute `mvn clean javafx:run` con Maven y Java 21 o superior. El POM compila con `--release 21`. Las imágenes originales `fondo_login.png` y `logo_san_antonio.png` siguen incluidas.
-
-Si una base ya tiene el esquema y usuarios, pero `tipo_habitacion`, `habitacion`, `categoria` y `producto` están **todas vacías**, puede ejecutar una vez `sql/CATALOGOS_ORIGINALES.sql` tras hacer una copia de seguridad. No lo use cuando ya existan filas en cualquiera de esas tablas. En la base local de esta entrega ya se repusieron esos catálogos.
 
 ## Reservas e identidad
 
@@ -30,7 +28,7 @@ Si una base ya tiene el esquema y usuarios, pero `tipo_habitacion`, `habitacion`
 - El orden comercial de tipos no estaba en la base original. `nivel_categoria` permanece sin valor hasta que el administrador defina ese orden; no se infiere de la tarifa. Así se evita autorizar un ascenso equivocado.
 - Las llamadas reales a ApiPeru, SUNAT y Decolecta requieren tokens e Internet. `config.properties` incluye solo marcadores, nunca claves privadas.
 - Las vistas de almacén, caja, reportes y usuarios en `nuevos/` siguen siendo FXML editables. Al abrirlas en la aplicación se conectan con `ModulosNuevosController` y `ModulosDAO`; las altas y movimientos se validan y guardan en MySQL. Gastos, Crear usuario, Asignar rol y Recuperación mantienen sus controladores específicos.
-- El SQL de instalación completa incluye dos cuentas con contraseñas temporales para poder entrar inmediatamente. Cámbielas tras el primer acceso. El esquema base `sql/hotel_san_antonio.sql` sigue siendo solo estructura y no se debe ejecutar de nuevo sobre una base existente.
+- El SQL de instalación completa incluye dos cuentas con contraseñas temporales para poder entrar inmediatamente. Cámbielas tras el primer acceso.
 
 ## Botones y validaciones (actualización 03/10/2026)
 

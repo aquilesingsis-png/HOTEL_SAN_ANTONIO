@@ -10,6 +10,7 @@ public class VentaTienda {
     private int idUsuario;
     private Integer idComprobante;  // null mientras esta "pendiente" en la cuenta
     private String clienteExterno;
+    private String metodoPago;      // EFECTIVO, YAPE, TRANSFERENCIA o TARJETA; null si se carga a una habitacion
     private LocalDateTime fechaVenta;
     private BigDecimal total;
 
@@ -32,6 +33,9 @@ public class VentaTienda {
 
     public String getClienteExterno() { return clienteExterno; }
     public void setClienteExterno(String clienteExterno) { this.clienteExterno = clienteExterno; }
+
+    public String getMetodoPago() { return metodoPago; }
+    public void setMetodoPago(String metodoPago) { this.metodoPago = metodoPago; }
 
     public LocalDateTime getFechaVenta() { return fechaVenta; }
     public void setFechaVenta(LocalDateTime fechaVenta) { this.fechaVenta = fechaVenta; }

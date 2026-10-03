@@ -8,7 +8,6 @@
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="untrm.hotel_san_antonio.controlador.LimpiezaController"
     spacing="14" style="-fx-background-color: #F7F4EF; -fx-padding: 24;">
-    <Label text="Estado de limpieza" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
     <Label text="Seleccione una habitación disponible o en limpieza. Las ocupadas y en mantenimiento no se pueden cambiar aquí." wrapText="true"/>
     <TableView fx:id="tabla" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-border-color: #E8E2D9;">
         <columns>

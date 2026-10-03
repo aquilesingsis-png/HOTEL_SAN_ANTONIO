@@ -328,17 +328,6 @@ public class ReservaDAO {
         }
     }
 
-    public boolean confirmarConAdelantoSiPendiente(Connection con, int idReserva,
-                                                     java.math.BigDecimal adelanto) throws SQLException {
-        String sql = "UPDATE reserva SET estado = 'CONFIRMADA', adelanto = ? "
-                + "WHERE id_reserva = ? AND estado = 'PENDIENTE'";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setBigDecimal(1, adelanto);
-            ps.setInt(2, idReserva);
-            return ps.executeUpdate() == 1;
-        }
-    }
-
     /** true si la habitacion ya tiene una reserva vigente que se cruza con esas fechas. */
     public boolean existeCruce(Connection con, int idHabitacion, LocalDate ingreso, LocalDate salida) throws SQLException {
         String sql = "SELECT COUNT(*) FROM reserva WHERE id_habitacion = ? "

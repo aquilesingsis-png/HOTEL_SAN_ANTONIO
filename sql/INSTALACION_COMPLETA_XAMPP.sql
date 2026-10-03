@@ -179,6 +179,7 @@ CREATE TABLE venta_tienda (
     id_usuario       INT NOT NULL,
     id_comprobante   INT NULL,
     cliente_externo  VARCHAR(100) NULL,
+    metodo_pago      ENUM('EFECTIVO','YAPE','TRANSFERENCIA','TARJETA') NULL,
     fecha_venta      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     total            DECIMAL(8,2) NOT NULL,
     CONSTRAINT fk_venta_huesped     FOREIGN KEY (id_huesped)     REFERENCES huesped(id_huesped),

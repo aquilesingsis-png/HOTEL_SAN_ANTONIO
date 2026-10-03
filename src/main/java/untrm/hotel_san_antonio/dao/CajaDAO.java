@@ -41,7 +41,7 @@ public class CajaDAO {
             + "CONCAT('Venta de tienda - ', COALESCE((SELECT GROUP_CONCAT(CONCAT(d.cantidad, ' x ', pr.nombre) SEPARATOR ', ') "
             + "FROM detalle_venta d JOIN producto pr ON pr.id_producto = d.id_producto WHERE d.id_venta = v.id_venta), "
             + "'sin detalle'), IF(v.id_habitacion IS NULL, '', CONCAT(' (a la habitación ', hb.numero, ')'))), "
-            + "v.total, IF(v.id_habitacion IS NULL, 'NO REGISTRADO', 'CARGO A HABITACION'), "
+            + "v.total, IF(v.id_habitacion IS NULL, COALESCE(v.metodo_pago, 'NO REGISTRADO'), 'CARGO A HABITACION'), "
             + "(SELECT c.numero FROM comprobante c WHERE c.id_comprobante = v.id_comprobante), "
             + "COALESCE(v.cliente_externo, (SELECT CONCAT(h2.nombres, ' ', h2.apellidos) FROM huesped h2 "
             + "WHERE h2.id_huesped = v.id_huesped), 'Cliente varios'), "

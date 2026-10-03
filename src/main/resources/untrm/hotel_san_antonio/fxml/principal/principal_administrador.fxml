@@ -60,8 +60,6 @@
 
                     <ToggleButton text="Comprobantes" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/comprobante/comprobante.fxml" onAction="#onMenu"/>
-                    <ToggleButton text="Gastos" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/gastos.fxml" onAction="#onMenu"/>
                     <ToggleButton text="Registro de días pasados" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/Reserva/registro_historico.fxml" onAction="#onMenu"/>
 
@@ -70,6 +68,8 @@
                           style="-fx-background-color: #2E1909; -fx-background-radius: 0 6px 6px 0; -fx-border-color: #B8862D; -fx-border-width: 0 0 0 2px; -fx-padding: 4px 0 4px 0;">
                         <ToggleButton text="Movimientos de caja" toggleGroup="$grupoMenu"
                                       userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/libro_caja.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Gastos" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/gastos.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Cierre y arqueo" toggleGroup="$grupoMenu"
                                       userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/cierre_arqueo.fxml" onAction="#onMenu"/>
                     </VBox>

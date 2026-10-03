@@ -12,7 +12,6 @@ El formulario de nueva reserva presenta un plano por piso, con pasillo, capacida
 
 - Base local XAMPP: `hotel_san_antonio`, MySQL `root`, contraseña vacía, `localhost:3306`.
 - Instalación nueva: importar `sql/INSTALACION_COMPLETA_XAMPP.sql` solo en una base vacía. Incluye 21 tablas y dos cuentas iniciales.
-- Instalación existente con 17 tablas: respaldar e importar `sql/migrations/002_modulos_operativos.sql`. Añade `movimiento_stock`, `movimiento_caja`, `arqueo_caja` y `cierre_caja`. La base local de este equipo ya recibió esta migración.
 - Cuentas de la aplicación: `admin` y `recepcion`. Las claves vigentes están en `ACCESOS_INICIALES.txt` y se verificaron contra los hashes almacenados.
 - Copia de seguridad previa: `C:\Users\HP\Documents\Codex\2026-10-02\a\work\hotel_san_antonio_backup_2026-10-03.sql`.
 

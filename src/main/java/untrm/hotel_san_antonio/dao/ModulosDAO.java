@@ -84,8 +84,8 @@ public class ModulosDAO {
             case "reportes/ingresos" -> filas(
                 "SELECT 0,DATE(p.fecha_pago),'Alojamiento',p.metodo_pago,COUNT(*),SUM(p.monto) "
                 + "FROM pago p GROUP BY DATE(p.fecha_pago),p.metodo_pago UNION ALL "
-                + "SELECT 0,DATE(v.fecha_venta),'Tienda','NO REGISTRADO',COUNT(*),SUM(v.total) "
-                + "FROM venta_tienda v GROUP BY DATE(v.fecha_venta) ORDER BY 2 DESC");
+                + "SELECT 0,DATE(v.fecha_venta),'Tienda',COALESCE(v.metodo_pago,'NO REGISTRADO'),COUNT(*),SUM(v.total) "
+                + "FROM venta_tienda v GROUP BY DATE(v.fecha_venta),COALESCE(v.metodo_pago,'NO REGISTRADO') ORDER BY 2 DESC");
             case "reportes/ocupacion" -> ocupacionDiaria(null, null);
             case "reportes/reportes_personalizados" -> filas(
                 "SELECT 0,DATE(p.fecha_pago),'Alojamiento','Pago de reserva',COUNT(*),SUM(p.monto) "
@@ -302,7 +302,8 @@ public class ModulosDAO {
 
     public BigDecimal efectivoHoy() throws SQLException {
         String sql = "SELECT COALESCE((SELECT SUM(monto) FROM pago WHERE metodo_pago='EFECTIVO' "
-                + "AND DATE(fecha_pago)=CURDATE()),0) + COALESCE((SELECT SUM(monto) FROM movimiento_caja "
+                + "AND DATE(fecha_pago)=CURDATE()),0) + COALESCE((SELECT SUM(total) FROM venta_tienda WHERE id_habitacion IS NULL "
+                + "AND metodo_pago='EFECTIVO' AND DATE(fecha_venta)=CURDATE()),0) + COALESCE((SELECT SUM(monto) FROM movimiento_caja "
                 + "WHERE tipo='INGRESO' AND metodo_pago='EFECTIVO' AND DATE(fecha)=CURDATE()),0) "
                 + "- COALESCE((SELECT SUM(monto) FROM gasto WHERE activo=1 AND metodo_pago='EFECTIVO' "
                 + "AND fecha=CURDATE()),0) - COALESCE((SELECT SUM(monto) FROM movimiento_caja "
@@ -319,7 +320,9 @@ public class ModulosDAO {
         String sql = "SELECT "
                 + "COALESCE((SELECT fondo_siguiente FROM cierre_caja c WHERE c.estado='CONFIRMADO' "
                 + "AND (c.fecha<? OR (c.fecha=? AND c.turno<>?)) ORDER BY c.fecha DESC,c.id_cierre DESC LIMIT 1),0),"
-                + "COALESCE((SELECT SUM(monto) FROM pago WHERE metodo_pago='EFECTIVO' AND DATE(fecha_pago)=?),0),"
+                + "COALESCE((SELECT SUM(monto) FROM pago WHERE metodo_pago='EFECTIVO' AND DATE(fecha_pago)=?),0) + "
+                + "COALESCE((SELECT SUM(total) FROM venta_tienda WHERE id_habitacion IS NULL AND metodo_pago='EFECTIVO' "
+                + "AND DATE(fecha_venta)=?),0),"
                 + "COALESCE((SELECT SUM(monto) FROM movimiento_caja WHERE tipo='INGRESO' "
                 + "AND metodo_pago='EFECTIVO' AND DATE(fecha)=?),0),"
                 + "COALESCE((SELECT SUM(monto) FROM movimiento_caja WHERE tipo='EGRESO' "
@@ -328,7 +331,7 @@ public class ModulosDAO {
         try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setDate(1, Date.valueOf(fecha)); ps.setDate(2, Date.valueOf(fecha));
             ps.setString(3, turno == null ? "" : turno.trim());
-            for (int i = 4; i <= 7; i++) ps.setDate(i, Date.valueOf(fecha));
+            for (int i = 4; i <= 8; i++) ps.setDate(i, Date.valueOf(fecha));
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
                 return new BigDecimal[] {rs.getBigDecimal(1), rs.getBigDecimal(2),

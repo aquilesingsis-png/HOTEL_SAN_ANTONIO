@@ -18,8 +18,8 @@ public class VentaTiendaDAO {
 
     public int insertar(Connection cn, VentaTienda venta) throws SQLException {
         String sql = "INSERT INTO venta_tienda " +
-                "(id_huesped, id_habitacion, id_usuario, id_comprobante, cliente_externo, total) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+                "(id_huesped, id_habitacion, id_usuario, id_comprobante, cliente_externo, metodo_pago, total) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = cn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             setNullableInt(ps, 1, venta.getIdHuesped());
@@ -31,7 +31,12 @@ public class VentaTiendaDAO {
             } else {
                 ps.setString(5, venta.getClienteExterno().trim());
             }
-            ps.setBigDecimal(6, venta.getTotal());
+            if (venta.getMetodoPago() == null) {
+                ps.setNull(6, Types.VARCHAR);
+            } else {
+                ps.setString(6, venta.getMetodoPago());
+            }
+            ps.setBigDecimal(7, venta.getTotal());
 
             if (ps.executeUpdate() != 1) {
                 throw new SQLException("No se pudo registrar la venta de tiendita.");
