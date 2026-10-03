@@ -5,31 +5,31 @@
 <?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.chart.*?>
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="untrm.hotel_san_antonio.controlador.AsignarRolController" styleClass="nuevos" stylesheets="@../css/nuevos-modulos.css" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300">
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="untrm.hotel_san_antonio.controlador.AsignarRolController" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
     <top>
-        <VBox spacing="7" styleClass="page-header">
-            <Label text="USUARIOS  /  HOTEL SAN ANTONIO" styleClass="eyebrow" wrapText="true" maxWidth="Infinity"/>
-            <Label text="Asignar rol" styleClass="page-title" wrapText="true" maxWidth="Infinity"/>
-            <Label text="Revisa el perfil actual y prepara la asignación del rol correspondiente." styleClass="subtitle" wrapText="true" maxWidth="Infinity"/>
+        <VBox spacing="7" style="-fx-padding: 22 26 18 26; -fx-background-color: white; -fx-border-color: #E7E1D8; -fx-border-width: 0 0 1 0;">
+            <Label text="USUARIOS  /  HOTEL SAN ANTONIO" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #8A601D; -fx-font-size: 10px; -fx-font-weight: bold;"/>
+            <Label text="Asignar rol" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+            <Label text="Revisa el perfil actual y prepara la asignación del rol correspondiente." wrapText="true" maxWidth="Infinity" style="-fx-font-size: 13px; -fx-text-fill: #6A5F52;"/>
         </VBox>
     </top>
     <center>
-        <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0">
+        <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0" userData="tabs-nuevos">
             <Tab text="Listado">
                 <content>
-                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" styleClass="content-scroll">
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" style="-fx-background: #F8F6F2; -fx-background-color: #F8F6F2; -fx-background-insets: 0; -fx-padding: 0;">
                         <content>
-                            <VBox spacing="18" fillWidth="true" styleClass="page-content">
-                                <VBox spacing="16" styleClass="card">
-                                    <Label text="Filtros de consulta" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                            <VBox spacing="18" fillWidth="true" style="-fx-padding: 20 24 26 24; -fx-background-color: #F8F6F2;">
+                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                                    <Label text="Filtros de consulta" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
                                         <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Buscar usuario o colaborador" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="filtroBuscarUsuarioOColaborador" maxWidth="Infinity" promptText="Buscar usuario o colaborador" onAction="#filtrar"/>
+                                            <Label text="Buscar usuario o colaborador" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="filtroBuscarUsuarioOColaborador" maxWidth="Infinity" promptText="Buscar usuario o colaborador" onAction="#filtrar" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Rol actual" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <ComboBox fx:id="filtroRolActual" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                            <Label text="Rol actual" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <ComboBox fx:id="filtroRolActual" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;">
                                                 <items>
                                                     <FXCollections fx:factory="observableArrayList">
                                                         <String fx:value="Administrador"/>
@@ -39,8 +39,8 @@
                                             </ComboBox>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Estado" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <ComboBox fx:id="filtroEstado" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                            <Label text="Estado" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <ComboBox fx:id="filtroEstado" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;">
                                                 <items>
                                                     <FXCollections fx:factory="observableArrayList">
                                                         <String fx:value="Activo"/>
@@ -51,17 +51,17 @@
                                         </VBox>
                                     </FlowPane>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                        <Button fx:id="btnFiltroBuscar" text="Buscar" styleClass="secondary" mnemonicParsing="false" onAction="#filtrar"/>
-                                        <Button fx:id="btnFiltroLimpiarFiltros" text="Limpiar filtros" styleClass="secondary" mnemonicParsing="false" onAction="#limpiarFiltros"/>
+                                        <Button fx:id="btnFiltroBuscar" text="Buscar" mnemonicParsing="false" onAction="#filtrar" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                                        <Button fx:id="btnFiltroLimpiarFiltros" text="Limpiar filtros" mnemonicParsing="false" onAction="#limpiarFiltros" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
                                     </FlowPane>
                                 </VBox>
-                                <VBox spacing="16" styleClass="card">
-                                    <Label text="Detalle de asignar rol" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                                    <Label text="Detalle de asignar rol" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                        <Button fx:id="btnListaActualizarLista" text="Actualizar lista" styleClass="secondary" mnemonicParsing="false" onAction="#actualizarLista"/>
-                                        <Button fx:id="btnListaSeleccionarUsuario" text="Seleccionar usuario" styleClass="secondary" mnemonicParsing="false" onAction="#seleccionarUsuario"/>
+                                        <Button fx:id="btnListaActualizarLista" text="Actualizar lista" mnemonicParsing="false" onAction="#actualizarLista" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                                        <Button fx:id="btnListaSeleccionarUsuario" text="Seleccionar usuario" mnemonicParsing="false" onAction="#seleccionarUsuario" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
                                     </FlowPane>
-                                    <TableView fx:id="tblRegistros" minHeight="240" prefHeight="330" VBox.vgrow="ALWAYS">
+                                    <TableView fx:id="tblRegistros" minHeight="240" prefHeight="330" VBox.vgrow="ALWAYS" userData="tabla-nuevos" style="-fx-background-color: white; -fx-border-color: #E8E2D9; -fx-border-color: #E7E1D8; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 0; -fx-fixed-cell-size: 40;">
                                         <columns>
                                             <TableColumn fx:id="colCodigo" text="Código" prefWidth="145" minWidth="90"/>
                                             <TableColumn fx:id="colColaborador" text="Colaborador" prefWidth="145" minWidth="90"/>
@@ -71,15 +71,15 @@
                                         </columns>
                                         <placeholder>
                                             <VBox alignment="CENTER" spacing="8">
-                                                <Label text="Sin registros para mostrar" styleClass="empty-title" wrapText="true" maxWidth="Infinity"/>
-                                                <Label text="Los resultados de la consulta aparecerán en este listado." styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                                <Label text="Sin registros para mostrar" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #5A3516; -fx-font-size: 15px; -fx-font-weight: bold;"/>
+                                                <Label text="Los resultados de la consulta aparecerán en este listado." wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                             </VBox>
                                         </placeholder>
                                     </TableView>
                                     <HBox alignment="CENTER_LEFT">
-                                        <Label text="0 registros" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                        <Label text="0 registros" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                         <Region HBox.hgrow="ALWAYS"/>
-                                        <Label text="Hotel San Antonio" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                        <Label text="Hotel San Antonio" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                     </HBox>
                                 </VBox>
                             </VBox>
@@ -89,36 +89,36 @@
             </Tab>
             <Tab text="Formulario">
                 <content>
-                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" styleClass="content-scroll">
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" style="-fx-background: #F8F6F2; -fx-background-color: #F8F6F2; -fx-background-insets: 0; -fx-padding: 0;">
                         <content>
-                            <VBox spacing="18" fillWidth="true" styleClass="page-content">
-                                <VBox spacing="16" styleClass="card">
-                                    <Label text="Colaborador" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                            <VBox spacing="18" fillWidth="true" style="-fx-padding: 20 24 26 24; -fx-background-color: #F8F6F2;">
+                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                                    <Label text="Colaborador" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Código de usuario" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtCodigoDeUsuario" maxWidth="Infinity" promptText="Código de usuario" editable="false"/>
+                                            <Label text="Código de usuario" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtCodigoDeUsuario" maxWidth="Infinity" promptText="Código de usuario" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Nombre completo" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtNombreCompleto" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                            <Label text="Nombre completo" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtNombreCompleto" maxWidth="Infinity" text="—" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70; -fx-background-color: #F3EEE7; -fx-text-fill: #6A5F52;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Nombre de usuario" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtNombreDeUsuario" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                            <Label text="Nombre de usuario" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtNombreDeUsuario" maxWidth="Infinity" text="—" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70; -fx-background-color: #F3EEE7; -fx-text-fill: #6A5F52;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Rol actual" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtRolActual" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                            <Label text="Rol actual" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtRolActual" maxWidth="Infinity" text="—" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70; -fx-background-color: #F3EEE7; -fx-text-fill: #6A5F52;"/>
                                         </VBox>
                                     </FlowPane>
                                 </VBox>
-                                <VBox spacing="16" styleClass="card">
-                                    <Label text="Asignación de acceso" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                                    <Label text="Asignación de acceso" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Nuevo rol" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <ComboBox fx:id="cmbNuevoRol" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                            <Label text="Nuevo rol" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <ComboBox fx:id="cmbNuevoRol" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;">
                                                 <items>
                                                     <FXCollections fx:factory="observableArrayList">
                                                         <String fx:value="Administrador"/>
@@ -133,13 +133,13 @@
                                         </VBox>
                                     </FlowPane>
                                 </VBox>
-                                <VBox spacing="16" styleClass="card">
-                                    <Label text="Alcance de los perfiles" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
-                                    <Label text="Administrador: operación y administración. Recepcionista: habitaciones y reservas. Limpieza: solo estado de limpieza de habitaciones." styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                                    <Label text="Alcance de los perfiles" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                                    <Label text="Administrador: operación y administración. Recepcionista: habitaciones y reservas. Limpieza: solo estado de limpieza de habitaciones." wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                 </VBox>
                                 <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                    <Button fx:id="btnFormCancelar" text="Cancelar" styleClass="secondary" mnemonicParsing="false" onAction="#cancelar"/>
-                                    <Button fx:id="btnFormGuardarAsignacion" text="Guardar asignación" styleClass="primary" mnemonicParsing="false" onAction="#guardar"/>
+                                    <Button fx:id="btnFormCancelar" text="Cancelar" mnemonicParsing="false" onAction="#cancelar" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                                    <Button fx:id="btnFormGuardarAsignacion" text="Guardar asignación" mnemonicParsing="false" onAction="#guardar" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
                                 </FlowPane>
                                 <Label fx:id="lblMensajeRol" wrapText="true"/>
                             </VBox>

@@ -22,7 +22,7 @@
                         userData="/untrm/hotel_san_antonio/fxml/habitaciones/limpieza.fxml" onAction="#onMenu"/>
                 </VBox>
             </ScrollPane>
-            <Button text="Cerrar sesión" onAction="#onCerrarSesion" maxWidth="Infinity"/>
+            <Button text="Cerrar sesión" onAction="#onCerrarSesion" maxWidth="Infinity" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
         </VBox>
     </left>
     <top>

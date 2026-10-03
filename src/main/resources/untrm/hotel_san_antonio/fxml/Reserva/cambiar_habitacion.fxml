@@ -11,12 +11,12 @@
     <Label text="Cambiar habitación" style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
     <Label fx:id="lblActual" wrapText="true"/>
     <Label text="Nueva habitación del mismo tipo o categoría superior"/>
-    <ComboBox fx:id="cmbNueva" maxWidth="Infinity"/>
+    <ComboBox fx:id="cmbNueva" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
     <Label text="La diferencia de tarifa se calcula con los días pendientes y conserva todos los pagos." wrapText="true"/>
-    <TextArea fx:id="txtMotivo" promptText="Motivo opcional" prefRowCount="3" wrapText="true"/>
+    <TextArea fx:id="txtMotivo" promptText="Motivo opcional" prefRowCount="3" wrapText="true" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
     <HBox spacing="10">
-        <Button fx:id="btnGuardar" text="Confirmar cambio" onAction="#guardar"/>
-        <Button text="Cancelar" onAction="#cancelar"/>
+        <Button fx:id="btnGuardar" text="Confirmar cambio" onAction="#guardar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+        <Button text="Cancelar" onAction="#cancelar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
     </HBox>
     <Label fx:id="lblMensaje" wrapText="true"/>
 </VBox>

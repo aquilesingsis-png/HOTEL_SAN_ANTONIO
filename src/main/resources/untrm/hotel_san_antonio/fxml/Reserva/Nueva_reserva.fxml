@@ -17,7 +17,7 @@
 
 <ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="untrm.hotel_san_antonio.controlador.Reserva.Nueva_reservaController"
-            fitToWidth="true" stylesheets="@reserva.css" style="-fx-background-color: transparent;">
+            fitToWidth="true" style="-fx-background-color: transparent;">
     <content>
         <VBox spacing="16" style="-fx-background-color: #F7F4EF;">
             <padding><Insets top="24" right="28" bottom="28" left="28"/></padding>
@@ -37,23 +37,22 @@
                     </columnConstraints>
                     <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
                         <Label fx:id="lblTipoDocumento" text="DNI del huésped *"/>
-                        <TextField fx:id="txtDocumento" onAction="#buscarCliente"/>
+                        <TextField fx:id="txtDocumento" onAction="#buscarCliente" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                     </VBox>
                     <VBox fx:id="filaDocumentoHuesped" spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
                         <Label text="DNI de la persona que se hospedará *"/>
-                        <TextField fx:id="txtDocumentoHuesped" promptText="8 dígitos" onAction="#buscarCliente"/>
+                        <TextField fx:id="txtDocumentoHuesped" promptText="8 dígitos" onAction="#buscarCliente" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                     </VBox>
                 </GridPane>
-                <Button fx:id="btnBuscarCliente" text="Buscar local / autocompletar" onAction="#buscarCliente"
-                        style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button fx:id="btnBuscarCliente" text="Buscar local / autocompletar" onAction="#buscarCliente" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
                 <Label fx:id="lblEstadoBusqueda" wrapText="true" style="-fx-text-fill: #655C54;"/>
 
                 <VBox fx:id="panelDatosEmpresa" spacing="8" visible="false" managed="false"
                       style="-fx-background-color: #F8F5F0; -fx-padding: 12; -fx-background-radius: 8;">
                     <Label text="Datos de empresa" style="-fx-font-weight: bold;"/>
                     <HBox spacing="10">
-                        <TextField fx:id="txtRazonSocial" promptText="Razón social *" HBox.hgrow="ALWAYS"/>
-                        <TextField fx:id="txtDireccionFiscal" promptText="Dirección fiscal" HBox.hgrow="ALWAYS"/>
+                        <TextField fx:id="txtRazonSocial" promptText="Razón social *" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                        <TextField fx:id="txtDireccionFiscal" promptText="Dirección fiscal" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                     </HBox>
                 </VBox>
 
@@ -66,11 +65,11 @@
                             <ColumnConstraints minWidth="160" hgrow="ALWAYS"/>
                             <ColumnConstraints minWidth="160" hgrow="ALWAYS"/>
                         </columnConstraints>
-                        <TextField fx:id="txtNombres" promptText="Nombres *" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                        <TextField fx:id="txtApellidos" promptText="Apellidos *" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                        <TextField fx:id="txtPais" promptText="País *" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-                        <TextField fx:id="txtTelefono" promptText="Teléfono" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                        <TextField fx:id="txtCorreo" promptText="Correo" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.columnSpan="2"/>
+                        <TextField fx:id="txtNombres" promptText="Nombres *" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                        <TextField fx:id="txtApellidos" promptText="Apellidos *" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                        <TextField fx:id="txtPais" promptText="País *" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                        <TextField fx:id="txtTelefono" promptText="Teléfono" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                        <TextField fx:id="txtCorreo" promptText="Correo" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.columnSpan="2" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                     </GridPane>
                 </VBox>
             </VBox>
@@ -79,10 +78,10 @@
                 <padding><Insets top="18" right="20" bottom="18" left="20"/></padding>
                 <Label text="2. Fechas y ocupación" style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
                 <HBox spacing="14">
-                    <VBox spacing="4"><Label text="Ingreso *"/><DatePicker fx:id="dpFechaIngreso"/></VBox>
-                    <VBox spacing="4"><Label text="Salida *"/><DatePicker fx:id="dpFechaSalida"/></VBox>
-                    <VBox spacing="4"><Label text="Hora de llegada"/><ChoiceBox fx:id="cbHoraIngreso" prefWidth="120"/></VBox>
-                    <VBox spacing="4"><Label text="Huéspedes *"/><Spinner fx:id="spHuespedes" prefWidth="100"/></VBox>
+                    <VBox spacing="4"><Label text="Ingreso *"/><DatePicker fx:id="dpFechaIngreso" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/></VBox>
+                    <VBox spacing="4"><Label text="Salida *"/><DatePicker fx:id="dpFechaSalida" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/></VBox>
+                    <VBox spacing="4"><Label text="Hora de llegada"/><ChoiceBox fx:id="cbHoraIngreso" prefWidth="120" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/></VBox>
+                    <VBox spacing="4"><Label text="Huéspedes *"/><Spinner fx:id="spHuespedes" prefWidth="100" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/></VBox>
                     <VBox spacing="4"><Label text="Noches"/><Label fx:id="lblNoches" text="0" style="-fx-font-size: 18px; -fx-font-weight: bold;"/></VBox>
                 </HBox>
                 <VBox fx:id="contenedorAcompanantes" spacing="8" visible="false" managed="false"/>
@@ -92,8 +91,8 @@
                 <padding><Insets top="18" right="20" bottom="18" left="20"/></padding>
                 <Label text="3. Plano de habitaciones" style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
                 <HBox spacing="10">
-                    <ChoiceBox fx:id="cbPiso" prefWidth="180"/>
-                    <ChoiceBox fx:id="cbTipoHabitacion" prefWidth="220"/>
+                    <ChoiceBox fx:id="cbPiso" prefWidth="180" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                    <ChoiceBox fx:id="cbTipoHabitacion" prefWidth="220" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                 </HBox>
                 <HBox spacing="16" alignment="CENTER_LEFT">
                     <Label text="● Disponible en las fechas" style="-fx-text-fill: #27643B;"/>
@@ -106,19 +105,19 @@
                     <!-- Vista de ejemplo visible y editable en Scene Builder. En ejecución se sustituyen
                          estas habitaciones por las de MySQL para las fechas seleccionadas. -->
                     <Label fx:id="lblSinHabitaciones" text="Vista de referencia del plano · cargando disponibilidad"/>
-                    <VBox spacing="8" styleClass="plano-piso">
-                        <Label text="Piso 1 · Ala norte y ala sur" styleClass="plano-titulo"/>
+                    <VBox spacing="8" style="-fx-background-color: #FAF8F4; -fx-background-radius: 10; -fx-border-color: #DDD4C8; -fx-border-radius: 10; -fx-padding: 14;">
+                        <Label text="Piso 1 · Ala norte y ala sur" style="-fx-text-fill: #3B210F; -fx-font-size: 15px; -fx-font-weight: bold;"/>
                         <GridPane hgap="8" vgap="8">
-                            <Button text="101&#10;Simple" disable="true" styleClass="plano-habitacion,plano-habitacion-disponible" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                            <Button text="102&#10;Doble" disable="true" styleClass="plano-habitacion,plano-habitacion-disponible" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                            <Button text="103&#10;Simple" disable="true" styleClass="plano-habitacion,plano-habitacion-ocupada" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-                            <Button text="104&#10;Matrimonial" disable="true" styleClass="plano-habitacion,plano-habitacion-disponible" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
-                            <Label text="PASILLO CENTRAL  ·  ACCESO A HABITACIONES" styleClass="plano-pasillo"
+                            <Button text="101&#10;Simple" disable="true" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-pref-width: 155; -fx-min-width: 135; -fx-min-height: 72; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-width: 2; -fx-font-weight: bold; -fx-text-alignment: center; -fx-background-color: #E7F4E8; -fx-border-color: #79B78B; -fx-text-fill: #224D2D; -fx-opacity: 1; -fx-cursor: default;"/>
+                            <Button text="102&#10;Doble" disable="true" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-pref-width: 155; -fx-min-width: 135; -fx-min-height: 72; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-width: 2; -fx-font-weight: bold; -fx-text-alignment: center; -fx-background-color: #E7F4E8; -fx-border-color: #79B78B; -fx-text-fill: #224D2D; -fx-opacity: 1; -fx-cursor: default;"/>
+                            <Button text="103&#10;Simple" disable="true" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-pref-width: 155; -fx-min-width: 135; -fx-min-height: 72; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-width: 2; -fx-font-weight: bold; -fx-text-alignment: center; -fx-background-color: #EEEAE5; -fx-border-color: #BDB4A9; -fx-text-fill: #756A5D; -fx-opacity: 1; -fx-cursor: default;"/>
+                            <Button text="104&#10;Matrimonial" disable="true" GridPane.columnIndex="3" GridPane.rowIndex="0" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-pref-width: 155; -fx-min-width: 135; -fx-min-height: 72; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-width: 2; -fx-font-weight: bold; -fx-text-alignment: center; -fx-background-color: #E7F4E8; -fx-border-color: #79B78B; -fx-text-fill: #224D2D; -fx-opacity: 1; -fx-cursor: default;"/>
+                            <Label text="PASILLO CENTRAL  ·  ACCESO A HABITACIONES" style="-fx-alignment: center; -fx-background-color: #E8E0D5; -fx-background-radius: 5; -fx-padding: 9; -fx-text-fill: #5A3516; -fx-font-weight: bold;"
                                    maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="4"/>
-                            <Button text="105&#10;Doble" disable="true" styleClass="plano-habitacion,plano-habitacion-disponible" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                            <Button text="106&#10;Simple" disable="true" styleClass="plano-habitacion,plano-habitacion-ocupada" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                            <Button text="107&#10;Triple" disable="true" styleClass="plano-habitacion,plano-habitacion-disponible" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                            <Button text="108&#10;Doble" disable="true" styleClass="plano-habitacion,plano-habitacion-disponible" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                            <Button text="105&#10;Doble" disable="true" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-pref-width: 155; -fx-min-width: 135; -fx-min-height: 72; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-width: 2; -fx-font-weight: bold; -fx-text-alignment: center; -fx-background-color: #E7F4E8; -fx-border-color: #79B78B; -fx-text-fill: #224D2D; -fx-opacity: 1; -fx-cursor: default;"/>
+                            <Button text="106&#10;Simple" disable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-pref-width: 155; -fx-min-width: 135; -fx-min-height: 72; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-width: 2; -fx-font-weight: bold; -fx-text-alignment: center; -fx-background-color: #EEEAE5; -fx-border-color: #BDB4A9; -fx-text-fill: #756A5D; -fx-opacity: 1; -fx-cursor: default;"/>
+                            <Button text="107&#10;Triple" disable="true" GridPane.columnIndex="2" GridPane.rowIndex="2" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-pref-width: 155; -fx-min-width: 135; -fx-min-height: 72; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-width: 2; -fx-font-weight: bold; -fx-text-alignment: center; -fx-background-color: #E7F4E8; -fx-border-color: #79B78B; -fx-text-fill: #224D2D; -fx-opacity: 1; -fx-cursor: default;"/>
+                            <Button text="108&#10;Doble" disable="true" GridPane.columnIndex="3" GridPane.rowIndex="2" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-pref-width: 155; -fx-min-width: 135; -fx-min-height: 72; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-width: 2; -fx-font-weight: bold; -fx-text-alignment: center; -fx-background-color: #E7F4E8; -fx-border-color: #79B78B; -fx-text-fill: #224D2D; -fx-opacity: 1; -fx-cursor: default;"/>
                         </GridPane>
                     </VBox>
                 </VBox>
@@ -139,17 +138,15 @@
                 </GridPane>
                 <Label fx:id="lblAyudaPago" wrapText="true" style="-fx-text-fill: #655C54;"/>
                 <HBox spacing="10">
-                    <ChoiceBox fx:id="cbMetodoPago" prefWidth="180"/>
-                    <TextField fx:id="txtMontoPago" promptText="Monto a pagar" prefWidth="160"/>
+                    <ChoiceBox fx:id="cbMetodoPago" prefWidth="180" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                    <TextField fx:id="txtMontoPago" promptText="Monto a pagar" prefWidth="160" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                 </HBox>
             </VBox>
 
             <HBox spacing="10">
-                <Button text="Limpiar" onAction="#cancelarFormulario"/>
-                <Button text="Guardar pendiente" onAction="#guardarPendiente"
-                        style="-fx-background-color: #C98A1B; -fx-text-fill: white; -fx-font-weight: bold;"/>
-                <Button text="Confirmar con pago" onAction="#confirmarReserva"
-                        style="-fx-background-color: #2E88DD; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button text="Limpiar" onAction="#cancelarFormulario" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+                <Button text="Guardar pendiente" onAction="#guardarPendiente" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #C98A1B; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button text="Confirmar con pago" onAction="#confirmarReserva" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #2E88DD; -fx-text-fill: white; -fx-font-weight: bold;"/>
             </HBox>
         </VBox>
     </content>

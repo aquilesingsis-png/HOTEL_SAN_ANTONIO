@@ -6,39 +6,39 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.chart.*?>
 <!-- Interfaz visual independiente: sin controlador ni acciones de negocio. -->
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" styleClass="nuevos" stylesheets="@../css/nuevos-modulos.css" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300">
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
     <top>
-        <VBox spacing="7" styleClass="page-header">
-            <Label text="REPORTES  /  HOTEL SAN ANTONIO" styleClass="eyebrow" wrapText="true" maxWidth="Infinity"/>
-            <Label text="Reporte de ventas" styleClass="page-title" wrapText="true" maxWidth="Infinity"/>
-            <Label text="Revisa unidades e importes vendidos en la tienda del hotel." styleClass="subtitle" wrapText="true" maxWidth="Infinity"/>
+        <VBox spacing="7" style="-fx-padding: 22 26 18 26; -fx-background-color: white; -fx-border-color: #E7E1D8; -fx-border-width: 0 0 1 0;">
+            <Label text="REPORTES  /  HOTEL SAN ANTONIO" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #8A601D; -fx-font-size: 10px; -fx-font-weight: bold;"/>
+            <Label text="Reporte de ventas" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+            <Label text="Revisa unidades e importes vendidos en la tienda del hotel." wrapText="true" maxWidth="Infinity" style="-fx-font-size: 13px; -fx-text-fill: #6A5F52;"/>
         </VBox>
     </top>
     <center>
-        <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0">
+        <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0" userData="tabs-nuevos">
             <Tab text="Resultado">
                 <content>
-                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" styleClass="content-scroll">
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" style="-fx-background: #F8F6F2; -fx-background-color: #F8F6F2; -fx-background-insets: 0; -fx-padding: 0;">
                         <content>
-                            <VBox spacing="18" fillWidth="true" styleClass="page-content">
-                                <VBox spacing="16" styleClass="card">
-                                    <Label text="Filtros de consulta" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                            <VBox spacing="18" fillWidth="true" style="-fx-padding: 20 24 26 24; -fx-background-color: #F8F6F2;">
+                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                                    <Label text="Filtros de consulta" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
                                         <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Buscar producto o código" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="filtroBuscarProductoOCodigo" maxWidth="Infinity" promptText="Buscar producto o código"/>
+                                            <Label text="Buscar producto o código" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="filtroBuscarProductoOCodigo" maxWidth="Infinity" promptText="Buscar producto o código" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Desde" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <DatePicker fx:id="filtroDesde" maxWidth="Infinity" promptText="dd/mm/aaaa"/>
+                                            <Label text="Desde" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <DatePicker fx:id="filtroDesde" maxWidth="Infinity" promptText="dd/mm/aaaa" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Hasta" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <DatePicker fx:id="filtroHasta" maxWidth="Infinity" promptText="dd/mm/aaaa"/>
+                                            <Label text="Hasta" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <DatePicker fx:id="filtroHasta" maxWidth="Infinity" promptText="dd/mm/aaaa" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Categoría" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <ComboBox fx:id="filtroCategoria" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                            <Label text="Categoría" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <ComboBox fx:id="filtroCategoria" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;">
                                                 <items>
                                                     <FXCollections fx:factory="observableArrayList">
                                                         <String fx:value="Todas las categorías"/>
@@ -48,35 +48,35 @@
                                         </VBox>
                                     </FlowPane>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                        <Button fx:id="btnFiltroBuscar" text="Buscar" styleClass="secondary" mnemonicParsing="false"/>
-                                        <Button fx:id="btnFiltroLimpiarFiltros" text="Limpiar filtros" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnFiltroBuscar" text="Buscar" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                                        <Button fx:id="btnFiltroLimpiarFiltros" text="Limpiar filtros" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
                                     </FlowPane>
                                 </VBox>
                                 <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
-                                        <Label text="Ventas registradas" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
-                                        <Label fx:id="lblVentasRegistradas" text="—" styleClass="metric-value"/>
-                                        <Label text="Período seleccionado" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    <VBox spacing="8" prefWidth="248" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                                        <Label text="Ventas registradas" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                                        <Label fx:id="lblVentasRegistradas" text="—" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                                        <Label text="Período seleccionado" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                     </VBox>
-                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
-                                        <Label text="Unidades vendidas" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
-                                        <Label fx:id="lblUnidadesVendidas" text="—" styleClass="metric-value"/>
-                                        <Label text="Período seleccionado" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    <VBox spacing="8" prefWidth="248" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                                        <Label text="Unidades vendidas" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                                        <Label fx:id="lblUnidadesVendidas" text="—" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                                        <Label text="Período seleccionado" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                     </VBox>
-                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
-                                        <Label text="Importe vendido (S/)" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
-                                        <Label fx:id="lblImporteVendidoS" text="—" styleClass="metric-value"/>
-                                        <Label text="Período seleccionado" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    <VBox spacing="8" prefWidth="248" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                                        <Label text="Importe vendido (S/)" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                                        <Label fx:id="lblImporteVendidoS" text="—" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                                        <Label text="Período seleccionado" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                     </VBox>
                                 </FlowPane>
-                                <VBox spacing="16" styleClass="card">
-                                    <Label text="Detalle de reporte de ventas" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                                    <Label text="Detalle de reporte de ventas" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                        <Button fx:id="btnListaConsultar" text="Consultar" styleClass="secondary" mnemonicParsing="false"/>
-                                        <Button fx:id="btnListaImprimir" text="Imprimir" styleClass="secondary" mnemonicParsing="false"/>
-                                        <Button fx:id="btnListaExportar" text="Exportar" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnListaConsultar" text="Consultar" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                                        <Button fx:id="btnListaImprimir" text="Imprimir" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                                        <Button fx:id="btnListaExportar" text="Exportar" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
                                     </FlowPane>
-                                    <TableView fx:id="tblRegistros" minHeight="240" prefHeight="330" VBox.vgrow="ALWAYS">
+                                    <TableView fx:id="tblRegistros" minHeight="240" prefHeight="330" VBox.vgrow="ALWAYS" userData="tabla-nuevos" style="-fx-background-color: white; -fx-border-color: #E8E2D9; -fx-border-color: #E7E1D8; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 0; -fx-fixed-cell-size: 40;">
                                         <columns>
                                             <TableColumn fx:id="colCodigo" text="Código" prefWidth="145" minWidth="90"/>
                                             <TableColumn fx:id="colProducto" text="Producto" prefWidth="145" minWidth="90"/>
@@ -87,19 +87,19 @@
                                         </columns>
                                         <placeholder>
                                             <VBox alignment="CENTER" spacing="8">
-                                                <Label text="Sin registros para mostrar" styleClass="empty-title" wrapText="true" maxWidth="Infinity"/>
-                                                <Label text="Los resultados de la consulta aparecerán en este listado." styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                                <Label text="Sin registros para mostrar" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #5A3516; -fx-font-size: 15px; -fx-font-weight: bold;"/>
+                                                <Label text="Los resultados de la consulta aparecerán en este listado." wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                             </VBox>
                                         </placeholder>
                                     </TableView>
                                     <HBox alignment="CENTER_LEFT">
-                                        <Label text="0 registros" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                        <Label text="0 registros" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                         <Region HBox.hgrow="ALWAYS"/>
-                                        <Label text="Importes expresados en soles" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                        <Label text="Importes expresados en soles" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                     </HBox>
                                 </VBox>
-                                <VBox spacing="16" styleClass="card">
-                                    <Label text="Distribución del período" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                                    <Label text="Distribución del período" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                                     <BarChart fx:id="graficoResumen" animated="false" legendVisible="false" minHeight="220" prefHeight="250">
                                         <xAxis>
                                             <CategoryAxis label="Producto"/>
@@ -108,7 +108,7 @@
                                             <NumberAxis label="Importe (S/)" forceZeroInRange="true"/>
                                         </yAxis>
                                     </BarChart>
-                                    <Label text="Selecciona los filtros del informe para consultar el período." styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    <Label text="Selecciona los filtros del informe para consultar el período." wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                 </VBox>
                             </VBox>
                         </content>

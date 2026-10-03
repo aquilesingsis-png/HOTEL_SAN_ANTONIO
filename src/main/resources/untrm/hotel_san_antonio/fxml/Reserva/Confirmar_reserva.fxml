@@ -21,9 +21,8 @@
                    style="-fx-text-fill: #6A625A;"/>
             <HBox spacing="10">
                 <TextField fx:id="txtBuscarReserva" promptText="Código exacto (por ejemplo R-0005)"
-                           prefWidth="380" onAction="#buscarReserva"/>
-                <Button text="Buscar" onAction="#buscarReserva"
-                        style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                           prefWidth="380" onAction="#buscarReserva" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                <Button text="Buscar" onAction="#buscarReserva" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
             </HBox>
             <fx:include fx:id="detalleReserva" source="Detalle_reserva.fxml"/>
             <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #E8E2D9; -fx-border-radius: 10;">
@@ -35,14 +34,13 @@
                 </HBox>
                 <Separator/>
                 <HBox spacing="12">
-                    <ChoiceBox fx:id="cbMetodoPago" prefWidth="180"/>
-                    <TextField fx:id="txtMontoPago" promptText="Monto" prefWidth="150"/>
+                    <ChoiceBox fx:id="cbMetodoPago" prefWidth="180" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                    <TextField fx:id="txtMontoPago" promptText="Monto" prefWidth="150" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                 </HBox>
             </VBox>
             <HBox spacing="10">
-                <Button text="Limpiar" onAction="#volver"/>
-                <Button text="Confirmar y registrar pago" onAction="#confirmarReserva"
-                        style="-fx-background-color: #2E88DD; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button text="Limpiar" onAction="#volver" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+                <Button text="Confirmar y registrar pago" onAction="#confirmarReserva" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #2E88DD; -fx-text-fill: white; -fx-font-weight: bold;"/>
             </HBox>
         </VBox>
     </content>

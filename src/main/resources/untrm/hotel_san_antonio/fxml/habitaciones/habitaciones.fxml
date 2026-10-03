@@ -28,7 +28,7 @@
         <Region HBox.hgrow="ALWAYS"/>
         <HBox spacing="10" alignment="CENTER_RIGHT">
             <Label text="Filtrar por:" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-            <ComboBox fx:id="cmbEstado" promptText="Estado" prefWidth="150" onAction="#onFiltrarEstado">
+            <ComboBox fx:id="cmbEstado" promptText="Estado" prefWidth="150" onAction="#onFiltrarEstado" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;">
                 <items>
                     <FXCollections fx:factory="observableArrayList">
                         <String fx:value="Todas"/>
@@ -39,7 +39,7 @@
                     </FXCollections>
                 </items>
             </ComboBox>
-            <ComboBox fx:id="cmbTipo" promptText="Tipo" prefWidth="150" onAction="#onFiltrarTipo">
+            <ComboBox fx:id="cmbTipo" promptText="Tipo" prefWidth="150" onAction="#onFiltrarTipo" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;">
                 <items>
                     <FXCollections fx:factory="observableArrayList">
                         <String fx:value="Todos"/>

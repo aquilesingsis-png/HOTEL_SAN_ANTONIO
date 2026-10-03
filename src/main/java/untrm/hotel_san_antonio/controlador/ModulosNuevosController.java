@@ -960,5 +960,24 @@ public class ModulosNuevosController {
             serie.getData().add(new XYChart.Data<>(nombre, numero(fila, fila.celdas().size() - 1)));
         }
         grafico.getData().setAll(serie);
+        pintarGrafico(grafico, serie);
+    }
+
+    /** Barras doradas y fondo claro: lo que antes ponia la hoja de estilos de los modulos. */
+    private void pintarGrafico(BarChart<String, Number> grafico, XYChart.Series<String, Number> serie) {
+        grafico.setPadding(new javafx.geometry.Insets(5));
+        for (XYChart.Data<String, Number> dato : serie.getData()) {
+            if (dato.getNode() != null) {
+                dato.getNode().setStyle("-fx-bar-fill: #B8862D;");
+            } else {
+                dato.nodeProperty().addListener((obs, antes, nodo) -> {
+                    if (nodo != null) nodo.setStyle("-fx-bar-fill: #B8862D;");
+                });
+            }
+        }
+        javafx.application.Platform.runLater(() -> {
+            javafx.scene.Node fondo = grafico.lookup(".chart-plot-background");
+            if (fondo != null) fondo.setStyle("-fx-background-color: #FBF9F5;");
+        });
     }
 }

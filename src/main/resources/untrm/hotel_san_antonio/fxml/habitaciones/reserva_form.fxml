@@ -47,44 +47,43 @@
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
                                 <Label text="Tipo de documento" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <ComboBox fx:id="cmbTipoDoc" maxWidth="Infinity"/>
+                                <ComboBox fx:id="cmbTipoDoc" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                 <Label text="Número de documento" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <HBox spacing="8">
-                                    <TextField fx:id="txtDocumento" HBox.hgrow="ALWAYS"/>
+                                    <TextField fx:id="txtDocumento" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                                     <Button fx:id="btnBuscarDoc" text="Buscar"
-                                            style="-fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"
-                                            onAction="#onBuscarDocumento"/>
+                                            onAction="#onBuscarDocumento" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
                                 </HBox>
                             </VBox>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
                                 <Label text="Nombres" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <TextField fx:id="txtNombres"/>
+                                <TextField fx:id="txtNombres" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                 <Label text="Apellidos" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <TextField fx:id="txtApellidos"/>
+                                <TextField fx:id="txtApellidos" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="2">
                                 <Label text="País de procedencia" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <TextField fx:id="txtPais"/>
+                                <TextField fx:id="txtPais" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                 <Label text="Teléfono (opcional)" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <TextField fx:id="txtTelefono" promptText="9XXXXXXXX"/>
+                                <TextField fx:id="txtTelefono" promptText="9XXXXXXXX" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2">
                                 <Label text="Correo electrónico (opcional)" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <TextField fx:id="txtEmail"/>
+                                <TextField fx:id="txtEmail" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                         </GridPane>
                         <HBox spacing="8" alignment="CENTER_LEFT">
                             <Label text="Personas que ingresan"/>
-                            <Spinner fx:id="spHuespedes" prefWidth="90"/>
+                            <Spinner fx:id="spHuespedes" prefWidth="90" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                         </HBox>
                         <VBox fx:id="contenedorAcompanantes" spacing="8" visible="false" managed="false"/>
                     </VBox>
@@ -99,16 +98,16 @@
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
                                 <Label text="Fecha de ingreso" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <DatePicker fx:id="dpIngreso" maxWidth="Infinity"/>
+                                <DatePicker fx:id="dpIngreso" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                 <Label text="Fecha de salida" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <DatePicker fx:id="dpSalida" maxWidth="Infinity"/>
+                                <DatePicker fx:id="dpSalida" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
                                 <Label text="Canal de reserva" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <ComboBox fx:id="cmbCanal" maxWidth="Infinity"/>
+                                <ComboBox fx:id="cmbCanal" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                 <Label text="Noches" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
@@ -127,11 +126,11 @@
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
                                 <Label fx:id="lblMontoPago" text="Monto del adelanto (S/)" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <TextField fx:id="txtAdelanto"/>
+                                <TextField fx:id="txtAdelanto" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                 <Label fx:id="lblMetodo1" text="Método de pago" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <ComboBox fx:id="cmbMetodo" maxWidth="Infinity"/>
+                                <ComboBox fx:id="cmbMetodo" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                         </GridPane>
 
@@ -144,11 +143,11 @@
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
                                 <Label text="Segundo método" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <ComboBox fx:id="cmbMetodo2" maxWidth="Infinity"/>
+                                <ComboBox fx:id="cmbMetodo2" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                             <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                 <Label text="Monto con el segundo método (S/)" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <TextField fx:id="txtMonto2"/>
+                                <TextField fx:id="txtMonto2" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                             <Label fx:id="lblDivision" style="-fx-text-fill: #777777;" wrapText="true"
                                    GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2"/>
@@ -161,19 +160,18 @@
                             <VBox spacing="4">
                                 <Label text="RUC" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <HBox spacing="8">
-                                    <TextField fx:id="txtRuc" HBox.hgrow="ALWAYS"/>
+                                    <TextField fx:id="txtRuc" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                                     <Button fx:id="btnBuscarRuc" text="Buscar"
-                                            style="-fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"
-                                            onAction="#onBuscarRuc"/>
+                                            onAction="#onBuscarRuc" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
                                 </HBox>
                             </VBox>
                             <VBox spacing="4">
                                 <Label text="Razón social" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <TextField fx:id="txtRazonSocial"/>
+                                <TextField fx:id="txtRazonSocial" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                             <VBox spacing="4">
                                 <Label text="Dirección fiscal" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <TextField fx:id="txtDireccionFiscal"/>
+                                <TextField fx:id="txtDireccionFiscal" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                         </VBox>
                     </VBox>
@@ -207,15 +205,12 @@
         <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-border-width: 1px 0 0 0;">
             <padding><Insets top="14" right="22" bottom="14" left="22"/></padding>
             <Button fx:id="btnMantenimiento" text="Poner en mantenimiento"
-                    style="-fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"
-                    onAction="#onMantenimiento"/>
+                    onAction="#onMantenimiento" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button fx:id="btnCancelar" text="Cancelar"
-                    style="-fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"
-                    onAction="#onCancelar"/>
+                    onAction="#onCancelar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
             <Button fx:id="btnGuardar" text="Registrar check-in"
-                    style="-fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"
-                    onAction="#onGuardar"/>
+                    onAction="#onGuardar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
         </HBox>
     </bottom>
 </BorderPane>

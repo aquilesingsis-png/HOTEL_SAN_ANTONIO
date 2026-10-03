@@ -125,8 +125,6 @@ public class Navegacion {
     }
 
     private static void aplicarCss(Scene escena) {
-        escena.getStylesheets().add(Navegacion.class.getResource(
-                "/untrm/hotel_san_antonio/fxml/app.css").toExternalForm());
-        EstiloBotones.instalar(escena);
+        EstiloGlobal.instalar(escena);
     }
 }

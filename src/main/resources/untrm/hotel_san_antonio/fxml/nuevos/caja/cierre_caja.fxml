@@ -6,39 +6,39 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.chart.*?>
 <!-- Interfaz visual independiente: sin controlador ni acciones de negocio. -->
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" styleClass="nuevos" stylesheets="@../css/nuevos-modulos.css" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300">
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
     <top>
-        <VBox spacing="7" styleClass="page-header">
-            <Label text="CAJA  /  HOTEL SAN ANTONIO" styleClass="eyebrow" wrapText="true" maxWidth="Infinity"/>
-            <Label text="Cierre de caja" styleClass="page-title" wrapText="true" maxWidth="Infinity"/>
-            <Label text="Compara el saldo esperado con el efectivo entregado al finalizar el turno." styleClass="subtitle" wrapText="true" maxWidth="Infinity"/>
+        <VBox spacing="7" style="-fx-padding: 22 26 18 26; -fx-background-color: white; -fx-border-color: #E7E1D8; -fx-border-width: 0 0 1 0;">
+            <Label text="CAJA  /  HOTEL SAN ANTONIO" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #8A601D; -fx-font-size: 10px; -fx-font-weight: bold;"/>
+            <Label text="Cierre de caja" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+            <Label text="Compara el saldo esperado con el efectivo entregado al finalizar el turno." wrapText="true" maxWidth="Infinity" style="-fx-font-size: 13px; -fx-text-fill: #6A5F52;"/>
         </VBox>
     </top>
     <center>
-        <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0">
+        <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0" userData="tabs-nuevos">
             <Tab text="Listado">
                 <content>
-                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" styleClass="content-scroll">
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" style="-fx-background: #F8F6F2; -fx-background-color: #F8F6F2; -fx-background-insets: 0; -fx-padding: 0;">
                         <content>
-                            <VBox spacing="18" fillWidth="true" styleClass="page-content">
-                                <VBox spacing="16" styleClass="card">
-                                    <Label text="Filtros de consulta" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                            <VBox spacing="18" fillWidth="true" style="-fx-padding: 20 24 26 24; -fx-background-color: #F8F6F2;">
+                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                                    <Label text="Filtros de consulta" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
                                         <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Buscar cierre o responsable" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="filtroBuscarCierreOResponsable" maxWidth="Infinity" promptText="Buscar cierre o responsable"/>
+                                            <Label text="Buscar cierre o responsable" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="filtroBuscarCierreOResponsable" maxWidth="Infinity" promptText="Buscar cierre o responsable" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Desde" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <DatePicker fx:id="filtroDesde" maxWidth="Infinity" promptText="dd/mm/aaaa"/>
+                                            <Label text="Desde" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <DatePicker fx:id="filtroDesde" maxWidth="Infinity" promptText="dd/mm/aaaa" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Hasta" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <DatePicker fx:id="filtroHasta" maxWidth="Infinity" promptText="dd/mm/aaaa"/>
+                                            <Label text="Hasta" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <DatePicker fx:id="filtroHasta" maxWidth="Infinity" promptText="dd/mm/aaaa" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Estado" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <ComboBox fx:id="filtroEstado" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                            <Label text="Estado" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <ComboBox fx:id="filtroEstado" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;">
                                                 <items>
                                                     <FXCollections fx:factory="observableArrayList">
                                                         <String fx:value="Abierto"/>
@@ -50,36 +50,36 @@
                                         </VBox>
                                     </FlowPane>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                        <Button fx:id="btnFiltroBuscar" text="Buscar" styleClass="secondary" mnemonicParsing="false"/>
-                                        <Button fx:id="btnFiltroLimpiarFiltros" text="Limpiar filtros" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnFiltroBuscar" text="Buscar" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                                        <Button fx:id="btnFiltroLimpiarFiltros" text="Limpiar filtros" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
                                     </FlowPane>
                                 </VBox>
                                 <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
-                                        <Label text="Efectivo esperado (S/)" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
-                                        <Label fx:id="lblEfectivoEsperadoS" text="—" styleClass="metric-value"/>
-                                        <Label text="Resumen del turno" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    <VBox spacing="8" prefWidth="248" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                                        <Label text="Efectivo esperado (S/)" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                                        <Label fx:id="lblEfectivoEsperadoS" text="—" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                                        <Label text="Resumen del turno" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                     </VBox>
-                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
-                                        <Label text="Efectivo contado (S/)" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
-                                        <Label fx:id="lblEfectivoContadoS" text="—" styleClass="metric-value"/>
-                                        <Label text="Resumen del turno" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    <VBox spacing="8" prefWidth="248" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                                        <Label text="Efectivo contado (S/)" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                                        <Label fx:id="lblEfectivoContadoS" text="—" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                                        <Label text="Resumen del turno" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                     </VBox>
-                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
-                                        <Label text="Diferencia (S/)" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
-                                        <Label fx:id="lblDiferenciaS" text="—" styleClass="metric-value"/>
-                                        <Label text="Resumen del turno" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    <VBox spacing="8" prefWidth="248" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                                        <Label text="Diferencia (S/)" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                                        <Label fx:id="lblDiferenciaS" text="—" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                                        <Label text="Resumen del turno" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                     </VBox>
                                 </FlowPane>
-                                <VBox spacing="16" styleClass="card">
-                                    <Label text="Detalle de cierre de caja" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                                    <Label text="Detalle de cierre de caja" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                        <Button fx:id="btnListaNuevo" text="+ Nuevo" styleClass="primary" mnemonicParsing="false"/>
-                                        <Button fx:id="btnListaActualizarLista" text="Actualizar lista" styleClass="secondary" mnemonicParsing="false"/>
-                                        <Button fx:id="btnListaVerDetalle" text="Ver detalle" styleClass="secondary" mnemonicParsing="false"/>
-                                        <Button fx:id="btnListaImprimir" text="Imprimir" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnListaNuevo" text="+ Nuevo" mnemonicParsing="false" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
+                                        <Button fx:id="btnListaActualizarLista" text="Actualizar lista" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                                        <Button fx:id="btnListaVerDetalle" text="Ver detalle" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                                        <Button fx:id="btnListaImprimir" text="Imprimir" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
                                     </FlowPane>
-                                    <TableView fx:id="tblRegistros" minHeight="240" prefHeight="330" VBox.vgrow="ALWAYS">
+                                    <TableView fx:id="tblRegistros" minHeight="240" prefHeight="330" VBox.vgrow="ALWAYS" userData="tabla-nuevos" style="-fx-background-color: white; -fx-border-color: #E8E2D9; -fx-border-color: #E7E1D8; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 0; -fx-fixed-cell-size: 40;">
                                         <columns>
                                             <TableColumn fx:id="colNOCierre" text="N.º cierre" prefWidth="145" minWidth="90"/>
                                             <TableColumn fx:id="colFecha" text="Fecha" prefWidth="145" minWidth="90"/>
@@ -92,15 +92,15 @@
                                         </columns>
                                         <placeholder>
                                             <VBox alignment="CENTER" spacing="8">
-                                                <Label text="Sin registros para mostrar" styleClass="empty-title" wrapText="true" maxWidth="Infinity"/>
-                                                <Label text="Los resultados de la consulta aparecerán en este listado." styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                                <Label text="Sin registros para mostrar" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #5A3516; -fx-font-size: 15px; -fx-font-weight: bold;"/>
+                                                <Label text="Los resultados de la consulta aparecerán en este listado." wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                             </VBox>
                                         </placeholder>
                                     </TableView>
                                     <HBox alignment="CENTER_LEFT">
-                                        <Label text="0 registros" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                        <Label text="0 registros" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                         <Region HBox.hgrow="ALWAYS"/>
-                                        <Label text="Importes expresados en soles" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                        <Label text="Importes expresados en soles" wrapText="true" maxWidth="Infinity" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                                     </HBox>
                                 </VBox>
                             </VBox>
@@ -110,76 +110,76 @@
             </Tab>
             <Tab text="Formulario">
                 <content>
-                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" styleClass="content-scroll">
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" style="-fx-background: #F8F6F2; -fx-background-color: #F8F6F2; -fx-background-insets: 0; -fx-padding: 0;">
                         <content>
-                            <VBox spacing="18" fillWidth="true" styleClass="page-content">
-                                <VBox spacing="16" styleClass="card">
-                                    <Label text="Turno a cerrar" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                            <VBox spacing="18" fillWidth="true" style="-fx-padding: 20 24 26 24; -fx-background-color: #F8F6F2;">
+                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                                    <Label text="Turno a cerrar" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Fecha del cierre" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <DatePicker fx:id="dpFechaDelCierre" maxWidth="Infinity" promptText="dd/mm/aaaa"/>
+                                            <Label text="Fecha del cierre" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <DatePicker fx:id="dpFechaDelCierre" maxWidth="Infinity" promptText="dd/mm/aaaa" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Turno / caja" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtTurnoCaja" maxWidth="Infinity" promptText="Turno / caja"/>
+                                            <Label text="Turno / caja" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtTurnoCaja" maxWidth="Infinity" promptText="Turno / caja" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Responsable" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtResponsable" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                            <Label text="Responsable" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtResponsable" maxWidth="Infinity" text="—" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70; -fx-background-color: #F3EEE7; -fx-text-fill: #6A5F52;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Hora de apertura" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtHoraDeApertura" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                            <Label text="Hora de apertura" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtHoraDeApertura" maxWidth="Infinity" text="—" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70; -fx-background-color: #F3EEE7; -fx-text-fill: #6A5F52;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Hora de cierre" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtHoraDeCierre" maxWidth="Infinity" promptText="Hora de cierre"/>
+                                            <Label text="Hora de cierre" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtHoraDeCierre" maxWidth="Infinity" promptText="Hora de cierre" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                                         </VBox>
                                     </FlowPane>
                                 </VBox>
-                                <VBox spacing="16" styleClass="card">
-                                    <Label text="Conciliación de efectivo" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                <VBox spacing="16" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                                    <Label text="Conciliación de efectivo" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                                     <FlowPane hgap="12" vgap="12" prefWrapLength="960">
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Fondo inicial (S/)" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtFondoInicialS" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                            <Label text="Fondo inicial (S/)" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtFondoInicialS" maxWidth="Infinity" text="—" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70; -fx-background-color: #F3EEE7; -fx-text-fill: #6A5F52;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Cobros en efectivo (S/)" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtCobrosEnEfectivoS" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                            <Label text="Cobros en efectivo (S/)" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtCobrosEnEfectivoS" maxWidth="Infinity" text="—" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70; -fx-background-color: #F3EEE7; -fx-text-fill: #6A5F52;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Otros ingresos de efectivo (S/)" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtOtrosIngresosDeEfectivoS" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                            <Label text="Otros ingresos de efectivo (S/)" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtOtrosIngresosDeEfectivoS" maxWidth="Infinity" text="—" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70; -fx-background-color: #F3EEE7; -fx-text-fill: #6A5F52;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Salidas de efectivo (S/)" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtSalidasDeEfectivoS" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                            <Label text="Salidas de efectivo (S/)" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtSalidasDeEfectivoS" maxWidth="Infinity" text="—" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70; -fx-background-color: #F3EEE7; -fx-text-fill: #6A5F52;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Efectivo esperado (S/)" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtEfectivoEsperadoS" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                            <Label text="Efectivo esperado (S/)" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtEfectivoEsperadoS" maxWidth="Infinity" text="—" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70; -fx-background-color: #F3EEE7; -fx-text-fill: #6A5F52;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Efectivo contado (S/)" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtEfectivoContadoS" maxWidth="Infinity" promptText="Efectivo contado (S/)"/>
+                                            <Label text="Efectivo contado (S/)" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtEfectivoContadoS" maxWidth="Infinity" promptText="Efectivo contado (S/)" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Diferencia (S/)" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtDiferenciaS" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                            <Label text="Diferencia (S/)" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtDiferenciaS" maxWidth="Infinity" text="—" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70; -fx-background-color: #F3EEE7; -fx-text-fill: #6A5F52;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Efectivo entregado (S/)" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtEfectivoEntregadoS" maxWidth="Infinity" promptText="Efectivo entregado (S/)"/>
+                                            <Label text="Efectivo entregado (S/)" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtEfectivoEntregadoS" maxWidth="Infinity" promptText="Efectivo entregado (S/)" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Fondo para siguiente turno (S/)" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextField fx:id="txtFondoParaSiguienteTurnoS" maxWidth="Infinity" promptText="Fondo para siguiente turno (S/)"/>
+                                            <Label text="Fondo para siguiente turno (S/)" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextField fx:id="txtFondoParaSiguienteTurnoS" maxWidth="Infinity" promptText="Fondo para siguiente turno (S/)" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
-                                            <Label text="Observaciones del cierre" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
-                                            <TextArea fx:id="txtObservacionesDelCierre" maxWidth="Infinity" promptText="Observaciones del cierre" wrapText="true" prefRowCount="3"/>
+                                            <Label text="Observaciones del cierre" wrapText="true" maxWidth="Infinity" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                            <TextArea fx:id="txtObservacionesDelCierre" maxWidth="Infinity" promptText="Observaciones del cierre" wrapText="true" prefRowCount="3" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-prompt-text-fill: #847B70;"/>
                                         </VBox>
                                         <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
                                             <CheckBox fx:id="chkHeRevisadoLosImportesDelCierre" maxWidth="Infinity" text="He revisado los importes del cierre" wrapText="true"/>
@@ -187,9 +187,9 @@
                                     </FlowPane>
                                 </VBox>
                                 <FlowPane hgap="12" vgap="12" prefWrapLength="960">
-                                    <Button fx:id="btnFormCancelar" text="Cancelar" styleClass="secondary" mnemonicParsing="false"/>
-                                    <Button fx:id="btnFormGuardarBorrador" text="Guardar borrador" styleClass="primary" mnemonicParsing="false"/>
-                                    <Button fx:id="btnFormConfirmarCierre" text="Confirmar cierre" styleClass="primary" mnemonicParsing="false"/>
+                                    <Button fx:id="btnFormCancelar" text="Cancelar" mnemonicParsing="false" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                                    <Button fx:id="btnFormGuardarBorrador" text="Guardar borrador" mnemonicParsing="false" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
+                                    <Button fx:id="btnFormConfirmarCierre" text="Confirmar cierre" mnemonicParsing="false" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
                                 </FlowPane>
                             </VBox>
                         </content>

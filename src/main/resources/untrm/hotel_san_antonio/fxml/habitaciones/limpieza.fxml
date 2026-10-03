@@ -10,7 +10,7 @@
     spacing="14" style="-fx-background-color: #F7F4EF; -fx-padding: 24;">
     <Label text="Estado de limpieza" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
     <Label text="Seleccione una habitación disponible o en limpieza. Las ocupadas y en mantenimiento no se pueden cambiar aquí." wrapText="true"/>
-    <TableView fx:id="tabla" VBox.vgrow="ALWAYS">
+    <TableView fx:id="tabla" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-border-color: #E8E2D9;">
         <columns>
             <TableColumn fx:id="colNumero" text="Habitación" prefWidth="140"/>
             <TableColumn fx:id="colTipo" text="Tipo" prefWidth="180"/>
@@ -19,9 +19,9 @@
         </columns>
     </TableView>
     <HBox spacing="10">
-        <Button text="Actualizar" onAction="#actualizar"/>
-        <Button fx:id="btnPendiente" text="Marcar en limpieza" onAction="#marcarEnLimpieza" disable="true"/>
-        <Button fx:id="btnLista" text="Marcar disponible" onAction="#marcarDisponible" disable="true"/>
+        <Button text="Actualizar" onAction="#actualizar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+        <Button fx:id="btnPendiente" text="Marcar en limpieza" onAction="#marcarEnLimpieza" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+        <Button fx:id="btnLista" text="Marcar disponible" onAction="#marcarDisponible" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
     </HBox>
     <Label fx:id="lblMensaje" wrapText="true"/>
 </VBox>

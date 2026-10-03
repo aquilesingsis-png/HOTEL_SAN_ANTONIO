@@ -8,8 +8,8 @@
     spacing="14" style="-fx-background-color: #F7F4EF; -fx-padding: 24;">
     <Label text="Emitir recuperación" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
     <Label text="Verifique la identidad del empleado antes de generar y entregar el token por un canal confiable." wrapText="true"/>
-    <TextField fx:id="txtUsuario" promptText="Usuario activo" maxWidth="300"/>
-    <Button text="Generar token de un solo uso" onAction="#emitir"/>
-    <TextField fx:id="txtToken" editable="false" promptText="El token aparecerá una sola vez aquí"/>
+    <TextField fx:id="txtUsuario" promptText="Usuario activo" maxWidth="300" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+    <Button text="Generar token de un solo uso" onAction="#emitir" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37;"/>
+    <TextField fx:id="txtToken" editable="false" promptText="El token aparecerá una sola vez aquí" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
     <Label fx:id="lblMensaje" wrapText="true"/>
 </VBox>

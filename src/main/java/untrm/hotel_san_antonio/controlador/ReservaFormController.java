@@ -29,9 +29,9 @@ import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ConflictoFechasException;
 import untrm.hotel_san_antonio.servicio.ReniecService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
-import untrm.hotel_san_antonio.servicio.SunatRucService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.CampoValidacion;
+import untrm.hotel_san_antonio.util.ConsultaApi;
 import untrm.hotel_san_antonio.util.Validador;
 
 import java.math.BigDecimal;
@@ -101,7 +101,7 @@ public class ReservaFormController {
         spHuespedes.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 1, 1));
         spHuespedes.valueProperty().addListener((obs, antes, ahora) -> acompanantes.actualizar(ahora));
         acompanantes.actualizar(1);
-        untrm.hotel_san_antonio.util.EstiloBoton.aplicarHoverPrimario(btnGuardar);
+        untrm.hotel_san_antonio.util.EstiloBotones.hoverPrimario(btnGuardar);
         cmbTipoDoc.getItems().addAll(TIPOS_DOC.keySet());
         cmbTipoDoc.setValue("DNI");
         cmbCanal.getItems().addAll(CANALES.keySet());
@@ -320,23 +320,13 @@ public class ReservaFormController {
             return;
         }
 
-        Task<Huesped> tarea = ReniecService.consultarDni(dni);
-        btnBuscarDoc.setDisable(true);
-        tarea.setOnSucceeded(e -> {
-            btnBuscarDoc.setDisable(false);
-            Huesped h = tarea.getValue();
-            if (h == null) {
-                CampoValidacion.marcar(txtDocumento, "No se encontraron datos para ese DNI. Puedes completarlos manualmente.");
-            } else {
-                txtNombres.setText(h.getNombres());
-                txtApellidos.setText(h.getApellidos());
-            }
-        });
-        tarea.setOnFailed(e -> {
-            btnBuscarDoc.setDisable(false);
-            Alertas.mostrarInfo("RENIEC", "No se pudo consultar RENIEC (" + causa(tarea.getException()) + ").\nPuedes ingresar los datos manualmente.");
-        });
-        iniciarTarea(tarea);
+        ConsultaApi.dni(dni, btnBuscarDoc,
+                h -> {
+                    txtNombres.setText(h.getNombres());
+                    txtApellidos.setText(h.getApellidos());
+                },
+                () -> CampoValidacion.marcar(txtDocumento, "No se encontraron datos para ese DNI. Puedes completarlos manualmente."),
+                motivo -> Alertas.mostrarInfo("RENIEC", "No se pudo consultar RENIEC (" + motivo + ").\nPuedes ingresar los datos manualmente."));
     }
 
     private void verificarIdentidadExistente(String dni) {
@@ -355,9 +345,9 @@ public class ReservaFormController {
             });
             actualizar.setOnFailed(ev -> Alertas.mostrarAdvertencia("RENIEC",
                     "Se conservaron los datos locales; no se pudo actualizar la identidad."));
-            iniciarTarea(actualizar);
+            ConsultaApi.iniciar(actualizar);
         });
-        iniciarTarea(consulta);
+        ConsultaApi.iniciar(consulta);
     }
 
     @FXML
@@ -368,33 +358,13 @@ public class ReservaFormController {
             return;
         }
 
-        Task<Empresa> tarea = SunatRucService.consultarRuc(ruc);
-        btnBuscarRuc.setDisable(true);
-        tarea.setOnSucceeded(e -> {
-            btnBuscarRuc.setDisable(false);
-            Empresa emp = tarea.getValue();
-            if (emp == null) {
-                CampoValidacion.marcar(txtRuc, "No se encontraron datos para ese RUC. Puedes completarlos manualmente.");
-            } else {
-                txtRazonSocial.setText(emp.getRazonSocial());
-                txtDireccionFiscal.setText(emp.getDireccion());
-            }
-        });
-        tarea.setOnFailed(e -> {
-            btnBuscarRuc.setDisable(false);
-            Alertas.mostrarInfo("SUNAT", "No se pudo consultar la SUNAT (" + causa(tarea.getException()) + ").\nPuedes ingresar los datos manualmente.");
-        });
-        iniciarTarea(tarea);
-    }
-
-    private void iniciarTarea(Task<?> tarea) {
-        Thread hilo = new Thread(tarea);
-        hilo.setDaemon(true);
-        hilo.start();
-    }
-
-    private String causa(Throwable t) {
-        return t == null || t.getMessage() == null ? "sin conexión" : t.getMessage();
+        ConsultaApi.ruc(ruc, btnBuscarRuc,
+                emp -> {
+                    txtRazonSocial.setText(emp.getRazonSocial());
+                    txtDireccionFiscal.setText(emp.getDireccion());
+                },
+                () -> CampoValidacion.marcar(txtRuc, "No se encontraron datos para ese RUC. Puedes completarlos manualmente."),
+                motivo -> Alertas.mostrarInfo("SUNAT", "No se pudo consultar la SUNAT (" + motivo + ").\nPuedes ingresar los datos manualmente."));
     }
 
     // ------------------------------------------------------------------ guardar

@@ -70,7 +70,7 @@ public class CuentaHabitacionController {
 
     @FXML
     public void initialize() {
-        untrm.hotel_san_antonio.util.EstiloBoton.aplicarHoverPrimario(btnCheckOut);
+        untrm.hotel_san_antonio.util.EstiloBotones.hoverPrimario(btnCheckOut);
         cmbMetodo.setValue("Efectivo");
         cmbMetodo2.setValue("Yape");
         txtMonto2.setTextFormatter(new TextFormatter<String>(cambio ->

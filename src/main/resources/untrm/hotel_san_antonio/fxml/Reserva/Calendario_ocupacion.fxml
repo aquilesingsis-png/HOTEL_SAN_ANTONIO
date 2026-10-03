@@ -19,16 +19,16 @@
     <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
     <Label text="Calendario de ocupación" style="-fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: #2C2118;"/>
     <HBox spacing="10" alignment="CENTER_LEFT">
-        <TextField fx:id="txtBuscarHabitacion" promptText="Buscar habitación o tipo" prefWidth="250"/>
-        <ChoiceBox fx:id="cbPiso" prefWidth="170"/>
+        <TextField fx:id="txtBuscarHabitacion" promptText="Buscar habitación o tipo" prefWidth="250" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+        <ChoiceBox fx:id="cbPiso" prefWidth="170" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
         <HBox HBox.hgrow="ALWAYS"/>
         <ToggleButton fx:id="btnSemana" text="Semana" toggleGroup="$grupoVista" selected="true" onAction="#cambiarVista"/>
         <ToggleButton fx:id="btnMes" text="Mes completo" toggleGroup="$grupoVista" onAction="#cambiarVista"/>
     </HBox>
     <HBox spacing="10" alignment="CENTER">
-        <Button text="‹" onAction="#periodoAnterior"/>
+        <Button text="‹" onAction="#periodoAnterior" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
         <Label fx:id="lblPeriodo" text="Periodo" style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
-        <Button text="›" onAction="#periodoSiguiente"/>
+        <Button text="›" onAction="#periodoSiguiente" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
     </HBox>
     <HBox spacing="14">
         <Label text="● Libre" style="-fx-text-fill: #2CB95F;"/>

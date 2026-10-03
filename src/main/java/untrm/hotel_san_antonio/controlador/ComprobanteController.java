@@ -21,7 +21,6 @@ import java.util.Locale;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -40,9 +39,8 @@ import untrm.hotel_san_antonio.modelo.DetalleVenta;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Huesped;
 import untrm.hotel_san_antonio.servicio.ComprobanteService;
-import untrm.hotel_san_antonio.servicio.ReniecService;
-import untrm.hotel_san_antonio.servicio.SunatRucService;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.ConsultaApi;
 import untrm.hotel_san_antonio.util.ConexionBD;
 import untrm.hotel_san_antonio.util.Validador;
 
@@ -247,22 +245,10 @@ public class ComprobanteController {
             return;
         }
 
-        btnBuscarCliente.setDisable(true);
-        Task<Huesped> tarea = ReniecService.consultarDni(dni);
-        tarea.setOnSucceeded(e -> {
-            btnBuscarCliente.setDisable(false);
-            Huesped h = tarea.getValue();
-            if (h == null) {
-                Alertas.mostrarInfo("Cliente no encontrado", "No se encontraron datos para ese DNI en RENIEC.");
-                return;
-            }
-            txtCliente.setText((h.getNombres() + " " + h.getApellidos()).trim());
-        });
-        tarea.setOnFailed(e -> {
-            btnBuscarCliente.setDisable(false);
-            Alertas.mostrarInfo("RENIEC", "No se pudo consultar RENIEC (" + causaError(tarea.getException()) + ").");
-        });
-        iniciarTarea(tarea);
+        ConsultaApi.dni(dni, btnBuscarCliente,
+                h -> txtCliente.setText((h.getNombres() + " " + h.getApellidos()).trim()),
+                () -> Alertas.mostrarInfo("Cliente no encontrado", "No se encontraron datos para ese DNI en RENIEC."),
+                motivo -> Alertas.mostrarInfo("RENIEC", "No se pudo consultar RENIEC (" + motivo + ")."));
     }
 
     private void buscarEmpresa(String ruc) {
@@ -283,33 +269,13 @@ public class ComprobanteController {
             return;
         }
 
-        btnBuscarCliente.setDisable(true);
-        Task<Empresa> tarea = SunatRucService.consultarRuc(ruc);
-        tarea.setOnSucceeded(e -> {
-            btnBuscarCliente.setDisable(false);
-            Empresa emp = tarea.getValue();
-            if (emp == null) {
-                Alertas.mostrarInfo("Empresa no encontrada", "No se encontraron datos para ese RUC en la SUNAT.");
-                return;
-            }
-            txtCliente.setText(emp.getRazonSocial());
-            txtDireccion.setText(emp.getDireccion() == null ? "" : emp.getDireccion());
-        });
-        tarea.setOnFailed(e -> {
-            btnBuscarCliente.setDisable(false);
-            Alertas.mostrarInfo("SUNAT", "No se pudo consultar la SUNAT (" + causaError(tarea.getException()) + ").");
-        });
-        iniciarTarea(tarea);
-    }
-
-    private void iniciarTarea(Task<?> tarea) {
-        Thread hilo = new Thread(tarea);
-        hilo.setDaemon(true);
-        hilo.start();
-    }
-
-    private String causaError(Throwable t) {
-        return t == null || t.getMessage() == null ? "sin conexión" : t.getMessage();
+        ConsultaApi.ruc(ruc, btnBuscarCliente,
+                emp -> {
+                    txtCliente.setText(emp.getRazonSocial());
+                    txtDireccion.setText(emp.getDireccion() == null ? "" : emp.getDireccion());
+                },
+                () -> Alertas.mostrarInfo("Empresa no encontrada", "No se encontraron datos para ese RUC en la SUNAT."),
+                motivo -> Alertas.mostrarInfo("SUNAT", "No se pudo consultar la SUNAT (" + motivo + ")."));
     }
 
     // =========================================================

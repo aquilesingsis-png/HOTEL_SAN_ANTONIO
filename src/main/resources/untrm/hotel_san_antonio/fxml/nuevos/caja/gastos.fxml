@@ -15,32 +15,32 @@
         <Label text="Gastos de la empresa" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
         <GridPane hgap="10" vgap="8">
             <Label text="Fecha del gasto" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-            <DatePicker fx:id="dpFecha" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <DatePicker fx:id="dpFecha" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
             <Label text="Concepto" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-            <TextField fx:id="txtConcepto" promptText="Concepto *" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <TextField fx:id="txtConcepto" promptText="Concepto *" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
             <Label text="Categoría" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-            <TextField fx:id="txtCategoria" promptText="Categoría *" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+            <TextField fx:id="txtCategoria" promptText="Categoría *" GridPane.columnIndex="2" GridPane.rowIndex="1" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
             <Label text="Monto S/" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <TextField fx:id="txtMonto" promptText="0.00" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <TextField fx:id="txtMonto" promptText="0.00" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
             <Label text="Método de pago" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <TextField fx:id="txtMetodo" promptText="Método *" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            <TextField fx:id="txtMetodo" promptText="Método *" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
             <Label text="Observación" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-            <TextField fx:id="txtObservacion" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+            <TextField fx:id="txtObservacion" GridPane.columnIndex="2" GridPane.rowIndex="3" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
         </GridPane>
         <Label text="Motivo del registro tardío (obligatorio si la fecha es anterior a hoy)" wrapText="true"/>
-        <TextField fx:id="txtMotivo" promptText="Por qué se registra después"/>
+        <TextField fx:id="txtMotivo" promptText="Por qué se registra después" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
         <HBox spacing="10">
-            <Button text="Guardar" onAction="#guardar"/>
-            <Button text="Nuevo / limpiar" onAction="#limpiar"/>
-            <Button fx:id="btnDesactivar" text="Desactivar seleccionado" disable="true" onAction="#desactivar"/>
+            <Button text="Guardar" onAction="#guardar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37;"/>
+            <Button text="Nuevo / limpiar" onAction="#limpiar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37;"/>
+            <Button fx:id="btnDesactivar" text="Desactivar seleccionado" disable="true" onAction="#desactivar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37;"/>
         </HBox>
         <HBox spacing="8">
-            <DatePicker fx:id="dpDesde" promptText="Desde"/>
-            <DatePicker fx:id="dpHasta" promptText="Hasta"/>
-            <TextField fx:id="txtFiltro" promptText="Buscar concepto" onAction="#filtrar"/>
-            <Button text="Filtrar" onAction="#filtrar"/>
+            <DatePicker fx:id="dpDesde" promptText="Desde" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
+            <DatePicker fx:id="dpHasta" promptText="Hasta" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
+            <TextField fx:id="txtFiltro" promptText="Buscar concepto" onAction="#filtrar" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+            <Button text="Filtrar" onAction="#filtrar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37;"/>
         </HBox>
-        <TableView fx:id="tabla" prefHeight="350">
+        <TableView fx:id="tabla" prefHeight="350" userData="tabla-nuevos" style="-fx-background-color: white; -fx-border-color: #E8E2D9; -fx-border-color: #E7E1D8; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 0; -fx-fixed-cell-size: 40;">
             <columns>
                 <TableColumn fx:id="colFecha" text="Fecha" prefWidth="100"/>
                 <TableColumn fx:id="colConcepto" text="Concepto" prefWidth="240"/>

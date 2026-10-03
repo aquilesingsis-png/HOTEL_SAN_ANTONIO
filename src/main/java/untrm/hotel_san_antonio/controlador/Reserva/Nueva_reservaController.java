@@ -39,11 +39,25 @@ import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ConflictoFechasException;
 import untrm.hotel_san_antonio.servicio.ReniecService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
-import untrm.hotel_san_antonio.servicio.SunatRucService;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.ConsultaApi;
 import untrm.hotel_san_antonio.util.Validador;
 
 public class Nueva_reservaController {
+
+    // Estilo de cada habitacion del plano (el mismo que usa el FXML de muestra)
+    private static final String HAB_BASE = "-fx-pref-width: 155; -fx-min-width: 135; -fx-min-height: 72; "
+            + "-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-width: 2; -fx-font-weight: bold; "
+            + "-fx-text-alignment: center; ";
+    private static final String HAB_DISPONIBLE = HAB_BASE
+            + "-fx-background-color: #E7F4E8; -fx-border-color: #79B78B; -fx-text-fill: #224D2D; -fx-cursor: hand;";
+    private static final String HAB_DISPONIBLE_HOVER = HAB_BASE
+            + "-fx-background-color: #C9E8CF; -fx-border-color: #79B78B; -fx-text-fill: #224D2D; -fx-cursor: hand;";
+    private static final String HAB_NO_DISPONIBLE = HAB_BASE
+            + "-fx-background-color: #EEEAE5; -fx-border-color: #BDB4A9; -fx-text-fill: #756A5D; "
+            + "-fx-opacity: 1; -fx-cursor: default;";
+    private static final String HAB_SELECCIONADA = HAB_BASE
+            + "-fx-background-color: #704313; -fx-border-color: #3B210F; -fx-text-fill: white; -fx-cursor: hand;";
 
     @FXML private ToggleButton btnPersonaNatural;
     @FXML private ToggleButton btnEmpresa;
@@ -222,28 +236,28 @@ public class Nueva_reservaController {
         }
 
         bloquearBusqueda("Empresa no encontrada localmente. Consultando SUNAT...");
-        Task<Empresa> tarea = SunatRucService.consultarRuc(ruc);
-        tarea.setOnSucceeded(evento -> {
-            if (consultaActual != secuenciaConsulta) {
-                return;
-            }
-            Empresa empresa = tarea.getValue();
-            if (empresa == null) {
-                habilitarEmpresaManual(ruc, "SUNAT no devolvió datos. Complete la empresa manualmente.");
-                buscarHuesped(dniHuesped, construirEmpresaDesdeCampos(), consultaActual);
-            } else {
-                cargarEmpresa(empresa, false);
-                buscarHuesped(dniHuesped, empresa, consultaActual);
-            }
-        });
-        tarea.setOnFailed(evento -> {
-            if (consultaActual != secuenciaConsulta) {
-                return;
-            }
-            habilitarEmpresaManual(ruc, "SUNAT no está disponible. Complete la empresa manualmente.");
-            buscarHuesped(dniHuesped, construirEmpresaDesdeCampos(), consultaActual);
-        });
-        iniciarTarea(tarea);
+        ConsultaApi.ruc(ruc, null,
+                empresa -> {
+                    if (consultaActual != secuenciaConsulta) {
+                        return;
+                    }
+                    cargarEmpresa(empresa, false);
+                    buscarHuesped(dniHuesped, empresa, consultaActual);
+                },
+                () -> {
+                    if (consultaActual != secuenciaConsulta) {
+                        return;
+                    }
+                    habilitarEmpresaManual(ruc, "SUNAT no devolvió datos. Complete la empresa manualmente.");
+                    buscarHuesped(dniHuesped, construirEmpresaDesdeCampos(), consultaActual);
+                },
+                motivo -> {
+                    if (consultaActual != secuenciaConsulta) {
+                        return;
+                    }
+                    habilitarEmpresaManual(ruc, "SUNAT no está disponible. Complete la empresa manualmente.");
+                    buscarHuesped(dniHuesped, construirEmpresaDesdeCampos(), consultaActual);
+                });
     }
 
     private void buscarHuesped(String dni, Empresa empresa, int consultaActual) {
@@ -262,29 +276,30 @@ public class Nueva_reservaController {
         }
 
         bloquearBusqueda("Huésped no encontrado localmente. Consultando RENIEC...");
-        Task<Huesped> tarea = ReniecService.consultarDni(dni);
-        tarea.setOnSucceeded(evento -> {
-            if (consultaActual != secuenciaConsulta) {
-                return;
-            }
-            Huesped huesped = tarea.getValue();
-            if (huesped == null) {
-                habilitarHuespedManual(dni, "RENIEC no devolvió datos. Ingrese el huésped manualmente.");
-            } else {
-                huesped.setPaisProcedencia("Perú");
-                cargarHuesped(huesped, false);
-                lblEstadoBusqueda.setText("RENIEC autocompletó los datos; complete teléfono y correo si corresponde.");
-            }
-            completarBusqueda(empresa, dni, consultaActual, lblEstadoBusqueda.getText());
-        });
-        tarea.setOnFailed(evento -> {
-            if (consultaActual != secuenciaConsulta) {
-                return;
-            }
-            habilitarHuespedManual(dni, "Sin conexión con RENIEC. Puede continuar con ingreso manual.");
-            completarBusqueda(empresa, dni, consultaActual, lblEstadoBusqueda.getText());
-        });
-        iniciarTarea(tarea);
+        ConsultaApi.dni(dni, null,
+                huesped -> {
+                    if (consultaActual != secuenciaConsulta) {
+                        return;
+                    }
+                    huesped.setPaisProcedencia("Perú");
+                    cargarHuesped(huesped, false);
+                    lblEstadoBusqueda.setText("RENIEC autocompletó los datos; complete teléfono y correo si corresponde.");
+                    completarBusqueda(empresa, dni, consultaActual, lblEstadoBusqueda.getText());
+                },
+                () -> {
+                    if (consultaActual != secuenciaConsulta) {
+                        return;
+                    }
+                    habilitarHuespedManual(dni, "RENIEC no devolvió datos. Ingrese el huésped manualmente.");
+                    completarBusqueda(empresa, dni, consultaActual, lblEstadoBusqueda.getText());
+                },
+                motivo -> {
+                    if (consultaActual != secuenciaConsulta) {
+                        return;
+                    }
+                    habilitarHuespedManual(dni, "Sin conexión con RENIEC. Puede continuar con ingreso manual.");
+                    completarBusqueda(empresa, dni, consultaActual, lblEstadoBusqueda.getText());
+                });
     }
 
     private void verificarIdentidadExistente(String dni, int consultaActual) {
@@ -305,14 +320,14 @@ public class Nueva_reservaController {
             });
             actualizar.setOnFailed(ev -> lblEstadoBusqueda.setText(
                     "Se cargaron datos locales; no se pudo actualizar la identidad."));
-            iniciarTarea(actualizar);
+            ConsultaApi.iniciar(actualizar);
         });
         consulta.setOnFailed(evento -> {
             if (consultaActual == secuenciaConsulta) {
                 lblEstadoBusqueda.setText("Huésped local cargado; RENIEC no está disponible.");
             }
         });
-        iniciarTarea(consulta);
+        ConsultaApi.iniciar(consulta);
     }
 
     private void completarBusqueda(Empresa empresa, String dni, int consultaActual, String mensaje) {
@@ -375,12 +390,6 @@ public class Nueva_reservaController {
         txtRazonSocial.setDisable(false);
         txtDireccionFiscal.setDisable(false);
         lblEstadoBusqueda.setText(mensaje + " RUC: " + ruc);
-    }
-
-    private void iniciarTarea(Task<?> tarea) {
-        Thread hiloConsulta = new Thread(tarea, "consulta-api-reservas");
-        hiloConsulta.setDaemon(true);
-        hiloConsulta.start();
     }
 
     private void bloquearBusqueda(String mensaje) {
@@ -448,16 +457,18 @@ public class Nueva_reservaController {
     /** Dibuja cada tramo como dos alas de cuatro habitaciones separadas por un pasillo. */
     private VBox crearPlanoPiso(int numero, List<Habitacion> habitaciones, Set<Integer> idsDisponibles) {
         VBox piso = new VBox(9);
-        piso.getStyleClass().add("plano-piso");
+        piso.setStyle("-fx-background-color: #FAF8F4; -fx-background-radius: 10; -fx-border-color: #DDD4C8; "
+                + "-fx-border-radius: 10; -fx-padding: 14;");
         Label titulo = new Label("Piso " + numero + " · " + habitaciones.size() + " habitaciones");
-        titulo.getStyleClass().add("plano-titulo");
+        titulo.setStyle("-fx-text-fill: #3B210F; -fx-font-size: 15px; -fx-font-weight: bold;");
         piso.getChildren().add(titulo);
         for (int inicio = 0; inicio < habitaciones.size(); inicio += 8) {
             GridPane tramo = new GridPane();
             tramo.setHgap(8);
             tramo.setVgap(8);
             Label pasillo = new Label("PASILLO CENTRAL  ·  PISO " + numero);
-            pasillo.getStyleClass().add("plano-pasillo");
+            pasillo.setStyle("-fx-alignment: center; -fx-background-color: #E8E0D5; -fx-background-radius: 5; "
+                    + "-fx-padding: 9; -fx-text-fill: #5A3516; -fx-font-weight: bold;");
             pasillo.setMaxWidth(Double.MAX_VALUE);
             pasillo.setAlignment(Pos.CENTER);
             tramo.add(pasillo, 0, 1, 4, 1);
@@ -471,9 +482,24 @@ public class Nueva_reservaController {
                         + (disponible && capacidad
                                 ? moneda(habitacion.getTipo().getPrecioBase()) + " / noche"
                                 : disponible ? "Capacidad insuficiente" : "No disponible"));
-                celda.getStyleClass().addAll("plano-habitacion",
-                        disponible && capacidad ? "plano-habitacion-disponible" : "plano-habitacion-ocupada");
-                celda.setDisable(!disponible || !capacidad);
+                boolean libre = disponible && capacidad;
+                String estilo = libre ? HAB_DISPONIBLE : HAB_NO_DISPONIBLE;
+                celda.setStyle(estilo);
+                celda.getProperties().put("estiloBase", estilo);
+                if (libre) {
+                    // el efecto al pasar el mouse no existe en un style="" fijo, se hace aqui
+                    celda.setOnMouseEntered(e -> {
+                        if (celda != tarjetaSeleccionada) {
+                            celda.setStyle(HAB_DISPONIBLE_HOVER);
+                        }
+                    });
+                    celda.setOnMouseExited(e -> {
+                        if (celda != tarjetaSeleccionada) {
+                            celda.setStyle(HAB_DISPONIBLE);
+                        }
+                    });
+                }
+                celda.setDisable(!libre);
                 celda.setOnAction(evento -> seleccionarHabitacion(habitacion, celda));
                 celda.setAccessibleText("Habitación " + habitacion.getNumero() + ", "
                         + (disponible && capacidad ? "disponible" : "no disponible"));
@@ -491,11 +517,11 @@ public class Nueva_reservaController {
             return;
         }
         if (tarjetaSeleccionada != null) {
-            tarjetaSeleccionada.getStyleClass().remove("plano-habitacion-seleccionada");
+            tarjetaSeleccionada.setStyle((String) tarjetaSeleccionada.getProperties().get("estiloBase"));
         }
         habitacionSeleccionada = habitacion;
         tarjetaSeleccionada = tarjeta;
-        tarjeta.getStyleClass().add("plano-habitacion-seleccionada");
+        tarjeta.setStyle(HAB_SELECCIONADA);
         calcularNochesYTotal();
     }
 

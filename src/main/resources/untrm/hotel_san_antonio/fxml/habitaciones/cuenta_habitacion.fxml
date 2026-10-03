@@ -62,10 +62,9 @@
                             <Label text="Ampliar estadía" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                             <HBox spacing="10" alignment="CENTER_LEFT">
                                 <Label text="Noches a agregar" minWidth="-Infinity"/>
-                                <Spinner fx:id="spnNoches" min="1" max="30" initialValue="1" prefWidth="80" minWidth="80"/>
+                                <Spinner fx:id="spnNoches" min="1" max="30" initialValue="1" prefWidth="80" minWidth="80" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                                 <Region HBox.hgrow="ALWAYS"/>
-                                <Button fx:id="btnAmpliar" text="Ampliar estadía" minWidth="-Infinity" onAction="#onAmpliar"
-                                        style="-fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
+                                <Button fx:id="btnAmpliar" text="Ampliar estadía" minWidth="-Infinity" onAction="#onAmpliar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
                             </HBox>
                             <Label fx:id="lblNuevaSalida" text="Nueva salida: 22/09/2026 · + S/ 65.00" style="-fx-text-fill: #777777;" wrapText="true"/>
                         </VBox>
@@ -92,7 +91,7 @@
                 <!-- ============ CARGOS ============ -->
                 <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #E5E5E5; -fx-border-radius: 8px; -fx-padding: 16px;">
                     <Label text="Cargos de la cuenta" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
-                    <TableView fx:id="tblCargos" prefHeight="190" minHeight="120">
+                    <TableView fx:id="tblCargos" prefHeight="190" minHeight="120" style="-fx-background-color: white; -fx-border-color: #E8E2D9;">
                         <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
                         <placeholder><Label text="Sin cargos"/></placeholder>
                         <columns>
@@ -126,7 +125,7 @@
                     <VBox spacing="10" HBox.hgrow="ALWAYS"
                           style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #E5E5E5; -fx-border-radius: 8px; -fx-padding: 16px;">
                         <Label text="Pagos realizados" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
-                        <TableView fx:id="tblPagos" prefHeight="150" minHeight="110">
+                        <TableView fx:id="tblPagos" prefHeight="150" minHeight="110" style="-fx-background-color: white; -fx-border-color: #E8E2D9;">
                             <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
                             <placeholder><Label text="Sin pagos"/></placeholder>
                             <columns>
@@ -151,11 +150,11 @@
                         <Label text="Registrar pago" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                         <VBox spacing="4">
                             <Label text="Monto (S/)" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                            <TextField fx:id="txtMonto"/>
+                            <TextField fx:id="txtMonto" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                         </VBox>
                         <VBox spacing="4">
                             <Label text="Método de pago" fx:id="lblMetodo1" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                            <ComboBox fx:id="cmbMetodo" maxWidth="Infinity">
+                            <ComboBox fx:id="cmbMetodo" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;">
                                 <items>
                                     <FXCollections fx:factory="observableArrayList">
                                         <String fx:value="Efectivo"/>
@@ -170,7 +169,7 @@
                         <VBox fx:id="boxSegundoPago" spacing="10">
                             <VBox spacing="4">
                                 <Label text="Segundo método" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <ComboBox fx:id="cmbMetodo2" maxWidth="Infinity">
+                                <ComboBox fx:id="cmbMetodo2" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;">
                                     <items>
                                         <FXCollections fx:factory="observableArrayList">
                                             <String fx:value="Efectivo"/>
@@ -183,12 +182,11 @@
                             </VBox>
                             <VBox spacing="4">
                                 <Label text="Monto con el segundo método (S/)" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <TextField fx:id="txtMonto2"/>
+                                <TextField fx:id="txtMonto2" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                             </VBox>
                             <Label fx:id="lblDivision" style="-fx-text-fill: #777777;" wrapText="true"/>
                         </VBox>
-                        <Button fx:id="btnRegistrarPago" text="Registrar pago" maxWidth="Infinity" onAction="#onRegistrarPago"
-                                style="-fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
+                        <Button fx:id="btnRegistrarPago" text="Registrar pago" maxWidth="Infinity" onAction="#onRegistrarPago" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
                     </VBox>
                 </HBox>
             </VBox>
@@ -201,10 +199,8 @@
             <Label fx:id="lblAviso" text="Cobra el saldo pendiente para poder hacer el check-out."
                    style="-fx-text-fill: #777777;" wrapText="true"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnCerrar" text="Cerrar" onAction="#onCerrar"
-                    style="-fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
-            <Button fx:id="btnCheckOut" text="Check-Out" onAction="#onCheckOut"
-                    style="-fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
+            <Button fx:id="btnCerrar" text="Cerrar" onAction="#onCerrar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: transparent; -fx-text-fill: #3B210F; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
+            <Button fx:id="btnCheckOut" text="Check-Out" onAction="#onCheckOut" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
         </HBox>
     </bottom>
 </BorderPane>

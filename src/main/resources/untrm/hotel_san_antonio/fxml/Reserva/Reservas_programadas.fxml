@@ -23,8 +23,7 @@
             <Label text="Reservas programadas" style="-fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: #2C2118;"/>
             <Label text="Busca, filtra, pagina y revisa el detalle de las reservas." style="-fx-text-fill: #6A625A;"/>
         </VBox>
-        <Button text="+ Nueva reserva" onAction="#abrirNuevaReserva"
-                style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        <Button text="+ Nueva reserva" onAction="#abrirNuevaReserva" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
     </HBox>
     <HBox spacing="7">
         <ToggleButton fx:id="btnTodas" text="Todas" toggleGroup="$grupoEstados" selected="true" onAction="#filtrarEstado"/>
@@ -35,13 +34,13 @@
         <ToggleButton fx:id="btnCanceladas" text="Canceladas" toggleGroup="$grupoEstados" onAction="#filtrarEstado"/>
     </HBox>
     <HBox spacing="9" alignment="CENTER_LEFT">
-        <TextField fx:id="txtBuscar" promptText="Código, nombre, DNI o habitación" prefWidth="280" onAction="#buscarReservas"/>
-        <DatePicker fx:id="dpDesde" promptText="Ingreso desde"/>
-        <DatePicker fx:id="dpHasta" promptText="Ingreso hasta"/>
-        <Button text="Buscar" onAction="#buscarReservas"/>
-        <Button text="Limpiar filtros" onAction="#limpiarFiltros"/>
+        <TextField fx:id="txtBuscar" promptText="Código, nombre, DNI o habitación" prefWidth="280" onAction="#buscarReservas" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+        <DatePicker fx:id="dpDesde" promptText="Ingreso desde" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+        <DatePicker fx:id="dpHasta" promptText="Ingreso hasta" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+        <Button text="Buscar" onAction="#buscarReservas" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+        <Button text="Limpiar filtros" onAction="#limpiarFiltros" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
     </HBox>
-    <TableView fx:id="tablaReservas" VBox.vgrow="ALWAYS" prefHeight="440">
+    <TableView fx:id="tablaReservas" VBox.vgrow="ALWAYS" prefHeight="440" style="-fx-background-color: white; -fx-border-color: #E8E2D9;">
         <columns>
             <TableColumn fx:id="colCodigo" text="Código" prefWidth="90"/>
             <TableColumn fx:id="colCliente" text="Cliente" prefWidth="210"/>
@@ -54,10 +53,10 @@
     </TableView>
     <HBox alignment="CENTER_LEFT" spacing="10">
         <Label fx:id="lblCantidad" text="0 reservas" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="btnVerDetalle" text="Ver detalle" onAction="#verDetalle" disable="true"/>
-        <Button fx:id="btnCambiarHabitacion" text="Cambiar habitación" onAction="#cambiarHabitacion" disable="true"/>
-        <Button fx:id="btnAnterior" text="Anterior" onAction="#paginaAnterior"/>
+        <Button fx:id="btnVerDetalle" text="Ver detalle" onAction="#verDetalle" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+        <Button fx:id="btnCambiarHabitacion" text="Cambiar habitación" onAction="#cambiarHabitacion" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+        <Button fx:id="btnAnterior" text="Anterior" onAction="#paginaAnterior" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
         <Label fx:id="lblPagina" text="1 / 1" style="-fx-font-weight: bold;"/>
-        <Button fx:id="btnSiguiente" text="Siguiente" onAction="#paginaSiguiente"/>
+        <Button fx:id="btnSiguiente" text="Siguiente" onAction="#paginaSiguiente" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
     </HBox>
 </VBox>

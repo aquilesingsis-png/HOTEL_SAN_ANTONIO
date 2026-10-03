@@ -7,11 +7,10 @@
 <?import javafx.scene.layout.VBox?>
 
 <HBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      spacing="10" alignment="CENTER_LEFT" stylesheets="@reserva.css" styleClass="tarjeta-habitacion">
+      spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-border-color: #e4ded5; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 12;">
     <VBox spacing="3" HBox.hgrow="ALWAYS">
         <Label fx:id="lblHabitacion" text="Habitación" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
         <Label fx:id="lblDetalle" text="Detalle" style="-fx-text-fill: #6F665E;"/>
     </VBox>
-    <Button fx:id="btnSeleccionar" text="Seleccionar"
-            style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    <Button fx:id="btnSeleccionar" text="Seleccionar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
 </HBox>

@@ -149,7 +149,7 @@ public class CalendarioOcupacionController {
             Label texto = (Label) cargador.getNamespace().get("lblCelda");
             texto.setText(fecha.getDayOfWeek().getDisplayName(TextStyle.SHORT, LOCALE_ES)
                     + "\n" + fecha.getDayOfMonth());
-            texto.getStyleClass().add("cabecera-calendario");
+            texto.setStyle(texto.getStyle() + " -fx-background-color: #f1ece4; -fx-text-fill: #4d4339;");
             contenedorCabeceraDias.getChildren().add(celda);
         }
     }
@@ -203,7 +203,7 @@ public class CalendarioOcupacionController {
         Tooltip ayuda = (Tooltip) cargador.getNamespace().get("tooltipCelda");
         EstadoDia estado = estadoParaDia(habitacion, reservas, fecha);
         texto.setText(estado.abreviatura());
-        texto.getStyleClass().add(estado.claseCss());
+        texto.setStyle(texto.getStyle() + " -fx-background-color: " + estado.color() + ";");
         ayuda.setText("Habitación " + habitacion.getNumero() + " · " + fecha.format(FORMATO_FECHA)
                 + " · " + estado.descripcion());
         return celda;
@@ -242,25 +242,25 @@ public class CalendarioOcupacionController {
     }
 
     private enum EstadoDia {
-        DISPONIBLE("Libre", "Disponible", "estado-disponible"),
-        PENDIENTE("Pend.", "Reserva pendiente", "estado-pendiente"),
-        RESERVADA("Res.", "Reserva confirmada", "estado-reservada"),
-        OCUPADA("Ocup.", "Ocupada / check-in", "estado-ocupada"),
-        LIMPIEZA("Limp.", "En limpieza", "estado-limpieza"),
-        MANTENIMIENTO("Mant.", "Mantenimiento", "estado-mantenimiento");
+        DISPONIBLE("Libre", "Disponible", "#2cb95f"),
+        PENDIENTE("Pend.", "Reserva pendiente", "#c98a1b"),
+        RESERVADA("Res.", "Reserva confirmada", "#2e88dd"),
+        OCUPADA("Ocup.", "Ocupada / check-in", "#ef4141"),
+        LIMPIEZA("Limp.", "En limpieza", "#eab851"),
+        MANTENIMIENTO("Mant.", "Mantenimiento", "#8f887f");
 
         private final String abreviatura;
         private final String descripcion;
-        private final String claseCss;
+        private final String color;
 
-        EstadoDia(String abreviatura, String descripcion, String claseCss) {
+        EstadoDia(String abreviatura, String descripcion, String color) {
             this.abreviatura = abreviatura;
             this.descripcion = descripcion;
-            this.claseCss = claseCss;
+            this.color = color;
         }
 
         String abreviatura() { return abreviatura; }
         String descripcion() { return descripcion; }
-        String claseCss() { return claseCss; }
+        String color() { return color; }
     }
 }

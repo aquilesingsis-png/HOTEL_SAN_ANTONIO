@@ -9,10 +9,10 @@
     spacing="12" prefWidth="500" style="-fx-background-color: #F7F4EF; -fx-padding: 24;">
     <Label text="Recuperar contraseña" style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
     <Label text="Solicite al administrador un token temporal después de verificar su identidad. Vence en 15 minutos y funciona una sola vez." wrapText="true"/>
-    <TextField fx:id="txtUsuario" promptText="Usuario"/>
-    <PasswordField fx:id="txtToken" promptText="Token temporal"/>
-    <PasswordField fx:id="txtNueva" promptText="Nueva contraseña (12 caracteres, letras y números)"/>
-    <PasswordField fx:id="txtConfirmar" promptText="Confirmar nueva contraseña"/>
-    <Button text="Restablecer" onAction="#restablecer"/>
+    <TextField fx:id="txtUsuario" promptText="Usuario" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+    <PasswordField fx:id="txtToken" promptText="Token temporal" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+    <PasswordField fx:id="txtNueva" promptText="Nueva contraseña (12 caracteres, letras y números)" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+    <PasswordField fx:id="txtConfirmar" promptText="Confirmar nueva contraseña" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+    <Button text="Restablecer" onAction="#restablecer" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
     <Label fx:id="lblMensaje" wrapText="true"/>
 </VBox>

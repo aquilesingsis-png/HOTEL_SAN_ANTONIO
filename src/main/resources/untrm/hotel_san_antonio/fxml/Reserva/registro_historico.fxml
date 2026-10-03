@@ -17,34 +17,34 @@
         <Label text="Solo para operaciones ya concluidas durante una contingencia. La fecha de captura se guarda automáticamente; indique las fechas reales y el motivo." wrapText="true"/>
         <GridPane hgap="10" vgap="8">
             <Label text="Habitación" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-            <ComboBox fx:id="cmbHabitacion" prefWidth="250" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <ComboBox fx:id="cmbHabitacion" prefWidth="250" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
             <Label text="Ingreso real" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-            <DatePicker fx:id="dpIngreso" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <DatePicker fx:id="dpIngreso" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
             <Label text="Salida real" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-            <DatePicker fx:id="dpSalida" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+            <DatePicker fx:id="dpSalida" GridPane.columnIndex="2" GridPane.rowIndex="1" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
             <Label text="Fecha del hecho" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <DatePicker fx:id="dpEvento" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <DatePicker fx:id="dpEvento" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
             <Label text="Fecha real del pago" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <DatePicker fx:id="dpPago" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            <DatePicker fx:id="dpPago" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
             <Label text="Método de pago" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-            <ComboBox fx:id="cmbMetodo" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+            <ComboBox fx:id="cmbMetodo" GridPane.columnIndex="2" GridPane.rowIndex="3" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
         </GridPane>
         <HBox spacing="8">
-            <TextField fx:id="txtDni" promptText="DNI titular" prefWidth="160" onAction="#buscarDni"/>
-            <Button text="Buscar DNI" onAction="#buscarDni"/>
-            <TextField fx:id="txtNombres" promptText="Nombres titular"/>
-            <TextField fx:id="txtApellidos" promptText="Apellidos titular"/>
+            <TextField fx:id="txtDni" promptText="DNI titular" prefWidth="160" onAction="#buscarDni" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+            <Button text="Buscar DNI" onAction="#buscarDni" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+            <TextField fx:id="txtNombres" promptText="Nombres titular" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+            <TextField fx:id="txtApellidos" promptText="Apellidos titular" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
         </HBox>
         <HBox spacing="8">
             <Label text="Personas que ingresaron"/>
-            <Spinner fx:id="spPersonas" prefWidth="90"/>
+            <Spinner fx:id="spPersonas" prefWidth="90" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
         </HBox>
         <VBox fx:id="contenedorAcompanantes" spacing="8" visible="false" managed="false"/>
         <Label text="Total según tarifa registrada (pago completo)"/>
-        <TextField fx:id="txtTotal" editable="false" prefWidth="160"/>
+        <TextField fx:id="txtTotal" editable="false" prefWidth="160" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
         <Label text="Motivo de regularización"/>
-        <TextArea fx:id="txtMotivo" prefRowCount="3" wrapText="true"/>
-        <Button fx:id="btnGuardar" text="Registrar con auditoría" onAction="#guardar"/>
+        <TextArea fx:id="txtMotivo" prefRowCount="3" wrapText="true" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+        <Button fx:id="btnGuardar" text="Registrar con auditoría" onAction="#guardar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
         <Label fx:id="lblEstado" wrapText="true"/>
     </VBox>
 </ScrollPane>

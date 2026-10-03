@@ -8,12 +8,23 @@ import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseEvent;
 
-/** Aplica el marrón de pulsación incluso a controles con estilo inline en FXML. */
+/** Efectos de botones que un style="" fijo no da: marrón al pulsar o elegir, y el hover del botón principal. */
 public final class EstiloBotones {
     private static final String PULSADO = "-fx-background-color: #704313; -fx-text-fill: white;";
     private static final String ELEGIDO = "-fx-background-color: #704313; -fx-text-fill: white;";
 
+    private static final String PRIMARIO = "-fx-background-color: #B8862D; -fx-text-fill: white; "
+            + "-fx-font-weight: bold; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;";
+    private static final String PRIMARIO_HOVER = "-fx-background-color: #D4A84C; -fx-text-fill: white; "
+            + "-fx-font-weight: bold; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;";
+
     private EstiloBotones() { }
+
+    /** Resalta el boton dorado principal al pasar el mouse (un style="" fijo no tiene :hover). */
+    public static void hoverPrimario(Button boton) {
+        boton.setOnMouseEntered(e -> boton.setStyle(PRIMARIO_HOVER));
+        boton.setOnMouseExited(e -> boton.setStyle(PRIMARIO));
+    }
 
     public static void instalar(Scene escena) {
         instalarEnRaiz(escena, escena.getRoot());

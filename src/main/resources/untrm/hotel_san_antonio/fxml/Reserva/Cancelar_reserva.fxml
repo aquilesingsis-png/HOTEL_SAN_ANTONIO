@@ -21,22 +21,20 @@
                    style="-fx-text-fill: #6A625A;"/>
             <HBox spacing="10">
                 <TextField fx:id="txtBuscarReserva" promptText="Código exacto (por ejemplo R-0005)"
-                           prefWidth="380" onAction="#buscarReserva"/>
-                <Button text="Buscar" onAction="#buscarReserva"
-                        style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                           prefWidth="380" onAction="#buscarReserva" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                <Button text="Buscar" onAction="#buscarReserva" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
             </HBox>
             <fx:include fx:id="detalleReserva" source="Detalle_reserva.fxml"/>
             <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #E8E2D9; -fx-border-radius: 10;">
                 <padding><Insets top="18" right="20" bottom="18" left="20"/></padding>
                 <Label text="Motivo de cancelación" style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
-                <ChoiceBox fx:id="cbMotivo" prefWidth="320"/>
+                <ChoiceBox fx:id="cbMotivo" prefWidth="320" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                 <TextArea fx:id="txtDetalle" promptText="Detalle opcional (máximo 500 caracteres)"
-                          prefRowCount="3" wrapText="true"/>
+                          prefRowCount="3" wrapText="true" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
             </VBox>
             <HBox spacing="10">
-                <Button text="Limpiar" onAction="#volver"/>
-                <Button text="Cancelar reserva" onAction="#cancelarReserva"
-                        style="-fx-background-color: #D9433A; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button text="Limpiar" onAction="#volver" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+                <Button text="Cancelar reserva" onAction="#cancelarReserva" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #D9433A; -fx-text-fill: white; -fx-font-weight: bold;"/>
             </HBox>
         </VBox>
     </content>

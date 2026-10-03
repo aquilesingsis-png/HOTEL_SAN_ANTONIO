@@ -48,8 +48,9 @@
                     <ToggleButton text="Habitaciones" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/habitaciones/habitaciones.fxml" onAction="#onMenu"/>
 
-                    <Button text="Reservas  ▸" onAction="#onGrupo"/>
-                    <VBox userData="Reservas" visible="false" managed="false" spacing="2">
+                    <Button text="Reservas  ▸" onAction="#onGrupo" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+                    <VBox userData="Reservas" visible="false" managed="false" spacing="2"
+                          style="-fx-background-color: #2E1909; -fx-background-radius: 0 6px 6px 0; -fx-border-color: #B8862D; -fx-border-width: 0 0 0 2px; -fx-padding: 4px 0 4px 0;">
                         <ToggleButton text="Nueva reserva" toggleGroup="$grupoMenu"
                                       userData="/untrm/hotel_san_antonio/fxml/Reserva/Nueva_reserva.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Reserva programada" toggleGroup="$grupoMenu"
@@ -75,8 +76,7 @@
                 <Label fx:id="lblUsuario" text="Luis Vasquez" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
                 <Label fx:id="lblRol" text="Recepcionista" style="-fx-text-fill: #E6C77A; -fx-font-size: 12px;"/>
             </VBox>
-            <Button text="Cerrar sesión" onAction="#onCerrarSesion" maxWidth="Infinity"
-                    style="-fx-background-color: transparent; -fx-text-fill: #F3ECDD; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 7px 14px; -fx-cursor: hand;"/>
+            <Button text="Cerrar sesión" onAction="#onCerrarSesion" maxWidth="Infinity" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: transparent; -fx-text-fill: #F3ECDD; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 7px 14px; -fx-cursor: hand;"/>
         </VBox>
     </left>
 
@@ -91,8 +91,7 @@
                         <Label fx:id="lblFecha" text="domingo, 20 de septiembre de 2026" style="-fx-font-size: 12px; -fx-text-fill: #E6C77A;"/>
                     </VBox>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="🛒  Carrito" onAction="#onCarrito"
-                            style="-fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
+                    <Button text="🛒  Carrito" onAction="#onCarrito" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
                 </HBox>
             </top>
 

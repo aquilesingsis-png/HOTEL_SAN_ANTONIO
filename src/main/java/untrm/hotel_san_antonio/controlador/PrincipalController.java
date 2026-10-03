@@ -47,12 +47,12 @@ public class PrincipalController {
             + "-fx-alignment: CENTER_LEFT; -fx-padding: 11px 16px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
 
     // Botones dentro de un submenu desplegado: igual, con letra un poco mas chica
-    private static final String SUBITEM = "-fx-background-color: transparent; -fx-text-fill: #F3ECDD; -fx-font-size: 13px; "
-            + "-fx-alignment: CENTER_LEFT; -fx-padding: 8px 14px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
+    private static final String SUBITEM = "-fx-background-color: transparent; -fx-text-fill: #D9CDB8; -fx-font-size: 13px; "
+            + "-fx-alignment: CENTER_LEFT; -fx-padding: 8px 14px 8px 34px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
     private static final String SUBITEM_HOVER = "-fx-background-color: #5A3516; -fx-text-fill: #F3ECDD; -fx-font-size: 13px; "
-            + "-fx-alignment: CENTER_LEFT; -fx-padding: 8px 14px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
+            + "-fx-alignment: CENTER_LEFT; -fx-padding: 8px 14px 8px 34px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
     private static final String SUBITEM_SELECCIONADO = "-fx-background-color: #704313; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px; "
-            + "-fx-alignment: CENTER_LEFT; -fx-padding: 8px 14px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
+            + "-fx-alignment: CENTER_LEFT; -fx-padding: 8px 14px 8px 34px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
 
     // Botones que solo despliegan un submenu (ej. "Reservas ▸"): mismo look que ITEM, mas un color
     // distinto cuando una de sus opciones esta abierta ("Reservas" activo aunque este plegado)
