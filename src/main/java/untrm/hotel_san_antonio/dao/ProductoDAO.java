@@ -48,7 +48,7 @@ public class ProductoDAO {
                     p.setNombre(rs.getString("nombre"));
                     p.setMarca(rs.getString("marca"));
                     p.setIdCategoria(rs.getInt("id_categoria"));
-                    p.setNombre(rs.getString("categoria"));
+                    p.setNombreCategoria(rs.getString("categoria"));
                     p.setPrecio(rs.getBigDecimal("precio"));
                     p.setStock(rs.getInt("stock"));
                     p.setActivo(rs.getBoolean("activo"));
@@ -68,6 +68,40 @@ public class ProductoDAO {
                     throw new SQLException("El producto ya no está disponible.");
                 }
                 return rs.getInt("stock");
+            }
+        }
+    }
+
+    /** Consulta el producto actual sin depender del filtro visible en la tienda. */
+    public Producto buscarActivoPorId(int idProducto) throws SQLException {
+        String sql = "SELECT id_producto, nombre, precio, stock FROM producto "
+                + "WHERE id_producto = ? AND activo = 1";
+        try (Connection cn = ConexionBD.conectar(); PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, idProducto);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+                Producto producto = new Producto();
+                producto.setIdProducto(rs.getInt("id_producto"));
+                producto.setNombre(rs.getString("nombre"));
+                producto.setPrecio(rs.getBigDecimal("precio"));
+                producto.setStock(rs.getInt("stock"));
+                return producto;
+            }
+        }
+    }
+
+    /** Lee stock y precio actuales dentro de la transacción de venta. */
+    public Producto bloquearParaVenta(Connection cn, int idProducto) throws SQLException {
+        String sql = "SELECT precio, stock FROM producto WHERE id_producto = ? AND activo = 1 FOR UPDATE";
+        try (PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, idProducto);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) throw new SQLException("El producto ya no está disponible.");
+                Producto producto = new Producto();
+                producto.setIdProducto(idProducto);
+                producto.setPrecio(rs.getBigDecimal("precio"));
+                producto.setStock(rs.getInt("stock"));
+                return producto;
             }
         }
     }

@@ -6,9 +6,16 @@ package untrm.hotel_san_antonio.controlador;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -23,6 +30,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 
 import untrm.hotel_san_antonio.dao.EmpresaDAO;
 import untrm.hotel_san_antonio.dao.HuespedDAO;
@@ -382,25 +390,108 @@ public class ComprobanteController {
             return;
         }
 
+        Alertas.mostrarInfo("Vista previa del comprobante", textoComprobante());
+    }
+
+    private String textoComprobante() {
         StringBuilder texto = new StringBuilder();
         texto.append(cmbTipoComprobante.getValue()).append('\n');
+        if (!txtNumero.getText().isBlank()) texto.append("Número: ").append(txtNumero.getText()).append('\n');
+        if (dpFecha.getValue() != null) texto.append("Fecha: ").append(dpFecha.getValue()).append('\n');
         String cliente = txtCliente.getText() == null || txtCliente.getText().isBlank() ? "Cliente varios" : txtCliente.getText();
         texto.append("Cliente: ").append(cliente).append('\n');
         if (txtDocumento.getText() != null && !txtDocumento.getText().isBlank()) {
-            texto.append("Documento: ").append(txtDocumento.getText()).append('\n');
+            texto.append(cmbTipoDocumento.getValue()).append(": ").append(txtDocumento.getText()).append('\n');
         }
+        if (txtDireccion.getText() != null && !txtDireccion.getText().isBlank())
+            texto.append("Dirección: ").append(txtDireccion.getText().trim()).append('\n');
         texto.append('\n');
         for (FilaDetalle f : tblDetalle.getItems()) {
             texto.append(String.format(Locale.US, "%s  x%d  %s%n", f.getConcepto(), f.getCantidad(), formatoMoneda(f.getImporte())));
         }
         texto.append("\nTotal: ").append(lblTotal.getText());
+        texto.append("\nPagado: ").append(lblPagado.getText());
+        texto.append("\nSaldo: ").append(lblSaldo.getText());
 
-        Alertas.mostrarInfo("Vista previa del comprobante", texto.toString());
+        return texto.toString();
     }
 
     @FXML
     private void onImprimir() {
-        Alertas.mostrarInfo("Imprimir", "La impresión del comprobante se implementará en la Unidad II.");
+        if (txtNumero.getText() == null || txtNumero.getText().isBlank()) {
+            Alertas.mostrarInfo("Guardar PDF", "Primero genere el comprobante.");
+            return;
+        }
+        FileChooser selector = new FileChooser();
+        selector.setTitle("Guardar comprobante en PDF");
+        selector.setInitialFileName("comprobante_" + txtNumero.getText().replaceAll("[^A-Za-z0-9_-]", "_") + ".pdf");
+        selector.getExtensionFilters().add(new FileChooser.ExtensionFilter("Documento PDF", "*.pdf"));
+        java.io.File elegido = selector.showSaveDialog(btnImprimir.getScene().getWindow());
+        if (elegido == null) return;
+        Path destino = elegido.toPath();
+        if (!destino.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".pdf")) {
+            destino = destino.resolveSibling(destino.getFileName() + ".pdf");
+        }
+        try {
+            Files.write(destino, crearPdf("HOTEL SAN ANTONIO\n" + textoComprobante()));
+            Alertas.mostrarInfo("PDF guardado", "Comprobante guardado en:\n" + destino.toAbsolutePath());
+        } catch (IOException error) {
+            Alertas.mostrarError("Guardar PDF", "No se pudo guardar el comprobante.\n" + error.getMessage());
+        }
+    }
+
+    /** PDF A4 de texto, sin depender de una impresora o de bibliotecas externas. */
+    static byte[] crearPdf(String texto) throws IOException {
+        Charset codificacion = Charset.forName("windows-1252");
+        List<String> lineas = new ArrayList<>();
+        for (String linea : texto.split("\\R", -1)) {
+            String restante = linea;
+            while (restante.length() > 82) {
+                int corte = restante.lastIndexOf(' ', 82);
+                if (corte < 20) corte = 82;
+                lineas.add(restante.substring(0, corte));
+                restante = restante.substring(corte).stripLeading();
+            }
+            lineas.add(restante);
+        }
+        int paginas = Math.max(1, (lineas.size() + 47) / 48);
+        String[] objetos = new String[4 + paginas * 2];
+        objetos[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+        objetos[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
+        StringBuilder hijos = new StringBuilder();
+        for (int pagina = 0; pagina < paginas; pagina++) {
+            int idPagina = 4 + pagina * 2;
+            int idContenido = idPagina + 1;
+            hijos.append(idPagina).append(" 0 R ");
+            objetos[idPagina] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] "
+                    + "/Resources << /Font << /F1 3 0 R >> >> /Contents " + idContenido + " 0 R >>";
+            StringBuilder contenido = new StringBuilder("BT /F1 11 Tf 48 790 Td 15 TL\n");
+            int fin = Math.min(lineas.size(), (pagina + 1) * 48);
+            for (int i = pagina * 48; i < fin; i++) {
+                String limpia = lineas.get(i).replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)");
+                contenido.append('(').append(limpia).append(") Tj T*\n");
+            }
+            contenido.append("ET\n");
+            byte[] bytesContenido = contenido.toString().getBytes(codificacion);
+            objetos[idContenido] = "<< /Length " + bytesContenido.length + " >>\nstream\n"
+                    + contenido + "endstream";
+        }
+        objetos[2] = "<< /Type /Pages /Kids [ " + hijos + "] /Count " + paginas + " >>";
+        ByteArrayOutputStream salida = new ByteArrayOutputStream();
+        salida.write("%PDF-1.4\n".getBytes(codificacion));
+        int[] posiciones = new int[objetos.length];
+        for (int i = 1; i < objetos.length; i++) {
+            posiciones[i] = salida.size();
+            salida.write((i + " 0 obj\n" + objetos[i] + "\nendobj\n").getBytes(codificacion));
+        }
+        int inicioIndice = salida.size();
+        salida.write(("xref\n0 " + objetos.length + "\n0000000000 65535 f \n").getBytes(codificacion));
+        for (int i = 1; i < objetos.length; i++) {
+            salida.write(String.format(Locale.ROOT, "%010d 00000 n \n", posiciones[i]).getBytes(codificacion));
+        }
+        salida.write(("trailer\n<< /Size " + objetos.length + " /Root 1 0 R >>\nstartxref\n"
+                + inicioIndice + "\n%%EOF\n").getBytes(codificacion));
+        return salida.toByteArray();
     }
 
     @FXML

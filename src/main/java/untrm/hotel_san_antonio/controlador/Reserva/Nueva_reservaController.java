@@ -1,36 +1,36 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package untrm.hotel_san_antonio.controlador.Reserva;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-
-import untrm.hotel_san_antonio.dao.EmpresaDAO;
 import untrm.hotel_san_antonio.dao.HabitacionDAO;
-import untrm.hotel_san_antonio.dao.HuespedDAO;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Huesped;
@@ -41,1808 +41,666 @@ import untrm.hotel_san_antonio.servicio.ReniecService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.servicio.SunatRucService;
 import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.ConexionBD;
 import untrm.hotel_san_antonio.util.Validador;
-/**
- *
- * @author HP
- */
+
 public class Nueva_reservaController {
 
-
-    // =========================================================
-    // CLIENTE
-    // =========================================================
-
-    @FXML
-    private ToggleButton btnPersonaNatural;
-
-    @FXML
-    private ToggleButton btnEmpresa;
-
-    @FXML
-    private Label lblTipoDocumento;
-
-    @FXML
-    private TextField txtDocumento;
-
-    @FXML
-    private Button btnBuscarCliente;
-
-    @FXML
-    private VBox filaDocumentoHuesped;
-
-    @FXML
-    private TextField txtDocumentoHuesped;
-
-    @FXML
-    private VBox panelSinCliente;
-
-    @FXML
-    private VBox panelClienteEncontrado;
-
-    @FXML
-    private Label lblNombres;
-
-    @FXML
-    private Label lblApellidos;
-
-    @FXML
-    private Label lblNacimiento;
-
-    @FXML
-    private Label lblCelular;
-
-    @FXML
-    private Label lblCorreo;
-
-    @FXML
-    private Label lblDireccion;
-
-
-    // =========================================================
-    // DATOS DE LA RESERVA
-    // =========================================================
-
-    @FXML
-    private DatePicker dpFechaIngreso;
-
-    @FXML
-    private DatePicker dpFechaSalida;
-
-    @FXML
-    private ChoiceBox<String> cbHoraIngreso;
-
-    @FXML
-    private ChoiceBox<String> cbHoraSalida;
-
-    @FXML
-    private Label lblNoches;
-
-    @FXML
-    private Spinner<Integer> spHuespedes;
-
-    @FXML
-    private TextArea txtObservaciones;
-
-    @FXML
-    private Label lblContadorObservaciones;
-
-
-    // =========================================================
-    // HABITACIONES
-    // =========================================================
-
-    @FXML
-    private ChoiceBox<String> cbPiso;
-
-    @FXML
-    private ChoiceBox<String> cbTipoHabitacion;
-
-    @FXML
-    private VBox contenedorHabitaciones;
-
-    @FXML
-    private Label lblSinHabitaciones;
-
-
-    // =========================================================
-    // RESUMEN
-    // =========================================================
-
-    @FXML
-    private Label lblHabitacionResumen;
-
-    @FXML
-    private Label lblNochesResumen;
-
-    @FXML
-    private Label lblPrecioNoche;
-
-    @FXML
-    private Label lblTotal;
-
-
-    // =========================================================
-    // PAGO
-    // =========================================================
-
-    @FXML
-    private ToggleButton btnEfectivo;
-
-    @FXML
-    private ToggleButton btnTarjeta;
-
-    @FXML
-    private ToggleButton btnTransferencia;
-
-    @FXML
-    private ToggleButton btnYape;
-
-    @FXML
-    private TextField txtMontoRecibido;
-
-    @FXML
-    private TextField txtVuelto;
-
-
-    // =========================================================
-    // COMPROBANTE
-    // =========================================================
-
-    @FXML
-    private RadioButton rbBoleta;
-
-    @FXML
-    private RadioButton rbFactura;
-
-    @FXML
-    private TextField txtDocumentoComprobante;
-
-    @FXML
-    private TextField txtNombreComprobante;
-
-
-    // =========================================================
-    // GRUPOS
-    // =========================================================
-
-    private final ToggleGroup grupoTipoCliente =
-            new ToggleGroup();
-
-    private final ToggleGroup grupoMetodoPago =
-            new ToggleGroup();
-
-    private final ToggleGroup grupoComprobante =
-            new ToggleGroup();
-
-
-    // =========================================================
-    // VARIABLES DE LA RESERVA
-    // =========================================================
-
-    private boolean clienteSeleccionado = false;
-
-    private Habitacion habitacionElegida = null;
-
-    private double precioNoche = 0.00;
-
-    private double totalReserva = 0.00;
-
-    private Huesped huespedEncontrado = null;
-
-    private Empresa empresaEncontrada = null;
-
-    private final HuespedDAO huespedDAO = new HuespedDAO();
-
-    private final EmpresaDAO empresaDAO = new EmpresaDAO();
-
-    private final HabitacionDAO habitacionDAO = new HabitacionDAO();
+    @FXML private ToggleButton btnPersonaNatural;
+    @FXML private ToggleButton btnEmpresa;
+    private final ToggleGroup grupoTipoCliente = new ToggleGroup();
+    @FXML private Label lblTipoDocumento;
+    @FXML private TextField txtDocumento;
+    @FXML private VBox filaDocumentoHuesped;
+    @FXML private TextField txtDocumentoHuesped;
+    @FXML private Button btnBuscarCliente;
+    @FXML private Label lblEstadoBusqueda;
+    @FXML private VBox panelDatosHuesped;
+    @FXML private TextField txtNombres;
+    @FXML private TextField txtApellidos;
+    @FXML private TextField txtPais;
+    @FXML private TextField txtTelefono;
+    @FXML private TextField txtCorreo;
+    @FXML private VBox panelDatosEmpresa;
+    @FXML private TextField txtRazonSocial;
+    @FXML private TextField txtDireccionFiscal;
+
+    @FXML private DatePicker dpFechaIngreso;
+    @FXML private DatePicker dpFechaSalida;
+    @FXML private ChoiceBox<String> cbHoraIngreso;
+    @FXML private Spinner<Integer> spHuespedes;
+    @FXML private VBox contenedorAcompanantes;
+    @FXML private Label lblNoches;
+    @FXML private ChoiceBox<String> cbPiso;
+    @FXML private ChoiceBox<String> cbTipoHabitacion;
+    @FXML private VBox contenedorHabitaciones;
+    @FXML private Label lblSinHabitaciones;
+
+    @FXML private Label lblHabitacionResumen;
+    @FXML private Label lblNochesResumen;
+    @FXML private Label lblPrecioNoche;
+    @FXML private Label lblTotal;
+    @FXML private ChoiceBox<String> cbMetodoPago;
+    @FXML private TextField txtMontoPago;
+    @FXML private Label lblAyudaPago;
 
     private final ReservaService reservaService = new ReservaService();
-
-
-    // =========================================================
-    // INITIALIZE
-    // =========================================================
+    private final HabitacionDAO habitacionDAO = new HabitacionDAO();
+    private HuespedesAdicionales acompanantes;
+    private Habitacion habitacionSeleccionada;
+    private Node tarjetaSeleccionada;
+    private boolean datosClienteListos;
+    private String documentoHuespedResuelto;
+    private String rucResuelto;
+    private boolean inicializando;
+    private int secuenciaConsulta;
 
     @FXML
     public void initialize() {
-
+        inicializando = true;
         configurarTipoCliente();
-
-        configurarFechas();
-
-        configurarHoras();
-
+        configurarFechasYHoras();
         configurarHuespedes();
-
-        configurarObservaciones();
-
-        configurarFiltrosHabitacion();
-
-        configurarMetodosPago();
-
-        configurarComprobante();
-
-        configurarMontoRecibido();
-
-        limpiarCliente();
-
-        cargarHabitaciones();
-
-        actualizarResumen();
+        configurarFiltros();
+        configurarPago();
+        inicializando = false;
+        limpiarCliente("Ingrese el documento y pulse Buscar.");
+        actualizarFechasYHabitaciones();
     }
 
-
-    // =========================================================
-    // TIPO DE CLIENTE
-    // =========================================================
-
     private void configurarTipoCliente() {
-
-        btnPersonaNatural.setToggleGroup(
-                grupoTipoCliente
-        );
-
-        btnEmpresa.setToggleGroup(
-                grupoTipoCliente
-        );
-
+        // Vincular los botones aquí mantiene el FXML editable en SceneBuilder.
+        btnPersonaNatural.setToggleGroup(grupoTipoCliente);
+        btnEmpresa.setToggleGroup(grupoTipoCliente);
         btnPersonaNatural.setSelected(true);
-
-
-        grupoTipoCliente
-                .selectedToggleProperty()
-                .addListener(
-                        (observable, anterior, actual) -> {
-
-                            if (actual == null) {
-
-                                if (anterior != null) {
-                                    anterior.setSelected(true);
-                                }
-
-                                return;
-                            }
-
-                            actualizarTipoCliente();
-                        }
-                );
-
-
+        grupoTipoCliente.selectedToggleProperty().addListener((observable, anterior, actual) -> {
+            if (actual == null) {
+                if (anterior != null) {
+                    anterior.setSelected(true);
+                }
+                return;
+            }
+            actualizarTipoCliente();
+        });
         actualizarTipoCliente();
     }
 
-
     private void actualizarTipoCliente() {
-
-        limpiarCliente();
-
-
-        if (btnEmpresa.isSelected()) {
-
-            lblTipoDocumento.setText(
-                    "RUC de la empresa *"
-            );
-
-            txtDocumento.setPromptText(
-                    "Ingrese RUC"
-            );
-
-        } else {
-
-            lblTipoDocumento.setText(
-                    "DNI del cliente *"
-            );
-
-            txtDocumento.setPromptText(
-                    "Ingrese DNI"
-            );
-        }
-
-        // Si se factura a una empresa, igual se hospeda una persona: se pide su DNI aparte.
-        filaDocumentoHuesped.setVisible(btnEmpresa.isSelected());
-        filaDocumentoHuesped.setManaged(btnEmpresa.isSelected());
-        txtDocumentoHuesped.clear();
-
-
-        actualizarEstiloTipoCliente();
+        boolean empresa = btnEmpresa.isSelected();
+        lblTipoDocumento.setText(empresa ? "RUC de la empresa *" : "DNI del huésped *");
+        txtDocumento.setPromptText(empresa ? "11 dígitos" : "8 dígitos");
+        filaDocumentoHuesped.setVisible(empresa);
+        filaDocumentoHuesped.setManaged(empresa);
+        panelDatosEmpresa.setVisible(empresa && datosClienteListos);
+        panelDatosEmpresa.setManaged(empresa && datosClienteListos);
+        secuenciaConsulta++;
+        limpiarCliente("Busque primero en la base local; las consultas externas son opcionales.");
     }
 
-
-    private void actualizarEstiloTipoCliente() {
-
-        String activo =
-                "-fx-background-color: #A87425;"
-                + "-fx-background-radius: 7;"
-                + "-fx-text-fill: white;"
-                + "-fx-font-size: 9px;"
-                + "-fx-font-weight: bold;";
-
-
-        String normal =
-                "-fx-background-color: #F2F2F2;"
-                + "-fx-background-radius: 7;"
-                + "-fx-text-fill: #222222;"
-                + "-fx-font-size: 9px;";
-
-
-        if (btnPersonaNatural.isSelected()) {
-
-            btnPersonaNatural.setStyle(activo);
-            btnEmpresa.setStyle(normal);
-
-        } else {
-
-            btnPersonaNatural.setStyle(normal);
-            btnEmpresa.setStyle(activo);
-        }
+    private void configurarFechasYHoras() {
+        LocalDate hoy = LocalDate.now();
+        dpFechaIngreso.setValue(hoy);
+        dpFechaSalida.setValue(hoy.plusDays(1));
+        cbHoraIngreso.getItems().setAll("06:00", "07:00", "08:00", "09:00", "10:00", "11:00",
+                "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00",
+                "20:00", "21:00", "22:00");
+        cbHoraIngreso.setValue("14:00");
+        dpFechaIngreso.valueProperty().addListener((observable, anterior, actual) -> actualizarFechasYHabitaciones());
+        dpFechaSalida.valueProperty().addListener((observable, anterior, actual) -> actualizarFechasYHabitaciones());
     }
 
+    private void configurarHuespedes() {
+        spHuespedes.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 1));
+        acompanantes = new HuespedesAdicionales(contenedorAcompanantes);
+        spHuespedes.valueProperty().addListener((obs, antes, ahora) -> {
+            acompanantes.actualizar(ahora);
+            if (habitacionSeleccionada != null && ahora > habitacionSeleccionada.getTipo().getCapacidad()) {
+                limpiarSeleccionHabitacion();
+            }
+            if (!inicializando) cargarHabitaciones();
+        });
+        acompanantes.actualizar(1);
+    }
 
-    // =========================================================
-    // BUSCAR CLIENTE
-    // =========================================================
+    private void configurarFiltros() {
+        cbPiso.getItems().setAll("Todos los pisos");
+        cbTipoHabitacion.getItems().setAll("Todos los tipos");
+        try {
+            for (Integer piso : reservaService.listarPisos()) {
+                cbPiso.getItems().add("Piso " + piso);
+            }
+            cbTipoHabitacion.getItems().addAll(reservaService.listarTiposHabitacion());
+        } catch (SQLException error) {
+            Alertas.mostrarError("Error de base de datos", "No se pudieron cargar los filtros.\n\n" + error.getMessage());
+        }
+        cbPiso.setValue("Todos los pisos");
+        cbTipoHabitacion.setValue("Todos los tipos");
+        cbPiso.valueProperty().addListener((observable, anterior, actual) -> cargarHabitaciones());
+        cbTipoHabitacion.valueProperty().addListener((observable, anterior, actual) -> cargarHabitaciones());
+    }
+
+    private void configurarPago() {
+        cbMetodoPago.getItems().setAll("EFECTIVO", "TARJETA", "TRANSFERENCIA", "YAPE");
+        cbMetodoPago.setValue("EFECTIVO");
+    }
 
     @FXML
     private void buscarCliente() {
-
-        String documento =
-                txtDocumento
-                        .getText()
-                        .trim();
-
-
-        if (documento.isEmpty()) {
-
-            Alertas.mostrarAdvertencia(
-                    "Documento requerido",
-                    "Ingrese un DNI o RUC."
-            );
-
-            txtDocumento.requestFocus();
-
-            return;
-        }
-
-
-        if (btnPersonaNatural.isSelected()) {
-
-            if (!documento.matches("\\d{8}")) {
-
-                Alertas.mostrarAdvertencia(
-                        "DNI inválido",
-                        "El DNI debe contener exactamente 8 números."
-                );
-
-                txtDocumento.requestFocus();
-
-                return;
-            }
-
-        } else {
-
-            if (!documento.matches("\\d{11}")) {
-
-                Alertas.mostrarAdvertencia(
-                        "RUC inválido",
-                        "El RUC debe contener exactamente 11 números."
-                );
-
-                txtDocumento.requestFocus();
-
-                return;
-            }
-        }
-
-
+        int consultaActual = ++secuenciaConsulta;
+        limpiarCliente("Buscando primero en la base de datos local...");
+        String documento = txtDocumento.getText().trim();
         if (btnEmpresa.isSelected()) {
-            buscarEmpresaYHuesped(documento);
+            String dniHuesped = txtDocumentoHuesped.getText().trim();
+            if (!Validador.esRucValido(documento)) {
+                mostrarErrorDocumento("El RUC debe contener 11 dígitos válidos.");
+                return;
+            }
+            if (!Validador.esDniValido(dniHuesped)) {
+                mostrarErrorDocumento("Ingrese el DNI válido de la persona que se hospedará.");
+                return;
+            }
+            buscarEmpresa(documento, dniHuesped, consultaActual);
         } else {
-            buscarPersonaNatural(documento);
+            if (!Validador.esDniValido(documento)) {
+                mostrarErrorDocumento("El DNI debe contener 8 dígitos válidos.");
+                return;
+            }
+            buscarHuesped(documento, null, consultaActual);
         }
     }
 
-
-    /** Busca al huesped (persona natural) primero en la BD y, si no esta, en RENIEC. */
-    private void buscarPersonaNatural(String dni) {
-
-        if (!Validador.esDniValido(dni)) {
-            Alertas.mostrarAdvertencia("DNI inválido", "Ingrese un DNI válido.");
-            return;
-        }
-
+    private void buscarEmpresa(String ruc, String dniHuesped, int consultaActual) {
         try {
-            Huesped local = huespedDAO.buscarPorDocumento("DNI", dni);
-            if (local != null) {
-                empresaEncontrada = null;
-                cargarClienteDesdeHuesped(local);
+            Empresa empresaLocal = reservaService.buscarEmpresaLocal(ruc);
+            if (empresaLocal != null) {
+                cargarEmpresa(empresaLocal, true);
+                buscarHuesped(dniHuesped, empresaLocal, consultaActual);
                 return;
             }
-        } catch (SQLException e) {
-            Alertas.mostrarError("Error de base de datos", "No se pudo buscar al cliente.\n\n" + e.getMessage());
+        } catch (SQLException error) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo buscar la empresa.\n\n" + error.getMessage());
             return;
         }
 
-        btnBuscarCliente.setDisable(true);
-        Task<Huesped> tarea = ReniecService.consultarDni(dni);
-        tarea.setOnSucceeded(e -> {
-            btnBuscarCliente.setDisable(false);
-            Huesped h = tarea.getValue();
-            if (h == null) {
-                Alertas.mostrarAdvertencia("Cliente no encontrado",
-                        "No se encontraron datos para ese DNI en RENIEC.");
-                return;
-            }
-            h.setPaisProcedencia("Perú");
-            empresaEncontrada = null;
-            cargarClienteDesdeHuesped(h);
-        });
-        tarea.setOnFailed(e -> {
-            btnBuscarCliente.setDisable(false);
-            Alertas.mostrarInfo("RENIEC", "No se pudo consultar RENIEC (" + causaError(tarea.getException()) + ").");
-        });
-        iniciarTarea(tarea);
-    }
-
-
-    /**
-     * Modo "Empresa": el RUC solo sirve para la facturación; quien se hospeda sigue siendo una
-     * persona real, por eso tambien se pide y se busca su DNI (txtDocumentoHuesped).
-     */
-    private void buscarEmpresaYHuesped(String ruc) {
-
-        if (!Validador.esRucValido(ruc)) {
-            Alertas.mostrarAdvertencia("RUC inválido", "Ingrese un RUC válido.");
-            return;
-        }
-
-        String dniHuesped = txtDocumentoHuesped.getText().trim();
-        if (!Validador.esDniValido(dniHuesped)) {
-            Alertas.mostrarAdvertencia("DNI del huésped requerido",
-                    "Ingrese el DNI de la persona que se va a hospedar.");
-            return;
-        }
-
-        Empresa empresaLocal;
-        try (java.sql.Connection con = ConexionBD.conectar()) {
-            empresaLocal = empresaDAO.buscarPorRuc(con, ruc);
-        } catch (SQLException e) {
-            Alertas.mostrarError("Error de base de datos", "No se pudo buscar la empresa.\n\n" + e.getMessage());
-            return;
-        }
-
-        if (empresaLocal != null) {
-            continuarConEmpresa(empresaLocal, dniHuesped);
-            return;
-        }
-
-        btnBuscarCliente.setDisable(true);
+        bloquearBusqueda("Empresa no encontrada localmente. Consultando SUNAT...");
         Task<Empresa> tarea = SunatRucService.consultarRuc(ruc);
-        tarea.setOnSucceeded(e -> {
-            btnBuscarCliente.setDisable(false);
+        tarea.setOnSucceeded(evento -> {
+            if (consultaActual != secuenciaConsulta) {
+                return;
+            }
             Empresa empresa = tarea.getValue();
             if (empresa == null) {
-                Alertas.mostrarAdvertencia("Empresa no encontrada", "No se encontraron datos para ese RUC en la SUNAT.");
+                habilitarEmpresaManual(ruc, "SUNAT no devolvió datos. Complete la empresa manualmente.");
+                buscarHuesped(dniHuesped, construirEmpresaDesdeCampos(), consultaActual);
+            } else {
+                cargarEmpresa(empresa, false);
+                buscarHuesped(dniHuesped, empresa, consultaActual);
+            }
+        });
+        tarea.setOnFailed(evento -> {
+            if (consultaActual != secuenciaConsulta) {
                 return;
             }
-            continuarConEmpresa(empresa, dniHuesped);
-        });
-        tarea.setOnFailed(e -> {
-            btnBuscarCliente.setDisable(false);
-            Alertas.mostrarInfo("SUNAT", "No se pudo consultar la SUNAT (" + causaError(tarea.getException()) + ").");
+            habilitarEmpresaManual(ruc, "SUNAT no está disponible. Complete la empresa manualmente.");
+            buscarHuesped(dniHuesped, construirEmpresaDesdeCampos(), consultaActual);
         });
         iniciarTarea(tarea);
     }
 
-
-    /** Con la empresa ya resuelta, busca (BD y luego RENIEC) al huesped que se va a hospedar. */
-    private void continuarConEmpresa(Empresa empresa, String dniHuesped) {
-
+    private void buscarHuesped(String dni, Empresa empresa, int consultaActual) {
         try {
-            Huesped local = huespedDAO.buscarPorDocumento("DNI", dniHuesped);
-            if (local != null) {
-                empresaEncontrada = empresa;
-                cargarClienteDesdeHuesped(local);
+            Huesped huespedLocal = reservaService.buscarHuespedLocal("DNI", dni);
+            if (huespedLocal != null) {
+                cargarHuesped(huespedLocal, true);
+                completarBusqueda(empresa, dni, consultaActual, "Huésped encontrado en la base local.");
+                verificarIdentidadExistente(dni, consultaActual);
                 return;
             }
-        } catch (SQLException e) {
-            Alertas.mostrarError("Error de base de datos", "No se pudo buscar al huésped.\n\n" + e.getMessage());
+        } catch (SQLException error) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo buscar al huésped.\n\n" + error.getMessage());
+            desbloquearBusqueda();
             return;
         }
 
-        btnBuscarCliente.setDisable(true);
-        Task<Huesped> tarea = ReniecService.consultarDni(dniHuesped);
-        tarea.setOnSucceeded(e -> {
-            btnBuscarCliente.setDisable(false);
-            Huesped h = tarea.getValue();
-            if (h == null) {
-                Alertas.mostrarAdvertencia("Huésped no encontrado",
-                        "No se encontraron datos para el DNI del huésped en RENIEC.");
+        bloquearBusqueda("Huésped no encontrado localmente. Consultando RENIEC...");
+        Task<Huesped> tarea = ReniecService.consultarDni(dni);
+        tarea.setOnSucceeded(evento -> {
+            if (consultaActual != secuenciaConsulta) {
                 return;
             }
-            h.setPaisProcedencia("Perú");
-            empresaEncontrada = empresa;
-            cargarClienteDesdeHuesped(h);
+            Huesped huesped = tarea.getValue();
+            if (huesped == null) {
+                habilitarHuespedManual(dni, "RENIEC no devolvió datos. Ingrese el huésped manualmente.");
+            } else {
+                huesped.setPaisProcedencia("Perú");
+                cargarHuesped(huesped, false);
+                lblEstadoBusqueda.setText("RENIEC autocompletó los datos; complete teléfono y correo si corresponde.");
+            }
+            completarBusqueda(empresa, dni, consultaActual, lblEstadoBusqueda.getText());
         });
-        tarea.setOnFailed(e -> {
-            btnBuscarCliente.setDisable(false);
-            Alertas.mostrarInfo("RENIEC", "No se pudo consultar RENIEC (" + causaError(tarea.getException()) + ").");
+        tarea.setOnFailed(evento -> {
+            if (consultaActual != secuenciaConsulta) {
+                return;
+            }
+            habilitarHuespedManual(dni, "Sin conexión con RENIEC. Puede continuar con ingreso manual.");
+            completarBusqueda(empresa, dni, consultaActual, lblEstadoBusqueda.getText());
         });
         iniciarTarea(tarea);
     }
 
+    private void verificarIdentidadExistente(String dni, int consultaActual) {
+        Task<Huesped> consulta = ReniecService.consultarDni(dni);
+        consulta.setOnSucceeded(evento -> {
+            if (consultaActual != secuenciaConsulta || consulta.getValue() == null) return;
+            Task<Huesped> actualizar = new Task<>() {
+                @Override protected Huesped call() throws Exception {
+                    return reservaService.reconciliarIdentidadDni(dni, consulta.getValue());
+                }
+            };
+            actualizar.setOnSucceeded(ev -> {
+                if (consultaActual != secuenciaConsulta || actualizar.getValue() == null) return;
+                Huesped h = actualizar.getValue();
+                txtNombres.setText(h.getNombres());
+                txtApellidos.setText(h.getApellidos());
+                lblEstadoBusqueda.setText("Identidad actualizada desde RENIEC; se conservaron los datos de contacto.");
+            });
+            actualizar.setOnFailed(ev -> lblEstadoBusqueda.setText(
+                    "Se cargaron datos locales; no se pudo actualizar la identidad."));
+            iniciarTarea(actualizar);
+        });
+        consulta.setOnFailed(evento -> {
+            if (consultaActual == secuenciaConsulta) {
+                lblEstadoBusqueda.setText("Huésped local cargado; RENIEC no está disponible.");
+            }
+        });
+        iniciarTarea(consulta);
+    }
+
+    private void completarBusqueda(Empresa empresa, String dni, int consultaActual, String mensaje) {
+        if (consultaActual != secuenciaConsulta) {
+            return;
+        }
+        if (btnEmpresa.isSelected() && empresa != null && txtRazonSocial.getText().isBlank()) {
+            cargarEmpresa(empresa, false);
+        }
+        datosClienteListos = true;
+        documentoHuespedResuelto = dni;
+        rucResuelto = btnEmpresa.isSelected() ? txtDocumento.getText().trim() : null;
+        panelDatosHuesped.setVisible(true);
+        panelDatosHuesped.setManaged(true);
+        panelDatosEmpresa.setVisible(btnEmpresa.isSelected());
+        panelDatosEmpresa.setManaged(btnEmpresa.isSelected());
+        lblEstadoBusqueda.setText(mensaje);
+        desbloquearBusqueda();
+    }
+
+    private void cargarHuesped(Huesped huesped, boolean existente) {
+        txtNombres.setText(valorSeguro(huesped.getNombres()));
+        txtApellidos.setText(valorSeguro(huesped.getApellidos()));
+        txtPais.setText(valorSeguro(huesped.getPaisProcedencia()).isBlank() ? "Perú" : huesped.getPaisProcedencia());
+        txtTelefono.setText(valorSeguro(huesped.getTelefono()));
+        txtCorreo.setText(valorSeguro(huesped.getEmail()));
+        hacerEditablesDatosHuesped(!existente);
+    }
+
+    private void habilitarHuespedManual(String dni, String mensaje) {
+        txtNombres.clear();
+        txtApellidos.clear();
+        txtPais.setText("Perú");
+        txtTelefono.clear();
+        txtCorreo.clear();
+        hacerEditablesDatosHuesped(true);
+        lblEstadoBusqueda.setText(mensaje + " DNI: " + dni);
+    }
+
+    private void hacerEditablesDatosHuesped(boolean editable) {
+        txtNombres.setDisable(!editable);
+        txtApellidos.setDisable(!editable);
+        txtPais.setDisable(!editable);
+        txtTelefono.setDisable(!editable);
+        txtCorreo.setDisable(!editable);
+    }
+
+    private void cargarEmpresa(Empresa empresa, boolean existente) {
+        txtRazonSocial.setText(valorSeguro(empresa.getRazonSocial()));
+        txtDireccionFiscal.setText(valorSeguro(empresa.getDireccion()));
+        txtRazonSocial.setDisable(existente);
+        txtDireccionFiscal.setDisable(existente);
+    }
+
+    private void habilitarEmpresaManual(String ruc, String mensaje) {
+        panelDatosEmpresa.setVisible(true);
+        panelDatosEmpresa.setManaged(true);
+        txtRazonSocial.clear();
+        txtDireccionFiscal.clear();
+        txtRazonSocial.setDisable(false);
+        txtDireccionFiscal.setDisable(false);
+        lblEstadoBusqueda.setText(mensaje + " RUC: " + ruc);
+    }
 
     private void iniciarTarea(Task<?> tarea) {
-        Thread hilo = new Thread(tarea);
-        hilo.setDaemon(true);
-        hilo.start();
+        Thread hiloConsulta = new Thread(tarea, "consulta-api-reservas");
+        hiloConsulta.setDaemon(true);
+        hiloConsulta.start();
     }
 
-
-    private String causaError(Throwable t) {
-        return t == null || t.getMessage() == null ? "sin conexión" : t.getMessage();
+    private void bloquearBusqueda(String mensaje) {
+        btnBuscarCliente.setDisable(true);
+        lblEstadoBusqueda.setText(mensaje);
     }
 
-
-    private void cargarClienteDesdeHuesped(Huesped h) {
-
-        huespedEncontrado = h;
-
-        cargarCliente(
-                h.getNombres(),
-                h.getApellidos(),
-                "--",
-                h.getTelefono(),
-                h.getEmail(),
-                empresaEncontrada != null
-                        ? "Se factura a " + empresaEncontrada.getRazonSocial() + " (RUC " + empresaEncontrada.getRuc() + ")"
-                        : "--"
-        );
-
-        rbFactura.setSelected(empresaEncontrada != null);
-        rbBoleta.setSelected(empresaEncontrada == null);
+    private void desbloquearBusqueda() {
+        btnBuscarCliente.setDisable(false);
     }
 
-
-    // =========================================================
-    // CARGAR CLIENTE
-    // =========================================================
-
-    /*
-     * Este método se utilizará posteriormente
-     * cuando exista conexión con la base de datos.
-     */
-    private void cargarCliente(
-            String nombres,
-            String apellidos,
-            String nacimiento,
-            String celular,
-            String correo,
-            String direccion
-    ) {
-
-        clienteSeleccionado = true;
-
-
-        lblNombres.setText(
-                valorSeguro(nombres)
-        );
-
-        lblApellidos.setText(
-                valorSeguro(apellidos)
-        );
-
-        lblNacimiento.setText(
-                valorSeguro(nacimiento)
-        );
-
-        lblCelular.setText(
-                valorSeguro(celular)
-        );
-
-        lblCorreo.setText(
-                valorSeguro(correo)
-        );
-
-        lblDireccion.setText(
-                valorSeguro(direccion)
-        );
-
-
-        panelSinCliente.setVisible(false);
-        panelSinCliente.setManaged(false);
-
-        panelClienteEncontrado.setManaged(true);
-        panelClienteEncontrado.setVisible(true);
-
-
-        if (empresaEncontrada != null) {
-
-            txtDocumentoComprobante.setText(empresaEncontrada.getRuc());
-
-            txtNombreComprobante.setText(empresaEncontrada.getRazonSocial());
-
-        } else {
-
-            txtDocumentoComprobante.setText(
-                    txtDocumento.getText().trim()
-            );
-
-
-            String nombreCompleto =
-                    (valorSeguro(nombres)
-                            + " "
-                            + valorSeguro(apellidos))
-                            .trim();
-
-
-            txtNombreComprobante.setText(
-                    nombreCompleto
-            );
-        }
+    private void mostrarErrorDocumento(String mensaje) {
+        desbloquearBusqueda();
+        lblEstadoBusqueda.setText(mensaje);
+        Alertas.mostrarAdvertencia("Documento inválido", mensaje);
     }
 
-
-    @FXML
-    private void editarCliente() {
-
-        if (!clienteSeleccionado) {
-            return;
-        }
-
-        /*
-         * Posteriormente puedes abrir
-         * un formulario de edición.
-         */
-    }
-
-
-    private void limpiarCliente() {
-
-        clienteSeleccionado = false;
-
-        huespedEncontrado = null;
-
-        empresaEncontrada = null;
-
-
-        if (panelClienteEncontrado != null) {
-
-            panelClienteEncontrado.setVisible(false);
-            panelClienteEncontrado.setManaged(false);
-        }
-
-
-        if (panelSinCliente != null) {
-
-            panelSinCliente.setManaged(true);
-            panelSinCliente.setVisible(true);
-        }
-
-
-        if (lblNombres != null) {
-            lblNombres.setText("--");
-        }
-
-        if (lblApellidos != null) {
-            lblApellidos.setText("--");
-        }
-
-        if (lblNacimiento != null) {
-            lblNacimiento.setText("--");
-        }
-
-        if (lblCelular != null) {
-            lblCelular.setText("--");
-        }
-
-        if (lblCorreo != null) {
-            lblCorreo.setText("--");
-        }
-
-        if (lblDireccion != null) {
-            lblDireccion.setText("--");
-        }
-
-
-        if (txtDocumentoComprobante != null) {
-            txtDocumentoComprobante.clear();
-        }
-
-        if (txtNombreComprobante != null) {
-            txtNombreComprobante.clear();
+    private void actualizarFechasYHabitaciones() {
+        calcularNochesYTotal();
+        if (!inicializando) {
+            cargarHabitaciones();
         }
     }
-
-
-    // =========================================================
-    // FECHAS
-    // =========================================================
-
-    private void configurarFechas() {
-
-        LocalDate hoy =
-                LocalDate.now();
-
-
-        dpFechaIngreso.setValue(
-                hoy
-        );
-
-
-        dpFechaSalida.setValue(
-                hoy.plusDays(1)
-        );
-
-
-        dpFechaIngreso
-                .valueProperty()
-                .addListener(
-                        (observable, anterior, actual) -> {
-
-                            calcularNoches();
-
-                            cargarHabitaciones();
-                        }
-                );
-
-
-        dpFechaSalida
-                .valueProperty()
-                .addListener(
-                        (observable, anterior, actual) -> {
-
-                            calcularNoches();
-
-                            cargarHabitaciones();
-                        }
-                );
-
-
-        calcularNoches();
-    }
-
-
-    @FXML
-    private void actualizarReserva() {
-
-        calcularNoches();
-
-        cargarHabitaciones();
-
-        actualizarResumen();
-    }
-
-
-    private void calcularNoches() {
-
-        LocalDate ingreso =
-                dpFechaIngreso.getValue();
-
-        LocalDate salida =
-                dpFechaSalida.getValue();
-
-
-        if (ingreso == null ||
-            salida == null) {
-
-            lblNoches.setText("0");
-
-            actualizarResumen();
-
-            return;
-        }
-
-
-        long noches =
-                ChronoUnit.DAYS.between(
-                        ingreso,
-                        salida
-                );
-
-
-        if (noches < 0) {
-            noches = 0;
-        }
-
-
-        lblNoches.setText(
-                String.valueOf(noches)
-        );
-
-
-        actualizarResumen();
-    }
-
-
-    // =========================================================
-    // HORAS
-    // =========================================================
-
-    private void configurarHoras() {
-
-        cbHoraIngreso
-                .getItems()
-                .addAll(
-                        "06:00",
-                        "07:00",
-                        "08:00",
-                        "09:00",
-                        "10:00",
-                        "11:00",
-                        "12:00",
-                        "13:00",
-                        "14:00",
-                        "15:00",
-                        "16:00",
-                        "17:00",
-                        "18:00",
-                        "19:00",
-                        "20:00",
-                        "21:00",
-                        "22:00"
-                );
-
-
-        cbHoraSalida
-                .getItems()
-                .addAll(
-                        "06:00",
-                        "07:00",
-                        "08:00",
-                        "09:00",
-                        "10:00",
-                        "11:00",
-                        "12:00",
-                        "13:00",
-                        "14:00",
-                        "15:00",
-                        "16:00",
-                        "17:00",
-                        "18:00",
-                        "19:00",
-                        "20:00"
-                );
-
-
-        cbHoraIngreso.setValue(
-                "14:00"
-        );
-
-
-        cbHoraSalida.setValue(
-                "12:00"
-        );
-    }
-
-
-    // =========================================================
-    // HUÉSPEDES
-    // =========================================================
-
-    private void configurarHuespedes() {
-
-        SpinnerValueFactory
-                .IntegerSpinnerValueFactory factory =
-                new SpinnerValueFactory
-                        .IntegerSpinnerValueFactory(
-                                1,
-                                20,
-                                1
-                        );
-
-
-        spHuespedes.setValueFactory(
-                factory
-        );
-    }
-
-
-    // =========================================================
-    // OBSERVACIONES
-    // =========================================================
-
-    private void configurarObservaciones() {
-
-        txtObservaciones
-                .textProperty()
-                .addListener(
-                        (observable, anterior, actual) -> {
-
-                            if (actual.length() > 300) {
-
-                                txtObservaciones.setText(
-                                        anterior
-                                );
-
-                                return;
-                            }
-
-
-                            lblContadorObservaciones.setText(
-                                    actual.length()
-                                    + " / 300"
-                            );
-                        }
-                );
-    }
-
-
-    // =========================================================
-    // FILTROS DE HABITACIÓN
-    // =========================================================
-
-    private void configurarFiltrosHabitacion() {
-
-        cbPiso
-                .getItems()
-                .clear();
-
-        cbPiso
-                .getItems()
-                .add(
-                        "Todos los pisos"
-                );
-
-        cbTipoHabitacion
-                .getItems()
-                .clear();
-
-        cbTipoHabitacion
-                .getItems()
-                .add(
-                        "Todos los tipos"
-                );
-
-        try (java.sql.Connection con = ConexionBD.conectar()) {
-            for (Integer piso : habitacionDAO.listarPisos(con)) {
-                cbPiso.getItems().add("Piso " + piso);
-            }
-            cbTipoHabitacion.getItems().addAll(habitacionDAO.listarNombresTipo(con));
-        } catch (SQLException e) {
-            Alertas.mostrarError("Error de base de datos", "No se pudieron cargar los pisos y tipos.\n\n" + e.getMessage());
-        }
-
-        cbPiso.setValue(
-                "Todos los pisos"
-        );
-
-        cbTipoHabitacion.setValue(
-                "Todos los tipos"
-        );
-
-
-        cbPiso
-                .getSelectionModel()
-                .selectedItemProperty()
-                .addListener(
-                        (observable, anterior, actual) -> {
-
-                            cargarHabitaciones();
-                        }
-                );
-
-
-        cbTipoHabitacion
-                .getSelectionModel()
-                .selectedItemProperty()
-                .addListener(
-                        (observable, anterior, actual) -> {
-
-                            cargarHabitaciones();
-                        }
-                );
-    }
-
-
-    // =========================================================
-    // CARGAR HABITACIONES
-    // =========================================================
 
     private void cargarHabitaciones() {
-
+        limpiarSeleccionHabitacion();
         LocalDate ingreso = dpFechaIngreso.getValue();
         LocalDate salida = dpFechaSalida.getValue();
-
         if (ingreso == null || salida == null || !salida.isAfter(ingreso)) {
-            limpiarHabitaciones();
+            mostrarMensajeHabitaciones("Seleccione un rango de fechas válido.");
             return;
         }
+        Integer piso = obtenerPisoSeleccionado();
+        String tipo = "Todos los tipos".equals(cbTipoHabitacion.getValue()) ? null : cbTipoHabitacion.getValue();
+        try {
+            List<Habitacion> disponibles = reservaService.buscarDisponibles(ingreso, salida, piso, tipo);
+            Set<Integer> idsDisponibles = new HashSet<>();
+            for (Habitacion habitacion : disponibles) idsDisponibles.add(habitacion.getIdHabitacion());
+            Map<Integer, List<Habitacion>> porPiso = new TreeMap<>();
+            for (Habitacion habitacion : habitacionDAO.listar()) {
+                if (piso != null && habitacion.getPiso() != piso) continue;
+                if (tipo != null && !tipo.equals(habitacion.getTipo().getNombre())) continue;
+                porPiso.computeIfAbsent(habitacion.getPiso(), numero -> new ArrayList<>()).add(habitacion);
+            }
+            contenedorHabitaciones.getChildren().clear();
+            if (porPiso.isEmpty()) {
+                mostrarMensajeHabitaciones("No hay habitaciones que coincidan con el piso y tipo seleccionados.");
+                return;
+            }
+            if (disponibles.isEmpty()) {
+                Label aviso = new Label("No hay habitaciones disponibles para esas fechas y filtros.");
+                aviso.setStyle("-fx-text-fill: #8A462E; -fx-font-weight: bold;");
+                contenedorHabitaciones.getChildren().add(aviso);
+            }
+            porPiso.forEach((numero, habitaciones) ->
+                    contenedorHabitaciones.getChildren().add(crearPlanoPiso(numero, habitaciones, idsDisponibles)));
+        } catch (IllegalArgumentException error) {
+            mostrarMensajeHabitaciones(error.getMessage());
+        } catch (SQLException error) {
+            mostrarMensajeHabitaciones("No se pudieron cargar las habitaciones.");
+            Alertas.mostrarError("Error de base de datos", error.getMessage());
+        }
+    }
 
+    /** Dibuja cada tramo como dos alas de cuatro habitaciones separadas por un pasillo. */
+    private VBox crearPlanoPiso(int numero, List<Habitacion> habitaciones, Set<Integer> idsDisponibles) {
+        VBox piso = new VBox(9);
+        piso.getStyleClass().add("plano-piso");
+        Label titulo = new Label("Piso " + numero + " · " + habitaciones.size() + " habitaciones");
+        titulo.getStyleClass().add("plano-titulo");
+        piso.getChildren().add(titulo);
+        for (int inicio = 0; inicio < habitaciones.size(); inicio += 8) {
+            GridPane tramo = new GridPane();
+            tramo.setHgap(8);
+            tramo.setVgap(8);
+            Label pasillo = new Label("PASILLO CENTRAL  ·  PISO " + numero);
+            pasillo.getStyleClass().add("plano-pasillo");
+            pasillo.setMaxWidth(Double.MAX_VALUE);
+            pasillo.setAlignment(Pos.CENTER);
+            tramo.add(pasillo, 0, 1, 4, 1);
+            int fin = Math.min(inicio + 8, habitaciones.size());
+            for (int indice = inicio; indice < fin; indice++) {
+                Habitacion habitacion = habitaciones.get(indice);
+                boolean disponible = idsDisponibles.contains(habitacion.getIdHabitacion());
+                boolean capacidad = habitacion.getTipo().getCapacidad() >= spHuespedes.getValue();
+                Button celda = new Button(habitacion.getNumero() + "\n" + habitacion.getTipo().getNombre()
+                        + " · " + habitacion.getTipo().getCapacidad() + " pers.\n"
+                        + (disponible && capacidad
+                                ? moneda(habitacion.getTipo().getPrecioBase()) + " / noche"
+                                : disponible ? "Capacidad insuficiente" : "No disponible"));
+                celda.getStyleClass().addAll("plano-habitacion",
+                        disponible && capacidad ? "plano-habitacion-disponible" : "plano-habitacion-ocupada");
+                celda.setDisable(!disponible || !capacidad);
+                celda.setOnAction(evento -> seleccionarHabitacion(habitacion, celda));
+                celda.setAccessibleText("Habitación " + habitacion.getNumero() + ", "
+                        + (disponible && capacidad ? "disponible" : "no disponible"));
+                tramo.add(celda, (indice - inicio) % 4, indice - inicio < 4 ? 0 : 2);
+            }
+            piso.getChildren().add(tramo);
+        }
+        return piso;
+    }
+
+    private void seleccionarHabitacion(Habitacion habitacion, Node tarjeta) {
+        if (spHuespedes.getValue() > habitacion.getTipo().getCapacidad()) {
+            Alertas.mostrarAdvertencia("Capacidad insuficiente", "La habitación admite como máximo "
+                    + habitacion.getTipo().getCapacidad() + " huésped(es).");
+            return;
+        }
+        if (tarjetaSeleccionada != null) {
+            tarjetaSeleccionada.getStyleClass().remove("plano-habitacion-seleccionada");
+        }
+        habitacionSeleccionada = habitacion;
+        tarjetaSeleccionada = tarjeta;
+        tarjeta.getStyleClass().add("plano-habitacion-seleccionada");
+        calcularNochesYTotal();
+    }
+
+    private Integer obtenerPisoSeleccionado() {
         String piso = cbPiso.getValue();
-        Integer numeroPiso = (piso != null && piso.startsWith("Piso "))
-                ? Integer.valueOf(piso.substring("Piso ".length())) : null;
-        String tipo = cbTipoHabitacion.getValue();
-        String nombreTipo = (tipo == null || "Todos los tipos".equals(tipo)) ? null : tipo;
-
-        List<Habitacion> disponibles;
-        try {
-            disponibles = reservaService.buscarDisponibles(ingreso, salida, numeroPiso, nombreTipo);
-        } catch (SQLException e) {
-            Alertas.mostrarError("Error de base de datos", "No se pudieron cargar las habitaciones.\n\n" + e.getMessage());
-            limpiarHabitaciones();
-            return;
-        }
-
-        habitacionElegida = null;
-        precioNoche = 0.00;
-        contenedorHabitaciones.getChildren().clear();
-
-        if (disponibles.isEmpty()) {
-            lblSinHabitaciones.setText("No hay habitaciones disponibles para esas fechas y filtros.");
-            contenedorHabitaciones.getChildren().add(lblSinHabitaciones);
-        } else {
-            for (Habitacion h : disponibles) {
-                contenedorHabitaciones.getChildren().add(crearTarjetaHabitacion(h));
-            }
-        }
-
-        actualizarResumen();
+        return piso != null && piso.startsWith("Piso ") ? Integer.valueOf(piso.substring(5)) : null;
     }
 
-
-    /** Fila compacta y clickeable de una habitacion disponible, para elegirla. */
-    private HBox crearTarjetaHabitacion(Habitacion h) {
-
-        HBox tarjeta = new HBox(8.0);
-        tarjeta.setStyle(estiloTarjetaHabitacion(false));
-
-        Region punto = new Region();
-        punto.setPrefSize(9.0, 9.0);
-        punto.setMaxSize(9.0, 9.0);
-        punto.setStyle("-fx-background-color: #1C9748; -fx-background-radius: 5;");
-
-        VBox datos = new VBox(1.0);
-        Label lblNumeroTipo = new Label(h.getNumero() + " · " + h.getTipo().getNombre());
-        lblNumeroTipo.setStyle("-fx-font-size: 9px; -fx-font-weight: bold; -fx-text-fill: #222222;");
-        Label lblPrecio = new Label(String.format(Locale.US, "S/ %.2f por noche · Piso %d", h.getTipo().getPrecioBase(), h.getPiso()));
-        lblPrecio.setStyle("-fx-font-size: 8px; -fx-text-fill: #777777;");
-        datos.getChildren().addAll(lblNumeroTipo, lblPrecio);
-
-        HBox.setHgrow(datos, javafx.scene.layout.Priority.ALWAYS);
-        tarjeta.getChildren().addAll(punto, datos);
-        tarjeta.setOnMouseClicked(e -> elegirHabitacion(h, tarjeta));
-
-        return tarjeta;
+    private void mostrarMensajeHabitaciones(String mensaje) {
+        contenedorHabitaciones.getChildren().setAll(lblSinHabitaciones);
+        lblSinHabitaciones.setText(mensaje);
     }
 
-    private String estiloTarjetaHabitacion(boolean elegida) {
-        return "-fx-padding: 8px 10px; -fx-background-radius: 6; -fx-cursor: hand; -fx-alignment: CENTER_LEFT; "
-                + (elegida
-                    ? "-fx-background-color: #FBF1E1; -fx-border-color: #A87425; -fx-border-radius: 6; -fx-border-width: 1.4px;"
-                    : "-fx-background-color: white; -fx-border-color: #E7E7E7; -fx-border-radius: 6; -fx-border-width: 1px;");
+    private void limpiarSeleccionHabitacion() {
+        habitacionSeleccionada = null;
+        tarjetaSeleccionada = null;
+        calcularNochesYTotal();
     }
 
-    private void elegirHabitacion(Habitacion h, HBox tarjetaElegida) {
-
-        habitacionElegida = h;
-        precioNoche = h.getTipo().getPrecioBase().doubleValue();
-
-        for (javafx.scene.Node nodo : contenedorHabitaciones.getChildren()) {
-            if (nodo instanceof HBox fila) {
-                fila.setStyle(estiloTarjetaHabitacion(fila == tarjetaElegida));
-            }
-        }
-
-        actualizarResumen();
+    private void calcularNochesYTotal() {
+        LocalDate ingreso = dpFechaIngreso.getValue();
+        LocalDate salida = dpFechaSalida.getValue();
+        long noches = ingreso != null && salida != null && salida.isAfter(ingreso)
+                ? ChronoUnit.DAYS.between(ingreso, salida) : 0;
+        BigDecimal precio = habitacionSeleccionada == null
+                ? BigDecimal.ZERO : habitacionSeleccionada.getTipo().getPrecioBase();
+        BigDecimal total = precio.multiply(BigDecimal.valueOf(noches));
+        lblNoches.setText(String.valueOf(noches));
+        lblNochesResumen.setText(String.valueOf(noches));
+        lblHabitacionResumen.setText(habitacionSeleccionada == null ? "--"
+                : habitacionSeleccionada.getNumero() + " · " + habitacionSeleccionada.getTipo().getNombre());
+        lblPrecioNoche.setText(moneda(precio));
+        lblTotal.setText(moneda(total));
+        actualizarPagoSugerido(total);
     }
 
-
-    private void limpiarHabitaciones() {
-
-        habitacionElegida = null;
-
-        precioNoche = 0.00;
-
-
-        contenedorHabitaciones
-                .getChildren()
-                .clear();
-
-
-        lblSinHabitaciones.setText(
-                "No hay habitaciones cargadas."
-        );
-
-
-        contenedorHabitaciones
-                .getChildren()
-                .add(
-                        lblSinHabitaciones
-                );
-
-
-        actualizarResumen();
+    private void actualizarPagoSugerido(BigDecimal total) {
+        boolean ingresoHoy = LocalDate.now().equals(dpFechaIngreso.getValue());
+        BigDecimal sugerido = ingresoHoy ? total
+                : total.multiply(new BigDecimal("0.50")).setScale(2, RoundingMode.HALF_UP);
+        txtMontoPago.setText(sugerido.signum() == 0 ? "" : sugerido.toPlainString());
+        lblAyudaPago.setText(ingresoHoy
+                ? "Ingreso hoy: se requiere el pago completo."
+                : "Reserva futura: se requiere al menos el 50 % para confirmar.");
     }
-
-
-    // =========================================================
-    // MÉTODOS DE PAGO
-    // =========================================================
-
-    private void configurarMetodosPago() {
-
-        btnEfectivo.setToggleGroup(
-                grupoMetodoPago
-        );
-
-        btnTarjeta.setToggleGroup(
-                grupoMetodoPago
-        );
-
-        btnTransferencia.setToggleGroup(
-                grupoMetodoPago
-        );
-
-        btnYape.setToggleGroup(
-                grupoMetodoPago
-        );
-
-
-        btnEfectivo.setSelected(true);
-
-
-        grupoMetodoPago
-                .selectedToggleProperty()
-                .addListener(
-                        (observable, anterior, actual) -> {
-
-                            if (actual == null) {
-
-                                if (anterior != null) {
-                                    anterior.setSelected(true);
-                                }
-
-                                return;
-                            }
-
-                            actualizarEstiloPago();
-
-                            actualizarEstadoMonto();
-                        }
-                );
-
-
-        actualizarEstiloPago();
-
-        actualizarEstadoMonto();
-    }
-
-
-    private void actualizarEstiloPago() {
-
-        String normal =
-                "-fx-background-color: #F4F4F4;"
-                + "-fx-text-fill: #333333;"
-                + "-fx-font-size: 7px;"
-                + "-fx-background-radius: 5;";
-
-
-        String activo =
-                "-fx-background-color: #A87425;"
-                + "-fx-text-fill: white;"
-                + "-fx-font-size: 7px;"
-                + "-fx-font-weight: bold;"
-                + "-fx-background-radius: 5;";
-
-
-        btnEfectivo.setStyle(
-                btnEfectivo.isSelected()
-                        ? activo
-                        : normal
-        );
-
-
-        btnTarjeta.setStyle(
-                btnTarjeta.isSelected()
-                        ? activo
-                        : normal
-        );
-
-
-        btnTransferencia.setStyle(
-                btnTransferencia.isSelected()
-                        ? activo
-                        : normal
-        );
-
-
-        btnYape.setStyle(
-                btnYape.isSelected()
-                        ? activo
-                        : normal
-        );
-    }
-
-
-    private void actualizarEstadoMonto() {
-
-        boolean efectivo =
-                btnEfectivo.isSelected();
-
-
-        txtMontoRecibido.setDisable(
-                !efectivo
-        );
-
-
-        if (!efectivo) {
-
-            txtMontoRecibido.clear();
-
-            txtVuelto.setText(
-                    "S/ 0.00"
-            );
-        }
-    }
-
-
-    // =========================================================
-    // COMPROBANTE
-    // =========================================================
-
-    private void configurarComprobante() {
-
-        rbBoleta.setToggleGroup(
-                grupoComprobante
-        );
-
-        rbFactura.setToggleGroup(
-                grupoComprobante
-        );
-
-
-        rbBoleta.setSelected(true);
-
-
-        grupoComprobante
-                .selectedToggleProperty()
-                .addListener(
-                        (observable, anterior, actual) -> {
-
-                            if (actual == null) {
-
-                                if (anterior != null) {
-                                    anterior.setSelected(true);
-                                }
-                            }
-                        }
-                );
-    }
-
-
-    // =========================================================
-    // MONTO RECIBIDO
-    // =========================================================
-
-    private void configurarMontoRecibido() {
-
-        txtVuelto.setEditable(false);
-
-
-        txtMontoRecibido
-                .textProperty()
-                .addListener(
-                        (observable, anterior, actual) -> {
-
-                            calcularVuelto();
-                        }
-                );
-    }
-
-
-    private void calcularVuelto() {
-
-        if (!btnEfectivo.isSelected()) {
-
-            txtVuelto.setText(
-                    "S/ 0.00"
-            );
-
-            return;
-        }
-
-
-        String valor =
-                txtMontoRecibido
-                        .getText()
-                        .replace("S/", "")
-                        .replace(",", ".")
-                        .trim();
-
-
-        if (valor.isEmpty()) {
-
-            txtVuelto.setText(
-                    "S/ 0.00"
-            );
-
-            return;
-        }
-
-
-        try {
-
-            double recibido =
-                    Double.parseDouble(valor);
-
-
-            double vuelto =
-                    recibido - totalReserva;
-
-
-            if (vuelto < 0) {
-                vuelto = 0;
-            }
-
-
-            txtVuelto.setText(
-                    String.format(
-                            "S/ %.2f",
-                            vuelto
-                    )
-            );
-
-
-        } catch (NumberFormatException e) {
-
-            txtVuelto.setText(
-                    "S/ 0.00"
-            );
-        }
-    }
-
-
-    // =========================================================
-    // RESUMEN
-    // =========================================================
-
-    private void actualizarResumen() {
-
-        long noches = 0;
-
-
-        try {
-
-            noches =
-                    Long.parseLong(
-                            lblNoches.getText()
-                    );
-
-        } catch (Exception e) {
-
-            noches = 0;
-        }
-
-
-        lblNochesResumen.setText(
-                String.valueOf(noches)
-        );
-
-
-        if (habitacionElegida == null) {
-
-            lblHabitacionResumen.setText(
-                    "--"
-            );
-
-        } else {
-
-            lblHabitacionResumen.setText(
-                    habitacionElegida.getNumero() + " · " + habitacionElegida.getTipo().getNombre()
-            );
-        }
-
-
-        lblPrecioNoche.setText(
-                String.format(
-                        "S/ %.2f",
-                        precioNoche
-                )
-        );
-
-
-        totalReserva =
-                precioNoche * noches;
-
-
-        lblTotal.setText(
-                String.format(
-                        "S/ %.2f",
-                        totalReserva
-                )
-        );
-
-
-        calcularVuelto();
-    }
-
-
-    // =========================================================
-    // GUARDAR COMO PENDIENTE
-    // =========================================================
 
     @FXML
     private void guardarPendiente() {
-
-        if (!validarFormularioBasico()) {
-            return;
-        }
-
-        if (habitacionElegida == null) {
-
-            Alertas.mostrarAdvertencia(
-                    "Habitación requerida",
-                    "Seleccione una habitación disponible."
-            );
-
-            return;
-        }
-
-        if (dpFechaIngreso.getValue().equals(LocalDate.now())) {
-
-            Alertas.mostrarAdvertencia(
-                    "Ingreso hoy",
-                    "Para un ingreso hoy, use \"Confirmar reserva\" con el pago; "
-                    + "\"Guardar pendiente\" es solo para fechas futuras."
-            );
-
-            return;
-        }
-
-        Huesped huesped = construirHuesped();
-        if (huesped == null) {
-            return;
-        }
-
         try {
-            int idReserva = reservaService.registrarPendiente(huesped, empresaEncontrada, construirReserva());
-
-            Alertas.mostrarInfo(
-                    "Reserva pendiente guardada",
-                    "La reserva " + String.format("R-%04d", idReserva) + " quedó pendiente de confirmación."
-            );
-
+            List<Huesped> huespedes = acompanantes.obtener(construirHuesped());
+            Empresa empresa = construirEmpresa();
+            Reserva reserva = construirReserva();
+            int idReserva = reservaService.registrarPendiente(huespedes, empresa, reserva);
+            Alertas.mostrarInfo("Reserva pendiente guardada",
+                    "La reserva " + String.format("R-%04d", idReserva) + " quedó pendiente.");
             limpiarFormulario();
-
-        } catch (ConflictoFechasException e) {
-            Alertas.mostrarAdvertencia("Fechas no disponibles", e.getMessage());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            Alertas.mostrarAdvertencia("No se pudo guardar", e.getMessage());
-        } catch (SQLException e) {
-            Alertas.mostrarError("Error de base de datos", "No se pudo guardar la reserva.\n\n" + e.getMessage());
+        } catch (ConflictoFechasException error) {
+            Alertas.mostrarAdvertencia("Fechas no disponibles", error.getMessage());
+            cargarHabitaciones();
+        } catch (IllegalArgumentException | IllegalStateException error) {
+            Alertas.mostrarAdvertencia("No se pudo guardar", error.getMessage());
+        } catch (SQLException error) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo guardar la reserva.\n\n" + error.getMessage());
         }
     }
-
-
-    // =========================================================
-    // CONFIRMAR RESERVA
-    // =========================================================
 
     @FXML
     private void confirmarReserva() {
-
-        if (!validarFormularioBasico()) {
-            return;
-        }
-
-
-        if (habitacionElegida == null) {
-
-            Alertas.mostrarAdvertencia(
-                    "Habitación requerida",
-                    "Seleccione una habitación disponible."
-            );
-
-            return;
-        }
-
-
-        if (totalReserva <= 0) {
-
-            Alertas.mostrarAdvertencia(
-                    "Total inválido",
-                    "No existe un total válido para la reserva."
-            );
-
-            return;
-        }
-
-
-        if (btnEfectivo.isSelected()) {
-
-            if (!validarMontoEfectivo()) {
-                return;
-            }
-        }
-
-        Huesped huesped = construirHuesped();
-        if (huesped == null) {
-            return;
-        }
-
-        boolean checkinInmediato = dpFechaIngreso.getValue().equals(LocalDate.now());
-
-        Pago pago = new Pago();
-        pago.setMonto(java.math.BigDecimal.valueOf(totalReserva).setScale(2, RoundingMode.HALF_UP));
-        pago.setMetodoPago(metodoPagoSeleccionado());
-        pago.setTipoPago("COMPLETO");
-
         try {
-            int idReserva = reservaService.registrar(huesped, empresaEncontrada, construirReserva(),
-                    List.of(pago), checkinInmediato);
-
-            Alertas.mostrarInfo(
-                    "Confirmar reserva",
-                    checkinInmediato
-                            ? "El huésped quedó registrado en la habitación " + habitacionElegida.getNumero() + "."
-                            : "La reserva " + String.format("R-%04d", idReserva) + " quedó confirmada."
-            );
-
+            List<Huesped> huespedes = acompanantes.obtener(construirHuesped());
+            Empresa empresa = construirEmpresa();
+            Reserva reserva = construirReserva();
+            Pago pago = construirPago();
+            boolean checkinInmediato = LocalDate.now().equals(reserva.getFechaCheckin());
+            int idReserva = reservaService.registrar(huespedes, empresa, reserva, List.of(pago), checkinInmediato);
+            Alertas.mostrarInfo("Reserva confirmada", checkinInmediato
+                    ? "Se registró el check-in en la habitación " + habitacionSeleccionada.getNumero() + "."
+                    : "La reserva " + String.format("R-%04d", idReserva) + " quedó confirmada.");
             limpiarFormulario();
-
-        } catch (ConflictoFechasException e) {
-            Alertas.mostrarAdvertencia("Fechas no disponibles", e.getMessage());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            Alertas.mostrarAdvertencia("No se pudo confirmar", e.getMessage());
-        } catch (SQLException e) {
-            Alertas.mostrarError("Error de base de datos", "No se pudo registrar la reserva.\n\n" + e.getMessage());
+        } catch (ConflictoFechasException error) {
+            Alertas.mostrarAdvertencia("Fechas no disponibles", error.getMessage());
+            cargarHabitaciones();
+        } catch (IllegalArgumentException | IllegalStateException error) {
+            Alertas.mostrarAdvertencia("No se pudo confirmar", error.getMessage());
+        } catch (SQLException error) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo registrar la reserva.\n\n" + error.getMessage());
         }
     }
-
 
     private Huesped construirHuesped() {
-        if (huespedEncontrado == null) {
-            Alertas.mostrarAdvertencia("Cliente requerido", "Debe buscar y seleccionar un cliente.");
+        String documentoActual = btnEmpresa.isSelected()
+                ? txtDocumentoHuesped.getText().trim() : txtDocumento.getText().trim();
+        if (!datosClienteListos || !documentoActual.equals(documentoHuespedResuelto)) {
+            throw new IllegalArgumentException("Busque nuevamente el documento del huésped antes de guardar.");
+        }
+        return new Huesped("DNI", documentoActual, txtNombres.getText().trim(), txtApellidos.getText().trim(),
+                txtPais.getText().trim(), textoOpcional(txtTelefono.getText()), textoOpcional(txtCorreo.getText()));
+    }
+
+    private Empresa construirEmpresa() {
+        if (!btnEmpresa.isSelected()) {
             return null;
         }
-        return huespedEncontrado;
+        String ruc = txtDocumento.getText().trim();
+        if (!ruc.equals(rucResuelto)) {
+            throw new IllegalArgumentException("Busque nuevamente el RUC antes de guardar.");
+        }
+        Empresa empresa = new Empresa();
+        empresa.setRuc(ruc);
+        empresa.setRazonSocial(txtRazonSocial.getText().trim());
+        empresa.setDireccion(textoOpcional(txtDireccionFiscal.getText()));
+        return empresa;
     }
 
+    private Empresa construirEmpresaDesdeCampos() {
+        Empresa empresa = new Empresa();
+        empresa.setRuc(txtDocumento.getText().trim());
+        empresa.setRazonSocial(txtRazonSocial.getText().trim());
+        empresa.setDireccion(textoOpcional(txtDireccionFiscal.getText()));
+        return empresa;
+    }
 
     private Reserva construirReserva() {
-        Reserva r = new Reserva();
-        r.setIdHabitacion(habitacionElegida.getIdHabitacion());
-        r.setFechaCheckin(dpFechaIngreso.getValue());
-        r.setFechaCheckout(dpFechaSalida.getValue());
-        r.setMontoTotal(java.math.BigDecimal.valueOf(totalReserva).setScale(2, RoundingMode.HALF_UP));
-        r.setCanal("PRESENCIAL");
-        r.setNumHuespedes(spHuespedes.getValue() == null ? 1 : spHuespedes.getValue());
-        if (cbHoraIngreso.getValue() != null) {
-            r.setHoraCheckin(java.time.LocalTime.parse(cbHoraIngreso.getValue()));
+        if (habitacionSeleccionada == null) {
+            throw new IllegalArgumentException("Seleccione una habitación disponible.");
         }
-        return r;
+        Reserva reserva = new Reserva();
+        reserva.setIdHabitacion(habitacionSeleccionada.getIdHabitacion());
+        reserva.setFechaCheckin(dpFechaIngreso.getValue());
+        reserva.setFechaCheckout(dpFechaSalida.getValue());
+        reserva.setHoraCheckin(cbHoraIngreso.getValue() == null ? null : LocalTime.parse(cbHoraIngreso.getValue()));
+        reserva.setNumHuespedes(spHuespedes.getValue());
+        reserva.setMontoTotal(habitacionSeleccionada.getTipo().getPrecioBase().multiply(
+                BigDecimal.valueOf(ChronoUnit.DAYS.between(dpFechaIngreso.getValue(), dpFechaSalida.getValue()))));
+        reserva.setCanal("PRESENCIAL");
+        return reserva;
     }
 
-
-    private String metodoPagoSeleccionado() {
-        if (btnTarjeta.isSelected()) {
-            return "TARJETA";
+    private Pago construirPago() {
+        BigDecimal monto;
+        try {
+            monto = new BigDecimal(txtMontoPago.getText().trim().replace(',', '.')).setScale(2, RoundingMode.UNNECESSARY);
+        } catch (ArithmeticException | NumberFormatException error) {
+            throw new IllegalArgumentException("Ingrese un monto de pago con máximo dos decimales.");
         }
-        if (btnTransferencia.isSelected()) {
-            return "TRANSFERENCIA";
-        }
-        if (btnYape.isSelected()) {
-            return "YAPE";
-        }
-        return "EFECTIVO";
+        Pago pago = new Pago();
+        pago.setMonto(monto);
+        pago.setMetodoPago(cbMetodoPago.getValue());
+        pago.setTipoPago("ADELANTO");
+        return pago;
     }
-
-
-    // =========================================================
-    // CANCELAR FORMULARIO
-    // =========================================================
 
     @FXML
     private void cancelarFormulario() {
-
         limpiarFormulario();
     }
 
-
     private void limpiarFormulario() {
-
+        secuenciaConsulta++;
         btnPersonaNatural.setSelected(true);
-
         txtDocumento.clear();
-
-        limpiarCliente();
-
-
-        LocalDate hoy =
-                LocalDate.now();
-
-
-        dpFechaIngreso.setValue(
-                hoy
-        );
-
-
-        dpFechaSalida.setValue(
-                hoy.plusDays(1)
-        );
-
-
-        cbHoraIngreso.setValue(
-                "14:00"
-        );
-
-
-        cbHoraSalida.setValue(
-                "12:00"
-        );
-
-
-        spHuespedes
-                .getValueFactory()
-                .setValue(1);
-
-
-        txtObservaciones.clear();
-
-
-        cbPiso.setValue(
-                "Todos los pisos"
-        );
-
-
-        cbTipoHabitacion.setValue(
-                "Todos los tipos"
-        );
-
-
-        btnEfectivo.setSelected(true);
-
-        rbBoleta.setSelected(true);
-
-
-        txtMontoRecibido.clear();
-
-        txtVuelto.setText(
-                "S/ 0.00"
-        );
-
-
-        actualizarTipoCliente();
-
-        calcularNoches();
-
-        actualizarResumen();
+        txtDocumentoHuesped.clear();
+        limpiarCliente("Ingrese el documento y pulse Buscar.");
+        LocalDate hoy = LocalDate.now();
+        dpFechaIngreso.setValue(hoy);
+        dpFechaSalida.setValue(hoy.plusDays(1));
+        cbHoraIngreso.setValue("14:00");
+        spHuespedes.getValueFactory().setValue(1);
+        cbPiso.setValue("Todos los pisos");
+        cbTipoHabitacion.setValue("Todos los tipos");
+        cbMetodoPago.setValue("EFECTIVO");
+        cargarHabitaciones();
     }
 
-
-    // =========================================================
-    // VALIDACIONES
-    // =========================================================
-
-    private boolean validarFormularioBasico() {
-
-        if (!clienteSeleccionado) {
-
-            Alertas.mostrarAdvertencia(
-                    "Cliente requerido",
-                    "Debe buscar y seleccionar un cliente."
-            );
-
-            return false;
-        }
-
-
-        if (dpFechaIngreso.getValue() == null) {
-
-            Alertas.mostrarAdvertencia(
-                    "Fecha requerida",
-                    "Seleccione la fecha de ingreso."
-            );
-
-            return false;
-        }
-
-
-        if (dpFechaSalida.getValue() == null) {
-
-            Alertas.mostrarAdvertencia(
-                    "Fecha requerida",
-                    "Seleccione la fecha de salida."
-            );
-
-            return false;
-        }
-
-
-        long noches =
-                ChronoUnit.DAYS.between(
-                        dpFechaIngreso.getValue(),
-                        dpFechaSalida.getValue()
-                );
-
-
-        if (noches <= 0) {
-
-            Alertas.mostrarAdvertencia(
-                    "Fechas inválidas",
-                    "La fecha de salida debe ser posterior "
-                    + "a la fecha de ingreso."
-            );
-
-            return false;
-        }
-
-
-        return true;
+    private void limpiarCliente(String mensaje) {
+        datosClienteListos = false;
+        documentoHuespedResuelto = null;
+        rucResuelto = null;
+        panelDatosHuesped.setVisible(false);
+        panelDatosHuesped.setManaged(false);
+        panelDatosEmpresa.setVisible(false);
+        panelDatosEmpresa.setManaged(false);
+        txtNombres.clear();
+        txtApellidos.clear();
+        txtPais.setText("Perú");
+        txtTelefono.clear();
+        txtCorreo.clear();
+        txtRazonSocial.clear();
+        txtDireccionFiscal.clear();
+        hacerEditablesDatosHuesped(true);
+        txtRazonSocial.setDisable(false);
+        txtDireccionFiscal.setDisable(false);
+        lblEstadoBusqueda.setText(mensaje);
+        desbloquearBusqueda();
     }
 
-
-    private boolean validarMontoEfectivo() {
-
-        String valor =
-                txtMontoRecibido
-                        .getText()
-                        .replace("S/", "")
-                        .replace(",", ".")
-                        .trim();
-
-
-        if (valor.isEmpty()) {
-
-            Alertas.mostrarAdvertencia(
-                    "Monto requerido",
-                    "Ingrese el monto recibido."
-            );
-
-            return false;
-        }
-
-
-        try {
-
-            double recibido =
-                    Double.parseDouble(valor);
-
-
-            if (recibido < totalReserva) {
-
-                Alertas.mostrarAdvertencia(
-                        "Monto insuficiente",
-                        "El monto recibido es menor "
-                        + "al total de la reserva."
-                );
-
-                return false;
-            }
-
-
-        } catch (NumberFormatException e) {
-
-            Alertas.mostrarAdvertencia(
-                    "Monto inválido",
-                    "Ingrese un monto numérico válido."
-            );
-
-            return false;
-        }
-
-
-        return true;
+    private String moneda(BigDecimal valor) {
+        return String.format(Locale.US, "S/ %.2f", valor);
     }
-
-
-    // =========================================================
-    // UTILIDADES
-    // =========================================================
 
     private String valorSeguro(String valor) {
-
-        if (valor == null ||
-            valor.isBlank()) {
-
-            return "--";
-        }
-
-        return valor;
+        return valor == null ? "" : valor;
     }
 
-
+    private String textoOpcional(String valor) {
+        return valor == null || valor.isBlank() ? null : valor.trim();
+    }
 }

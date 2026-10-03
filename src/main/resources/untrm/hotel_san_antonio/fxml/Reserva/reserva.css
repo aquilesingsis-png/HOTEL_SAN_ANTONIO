@@ -1,0 +1,100 @@
+.tarjeta-habitacion {
+    -fx-background-color: white;
+    -fx-border-color: #e4ded5;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 12;
+}
+
+.tarjeta-habitacion-seleccionada {
+    -fx-background-color: #fbf1e1;
+    -fx-border-color: #a87425;
+    -fx-border-width: 2;
+}
+
+.plano-piso {
+    -fx-background-color: #FAF8F4;
+    -fx-background-radius: 10;
+    -fx-border-color: #DDD4C8;
+    -fx-border-radius: 10;
+    -fx-padding: 14;
+}
+
+.plano-titulo { -fx-text-fill: #3B210F; -fx-font-size: 15px; -fx-font-weight: bold; }
+.plano-pasillo {
+    -fx-alignment: center;
+    -fx-background-color: #E8E0D5;
+    -fx-background-radius: 5;
+    -fx-padding: 9;
+    -fx-text-fill: #5A3516;
+    -fx-font-weight: bold;
+}
+.plano-habitacion {
+    -fx-pref-width: 155;
+    -fx-min-width: 135;
+    -fx-min-height: 72;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-width: 2;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+    -fx-cursor: hand;
+}
+.plano-habitacion-disponible {
+    -fx-background-color: #E7F4E8;
+    -fx-border-color: #79B78B;
+    -fx-text-fill: #224D2D;
+}
+.plano-habitacion-disponible:hover { -fx-background-color: #C9E8CF; }
+.plano-habitacion-ocupada {
+    -fx-background-color: #EEEAE5;
+    -fx-border-color: #BDB4A9;
+    -fx-text-fill: #756A5D;
+}
+.plano-habitacion-seleccionada {
+    -fx-background-color: #704313;
+    -fx-border-color: #3B210F;
+    -fx-text-fill: white;
+}
+.plano-habitacion:disabled { -fx-opacity: 1; -fx-cursor: default; }
+
+.fila-calendario {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #eee8df transparent;
+    -fx-padding: 5 0;
+}
+
+.celda-calendario {
+    -fx-min-width: 58;
+    -fx-pref-width: 58;
+    -fx-min-height: 30;
+    -fx-pref-height: 30;
+    -fx-alignment: center;
+    -fx-background-radius: 5;
+    -fx-text-fill: white;
+    -fx-font-size: 10;
+    -fx-font-weight: bold;
+}
+
+.cabecera-calendario {
+    -fx-background-color: #f1ece4;
+    -fx-text-fill: #4d4339;
+}
+
+.estado-disponible { -fx-background-color: #2cb95f; }
+.estado-pendiente { -fx-background-color: #c98a1b; }
+.estado-reservada { -fx-background-color: #2e88dd; }
+.estado-ocupada { -fx-background-color: #ef4141; }
+.estado-limpieza { -fx-background-color: #eab851; }
+.estado-mantenimiento { -fx-background-color: #8f887f; }
+.acompanante {
+    -fx-background-color: #f8f5f0;
+    -fx-background-radius: 8;
+    -fx-border-color: #e8e2d9;
+    -fx-border-radius: 8;
+    -fx-padding: 10;
+}
+.acompanante-titulo {
+    -fx-font-weight: bold;
+    -fx-text-fill: #3b210f;
+}

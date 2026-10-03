@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="untrm.hotel_san_antonio.controlador.CrearUsuarioController" styleClass="nuevos" stylesheets="@../css/nuevos-modulos.css" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300">
+    <top>
+        <VBox spacing="7" styleClass="page-header">
+            <Label text="USUARIOS  /  HOTEL SAN ANTONIO" styleClass="eyebrow" wrapText="true" maxWidth="Infinity"/>
+            <Label text="Crear usuario" styleClass="page-title" wrapText="true" maxWidth="Infinity"/>
+            <Label text="Prepara el acceso del personal autorizado del hotel." styleClass="subtitle" wrapText="true" maxWidth="Infinity"/>
+        </VBox>
+    </top>
+    <center>
+        <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0">
+            <Tab text="Formulario">
+                <content>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" styleClass="content-scroll">
+                        <content>
+                            <VBox spacing="18" fillWidth="true" styleClass="page-content">
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Datos del colaborador" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Nombres" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtNombres" maxWidth="Infinity" promptText="Nombres"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Apellidos" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtApellidos" maxWidth="Infinity" promptText="Apellidos"/>
+                                        </VBox>
+                                    </FlowPane>
+                                </VBox>
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Credenciales de acceso" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Nombre de usuario" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtNombreDeUsuario" maxWidth="Infinity" promptText="Nombre de usuario"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Contraseña" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <PasswordField fx:id="pwdContrasena" maxWidth="Infinity" promptText="Contraseña"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Confirmar contraseña" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <PasswordField fx:id="pwdConfirmarContrasena" maxWidth="Infinity" promptText="Confirmar contraseña"/>
+                                        </VBox>
+                                    </FlowPane>
+                                </VBox>
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Perfil de acceso" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Rol" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <ComboBox fx:id="cmbRol" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                                <items>
+                                                    <FXCollections fx:factory="observableArrayList">
+                                                        <String fx:value="Administrador"/>
+                                                        <String fx:value="Recepcionista"/>
+                                                        <String fx:value="Limpieza"/>
+                                                    </FXCollections>
+                                                </items>
+                                            </ComboBox>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Estado" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <ComboBox fx:id="cmbEstado" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                                <items>
+                                                    <FXCollections fx:factory="observableArrayList">
+                                                        <String fx:value="Activo"/>
+                                                        <String fx:value="Inactivo"/>
+                                                    </FXCollections>
+                                                </items>
+                                            </ComboBox>
+                                        </VBox>
+                                    </FlowPane>
+                                </VBox>
+                                <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                    <Button fx:id="btnFormCancelar" text="Cancelar" styleClass="secondary" mnemonicParsing="false" onAction="#limpiar"/>
+                                    <Button fx:id="btnFormLimpiar" text="Limpiar" styleClass="secondary" mnemonicParsing="false" onAction="#limpiar"/>
+                                    <Button fx:id="btnFormGuardarUsuario" text="Guardar usuario" styleClass="primary" mnemonicParsing="false" onAction="#guardar"/>
+                                </FlowPane>
+                                <Label fx:id="lblMensaje" wrapText="true"/>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+        </TabPane>
+    </center>
+</BorderPane>

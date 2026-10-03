@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="untrm.hotel_san_antonio.controlador.RecuperacionController"
+    spacing="12" prefWidth="500" style="-fx-background-color: #F7F4EF; -fx-padding: 24;">
+    <Label text="Recuperar contraseña" style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+    <Label text="Solicite al administrador un token temporal después de verificar su identidad. Vence en 15 minutos y funciona una sola vez." wrapText="true"/>
+    <TextField fx:id="txtUsuario" promptText="Usuario"/>
+    <PasswordField fx:id="txtToken" promptText="Token temporal"/>
+    <PasswordField fx:id="txtNueva" promptText="Nueva contraseña (12 caracteres, letras y números)"/>
+    <PasswordField fx:id="txtConfirmar" promptText="Confirmar nueva contraseña"/>
+    <Button text="Restablecer" onAction="#restablecer"/>
+    <Label fx:id="lblMensaje" wrapText="true"/>
+</VBox>

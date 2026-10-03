@@ -46,6 +46,8 @@
                                   userData="/untrm/hotel_san_antonio/fxml/dashboard/dashboard_2.fxml" onAction="#onMenu"/>
                     <ToggleButton text="Habitaciones" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/habitaciones/habitaciones.fxml" onAction="#onMenu"/>
+                    <ToggleButton text="Categorías de habitación" toggleGroup="$grupoMenu"
+                                  userData="/untrm/hotel_san_antonio/fxml/habitaciones/categorias_habitacion.fxml" onAction="#onMenu"/>
 
                     <Button text="Reservas  ▸" onAction="#onGrupo"/>
                     <VBox userData="Reservas" visible="false" managed="false" spacing="2">
@@ -63,19 +65,23 @@
 
                     <ToggleButton text="Comprobantes" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/comprobante/comprobante.fxml" onAction="#onMenu"/>
+                    <ToggleButton text="Gastos" toggleGroup="$grupoMenu"
+                                  userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/gastos.fxml" onAction="#onMenu"/>
+                    <ToggleButton text="Registro de días pasados" toggleGroup="$grupoMenu"
+                                  userData="/untrm/hotel_san_antonio/fxml/Reserva/registro_historico.fxml" onAction="#onMenu"/>
 
                     <Button text="Caja y pagos  ▸" onAction="#onGrupo"/>
                     <VBox userData="Caja y pagos" visible="false" managed="false" spacing="2">
                         <ToggleButton text="Registrar pagos" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/caja/registrar_pagos.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/registrar_pagos.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Movimientos" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/caja/movimientos.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/movimientos.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Totales del día" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/caja/totales_dia.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/totales_dia.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Cierre de caja" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/caja/cierre_caja.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/cierre_caja.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Arqueo" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/caja/arqueo.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/arqueo.fxml" onAction="#onMenu"/>
                     </VBox>
 
                     <Label text="ADMINISTRACIÓN" style="-fx-text-fill: #D4A84C; -fx-font-size: 11px; -fx-font-weight: bold;">
@@ -85,39 +91,41 @@
                     <Button text="Usuarios  ▸" onAction="#onGrupo"/>
                     <VBox userData="Usuarios" visible="false" managed="false" spacing="2">
                         <ToggleButton text="Crear usuario" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/usuarios/crear_usuario.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/crear_usuario.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Editar / Desactivar" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/usuarios/editar_usuario.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/editar_usuario.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Asignar rol" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/usuarios/asignar_rol.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/asignar_rol.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Ver historial" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/usuarios/historial_usuarios.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/historial_usuarios.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Recuperar contraseña" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/recuperacion_admin.fxml" onAction="#onMenu"/>
                     </VBox>
 
                     <Button text="Reportes y estadísticas  ▸" onAction="#onGrupo"/>
                     <VBox userData="Reportes y estadísticas" visible="false" managed="false" spacing="2">
                         <ToggleButton text="Ocupación" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/reportes/ocupacion.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/reportes/ocupacion.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Ventas" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/reportes/ventas.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/reportes/ventas.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Ingresos" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/reportes/ingresos.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/reportes/ingresos.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Reportes personalizados" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/reportes/reportes_personalizados.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/reportes/reportes_personalizados.fxml" onAction="#onMenu"/>
                     </VBox>
 
                     <Button text="Almacén  ▸" onAction="#onGrupo"/>
                     <VBox userData="Almacén" visible="false" managed="false" spacing="2">
                         <ToggleButton text="Productos" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/almacen/productos.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/productos.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Categorías" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/almacen/categorias.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/categorias.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Stock" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/almacen/stock.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/stock.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Precios" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/almacen/precios.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/precios.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Alertas de stock bajo" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/almacen/alertas_stock.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/alertas_stock.fxml" onAction="#onMenu"/>
                     </VBox>
                 </VBox>
             </ScrollPane>

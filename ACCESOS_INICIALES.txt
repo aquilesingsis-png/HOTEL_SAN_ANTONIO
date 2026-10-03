@@ -1,0 +1,21 @@
+HOTEL SAN ANTONIO - ACCESO INICIAL
+
+Base de datos local XAMPP:
+  nombre: hotel_san_antonio
+  servidor: localhost:3306
+  usuario MySQL: root
+  clave MySQL: vacia (instalacion XAMPP local probada)
+
+Usuarios de la aplicacion incluidos en INSTALACION_COMPLETA_XAMPP.sql:
+  Rol: Administrador
+  Usuario: admin
+  Clave temporal: 4fRisGLuCXfYiKij3HRqEQiT
+
+  Rol: Recepcionista
+  Usuario: recepcion
+  Clave temporal: rhRA0YdUfdxPiH4rlR9wgxpt
+
+Las claves se guardan en MySQL como hashes PBKDF2, no como texto plano.
+Cambie ambas claves despues del primer acceso mediante el flujo de recuperacion.
+Si su XAMPP tiene clave para root, edite db.password en config.properties.
+No publique este archivo despues de configurar sus cuentas definitivas.

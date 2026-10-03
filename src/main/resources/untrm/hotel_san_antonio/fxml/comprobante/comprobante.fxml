@@ -16,7 +16,7 @@
 <?import javafx.scene.text.Font?>
 
 <!-- Sin encabezado propio (logo y "Recepcionista"): el marco principal ya los pone. -->
-<BorderPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: #F8F6F2;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="untrm.hotel_san_antonio.controlador.ComprobanteController">
+<BorderPane prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: #F8F6F2;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="untrm.hotel_san_antonio.controlador.ComprobanteController">
    <center>
       <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #F8F6F2;" BorderPane.alignment="CENTER">
          <content>
@@ -153,7 +153,7 @@
                         </Label>
                         <Label text="Revisa la vista previa antes de generar." textFill="#666666" />
                         <Button fx:id="btnVistaPrevia" onAction="#onVistaPrevia" maxWidth="1.7976931348623157E308" style="-fx-background-color: white; -fx-border-color: #b8862d; -fx-text-fill: #b8862d; -fx-border-radius: 3;" text="Vista previa" />
-                        <Button fx:id="btnImprimir" onAction="#onImprimir" disable="true" maxWidth="1.7976931348623157E308" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-text-fill: #999999; -fx-border-radius: 3;" text="Imprimir" />
+                        <Button fx:id="btnImprimir" onAction="#onImprimir" disable="true" maxWidth="1.7976931348623157E308" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-text-fill: #999999; -fx-border-radius: 3;" text="Guardar PDF" />
                      </VBox>
                      
                   </VBox>

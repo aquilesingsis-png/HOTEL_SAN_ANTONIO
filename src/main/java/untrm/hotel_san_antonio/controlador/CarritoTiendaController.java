@@ -34,12 +34,13 @@ import java.util.ArrayList;
 
 public class CarritoTiendaController {
 
-    // Boleta/Factura y Efectivo/Tarjeta/Yape/Transferencia se ven igual seleccionados que sin
-    // seleccionar (asi estaba en el diseño original); solo cambian al pasar el mouse.
+    // El método y el tipo de comprobante elegidos conservan un marrón más oscuro.
     private static final String BTN_MARRON = "-fx-background-color: #8B571C; -fx-text-fill: white; "
             + "-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #8B571C; -fx-font-weight: bold;";
     private static final String BTN_MARRON_HOVER = "-fx-background-color: #704313; -fx-text-fill: white; "
             + "-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #704313; -fx-font-weight: bold;";
+    private static final String BTN_MARRON_SELECCIONADO = "-fx-background-color: #5A3516; -fx-text-fill: white; "
+            + "-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #D9BA7D; -fx-border-width: 2; -fx-font-weight: bold;";
     private static final String BTN_OPCION = BTN_MARRON + " -fx-min-height: 54; -fx-content-display: TOP; -fx-graphic-text-gap: 5;";
     private static final String BTN_OPCION_HOVER = BTN_MARRON_HOVER + " -fx-min-height: 54; -fx-content-display: TOP; -fx-graphic-text-gap: 5;";
     private static final String BTN_PAGO = BTN_MARRON + " -fx-min-height: 60; -fx-font-size: 11px; -fx-content-display: TOP; -fx-graphic-text-gap: 5;";
@@ -52,7 +53,7 @@ public class CarritoTiendaController {
             + "-fx-background-radius: 6; -fx-font-weight: bold; -fx-min-height: 44;";
     private static final String BTN_EMITIR_HOVER = "-fx-background-color: #704313; -fx-text-fill: white; "
             + "-fx-background-radius: 6; -fx-font-weight: bold; -fx-min-height: 44;";
-    private static final String FILA_SELECCIONADA = "-fx-background-color: #F4EBDD; -fx-text-background-color: #111;";
+    private static final String FILA_SELECCIONADA = "-fx-background-color: #704313; -fx-text-background-color: white;";
     @FXML 
     private TextField txtBuscar, txtBuscarDni, txtNombreCliente, txtDireccion, txtTelefono, txtMontoRecibido;
     @FXML 
@@ -113,20 +114,26 @@ public class CarritoTiendaController {
         txtBuscar.textProperty().addListener((o,a,n) -> cargarProductos());
         cmbCategoria.valueProperty().addListener((o,a,n) -> cargarProductos());
         txtMontoRecibido.textProperty().addListener((o,a,n) -> actualizarVuelto());
-        tipoComprobante.selectedToggleProperty().addListener((o,a,n) -> actualizarTipoComprobante());
-        formaPago.selectedToggleProperty().addListener((o,a,n) -> actualizarFormaPago());
+        tipoComprobante.selectedToggleProperty().addListener((o,a,n) -> {
+            if (n == null && a != null) a.setSelected(true);
+            actualizarTipoComprobante();
+        });
+        formaPago.selectedToggleProperty().addListener((o,a,n) -> {
+            if (n == null && a != null) a.setSelected(true);
+            actualizarFormaPago();
+        });
         actualizarTipoComprobante();
         actualizarFormaPago();
     }
 
     /** Resalta al pasar el mouse los botones marrones (eso no se puede fijar en el FXML). */
     private void aplicarEstiloBotones() {
-        aplicarHover(btnBoleta, BTN_OPCION, BTN_OPCION_HOVER);
-        aplicarHover(btnFactura, BTN_OPCION, BTN_OPCION_HOVER);
-        aplicarHover(btnEfectivo, BTN_PAGO, BTN_PAGO_HOVER);
-        aplicarHover(btnTarjeta, BTN_PAGO, BTN_PAGO_HOVER);
-        aplicarHover(btnYape, BTN_PAGO, BTN_PAGO_HOVER);
-        aplicarHover(btnTransferencia, BTN_PAGO, BTN_PAGO_HOVER);
+        aplicarOpcion(btnBoleta, BTN_OPCION, BTN_OPCION_HOVER);
+        aplicarOpcion(btnFactura, BTN_OPCION, BTN_OPCION_HOVER);
+        aplicarOpcion(btnEfectivo, BTN_PAGO, BTN_PAGO_HOVER);
+        aplicarOpcion(btnTarjeta, BTN_PAGO, BTN_PAGO_HOVER);
+        aplicarOpcion(btnYape, BTN_PAGO, BTN_PAGO_HOVER);
+        aplicarOpcion(btnTransferencia, BTN_PAGO, BTN_PAGO_HOVER);
         aplicarHover(btnBuscarCliente, BTN_BUSCAR, BTN_BUSCAR_HOVER);
         aplicarHover(btnBuscarProducto, BTN_BUSCAR, BTN_BUSCAR_HOVER);
         aplicarHover(btnEmitir, BTN_EMITIR, BTN_EMITIR_HOVER);
@@ -136,6 +143,21 @@ public class CarritoTiendaController {
         boton.setStyle(normal);
         boton.setOnMouseEntered(e -> boton.setStyle(hover));
         boton.setOnMouseExited(e -> boton.setStyle(normal));
+        boton.setOnMousePressed(e -> boton.setStyle(BTN_MARRON_SELECCIONADO));
+        boton.setOnMouseReleased(e -> boton.setStyle(normal));
+    }
+
+    private void aplicarOpcion(ToggleButton boton, String normal, String hover) {
+        Runnable actualizar = () -> boton.setStyle(boton.isSelected()
+                ? BTN_MARRON_SELECCIONADO : normal);
+        actualizar.run();
+        boton.selectedProperty().addListener((obs, anterior, actual) -> actualizar.run());
+        boton.setOnMouseEntered(e -> {
+            if (!boton.isSelected()) boton.setStyle(hover);
+        });
+        boton.setOnMouseExited(e -> actualizar.run());
+        boton.setOnMousePressed(e -> boton.setStyle(BTN_MARRON_SELECCIONADO));
+        boton.setOnMouseReleased(e -> actualizar.run());
     }
 
     /** El color de la fila seleccionada de una tabla es una pieza interna: se fija por fila, no en el FXML. */
@@ -156,7 +178,7 @@ public class CarritoTiendaController {
         resaltarFilaSeleccionada(tablaCarrito);
         colCodigo.setCellValueFactory(c -> new ReadOnlyStringWrapper(String.format("P%03d", c.getValue().getIdProducto())));
         colProducto.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getNombre()));
-        colCategoria.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getNombre()));
+        colCategoria.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getNombreCategoria()));
         colPrecio.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getPrecio()));
         colStock.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getStock()));
         formatearMoneda(colPrecio);
@@ -369,13 +391,44 @@ public class CarritoTiendaController {
     }
 
     @FXML 
-    private void onSumarCantidad(){ DetalleVenta d=tablaCarrito.getSelectionModel().getSelectedItem(); if(d==null)return; Producto p=buscarProducto(d.getIdProducto()); if(p!=null && d.getCantidad()>=p.getStock())return; d.setCantidad(d.getCantidad()+1); recalcular(d); tablaCarrito.refresh(); actualizarTotales(); }
+    private void onSumarCantidad(){
+        DetalleVenta d=tablaCarrito.getSelectionModel().getSelectedItem();
+        if(d==null){ Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito."); return; }
+        Producto p;
+        try {
+            p = productoDAO.buscarActivoPorId(d.getIdProducto());
+        } catch (SQLException ex) {
+            Alertas.mostrarError("Producto", "No se pudo comprobar el stock.\n" + ex.getMessage());
+            return;
+        }
+        if(p==null){ Alertas.mostrarInfo("Producto", "El producto ya no está disponible."); return; }
+        if (p.getPrecio().compareTo(d.getPrecioUnitario()) != 0) {
+            Alertas.mostrarInfo("Precio actualizado", "El precio cambió. Retire el producto y agréguelo de nuevo.");
+            return;
+        }
+        if(d.getCantidad()>=p.getStock()){ Alertas.mostrarInfo("Stock", "No hay más unidades disponibles."); return; }
+        d.setCantidad(d.getCantidad()+1); recalcular(d); tablaCarrito.refresh(); actualizarTotales();
+    }
     @FXML 
-    private void onRestarCantidad(){ DetalleVenta d=tablaCarrito.getSelectionModel().getSelectedItem(); if(d==null)return; if(d.getCantidad()<=1)carrito.remove(d); else {d.setCantidad(d.getCantidad()-1);recalcular(d);} tablaCarrito.refresh();actualizarTotales(); }
+    private void onRestarCantidad(){
+        DetalleVenta d=tablaCarrito.getSelectionModel().getSelectedItem();
+        if(d==null){ Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito."); return; }
+        if(d.getCantidad()<=1)carrito.remove(d); else {d.setCantidad(d.getCantidad()-1);recalcular(d);}
+        tablaCarrito.refresh();actualizarTotales();
+    }
     @FXML 
-    private void onQuitarProducto(){ DetalleVenta d=tablaCarrito.getSelectionModel().getSelectedItem(); if(d!=null){carrito.remove(d);actualizarTotales();} }
+    private void onQuitarProducto(){
+        DetalleVenta d=tablaCarrito.getSelectionModel().getSelectedItem();
+        if(d==null){ Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito."); return; }
+        carrito.remove(d);actualizarTotales();
+    }
     @FXML 
-    private void onVaciarCarrito(){ if(!carrito.isEmpty() && Alertas.confirmar("Vaciar carrito","¿Deseas retirar todos los productos?")){carrito.clear();actualizarTotales();} }
+    private void onVaciarCarrito(){
+        if (carrito.isEmpty()) { Alertas.mostrarInfo("Carrito", "El carrito ya está vacío."); return; }
+        if (Alertas.confirmar("Vaciar carrito","¿Deseas retirar todos los productos?")) {
+            carrito.clear(); actualizarTotales();
+        }
+    }
     @FXML 
     private void onCancelar(){ if(carrito.isEmpty() || Alertas.confirmar("Cancelar","¿Deseas cancelar la venta actual?")){carrito.clear();limpiarCliente();actualizarTotales();} }
 
@@ -384,6 +437,10 @@ public class CarritoTiendaController {
         String dni = txtBuscarDni.getText() == null ? "" : txtBuscarDni.getText().trim();
         String nombre = txtNombreCliente.getText() == null ? "" : txtNombreCliente.getText().trim();
 
+        if (tipoComprobante.getSelectedToggle() == null) {
+            Alertas.mostrarInfo("Comprobante", "Seleccione boleta o factura.");
+            return;
+        }
         if (btnFactura.isSelected()) {
             // Una factura siempre identifica a quien se le factura: el RUC no es opcional.
             if (!Validador.esRucValido(dni)) {
@@ -396,6 +453,11 @@ public class CarritoTiendaController {
                 txtNombreCliente.requestFocus();
                 return;
             }
+            if (nombre.length() > 150 || txtDireccion.getText() == null
+                    || txtDireccion.getText().isBlank() || txtDireccion.getText().length() > 200) {
+                Alertas.mostrarInfo("Datos incompletos", "Revise la razón social y la dirección de facturación.");
+                return;
+            }
         } else if (!dni.isEmpty() && !Validador.esDniValido(dni)) {
             // En una boleta, el cliente puede preferir no dar sus datos: solo se valida si escribio algo.
             Alertas.mostrarInfo("DNI inválido", "El DNI debe contener exactamente 8 dígitos.");
@@ -404,6 +466,12 @@ public class CarritoTiendaController {
         }
         if(carrito.isEmpty()){
             Alertas.mostrarInfo("Carrito vacío","Agrega al menos un producto antes de emitir el comprobante.");
+            return;
+        }
+        String telefono = txtTelefono.getText() == null ? "" : txtTelefono.getText().trim();
+        if (!telefono.isEmpty() && !Validador.esTelefonoValido(telefono)) {
+            Alertas.mostrarInfo("Teléfono inválido", "Ingrese un celular válido de 9 dígitos o deje el campo vacío.");
+            txtTelefono.requestFocus();
             return;
         }
         if(SesionActual.getUsuario()==null){
@@ -423,6 +491,11 @@ public class CarritoTiendaController {
             }
             try {
                 BigDecimal monto = new BigDecimal(montoTexto);
+                if (monto.scale() > 2 || monto.signum() <= 0) {
+                    Alertas.mostrarInfo("Monto inválido", "Use un importe positivo con hasta dos decimales.");
+                    txtMontoRecibido.requestFocus();
+                    return;
+                }
                 if (monto.compareTo(totalCarrito()) < 0) {
                     Alertas.mostrarInfo("Pago insuficiente", "El monto recibido es menor al total de la venta.");
                     txtMontoRecibido.requestFocus();
@@ -477,11 +550,6 @@ public class CarritoTiendaController {
         for(DetalleVenta d:carrito)
             if(d.getIdProducto()==id)
                 return d;
-        return null;}
-    private Producto buscarProducto(int id){
-        for(Producto p:productos)
-            if(p.getIdProducto()==id)
-                return p;
         return null;}
     private void limpiarCliente(){txtBuscarDni.clear();txtNombreCliente.clear();txtDireccion.clear();txtTelefono.clear();txtObservaciones.clear();txtMontoRecibido.clear();cmbHabitacion.getSelectionModel().clearSelection();}
     @FXML 
