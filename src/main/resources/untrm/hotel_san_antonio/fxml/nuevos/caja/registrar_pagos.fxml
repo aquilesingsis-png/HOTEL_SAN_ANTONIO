@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<!-- Interfaz visual independiente: sin controlador ni acciones de negocio. -->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" styleClass="nuevos" stylesheets="@../css/nuevos-modulos.css" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300">
+    <top>
+        <VBox spacing="7" styleClass="page-header">
+            <Label text="CAJA  /  HOTEL SAN ANTONIO" styleClass="eyebrow" wrapText="true" maxWidth="Infinity"/>
+            <Label text="Registrar pagos" styleClass="page-title" wrapText="true" maxWidth="Infinity"/>
+            <Label text="Consulta los pagos de alojamiento y prepara el cobro de una reserva." styleClass="subtitle" wrapText="true" maxWidth="Infinity"/>
+        </VBox>
+    </top>
+    <center>
+        <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0">
+            <Tab text="Listado">
+                <content>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" styleClass="content-scroll">
+                        <content>
+                            <VBox spacing="18" fillWidth="true" styleClass="page-content">
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Filtros de consulta" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Buscar reserva o huésped" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="filtroBuscarReservaOHuesped" maxWidth="Infinity" promptText="Buscar reserva o huésped"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Desde" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <DatePicker fx:id="filtroDesde" maxWidth="Infinity" promptText="dd/mm/aaaa"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Hasta" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <DatePicker fx:id="filtroHasta" maxWidth="Infinity" promptText="dd/mm/aaaa"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Método de pago" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <ComboBox fx:id="filtroMetodoDePago" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                                <items>
+                                                    <FXCollections fx:factory="observableArrayList">
+                                                        <String fx:value="Efectivo"/>
+                                                        <String fx:value="Yape"/>
+                                                        <String fx:value="Transferencia"/>
+                                                        <String fx:value="Tarjeta"/>
+                                                    </FXCollections>
+                                                </items>
+                                            </ComboBox>
+                                        </VBox>
+                                    </FlowPane>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <Button fx:id="btnFiltroBuscar" text="Buscar" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnFiltroLimpiarFiltros" text="Limpiar filtros" styleClass="secondary" mnemonicParsing="false"/>
+                                    </FlowPane>
+                                </VBox>
+                                <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
+                                        <Label text="Total cobrado (S/)" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
+                                        <Label fx:id="lblTotalCobradoS" text="—" styleClass="metric-value"/>
+                                        <Label text="Resumen de la cuenta" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </VBox>
+                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
+                                        <Label text="Pagos registrados" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
+                                        <Label fx:id="lblPagosRegistrados" text="—" styleClass="metric-value"/>
+                                        <Label text="Resumen de la cuenta" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </VBox>
+                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
+                                        <Label text="Saldo de la cuenta (S/)" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
+                                        <Label fx:id="lblSaldoDeLaCuentaS" text="—" styleClass="metric-value"/>
+                                        <Label text="Resumen de la cuenta" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </VBox>
+                                </FlowPane>
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Detalle de registrar pagos" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <Button fx:id="btnListaNuevo" text="+ Nuevo" styleClass="primary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnListaActualizarLista" text="Actualizar lista" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnListaVerDetalle" text="Ver detalle" styleClass="secondary" mnemonicParsing="false"/>
+                                    </FlowPane>
+                                    <TableView fx:id="tblRegistros" minHeight="240" prefHeight="330" VBox.vgrow="ALWAYS">
+                                        <columns>
+                                            <TableColumn fx:id="colNOPago" text="N.º pago" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colFechaYHora" text="Fecha y hora" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colReserva" text="Reserva" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colHuesped" text="Huésped" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colHabitacion" text="Habitación" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colTipoDePago" text="Tipo de pago" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colMetodo" text="Método" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colMontoS" text="Monto (S/)" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colResponsable" text="Responsable" prefWidth="145" minWidth="90"/>
+                                        </columns>
+                                        <placeholder>
+                                            <VBox alignment="CENTER" spacing="8">
+                                                <Label text="Sin registros para mostrar" styleClass="empty-title" wrapText="true" maxWidth="Infinity"/>
+                                                <Label text="Los resultados de la consulta aparecerán en este listado." styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                            </VBox>
+                                        </placeholder>
+                                    </TableView>
+                                    <HBox alignment="CENTER_LEFT">
+                                        <Label text="0 registros" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                        <Region HBox.hgrow="ALWAYS"/>
+                                        <Label text="Importes expresados en soles" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </HBox>
+                                </VBox>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+            <Tab text="Formulario">
+                <content>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" styleClass="content-scroll">
+                        <content>
+                            <VBox spacing="18" fillWidth="true" styleClass="page-content">
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Reserva y cuenta" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Código de reserva" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtCodigoDeReserva" maxWidth="Infinity" promptText="Código de reserva"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Huésped" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtHuesped" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Documento" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtDocumento" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Habitación" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtHabitacion" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Total de la cuenta (S/)" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtTotalDeLaCuentaS" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Saldo pendiente (S/)" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtSaldoPendienteS" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                        </VBox>
+                                    </FlowPane>
+                                </VBox>
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Datos del pago" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Fecha del pago" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <DatePicker fx:id="dpFechaDelPago" maxWidth="Infinity" promptText="dd/mm/aaaa"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Tipo de pago" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <ComboBox fx:id="cmbTipoDePago" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                                <items>
+                                                    <FXCollections fx:factory="observableArrayList">
+                                                        <String fx:value="Adelanto"/>
+                                                        <String fx:value="Saldo"/>
+                                                        <String fx:value="Completo"/>
+                                                    </FXCollections>
+                                                </items>
+                                            </ComboBox>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Método de pago" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <ComboBox fx:id="cmbMetodoDePago" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                                <items>
+                                                    <FXCollections fx:factory="observableArrayList">
+                                                        <String fx:value="Efectivo"/>
+                                                        <String fx:value="Yape"/>
+                                                        <String fx:value="Transferencia"/>
+                                                        <String fx:value="Tarjeta"/>
+                                                    </FXCollections>
+                                                </items>
+                                            </ComboBox>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Monto a pagar (S/)" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtMontoAPagarS" maxWidth="Infinity" promptText="Monto a pagar (S/)"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Responsable" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtResponsable" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                        </VBox>
+                                    </FlowPane>
+                                </VBox>
+                                <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                    <Button fx:id="btnFormCancelar" text="Cancelar" styleClass="secondary" mnemonicParsing="false"/>
+                                    <Button fx:id="btnFormLimpiar" text="Limpiar" styleClass="secondary" mnemonicParsing="false"/>
+                                    <Button fx:id="btnFormRegistrarPago" text="Registrar pago" styleClass="primary" mnemonicParsing="false"/>
+                                </FlowPane>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+        </TabPane>
+    </center>
+</BorderPane>

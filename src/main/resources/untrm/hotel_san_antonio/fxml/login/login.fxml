@@ -107,6 +107,8 @@
                                     style="-fx-progress-color: white;" />
             </StackPane>
 
+            <Button text="¿Olvidaste tu contraseña?" onAction="#onOlvidoContrasena"
+                    style="-fx-background-color: transparent; -fx-text-fill: #A87425; -fx-cursor: hand;"/>
             <Label text="Acceso exclusivo para personal autorizado" style="-fx-font-size: 11px; -fx-text-fill: #8C8C8C;" />
         </VBox>
     </HBox>

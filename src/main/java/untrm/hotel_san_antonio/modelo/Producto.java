@@ -6,6 +6,7 @@ public class Producto {
     private int idProducto;
     private String codigoBarra;
     private String nombre;
+    private String nombreCategoria;
     private String marca;
     private int idCategoria;
     private BigDecimal precio;
@@ -22,6 +23,9 @@ public class Producto {
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
+
+    public String getNombreCategoria() { return nombreCategoria; }
+    public void setNombreCategoria(String nombreCategoria) { this.nombreCategoria = nombreCategoria; }
 
     public String getMarca() { return marca; }
     public void setMarca(String marca) { this.marca = marca; }

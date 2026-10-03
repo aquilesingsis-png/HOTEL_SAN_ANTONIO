@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<!-- Interfaz visual independiente: sin controlador ni acciones de negocio. -->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" styleClass="nuevos" stylesheets="@../css/nuevos-modulos.css" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300">
+    <top>
+        <VBox spacing="7" styleClass="page-header">
+            <Label text="CAJA  /  HOTEL SAN ANTONIO" styleClass="eyebrow" wrapText="true" maxWidth="Infinity"/>
+            <Label text="Totales del día" styleClass="page-title" wrapText="true" maxWidth="Infinity"/>
+            <Label text="Consolida cobros de alojamiento y tienda por método de pago." styleClass="subtitle" wrapText="true" maxWidth="Infinity"/>
+        </VBox>
+    </top>
+    <center>
+        <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0">
+            <Tab text="Listado">
+                <content>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" styleClass="content-scroll">
+                        <content>
+                            <VBox spacing="18" fillWidth="true" styleClass="page-content">
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Filtros de consulta" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Fecha" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <DatePicker fx:id="filtroFecha" maxWidth="Infinity" promptText="dd/mm/aaaa"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Responsable" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <ComboBox fx:id="filtroResponsable" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                                <items>
+                                                    <FXCollections fx:factory="observableArrayList">
+                                                        <String fx:value="Todos los responsables"/>
+                                                    </FXCollections>
+                                                </items>
+                                            </ComboBox>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Origen" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <ComboBox fx:id="filtroOrigen" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                                <items>
+                                                    <FXCollections fx:factory="observableArrayList">
+                                                        <String fx:value="Alojamiento"/>
+                                                        <String fx:value="Tienda"/>
+                                                    </FXCollections>
+                                                </items>
+                                            </ComboBox>
+                                        </VBox>
+                                    </FlowPane>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <Button fx:id="btnFiltroBuscar" text="Buscar" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnFiltroLimpiarFiltros" text="Limpiar filtros" styleClass="secondary" mnemonicParsing="false"/>
+                                    </FlowPane>
+                                </VBox>
+                                <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
+                                        <Label text="Alojamiento (S/)" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
+                                        <Label fx:id="lblAlojamientoS" text="—" styleClass="metric-value"/>
+                                        <Label text="Período seleccionado" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </VBox>
+                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
+                                        <Label text="Tienda (S/)" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
+                                        <Label fx:id="lblTiendaS" text="—" styleClass="metric-value"/>
+                                        <Label text="Período seleccionado" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </VBox>
+                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
+                                        <Label text="Cobros del día (S/)" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
+                                        <Label fx:id="lblCobrosDelDiaS" text="—" styleClass="metric-value"/>
+                                        <Label text="Período seleccionado" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </VBox>
+                                </FlowPane>
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Detalle de totales del día" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <Button fx:id="btnListaConsultar" text="Consultar" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnListaActualizarResumen" text="Actualizar resumen" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnListaImprimir" text="Imprimir" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnListaExportar" text="Exportar" styleClass="secondary" mnemonicParsing="false"/>
+                                    </FlowPane>
+                                    <TableView fx:id="tblRegistros" minHeight="240" prefHeight="330" VBox.vgrow="ALWAYS">
+                                        <columns>
+                                            <TableColumn fx:id="colMetodoDePago" text="Método de pago" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colCobrosDeAlojamientoS" text="Cobros de alojamiento (S/)" prefWidth="211" minWidth="90"/>
+                                            <TableColumn fx:id="colCobrosDeTiendaS" text="Cobros de tienda (S/)" prefWidth="175" minWidth="90"/>
+                                            <TableColumn fx:id="colTotalCobradoS" text="Total cobrado (S/)" prefWidth="154" minWidth="90"/>
+                                            <TableColumn fx:id="colNOOperaciones" text="N.º operaciones" prefWidth="145" minWidth="90"/>
+                                        </columns>
+                                        <placeholder>
+                                            <VBox alignment="CENTER" spacing="8">
+                                                <Label text="Sin registros para mostrar" styleClass="empty-title" wrapText="true" maxWidth="Infinity"/>
+                                                <Label text="Los resultados de la consulta aparecerán en este listado." styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                            </VBox>
+                                        </placeholder>
+                                    </TableView>
+                                    <HBox alignment="CENTER_LEFT">
+                                        <Label text="0 registros" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                        <Region HBox.hgrow="ALWAYS"/>
+                                        <Label text="Importes expresados en soles" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </HBox>
+                                </VBox>
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Distribución del período" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <BarChart fx:id="graficoResumen" animated="false" legendVisible="false" minHeight="220" prefHeight="250">
+                                        <xAxis>
+                                            <CategoryAxis label="Método de pago"/>
+                                        </xAxis>
+                                        <yAxis>
+                                            <NumberAxis label="Importe (S/)" forceZeroInRange="true"/>
+                                        </yAxis>
+                                    </BarChart>
+                                    <Label text="Selecciona los filtros del informe para consultar el período." styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                </VBox>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+        </TabPane>
+    </center>
+</BorderPane>

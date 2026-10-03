@@ -13,6 +13,61 @@ import java.util.List;
 
 public class HabitacionDAO {
 
+    public List<TipoHabitacion> listarTipos(Connection con) throws SQLException {
+        List<TipoHabitacion> lista = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT id_tipo, nombre, capacidad, precio_base, nivel_categoria "
+                + "FROM tipo_habitacion ORDER BY precio_base, nombre");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                TipoHabitacion t = new TipoHabitacion(rs.getInt("id_tipo"), rs.getString("nombre"),
+                        rs.getInt("capacidad"), rs.getBigDecimal("precio_base"));
+                int nivel = rs.getInt("nivel_categoria");
+                t.setNivelCategoria(rs.wasNull() ? null : nivel);
+                lista.add(t);
+            }
+        }
+        return lista;
+    }
+
+    public void actualizarNivelCategoria(Connection con, int idTipo, int nivel) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE tipo_habitacion SET nivel_categoria = ? WHERE id_tipo = ?")) {
+            ps.setInt(1, nivel); ps.setInt(2, idTipo);
+            if (ps.executeUpdate() != 1) throw new SQLException("No se pudo guardar el nivel de categoría.");
+        }
+    }
+
+    public Habitacion buscarPorId(Connection con, int idHabitacion) throws SQLException {
+        String sql = "SELECT h.id_habitacion, h.numero, h.id_tipo, h.piso, h.estado, "
+                + "t.nombre AS tipo_nombre, t.capacidad, t.precio_base "
+                + "FROM habitacion h JOIN tipo_habitacion t ON t.id_tipo = h.id_tipo "
+                + "WHERE h.id_habitacion = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacion);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+                Habitacion h = new Habitacion(rs.getInt("id_habitacion"), rs.getString("numero"),
+                        rs.getInt("id_tipo"), rs.getInt("piso"), rs.getString("estado"));
+                h.setTipo(new TipoHabitacion(h.getIdTipo(), rs.getString("tipo_nombre"),
+                        rs.getInt("capacidad"), rs.getBigDecimal("precio_base")));
+                return h;
+            }
+        }
+    }
+
+    public Integer nivelCategoria(Connection con, int idTipo) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT nivel_categoria FROM tipo_habitacion WHERE id_tipo = ?")) {
+            ps.setInt(1, idTipo);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+                int nivel = rs.getInt(1);
+                return rs.wasNull() ? null : nivel;
+            }
+        }
+    }
+
     /** Todas las habitaciones con su tipo y, si estan ocupadas, el huesped actual. */
     public List<Habitacion> listar() throws SQLException {
         try (Connection con = ConexionBD.conectar()) {
@@ -174,6 +229,24 @@ public class HabitacionDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? rs.getString(1) : null;
             }
+        }
+    }
+
+    public String bloquearYObtenerEstado(Connection con, int idHabitacion) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT estado FROM habitacion WHERE id_habitacion = ? FOR UPDATE")) {
+            ps.setInt(1, idHabitacion);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getString(1) : null;
+            }
+        }
+    }
+
+    public boolean tieneCheckinActivo(Connection con, int idHabitacion) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT 1 FROM reserva WHERE id_habitacion = ? AND estado = 'CHECKIN' LIMIT 1")) {
+            ps.setInt(1, idHabitacion);
+            try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
         }
     }
 

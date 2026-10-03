@@ -5,12 +5,17 @@ import untrm.hotel_san_antonio.dao.ProductoDAO;
 import untrm.hotel_san_antonio.dao.VentaTiendaDAO;
 import untrm.hotel_san_antonio.modelo.DetalleVenta;
 import untrm.hotel_san_antonio.modelo.VentaTienda;
+import untrm.hotel_san_antonio.modelo.Producto;
 import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.util.Permisos;
+import untrm.hotel_san_antonio.util.SesionActual;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class VentaService {
 
@@ -19,27 +24,36 @@ public class VentaService {
     private final ProductoDAO productoDAO = new ProductoDAO();
 
     public int registrarVenta(VentaTienda venta, List<DetalleVenta> detalles) throws SQLException {
+        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
         if (venta == null) {
             throw new IllegalArgumentException("La venta es obligatoria.");
         }
         if (detalles == null || detalles.isEmpty()) {
             throw new IllegalArgumentException("El carrito está vacío.");
         }
-        if (venta.getIdUsuario() <= 0) {
+        if (venta.getIdUsuario() <= 0 || venta.getIdUsuario() != SesionActual.getUsuario().getIdUsuario()) {
             throw new IllegalArgumentException("Debe existir un usuario autenticado.");
         }
 
         BigDecimal total = BigDecimal.ZERO;
+        Set<Integer> ids = new HashSet<>();
         for (DetalleVenta d : detalles) {
+            if (d == null || d.getIdProducto() <= 0 || !ids.add(d.getIdProducto())) {
+                throw new IllegalArgumentException("El carrito contiene productos inválidos o repetidos.");
+            }
             if (d.getCantidad() <= 0) {
                 throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
             }
-            if (d.getPrecioUnitario() == null || d.getPrecioUnitario().signum() < 0) {
+            if (d.getPrecioUnitario() == null || d.getPrecioUnitario().signum() <= 0
+                    || d.getPrecioUnitario().scale() > 2) {
                 throw new IllegalArgumentException("Precio inválido en el carrito.");
             }
             BigDecimal subtotal = d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad()));
             d.setSubtotal(subtotal);
             total = total.add(subtotal);
+        }
+        if (total.compareTo(new BigDecimal("999999.99")) > 0) {
+            throw new IllegalArgumentException("El total supera el máximo admitido para una venta.");
         }
         venta.setTotal(total);
 
@@ -48,10 +62,14 @@ public class VentaService {
             cn.setAutoCommit(false);
             try {
                 for (DetalleVenta d : detalles) {
-                    int stock = productoDAO.obtenerStockParaActualizar(cn, d.getIdProducto());
-                    if (stock < d.getCantidad()) {
+                    Producto producto = productoDAO.bloquearParaVenta(cn, d.getIdProducto());
+                    if (producto.getPrecio().compareTo(d.getPrecioUnitario()) != 0) {
+                        throw new IllegalStateException("El precio de " + d.getNombreProducto()
+                                + " cambió. Actualice el carrito antes de confirmar.");
+                    }
+                    if (producto.getStock() < d.getCantidad()) {
                         throw new SQLException("Stock insuficiente para " + d.getNombreProducto() +
-                                ". Disponible: " + stock + ".");
+                                ". Disponible: " + producto.getStock() + ".");
                     }
                 }
 

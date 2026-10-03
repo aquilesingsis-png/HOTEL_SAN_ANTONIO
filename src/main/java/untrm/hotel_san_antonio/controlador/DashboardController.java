@@ -194,7 +194,7 @@ public class DashboardController {
     private static final String FILA_MINI_IMPAR =
             "-fx-background-color: #FBF9F5; -fx-border-color: transparent transparent #F0ECE2 transparent;";
     private static final String FILA_MINI_SELECCIONADA =
-            "-fx-background-color: #F5E6C8; -fx-text-fill: #2C2118;";
+            "-fx-background-color: #704313; -fx-text-background-color: white;";
 
     private final DashboardService dashboardService = new DashboardService();
 
@@ -583,29 +583,18 @@ public class DashboardController {
     // =========================================================
     // MOSTRAR OTRAS SECCIONES
     // =========================================================
+
     @FXML
     private void mostrarSeccion(ActionEvent event) {
-
-
-        if (dashboardView != null) {
-
-            dashboardView.setVisible(false);
-
-            dashboardView.setManaged(false);
+        Object ruta = ((Node) event.getSource()).getUserData();
+        if (!(ruta instanceof String destino)) {
+            Alertas.mostrarError("Navegación", "Esta acción no tiene una pantalla configurada.");
+            return;
         }
-
-        if (placeholderView != null) {
-
-            placeholderView.setVisible(true);
-
-            placeholderView.setManaged(true);
-        }
-
-        if (lblPlaceholderTitulo != null) {
-
-            lblPlaceholderTitulo.setText(
-                    "Sección en construcción"
-            );
+        try {
+            Navegacion.mostrar(destino);
+        } catch (IOException | SecurityException error) {
+            Alertas.mostrarError("Navegación", "No se pudo abrir la lista solicitada.");
         }
     }
 

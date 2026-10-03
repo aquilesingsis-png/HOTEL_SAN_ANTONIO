@@ -7,6 +7,7 @@ public class TipoHabitacion {
     private String nombre;
     private int capacidad;
     private BigDecimal precioBase;
+    private Integer nivelCategoria;
 
     public TipoHabitacion() {}
 
@@ -28,6 +29,8 @@ public class TipoHabitacion {
 
     public BigDecimal getPrecioBase() { return precioBase; }
     public void setPrecioBase(BigDecimal precioBase) { this.precioBase = precioBase; }
+    public Integer getNivelCategoria() { return nivelCategoria; }
+    public void setNivelCategoria(Integer nivelCategoria) { this.nivelCategoria = nivelCategoria; }
 
     @Override
     public String toString() { return nombre; }

@@ -35,6 +35,7 @@ public class PrincipalController {
     private static final String RUTA_LOGIN = "/untrm/hotel_san_antonio/fxml/login/login.fxml";
     private static final String RUTA_MARCO_RECEPCIONISTA = "/untrm/hotel_san_antonio/fxml/principal/principal_recepcionista.fxml";
     private static final String RUTA_MARCO_ADMIN = "/untrm/hotel_san_antonio/fxml/principal/principal_administrador.fxml";
+    private static final String RUTA_MARCO_LIMPIEZA = "/untrm/hotel_san_antonio/fxml/principal/principal_limpieza.fxml";
     private static final String RUTA_CARRITO = "/untrm/hotel_san_antonio/fxml/carrito/carrito_tienda.fxml";
 
     // Botones de opcion (Inicio, Habitaciones, y los de dentro de un submenu)
@@ -42,7 +43,7 @@ public class PrincipalController {
             + "-fx-alignment: CENTER_LEFT; -fx-padding: 11px 16px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
     private static final String ITEM_HOVER = "-fx-background-color: #5A3516; -fx-text-fill: #F3ECDD; -fx-font-size: 14px; "
             + "-fx-alignment: CENTER_LEFT; -fx-padding: 11px 16px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
-    private static final String ITEM_SELECCIONADO = "-fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; "
+    private static final String ITEM_SELECCIONADO = "-fx-background-color: #704313; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; "
             + "-fx-alignment: CENTER_LEFT; -fx-padding: 11px 16px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
 
     // Botones dentro de un submenu desplegado: igual, con letra un poco mas chica
@@ -50,12 +51,12 @@ public class PrincipalController {
             + "-fx-alignment: CENTER_LEFT; -fx-padding: 8px 14px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
     private static final String SUBITEM_HOVER = "-fx-background-color: #5A3516; -fx-text-fill: #F3ECDD; -fx-font-size: 13px; "
             + "-fx-alignment: CENTER_LEFT; -fx-padding: 8px 14px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
-    private static final String SUBITEM_SELECCIONADO = "-fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px; "
+    private static final String SUBITEM_SELECCIONADO = "-fx-background-color: #704313; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px; "
             + "-fx-alignment: CENTER_LEFT; -fx-padding: 8px 14px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
 
     // Botones que solo despliegan un submenu (ej. "Reservas ▸"): mismo look que ITEM, mas un color
     // distinto cuando una de sus opciones esta abierta ("Reservas" activo aunque este plegado)
-    private static final String GRUPO_ACTIVO = "-fx-background-color: transparent; -fx-text-fill: #E6C77A; -fx-font-weight: bold; -fx-font-size: 14px; "
+    private static final String GRUPO_ACTIVO = "-fx-background-color: #704313; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; "
             + "-fx-alignment: CENTER_LEFT; -fx-padding: 11px 16px; -fx-background-radius: 6px; -fx-cursor: hand; -fx-max-width: infinity;";
 
     @FXML private StackPane contenido;
@@ -63,10 +64,12 @@ public class PrincipalController {
     @FXML private VBox barraLateral;
     @FXML private ToggleButton btnInicio;
     @FXML private Label lblTitulo, lblFecha, lblUsuario, lblRol;
+    private ToggleButton ultimaPantalla;
 
     /** FXML del marco que corresponde al rol del usuario que inicio sesion (lo usa el Login). */
     public static String rutaMarco(String rol) {
-        return "ADMINISTRADOR".equals(rol) ? RUTA_MARCO_ADMIN : RUTA_MARCO_RECEPCIONISTA;
+        return "ADMINISTRADOR".equals(rol) ? RUTA_MARCO_ADMIN
+                : "LIMPIEZA".equals(rol) ? RUTA_MARCO_LIMPIEZA : RUTA_MARCO_RECEPCIONISTA;
     }
 
     @FXML
@@ -79,7 +82,8 @@ public class PrincipalController {
         Usuario usuario = SesionActual.getUsuario();
         if (usuario != null) {
             lblUsuario.setText(usuario.getNombreCompleto());
-            lblRol.setText("ADMINISTRADOR".equals(usuario.getRol()) ? "Administrador" : "Recepcionista");
+            lblRol.setText("ADMINISTRADOR".equals(usuario.getRol()) ? "Administrador"
+                    : "LIMPIEZA".equals(usuario.getRol()) ? "Limpieza" : "Recepcionista");
         }
 
         aplicarEstiloMenu();
@@ -138,12 +142,16 @@ public class PrincipalController {
         boton.selectedProperty().addListener((obs, antes, ahora) -> actualizar.run());
         boton.setOnMouseEntered(e -> { if (!boton.isSelected()) boton.setStyle(hover); });
         boton.setOnMouseExited(e -> actualizar.run());
+        boton.setOnMousePressed(e -> boton.setStyle(seleccionado));
+        boton.setOnMouseReleased(e -> actualizar.run());
     }
 
     private void aplicarGrupo(Button boton) {
         boton.setStyle(ITEM);
         boton.setOnMouseEntered(e -> boton.setStyle(ITEM_HOVER));
         boton.setOnMouseExited(e -> boton.setStyle(esGrupoActivo(boton) ? GRUPO_ACTIVO : ITEM));
+        boton.setOnMousePressed(e -> boton.setStyle(GRUPO_ACTIVO));
+        boton.setOnMouseReleased(e -> boton.setStyle(esGrupoActivo(boton) ? GRUPO_ACTIVO : ITEM));
     }
 
     private boolean esGrupoActivo(Button boton) {
@@ -236,11 +244,17 @@ public class PrincipalController {
     private void abrir(ToggleButton boton) {
         // En un submenu el titulo lleva el nombre del grupo: "Reservas · Nueva reserva"
         Object grupo = boton.getParent().getUserData();
-        lblTitulo.setText(grupo == null ? boton.getText() : grupo + " · " + boton.getText());
-        marcarGrupoActivo(boton);
+        String titulo = grupo == null ? boton.getText() : grupo + " · " + boton.getText();
         try {
             Navegacion.mostrar(boton.getUserData().toString());
-        } catch (IOException e) {
+            lblTitulo.setText(titulo);
+            marcarGrupoActivo(boton);
+            ultimaPantalla = boton;
+        } catch (IOException | SecurityException e) {
+            if (ultimaPantalla != null) {
+                ultimaPantalla.setSelected(true);
+                marcarGrupoActivo(ultimaPantalla);
+            }
             Alertas.mostrarError("Error", "No se pudo abrir " + boton.getText() + ".\n\n" + e.getMessage());
         }
     }

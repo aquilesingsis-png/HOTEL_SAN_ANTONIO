@@ -7,6 +7,7 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -81,6 +82,11 @@
                                 <TextField fx:id="txtEmail"/>
                             </VBox>
                         </GridPane>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <Label text="Personas que ingresan"/>
+                            <Spinner fx:id="spHuespedes" prefWidth="90"/>
+                        </HBox>
+                        <VBox fx:id="contenedorAcompanantes" spacing="8" visible="false" managed="false"/>
                     </VBox>
 
                     <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #E5E5E5; -fx-border-radius: 8px; -fx-padding: 16px;">

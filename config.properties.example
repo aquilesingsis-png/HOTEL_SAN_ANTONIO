@@ -5,3 +5,9 @@
 reniec.token=PEGAR_TOKEN_AQUI
 sunat.ruc.token=PEGAR_TOKEN_AQUI
 decolecta.token=PEGAR_TOKEN_AQUI
+
+# Base MySQL. Puede configurar estas claves o usar HOTEL_DB_URL, HOTEL_DB_USER
+# y HOTEL_DB_PASSWORD en el entorno de NetBeans.
+db.url=jdbc:mysql://localhost:3306/hotel_san_antonio?serverTimezone=America/Lima
+db.user=USUARIO_MYSQL
+db.password=CONTRASENA_MYSQL

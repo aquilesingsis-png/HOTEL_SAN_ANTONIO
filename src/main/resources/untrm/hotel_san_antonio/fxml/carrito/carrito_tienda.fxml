@@ -97,7 +97,7 @@
        <Label fx:id="lblMostrando" text="Mostrando 0 productos" style="-fx-text-fill: #657187; -fx-font-size: 12px;"/>
        <Region HBox.hgrow="ALWAYS"/>
        <Button text="‹" disable="true" style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
-       <Button text="1" style="-fx-background-color: #8B571C; -fx-text-fill: white; -fx-background-radius: 5;"/>
+       <Button text="1" disable="true" style="-fx-background-color: #8B571C; -fx-text-fill: white; -fx-background-radius: 5;"/>
        <Button text="›" disable="true" style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
       </HBox>
      </VBox>
@@ -120,8 +120,8 @@
        <placeholder><VBox alignment="CENTER" spacing="8"><Label text="Carrito"/><Label text="El carrito está vacío." style="-fx-text-fill: #657187; -fx-font-size: 12px;"/></VBox></placeholder>
       </TableView>
       <HBox alignment="CENTER_RIGHT" spacing="6">
-       <Button onAction="#onRestarCantidad" style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
-       <Button onAction="#onSumarCantidad" style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+       <Button text="−" onAction="#onRestarCantidad" style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+       <Button text="+" onAction="#onSumarCantidad" style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
        <Button text="Quitar" onAction="#onQuitarProducto" style="-fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
       </HBox>
       <VBox spacing="6" style="-fx-background-color: #FFF9F1; -fx-border-color: #EADFD1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10;">

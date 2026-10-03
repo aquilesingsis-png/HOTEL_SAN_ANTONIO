@@ -8,7 +8,7 @@ import untrm.hotel_san_antonio.modelo.Usuario;
  */
 public class SesionActual {
 
-    private static Usuario usuario;
+    private static volatile Usuario usuario;
 
     public static void iniciar(Usuario usuarioLogueado) {
         usuario = usuarioLogueado;

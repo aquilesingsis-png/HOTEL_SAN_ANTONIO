@@ -29,6 +29,8 @@ import untrm.hotel_san_antonio.util.SesionActual;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Login. Sin archivo .css: el fondo, los "campo" (normal/foco/error) y los botones
@@ -37,8 +39,11 @@ import java.sql.SQLException;
  */
 public class LoginController {
 
+    private static final Logger LOG = Logger.getLogger(LoginController.class.getName());
+
     private static final String ROL_ADMINISTRADOR = "ADMINISTRADOR";
     private static final String ROL_RECEPCIONISTA = "RECEPCIONISTA";
+    private static final String ROL_LIMPIEZA = "LIMPIEZA";
 
     // "campo" (los contenedores de rol/usuario/contraseña)
     private static final String CAMPO_BASE = "-fx-border-width: 1.2px; -fx-border-radius: 11px; "
@@ -84,7 +89,7 @@ public class LoginController {
     private void initialize() {
         aplicarFondo();
 
-        cmbRol.setItems(FXCollections.observableArrayList("Administrador", "Recepcionista"));
+        cmbRol.setItems(FXCollections.observableArrayList("Administrador", "Recepcionista", "Limpieza"));
         txtContrasenaVisible.textProperty().bindBidirectional(txtContrasena.textProperty());
 
         cmbRol.valueProperty().addListener((observable, anterior, actual) -> ocultarError());
@@ -167,6 +172,10 @@ public class LoginController {
                         || !PasswordUtil.coincide(contrasena, encontrado.getContrasenaHash())) {
                     return null;
                 }
+                if (PasswordUtil.esLegacy(encontrado.getContrasenaHash())) {
+                    usuarioDAO.actualizarHashLegacy(encontrado.getIdUsuario(),
+                            encontrado.getContrasenaHash(), PasswordUtil.hash(contrasena));
+                }
                 return encontrado;
             }
         };
@@ -186,7 +195,8 @@ public class LoginController {
                     ? "" : encontrado.getRol().trim().toUpperCase();
 
             if (!ROL_ADMINISTRADOR.equals(rolRegistrado)
-                    && !ROL_RECEPCIONISTA.equals(rolRegistrado)) {
+                    && !ROL_RECEPCIONISTA.equals(rolRegistrado)
+                    && !ROL_LIMPIEZA.equals(rolRegistrado)) {
                 mostrarError("El usuario no tiene un rol autorizado.", true, true, true);
                 return;
             }
@@ -212,14 +222,32 @@ public class LoginController {
         tareaAutenticacion.setOnFailed(evento -> {
             cambiarEstadoCarga(false);
             Throwable error = tareaAutenticacion.getException();
-            Alertas.mostrarError("Error de conexión",
-                    "No se pudo conectar a la base de datos. Verifica que MySQL/XAMPP esté encendido.\n\n"
-                            + (error == null ? "Error desconocido." : error.getMessage()));
+            LOG.log(Level.SEVERE, "Falló la autenticación", error);
+            Alertas.mostrarError("No se pudo iniciar sesión", mensajeErrorInicio(error));
         });
 
         Thread hilo = new Thread(tareaAutenticacion, "autenticacion-usuario");
         hilo.setDaemon(true);
         hilo.start();
+    }
+
+    private String mensajeErrorInicio(Throwable error) {
+        if (error instanceof SQLException sql) {
+            String estado = sql.getSQLState();
+            if (estado != null && estado.startsWith("08")) {
+                return "No se pudo comunicar con MySQL. Encienda MySQL en XAMPP y compruebe el puerto 3306.";
+            }
+            if (estado != null && estado.startsWith("28")) {
+                return "MySQL rechazó el usuario o la contraseña configurados en config.properties.";
+            }
+            if ("42S02".equals(estado) || "42000".equals(estado)) {
+                return "La base hotel_san_antonio no tiene las tablas esperadas. Importe el SQL de instalación.";
+            }
+            if (sql.getMessage() != null && sql.getMessage().startsWith("Configure db.url")) {
+                return "Configure la conexión MySQL en config.properties.";
+            }
+        }
+        return "No se pudo validar el acceso. Revise el registro técnico y la configuración de MySQL.";
     }
 
     @FXML
@@ -235,6 +263,15 @@ public class LoginController {
         TextField campoActivo = campoContrasenaActivo();
         campoActivo.requestFocus();
         campoActivo.positionCaret(campoActivo.getText().length());
+    }
+
+    @FXML private void onOlvidoContrasena() {
+        try {
+            Navegacion.abrirModal("/untrm/hotel_san_antonio/fxml/login/recuperacion.fxml",
+                    "Recuperar contraseña");
+        } catch (IOException error) {
+            Alertas.mostrarError("Error", "No se pudo abrir la recuperación de contraseña.");
+        }
     }
 
     private TextField campoContrasenaActivo() {

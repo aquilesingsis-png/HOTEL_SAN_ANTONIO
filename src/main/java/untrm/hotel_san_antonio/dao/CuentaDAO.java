@@ -94,14 +94,18 @@ public class CuentaDAO {
             }
         }
 
-        String sqlPagos = "SELECT fecha_pago, tipo_pago, metodo_pago, monto FROM pago "
+        String sqlPagos = "SELECT fecha_pago, fecha_evento, tipo_pago, metodo_pago, monto FROM pago "
                 + "WHERE id_reserva = ? ORDER BY fecha_pago, id_pago";
         try (PreparedStatement ps = con.prepareStatement(sqlPagos)) {
             ps.setInt(1, cuenta.getIdReserva());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
+                    String fechaVisible = rs.getDate("fecha_evento") == null
+                            ? rs.getTimestamp("fecha_pago").toLocalDateTime().format(FECHA)
+                            : rs.getDate("fecha_evento").toLocalDate().toString() + " (registrado "
+                                + rs.getTimestamp("fecha_pago").toLocalDateTime().format(FECHA) + ")";
                     cuenta.getPagos().add(new CuentaHabitacion.PagoLinea(
-                            rs.getTimestamp("fecha_pago").toLocalDateTime().format(FECHA),
+                            fechaVisible,
                             capitalizar(rs.getString("tipo_pago")),
                             capitalizar(rs.getString("metodo_pago")),
                             rs.getBigDecimal("monto")));
