@@ -11,6 +11,7 @@ public class Usuario {
     private String rol; // ADMINISTRADOR, RECEPCIONISTA
     private boolean activo;
     private LocalDateTime fechaCreacion;
+    private LocalDateTime bloqueadoHasta;
 
     public Usuario() {}
 
@@ -43,6 +44,12 @@ public class Usuario {
 
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
+
+    public LocalDateTime getBloqueadoHasta() { return bloqueadoHasta; }
+    public void setBloqueadoHasta(LocalDateTime bloqueadoHasta) { this.bloqueadoHasta = bloqueadoHasta; }
+
+    /** true si la cuenta está bloqueada por demasiados intentos y el bloqueo aún no vence. */
+    public boolean isBloqueado() { return bloqueadoHasta != null && bloqueadoHasta.isAfter(LocalDateTime.now()); }
 
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }

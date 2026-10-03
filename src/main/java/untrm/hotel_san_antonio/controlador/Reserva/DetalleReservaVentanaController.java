@@ -102,11 +102,14 @@ public class DetalleReservaVentanaController {
         BigDecimal total = reserva.getMontoTotal() == null ? BigDecimal.ZERO : reserva.getMontoTotal();
         pagado = pagos.stream().map(Pago::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
         saldo = total.subtract(pagado).max(BigDecimal.ZERO);
-        lblResumenPagos.setText(String.format(Locale.US, "Total S/ %.2f  ·  Pagado S/ %.2f  ·  Saldo S/ %.2f",
-                total, pagado, saldo));
+        boolean cancelada = "CANCELADA".equals(reserva.getEstado());
+        lblResumenPagos.setText(cancelada
+                ? String.format(Locale.US, "Total S/ %.2f  ·  Adelanto retenido por cancelación S/ %.2f", total, pagado)
+                : String.format(Locale.US, "Total S/ %.2f  ·  Pagado S/ %.2f  ·  Saldo S/ %.2f", total, pagado, saldo));
         lblPagos.setText(pagos.isEmpty() ? "Todavía no hay pagos registrados." : pagos.stream()
                 .map(p -> p.getFechaPago().format(formato) + "  ·  " + p.getMetodoPago() + "  ·  "
-                        + p.getTipoPago() + "  ·  " + String.format(Locale.US, "S/ %.2f", p.getMonto()))
+                        + p.getTipoPago() + "  ·  " + String.format(Locale.US, "S/ %.2f", p.getMonto())
+                        + (cancelada ? "  (retenido)" : ""))
                 .collect(java.util.stream.Collectors.joining("\n")));
 
         boolean confirmada = "CONFIRMADA".equals(reserva.getEstado());
@@ -122,6 +125,10 @@ public class DetalleReservaVentanaController {
             lblAvisoCobro.setText("El huésped ya está alojado: el saldo se cobra en la cuenta de la habitación (Habitaciones).");
         } else {
             lblAvisoCobro.setText("");
+        }
+        if (cancelada) {
+            lblAvisoCancelacion.setText("");
+            return;
         }
         lblAvisoCancelacion.setText(pagado.signum() > 0
                 ? String.format(Locale.US, "El adelanto pagado (S/ %.2f) NO se devuelve.", pagado) : "");

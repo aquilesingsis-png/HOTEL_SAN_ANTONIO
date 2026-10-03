@@ -13,8 +13,76 @@ import untrm.hotel_san_antonio.util.SesionActual;
 import untrm.hotel_san_antonio.util.Validador;
 
 public class UsuarioService {
+    /** Contraseñas incorrectas seguidas que bloquean una cuenta. */
+    public static final int MAX_INTENTOS = 5;
+    /** Minutos que dura el bloqueo. */
+    public static final int MINUTOS_BLOQUEO = 15;
+
     private final UsuarioDAO usuarios = new UsuarioDAO();
     private final AuditoriaDAO auditoria = new AuditoriaDAO();
+
+    /**
+     * Valida usuario y contraseña. Devuelve null si no coinciden (sin decir cuál falló).
+     * Tras {@link #MAX_INTENTOS} contraseñas incorrectas seguidas la cuenta se bloquea
+     * {@link #MINUTOS_BLOQUEO} minutos; mientras dura el bloqueo ni la contraseña correcta entra.
+     */
+    public Usuario autenticar(String login, String contrasena) throws SQLException, CuentaBloqueadaException {
+        int bloqueoNuevo = 0;
+        Usuario encontrado = null;
+        try (Connection con = ConexionBD.conectar()) {
+            con.setAutoCommit(false);
+            try {
+                Usuario usuario = usuarios.bloquearActivoPorLogin(con, login);
+                if (usuario == null) {
+                    con.commit();
+                    return null;
+                }
+                int minutos = usuarios.minutosDeBloqueo(con, usuario.getIdUsuario());
+                if (minutos > 0) {
+                    con.commit();
+                    throw new CuentaBloqueadaException(minutos);
+                }
+                if (PasswordUtil.coincide(contrasena, usuario.getContrasenaHash())) {
+                    usuarios.limpiarIntentos(con, usuario.getIdUsuario());
+                    encontrado = usuario;
+                } else if (usuarios.registrarFallo(con, usuario.getIdUsuario()) >= MAX_INTENTOS) {
+                    usuarios.bloquear(con, usuario.getIdUsuario(), MINUTOS_BLOQUEO);
+                    auditoria.registrar(con, usuario.getIdUsuario(), "USUARIO_BLOQUEADO", "usuario",
+                            usuario.getIdUsuario(), MAX_INTENTOS + " contraseñas incorrectas seguidas");
+                    bloqueoNuevo = MINUTOS_BLOQUEO;
+                }
+                con.commit();
+            } catch (SQLException | RuntimeException error) {
+                con.rollback();
+                throw error;
+            }
+        }
+        if (bloqueoNuevo > 0) throw new CuentaBloqueadaException(bloqueoNuevo);
+        if (encontrado != null && PasswordUtil.esLegacy(encontrado.getContrasenaHash())) {
+            usuarios.actualizarHashLegacy(encontrado.getIdUsuario(), encontrado.getContrasenaHash(),
+                    PasswordUtil.hash(contrasena));
+        }
+        return encontrado;
+    }
+
+    /** El administrador levanta el bloqueo de una cuenta sin esperar a que venza. */
+    public void desbloquear(int idUsuario) throws SQLException {
+        Permisos.requerir("ADMINISTRADOR");
+        try (Connection con = ConexionBD.conectar()) {
+            con.setAutoCommit(false);
+            try {
+                Usuario usuario = usuarios.bloquearPorId(con, idUsuario);
+                if (usuario == null) throw new IllegalArgumentException("El usuario ya no existe.");
+                usuarios.limpiarIntentos(con, idUsuario);
+                auditoria.registrar(con, SesionActual.getUsuario().getIdUsuario(), "USUARIO_DESBLOQUEAR",
+                        "usuario", idUsuario, null);
+                con.commit();
+            } catch (SQLException | RuntimeException error) {
+                con.rollback();
+                throw error;
+            }
+        }
+    }
 
     public List<String> listarRoles() throws SQLException {
         Permisos.requerir("ADMINISTRADOR");

@@ -19,12 +19,12 @@ import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import untrm.hotel_san_antonio.dao.UsuarioDAO;
+import untrm.hotel_san_antonio.servicio.CuentaBloqueadaException;
+import untrm.hotel_san_antonio.servicio.UsuarioService;
 import untrm.hotel_san_antonio.modelo.Usuario;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.EstiloUtil;
 import untrm.hotel_san_antonio.util.Navegacion;
-import untrm.hotel_san_antonio.util.PasswordUtil;
 import untrm.hotel_san_antonio.util.SesionActual;
 
 import java.io.IOException;
@@ -80,7 +80,7 @@ public class LoginController {
     @FXML private HBox contenedorContrasena;
     @FXML private HBox contenedorRol;
 
-    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
+    private final UsuarioService usuarioService = new UsuarioService();
 
     // se necesita recordar el error de cada campo para no perderlo cuando solo cambia el foco
     private boolean errorUsuario, errorContrasena, errorRol;
@@ -166,17 +166,8 @@ public class LoginController {
 
         Task<Usuario> tareaAutenticacion = new Task<Usuario>() {
             @Override
-            protected Usuario call() throws SQLException {
-                Usuario encontrado = usuarioDAO.buscarPorUsuario(usuario);
-                if (encontrado == null
-                        || !PasswordUtil.coincide(contrasena, encontrado.getContrasenaHash())) {
-                    return null;
-                }
-                if (PasswordUtil.esLegacy(encontrado.getContrasenaHash())) {
-                    usuarioDAO.actualizarHashLegacy(encontrado.getIdUsuario(),
-                            encontrado.getContrasenaHash(), PasswordUtil.hash(contrasena));
-                }
-                return encontrado;
+            protected Usuario call() throws Exception {
+                return usuarioService.autenticar(usuario, contrasena);
             }
         };
 
@@ -222,6 +213,13 @@ public class LoginController {
         tareaAutenticacion.setOnFailed(evento -> {
             cambiarEstadoCarga(false);
             Throwable error = tareaAutenticacion.getException();
+            if (error instanceof CuentaBloqueadaException bloqueada) {
+                txtContrasena.clear();
+                mostrarError("Cuenta bloqueada por demasiados intentos. Intente de nuevo en "
+                        + bloqueada.getMinutos() + " minuto(s) o pida al administrador que la desbloquee.",
+                        true, true, false);
+                return;
+            }
             LOG.log(Level.SEVERE, "Falló la autenticación", error);
             Alertas.mostrarError("No se pudo iniciar sesión", mensajeErrorInicio(error));
         });

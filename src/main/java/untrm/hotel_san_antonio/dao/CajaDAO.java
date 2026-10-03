@@ -31,8 +31,9 @@ public class CajaDAO {
     /** Los cuatro origenes del dinero, unidos en una misma tabla virtual. */
     private static final String TODOS = ""
             + "SELECT COALESCE(TIMESTAMP(p.fecha_evento, TIME(p.fecha_pago)), p.fecha_pago) AS fecha, 'INGRESO' AS tipo, "
-            + "CONCAT('Pago de cliente - ', CASE p.tipo_pago WHEN 'ADELANTO' THEN 'Adelanto' WHEN 'SALDO' THEN 'Saldo' "
-            + "ELSE 'Pago completo' END, ' - Habitación ', hab.numero, ' (R-', LPAD(r.id_reserva, 4, '0'), ')') AS concepto, "
+            + "CONCAT(IF(r.estado = 'CANCELADA', 'Adelanto retenido por cancelación', CONCAT('Pago de cliente - ', "
+            + "CASE p.tipo_pago WHEN 'ADELANTO' THEN 'Adelanto' WHEN 'SALDO' THEN 'Saldo' ELSE 'Pago completo' END)), "
+            + "' - Habitación ', hab.numero, ' (R-', LPAD(r.id_reserva, 4, '0'), ')') AS concepto, "
             + "p.monto AS monto, p.metodo_pago AS metodo, "
             + "(SELECT MIN(c.numero) FROM comprobante c WHERE c.id_reserva = r.id_reserva) AS documento, "
             + "CONCAT(h.nombres, ' ', h.apellidos) AS cliente, CONCAT(u.nombre, ' ', u.apellido) AS responsable, "

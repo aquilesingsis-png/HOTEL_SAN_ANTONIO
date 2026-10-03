@@ -43,6 +43,7 @@ public class UsuariosController {
     @FXML private Label lblInactivos;
     @FXML private Button btnEditar;
     @FXML private Button btnAcceso;
+    @FXML private Button btnDesbloquear;
     @FXML private TableView<Usuario> tabla;
     @FXML private TableColumn<Usuario, String> colCodigo;
     @FXML private TableColumn<Usuario, String> colColaborador;
@@ -72,7 +73,7 @@ public class UsuariosController {
         colColaborador.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getNombreCompleto()));
         colUsuario.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getUsuario()));
         colRol.setCellValueFactory(d -> new SimpleStringProperty(rolTexto(d.getValue().getRol())));
-        colEstado.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().isActivo() ? "Activo" : "Inactivo"));
+        colEstado.setCellValueFactory(d -> new SimpleStringProperty(textoEstado(d.getValue())));
         colCreado.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getFechaCreacion() == null ? ""
                 : d.getValue().getFechaCreacion().format(FORMATO_FECHA)));
         for (TableColumn<Usuario, String> columna : List.of(colCodigo, colColaborador, colUsuario, colRol,
@@ -86,12 +87,14 @@ public class UsuariosController {
         tabla.getSelectionModel().selectedItemProperty().addListener((o, antes, ahora) -> {
             btnEditar.setDisable(ahora == null);
             btnAcceso.setDisable(ahora == null || !ahora.isActivo());
+            btnDesbloquear.setDisable(ahora == null || !ahora.isBloqueado());
         });
         tabla.setOnMouseClicked(evento -> {
             if (evento.getButton() == MouseButton.PRIMARY && evento.getClickCount() == 2) editar();
         });
         btnEditar.setDisable(true);
         btnAcceso.setDisable(true);
+        btnDesbloquear.setDisable(true);
         EstiloGlobal.restilizarEncabezados(tabla);
         cargar();
     }
@@ -139,6 +142,18 @@ public class UsuariosController {
                     controlador -> controlador.iniciar(elegido));
         } catch (IOException | SecurityException error) {
             Alertas.mostrarError("Error", "No se pudo abrir la ventana.\n\n" + error.getMessage());
+        }
+    }
+
+    @FXML
+    private void desbloquear() {
+        Usuario elegido = tabla.getSelectionModel().getSelectedItem();
+        if (elegido == null || !elegido.isBloqueado()) return;
+        try {
+            servicio.desbloquear(elegido.getIdUsuario());
+            cargar();
+        } catch (SQLException | IllegalArgumentException | SecurityException error) {
+            Alertas.mostrarError("Usuarios", "No se pudo desbloquear la cuenta.\n\n" + error.getMessage());
         }
     }
 
@@ -199,6 +214,11 @@ public class UsuariosController {
         lblActivos.setText(String.valueOf(activos));
         lblAdministradores.setText(String.valueOf(administradores));
         lblInactivos.setText(String.valueOf(inactivos));
+    }
+
+    private static String textoEstado(Usuario u) {
+        if (!u.isActivo()) return "Inactivo";
+        return u.isBloqueado() ? "Bloqueado" : "Activo";
     }
 
     /** ADMINISTRADOR se muestra como Administrador. */

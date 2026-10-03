@@ -18,6 +18,9 @@ import untrm.hotel_san_antonio.util.SesionActual;
 
 /** Recuperación asistida por administrador cuando no existe SMTP configurado. */
 public class RecuperacionService {
+    /** Códigos incorrectos seguidos que anulan el código vigente de un usuario. */
+    public static final int MAX_INTENTOS = 5;
+
     private final UsuarioDAO usuarios = new UsuarioDAO();
     private final RecuperacionDAO tokens = new RecuperacionDAO();
     private final AuditoriaDAO auditoria = new AuditoriaDAO();
@@ -34,6 +37,7 @@ public class RecuperacionService {
                 if (destinatario == null) throw new IllegalArgumentException("Usuario activo no encontrado.");
                 tokens.anularPendientes(con, destinatario.getIdUsuario());
                 tokens.insertar(con, destinatario.getIdUsuario(), digest(token));
+                usuarios.limpiarIntentosRecuperacion(con, destinatario.getIdUsuario());
                 auditoria.registrar(con, SesionActual.getUsuario().getIdUsuario(),
                         "RECUPERACION_EMITIR", "usuario", destinatario.getIdUsuario(), null);
                 con.commit();
@@ -60,7 +64,21 @@ public class RecuperacionService {
                     if (MessageDigest.isEqual(hashToken.getBytes(StandardCharsets.US_ASCII),
                             candidato.hash().getBytes(StandardCharsets.US_ASCII))) valido = candidato;
                 }
-                if (valido == null) throw new IllegalArgumentException("Usuario o token inválido.");
+                if (valido == null) {
+                    // se anota el intento ANTES de avisar del error, para que no se pierda al revertir
+                    boolean anulado = usuarios.registrarFalloRecuperacion(con, usuario.getIdUsuario()) >= MAX_INTENTOS;
+                    if (anulado) {
+                        tokens.anularPendientes(con, usuario.getIdUsuario());
+                        usuarios.limpiarIntentosRecuperacion(con, usuario.getIdUsuario());
+                        auditoria.registrar(con, usuario.getIdUsuario(), "RECUPERACION_BLOQUEADA", "usuario",
+                                usuario.getIdUsuario(), MAX_INTENTOS + " códigos incorrectos seguidos");
+                    }
+                    con.commit();
+                    throw new IllegalArgumentException(anulado
+                            ? "Demasiados intentos. El código fue anulado: pida uno nuevo al administrador."
+                            : "Usuario o token inválido.");
+                }
+                usuarios.limpiarIntentosRecuperacion(con, usuario.getIdUsuario());
                 usuarios.actualizarContrasena(con, usuario.getIdUsuario(), PasswordUtil.hash(nueva));
                 tokens.usar(con, valido.id());
                 auditoria.registrar(con, usuario.getIdUsuario(), "CONTRASENA_RESTABLECIDA",

@@ -134,6 +134,79 @@ public class UsuarioDAO {
         }
     }
 
+    /** Busca el usuario activo por su nombre y lo bloquea hasta terminar la operación de ingreso. */
+    public Usuario bloquearActivoPorLogin(Connection con, String login) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT * FROM usuario WHERE usuario = ? AND activo = TRUE FOR UPDATE")) {
+            ps.setString(1, login);
+            try (ResultSet rs = ps.executeQuery()) { return rs.next() ? mapear(rs) : null; }
+        }
+    }
+
+    /** Minutos que faltan para que termine el bloqueo (0 si la cuenta no está bloqueada). */
+    public int minutosDeBloqueo(Connection con, int idUsuario) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT CASE WHEN bloqueado_hasta IS NOT NULL AND bloqueado_hasta > NOW() "
+                + "THEN GREATEST(1, CEIL(TIMESTAMPDIFF(SECOND, NOW(), bloqueado_hasta) / 60)) ELSE 0 END "
+                + "FROM usuario WHERE id_usuario = ?")) {
+            ps.setInt(1, idUsuario);
+            try (ResultSet rs = ps.executeQuery()) { return rs.next() ? rs.getInt(1) : 0; }
+        }
+    }
+
+    /** Suma un intento fallido de ingreso y devuelve cuántos lleva. */
+    public int registrarFallo(Connection con, int idUsuario) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE usuario SET intentos_fallidos = intentos_fallidos + 1 WHERE id_usuario = ?")) {
+            ps.setInt(1, idUsuario);
+            ps.executeUpdate();
+        }
+        try (PreparedStatement ps = con.prepareStatement("SELECT intentos_fallidos FROM usuario WHERE id_usuario = ?")) {
+            ps.setInt(1, idUsuario);
+            try (ResultSet rs = ps.executeQuery()) { rs.next(); return rs.getInt(1); }
+        }
+    }
+
+    public void bloquear(Connection con, int idUsuario, int minutos) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE usuario SET bloqueado_hasta = DATE_ADD(NOW(), INTERVAL ? MINUTE), intentos_fallidos = 0 "
+                + "WHERE id_usuario = ?")) {
+            ps.setInt(1, minutos);
+            ps.setInt(2, idUsuario);
+            ps.executeUpdate();
+        }
+    }
+
+    /** Borra los intentos fallidos y cualquier bloqueo (ingreso correcto o desbloqueo del administrador). */
+    public void limpiarIntentos(Connection con, int idUsuario) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE usuario SET intentos_fallidos = 0, bloqueado_hasta = NULL WHERE id_usuario = ?")) {
+            ps.setInt(1, idUsuario);
+            ps.executeUpdate();
+        }
+    }
+
+    /** Suma un código de recuperación incorrecto y devuelve cuántos lleva. */
+    public int registrarFalloRecuperacion(Connection con, int idUsuario) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE usuario SET intentos_recuperacion = intentos_recuperacion + 1 WHERE id_usuario = ?")) {
+            ps.setInt(1, idUsuario);
+            ps.executeUpdate();
+        }
+        try (PreparedStatement ps = con.prepareStatement("SELECT intentos_recuperacion FROM usuario WHERE id_usuario = ?")) {
+            ps.setInt(1, idUsuario);
+            try (ResultSet rs = ps.executeQuery()) { rs.next(); return rs.getInt(1); }
+        }
+    }
+
+    public void limpiarIntentosRecuperacion(Connection con, int idUsuario) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE usuario SET intentos_recuperacion = 0 WHERE id_usuario = ?")) {
+            ps.setInt(1, idUsuario);
+            ps.executeUpdate();
+        }
+    }
+
     private Usuario mapear(ResultSet rs) throws SQLException {
         Usuario u = new Usuario();
         u.setIdUsuario(rs.getInt("id_usuario"));
@@ -143,6 +216,8 @@ public class UsuarioDAO {
         u.setContrasenaHash(rs.getString("contrasena_hash"));
         u.setRol(rs.getString("rol"));
         u.setActivo(rs.getBoolean("activo"));
+        java.sql.Timestamp bloqueo = rs.getTimestamp("bloqueado_hasta");
+        if (bloqueo != null) u.setBloqueadoHasta(bloqueo.toLocalDateTime());
         java.sql.Timestamp creado = rs.getTimestamp("fecha_creacion");
         if (creado != null) u.setFechaCreacion(creado.toLocalDateTime());
         return u;

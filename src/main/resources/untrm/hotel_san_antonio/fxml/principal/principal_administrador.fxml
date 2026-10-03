@@ -87,6 +87,9 @@
 
                     <ToggleButton text="Almacén" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/almacen.fxml" onAction="#onMenu"/>
+
+                    <ToggleButton text="Respaldo" toggleGroup="$grupoMenu"
+                                  userData="/untrm/hotel_san_antonio/fxml/nuevos/respaldo/respaldo.fxml" onAction="#onMenu"/>
                 </VBox>
             </ScrollPane>
 

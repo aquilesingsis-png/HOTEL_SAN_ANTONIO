@@ -218,6 +218,13 @@ CREATE INDEX idx_reserva_estado    ON reserva (estado);
 
 ALTER TABLE usuario MODIFY rol ENUM('ADMINISTRADOR','RECEPCIONISTA','LIMPIEZA') NOT NULL;
 
+-- Limite de intentos: tras 5 contrasenas incorrectas la cuenta se bloquea 15 minutos; tras 5 codigos de
+-- recuperacion incorrectos el codigo se anula.
+ALTER TABLE usuario
+    ADD COLUMN intentos_fallidos TINYINT NOT NULL DEFAULT 0,
+    ADD COLUMN bloqueado_hasta DATETIME NULL,
+    ADD COLUMN intentos_recuperacion TINYINT NOT NULL DEFAULT 0;
+
 CREATE TABLE reserva_huesped (
     id_reserva INT NOT NULL,
     id_huesped INT NOT NULL,

@@ -74,6 +74,9 @@ public class HistorialUsuariosController {
             case "USUARIO_ROL" -> "Cambio de rol";
             case "RECUPERACION_EMITIR" -> "Código de recuperación emitido";
             case "CONTRASENA_RESTABLECIDA" -> "Contraseña restablecida";
+            case "USUARIO_BLOQUEADO" -> "Cuenta bloqueada por intentos";
+            case "USUARIO_DESBLOQUEAR" -> "Cuenta desbloqueada";
+            case "RECUPERACION_BLOQUEADA" -> "Código de recuperación anulado";
             default -> codigo;
         };
     }
