@@ -449,6 +449,15 @@ public class ModulosNuevosController {
         }
         ComboBox<String> roles = nodo("filtroRol", ComboBox.class);
         if (roles != null && !roles.getItems().contains("Limpieza")) roles.getItems().add("Limpieza");
+        if (modulo.equals("caja/totales_dia")) {
+            try {
+                ComboBox<String> responsables = nodo("filtroResponsable", ComboBox.class);
+                if (responsables != null) {
+                    for (String persona : dao.responsables())
+                        if (!responsables.getItems().contains(persona)) responsables.getItems().add(persona);
+                }
+            } catch (SQLException error) { Alertas.mostrarError("Personal", error.getMessage()); }
+        }
     }
 
     @SuppressWarnings("unchecked")

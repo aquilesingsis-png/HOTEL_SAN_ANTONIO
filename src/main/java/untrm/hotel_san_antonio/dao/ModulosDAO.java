@@ -93,10 +93,12 @@ public class ModulosDAO {
                 + "JOIN huesped h ON h.id_huesped=r.id_huesped JOIN habitacion hab ON hab.id_habitacion=r.id_habitacion "
                 + "JOIN usuario u ON u.id_usuario=p.id_usuario ORDER BY p.fecha_pago DESC");
             case "caja/totales_dia" -> filas(
-                "SELECT 0,p.metodo_pago,SUM(p.monto),0,SUM(p.monto),COUNT(*) FROM pago p "
-                + "WHERE DATE(p.fecha_pago)=? GROUP BY p.metodo_pago UNION ALL "
-                + "SELECT 0,'NO REGISTRADO',0,COALESCE(SUM(v.total),0),COALESCE(SUM(v.total),0),COUNT(*) "
-                + "FROM venta_tienda v WHERE DATE(v.fecha_venta)=?", Date.valueOf(dia), Date.valueOf(dia));
+                "SELECT 0,CONCAT(p.metodo_pago,' · ',u.nombre,' ',u.apellido),SUM(p.monto),0,"
+                + "SUM(p.monto),COUNT(*) FROM pago p JOIN usuario u ON u.id_usuario=p.id_usuario "
+                + "WHERE DATE(p.fecha_pago)=? GROUP BY p.metodo_pago,p.id_usuario UNION ALL "
+                + "SELECT 0,CONCAT('NO REGISTRADO · ',u.nombre,' ',u.apellido),0,SUM(v.total),"
+                + "SUM(v.total),COUNT(*) FROM venta_tienda v JOIN usuario u ON u.id_usuario=v.id_usuario "
+                + "WHERE DATE(v.fecha_venta)=? GROUP BY v.id_usuario", Date.valueOf(dia), Date.valueOf(dia));
             case "reportes/ingresos" -> filas(
                 "SELECT 0,DATE(p.fecha_pago),'Alojamiento',p.metodo_pago,COUNT(*),SUM(p.monto) "
                 + "FROM pago p GROUP BY DATE(p.fecha_pago),p.metodo_pago UNION ALL "
@@ -270,6 +272,15 @@ public class ModulosDAO {
             while (rs.next()) tipos.add(rs.getString(1));
         }
         return tipos;
+    }
+
+    public List<String> responsables() throws SQLException {
+        List<String> nombres = new ArrayList<>();
+        try (Connection con = ConexionBD.conectar(); Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery("SELECT CONCAT(nombre,' ',apellido) FROM usuario ORDER BY nombre,apellido")) {
+            while (rs.next()) nombres.add(rs.getString(1));
+        }
+        return nombres;
     }
 
     public int idProductoPorCodigo(String codigo) throws SQLException {
