@@ -48,10 +48,14 @@
                     <ToggleButton text="Habitaciones" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/habitaciones/habitaciones.fxml" onAction="#onMenu"/>
 
-                    <ToggleButton text="Nueva reserva" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/Reserva/Nueva_reserva.fxml" onAction="#onMenu"/>
-                    <ToggleButton text="Reservas" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/Reserva/Reservas.fxml" onAction="#onMenu"/>
+                    <Button text="Reservas  ▸" onAction="#onGrupo" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+                    <VBox userData="Reservas" visible="false" managed="false" spacing="2"
+                          style="-fx-background-color: #2E1909; -fx-background-radius: 0 6px 6px 0; -fx-border-color: #B8862D; -fx-border-width: 0 0 0 2px; -fx-padding: 4px 0 4px 0;">
+                        <ToggleButton text="Nueva reserva" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Nueva_reserva.fxml" onAction="#onMenu"/>
+                        <ToggleButton text="Ver reservas" toggleGroup="$grupoMenu"
+                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Reservas.fxml" onAction="#onMenu"/>
+                    </VBox>
 
                     <ToggleButton text="Comprobantes" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/comprobante/comprobante.fxml" onAction="#onMenu"/>
