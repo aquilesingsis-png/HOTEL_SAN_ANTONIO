@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
@@ -26,25 +27,25 @@
             <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #E8E2D9; -fx-border-radius: 10;">
                 <padding><Insets top="18" right="20" bottom="18" left="20"/></padding>
                 <Label text="1. Huésped y facturación" style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
-                <HBox spacing="8">
-                    <ToggleButton fx:id="btnPersonaNatural" text="Persona natural" selected="true"/>
-                    <ToggleButton fx:id="btnEmpresa" text="Empresa"/>
-                </HBox>
+                <CheckBox fx:id="chkEmpresa" text="Facturar a una empresa (RUC)"/>
                 <GridPane hgap="12" vgap="8">
                     <columnConstraints>
                         <ColumnConstraints minWidth="180" prefWidth="220"/>
                         <ColumnConstraints minWidth="180" hgrow="ALWAYS"/>
                     </columnConstraints>
                     <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                        <Label fx:id="lblTipoDocumento" text="DNI del huésped *"/>
-                        <TextField fx:id="txtDocumento" onAction="#buscarCliente" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                        <Label text="DNI del huésped *"/>
+                        <TextField fx:id="txtDocumento" promptText="8 dígitos" onAction="#buscarCliente" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                     </VBox>
-                    <VBox fx:id="filaDocumentoHuesped" spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                        <Label text="DNI de la persona que se hospedará *"/>
-                        <TextField fx:id="txtDocumentoHuesped" promptText="8 dígitos" onAction="#buscarCliente" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                    <VBox fx:id="filaRuc" spacing="4" visible="false" managed="false" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="RUC de la empresa *"/>
+                        <TextField fx:id="txtRuc" promptText="11 dígitos" onAction="#buscarCliente" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
                     </VBox>
                 </GridPane>
-                <Button fx:id="btnBuscarCliente" text="Buscar local / autocompletar" onAction="#buscarCliente" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <HBox spacing="10">
+                    <Button fx:id="btnBuscarCliente" text="Buscar local / autocompletar" onAction="#buscarCliente" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #A87425; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                    <Button text="Escribir datos manualmente" onAction="#escribirManual" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+                </HBox>
                 <Label fx:id="lblEstadoBusqueda" wrapText="true" style="-fx-text-fill: #655C54;"/>
 
                 <VBox fx:id="panelDatosEmpresa" spacing="8" visible="false" managed="false"

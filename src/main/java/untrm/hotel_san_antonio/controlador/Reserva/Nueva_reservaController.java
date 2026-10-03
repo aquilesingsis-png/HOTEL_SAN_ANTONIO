@@ -19,6 +19,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
@@ -60,13 +61,10 @@ public class Nueva_reservaController {
     private static final String HAB_SELECCIONADA = HAB_BASE
             + "-fx-background-color: #704313; -fx-border-color: #3B210F; -fx-text-fill: white; -fx-cursor: hand;";
 
-    @FXML private ToggleButton btnPersonaNatural;
-    @FXML private ToggleButton btnEmpresa;
-    private final ToggleGroup grupoTipoCliente = new ToggleGroup();
-    @FXML private Label lblTipoDocumento;
+    @FXML private CheckBox chkEmpresa;
     @FXML private TextField txtDocumento;
-    @FXML private VBox filaDocumentoHuesped;
-    @FXML private TextField txtDocumentoHuesped;
+    @FXML private VBox filaRuc;
+    @FXML private TextField txtRuc;
     @FXML private Button btnBuscarCliente;
     @FXML private Label lblEstadoBusqueda;
     @FXML private VBox panelDatosHuesped;
@@ -123,28 +121,15 @@ public class Nueva_reservaController {
     }
 
     private void configurarTipoCliente() {
-        // Vincular los botones aquí mantiene el FXML editable en SceneBuilder.
-        btnPersonaNatural.setToggleGroup(grupoTipoCliente);
-        btnEmpresa.setToggleGroup(grupoTipoCliente);
-        btnPersonaNatural.setSelected(true);
-        grupoTipoCliente.selectedToggleProperty().addListener((observable, anterior, actual) -> {
-            if (actual == null) {
-                if (anterior != null) {
-                    anterior.setSelected(true);
-                }
-                return;
-            }
-            actualizarTipoCliente();
-        });
+        // El huesped siempre se registra con su DNI; el RUC solo aparece si pide factura.
+        chkEmpresa.selectedProperty().addListener((observable, anterior, actual) -> actualizarTipoCliente());
         actualizarTipoCliente();
     }
 
     private void actualizarTipoCliente() {
-        boolean empresa = btnEmpresa.isSelected();
-        lblTipoDocumento.setText(empresa ? "RUC de la empresa *" : "DNI del huésped *");
-        txtDocumento.setPromptText(empresa ? "11 dígitos" : "8 dígitos");
-        filaDocumentoHuesped.setVisible(empresa);
-        filaDocumentoHuesped.setManaged(empresa);
+        boolean empresa = chkEmpresa.isSelected();
+        filaRuc.setVisible(empresa);
+        filaRuc.setManaged(empresa);
         panelDatosEmpresa.setVisible(empresa && datosClienteListos);
         panelDatosEmpresa.setManaged(empresa && datosClienteListos);
         secuenciaConsulta++;
@@ -221,24 +206,45 @@ public class Nueva_reservaController {
         int consultaActual = ++secuenciaConsulta;
         limpiarCliente("Buscando primero en la base de datos local...");
         String documento = txtDocumento.getText().trim();
-        if (btnEmpresa.isSelected()) {
-            String dniHuesped = txtDocumentoHuesped.getText().trim();
-            if (!Validador.esRucValido(documento)) {
+        if (!Validador.esDniValido(documento)) {
+            mostrarErrorDocumento("El DNI debe contener 8 dígitos válidos.");
+            return;
+        }
+        if (chkEmpresa.isSelected()) {
+            String ruc = txtRuc.getText().trim();
+            if (!Validador.esRucValido(ruc)) {
                 mostrarErrorDocumento("El RUC debe contener 11 dígitos válidos.");
                 return;
             }
-            if (!Validador.esDniValido(dniHuesped)) {
-                mostrarErrorDocumento("Ingrese el DNI válido de la persona que se hospedará.");
-                return;
-            }
-            buscarEmpresa(documento, dniHuesped, consultaActual);
+            buscarEmpresa(ruc, documento, consultaActual);
         } else {
-            if (!Validador.esDniValido(documento)) {
-                mostrarErrorDocumento("El DNI debe contener 8 dígitos válidos.");
-                return;
-            }
             buscarHuesped(documento, null, consultaActual);
         }
+    }
+
+    /** Abre los campos del huesped (y de la empresa) sin consultar nada, por ejemplo cuando no hay Internet. */
+    @FXML
+    private void escribirManual() {
+        int consultaActual = ++secuenciaConsulta;
+        limpiarCliente("");
+        String dni = txtDocumento.getText().trim();
+        if (!Validador.esDniValido(dni)) {
+            mostrarErrorDocumento("Escriba primero el DNI del huésped (8 dígitos).");
+            return;
+        }
+        Empresa empresa = null;
+        if (chkEmpresa.isSelected()) {
+            String ruc = txtRuc.getText().trim();
+            if (!Validador.esRucValido(ruc)) {
+                mostrarErrorDocumento("El RUC debe contener 11 dígitos válidos.");
+                return;
+            }
+            habilitarEmpresaManual(ruc, "Ingreso manual de la empresa.");
+            empresa = construirEmpresaDesdeCampos();
+        }
+        habilitarHuespedManual(dni, "Ingreso manual.");
+        completarBusqueda(empresa, dni, consultaActual, "Complete los datos del huésped"
+                + (empresa == null ? "." : " y de la empresa."));
     }
 
     private void buscarEmpresa(String ruc, String dniHuesped, int consultaActual) {
@@ -353,16 +359,16 @@ public class Nueva_reservaController {
         if (consultaActual != secuenciaConsulta) {
             return;
         }
-        if (btnEmpresa.isSelected() && empresa != null && txtRazonSocial.getText().isBlank()) {
+        if (chkEmpresa.isSelected() && empresa != null && txtRazonSocial.getText().isBlank()) {
             cargarEmpresa(empresa, false);
         }
         datosClienteListos = true;
         documentoHuespedResuelto = dni;
-        rucResuelto = btnEmpresa.isSelected() ? txtDocumento.getText().trim() : null;
+        rucResuelto = chkEmpresa.isSelected() ? txtRuc.getText().trim() : null;
         panelDatosHuesped.setVisible(true);
         panelDatosHuesped.setManaged(true);
-        panelDatosEmpresa.setVisible(btnEmpresa.isSelected());
-        panelDatosEmpresa.setManaged(btnEmpresa.isSelected());
+        panelDatosEmpresa.setVisible(chkEmpresa.isSelected());
+        panelDatosEmpresa.setManaged(chkEmpresa.isSelected());
         lblEstadoBusqueda.setText(mensaje);
         desbloquearBusqueda();
     }
@@ -610,8 +616,7 @@ public class Nueva_reservaController {
     }
 
     private Huesped construirHuesped() {
-        String documentoActual = btnEmpresa.isSelected()
-                ? txtDocumentoHuesped.getText().trim() : txtDocumento.getText().trim();
+        String documentoActual = txtDocumento.getText().trim();
         if (!datosClienteListos || !documentoActual.equals(documentoHuespedResuelto)) {
             throw new IllegalArgumentException("Busque nuevamente el documento del huésped antes de guardar.");
         }
@@ -620,10 +625,10 @@ public class Nueva_reservaController {
     }
 
     private Empresa construirEmpresa() {
-        if (!btnEmpresa.isSelected()) {
+        if (!chkEmpresa.isSelected()) {
             return null;
         }
-        String ruc = txtDocumento.getText().trim();
+        String ruc = txtRuc.getText().trim();
         if (!ruc.equals(rucResuelto)) {
             throw new IllegalArgumentException("Busque nuevamente el RUC antes de guardar.");
         }
@@ -636,7 +641,7 @@ public class Nueva_reservaController {
 
     private Empresa construirEmpresaDesdeCampos() {
         Empresa empresa = new Empresa();
-        empresa.setRuc(txtDocumento.getText().trim());
+        empresa.setRuc(txtRuc.getText().trim());
         empresa.setRazonSocial(txtRazonSocial.getText().trim());
         empresa.setDireccion(textoOpcional(txtDireccionFiscal.getText()));
         return empresa;
@@ -679,9 +684,9 @@ public class Nueva_reservaController {
 
     private void limpiarFormulario() {
         secuenciaConsulta++;
-        btnPersonaNatural.setSelected(true);
+        chkEmpresa.setSelected(false);
         txtDocumento.clear();
-        txtDocumentoHuesped.clear();
+        txtRuc.clear();
         limpiarCliente("Ingrese el documento y pulse Buscar.");
         LocalDate hoy = LocalDate.now();
         dpFechaIngreso.setValue(hoy.plusDays(1));
