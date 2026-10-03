@@ -52,15 +52,6 @@ public class ModulosNuevosController {
         this.tabla = (TableView<Registro>) nodos.get("tblRegistros");
     }
 
-    /** Carga la pantalla de un modulo (por ejemplo "caja/arqueo") ya conectada a sus datos, para usarla dentro de otra. */
-    public static javafx.scene.Parent cargarModulo(String modulo) throws IOException {
-        javafx.fxml.FXMLLoader cargador = new javafx.fxml.FXMLLoader(ModulosNuevosController.class.getResource(
-                "/untrm/hotel_san_antonio/fxml/nuevos/" + modulo + ".fxml"));
-        javafx.scene.Parent raiz = cargador.load();
-        new ModulosNuevosController(modulo, cargador.getNamespace()).iniciar();
-        return raiz;
-    }
-
     public void iniciar() {
         if (tabla == null) throw new IllegalStateException("Falta la tabla del módulo " + modulo);
         tabla.setItems(visibles);
@@ -108,14 +99,11 @@ public class ModulosNuevosController {
             if (accion.contains("ListaImprimir")) { guardarPdf(); return; }
             if (accion.contains("FormCancelar")) { tab(0); return; }
             if (accion.contains("FormLimpiar")) {
-                if (modulo.equals("caja/arqueo")) limpiarConteo();
-                else {
-                    limpiarFormulario();
-                    if (modulo.equals("reportes/reportes_personalizados")) {
-                        seleccionarCombo("cmbFuente", "Todos");
-                        seleccionarCombo("cmbAgruparPor", "Día");
-                        seleccionarCombo("cmbFormato", "PDF");
-                    }
+                limpiarFormulario();
+                if (modulo.equals("reportes/reportes_personalizados")) {
+                    seleccionarCombo("cmbFuente", "Todos");
+                    seleccionarCombo("cmbAgruparPor", "Día");
+                    seleccionarCombo("cmbFormato", "PDF");
                 }
                 return;
             }
@@ -220,13 +208,6 @@ public class ModulosNuevosController {
                     if (agotado != elegido.equals("agotado")) return false;
                     continue;
                 }
-                if (id.equals("filtroEstado") && modulo.equals("caja/cierre_caja")) {
-                    boolean borrador = fila.celdas().get(7).equals("BORRADOR");
-                    if (elegido.equals("abierto") && !borrador) return false;
-                    if (elegido.equals("cerrado") && borrador) return false;
-                    if (elegido.equals("con diferencia") && numero(fila, 6).signum() == 0) return false;
-                    continue;
-                }
                 if (id.equals("filtroEstado") && (modulo.equals("almacen/productos")
                         || modulo.equals("almacen/precios") || modulo.equals("usuarios/editar_usuario"))) {
                     int indiceEstado = modulo.equals("almacen/productos") ? 7 : 5;
@@ -286,13 +267,10 @@ public class ModulosNuevosController {
         String nombre = SesionActual.getUsuario().getNombreCompleto();
         campo("txtResponsable", nombre);
         campo("txtTurnoCaja", "Mañana");
-        if (modulo.equals("caja/arqueo"))
-            campo("txtEfectivoEsperadoS", dao.efectivoHoy().max(BigDecimal.ZERO).toPlainString());
         DatePicker fecha = nodo("dpFecha", DatePicker.class);
         if (fecha != null) fecha.setValue(LocalDate.now());
         DatePicker cierre = nodo("dpFechaDelCierre", DatePicker.class);
         if (cierre != null) cierre.setValue(LocalDate.now());
-        if (modulo.equals("caja/cierre_caja")) actualizarResumenCierre();
         DatePicker pago = nodo("dpFechaDelPago", DatePicker.class);
         if (pago != null) pago.setValue(LocalDate.now());
         if (modulo.equals("almacen/productos")) {
@@ -379,16 +357,6 @@ public class ModulosNuevosController {
             else if (control instanceof ComboBox<?> caja) caja.getSelectionModel().clearSelection();
             else if (control instanceof CheckBox check) check.setSelected(false);
         }
-    }
-
-    private void limpiarConteo() {
-        for (var entrada : nodos.entrySet()) {
-            if (entrada.getKey().startsWith("spn") && entrada.getValue() instanceof Spinner<?> spinner) {
-                spinner.getEditor().setText("0");
-            }
-        }
-        campo("txtObservaciones", "");
-        recalcularArqueo();
     }
 
     private void generarReporte() throws SQLException {
@@ -540,37 +508,6 @@ public class ModulosNuevosController {
                         normalizar(combo("cmbTipoDeMovimiento")), cantidad("spnCantidad"),
                         combo("cmbMotivo"), texto("txtReferenciaSustento"), texto("txtObservaciones"));
             }
-            case "caja/arqueo" -> {
-                exigirFechaActual("dpFecha");
-                recalcularArqueo();
-                dao.guardarArqueo(texto("txtTurnoCaja"), dinero("txtEfectivoEsperadoS"),
-                        dinero("txtTotalContadoS"), texto("txtObservaciones"));
-            }
-            case "caja/cierre_caja" -> {
-                actualizarResumenCierre();
-                boolean confirmar = accion.contains("ConfirmarCierre");
-                CheckBox revisado = nodo("chkHeRevisadoLosImportesDelCierre", CheckBox.class);
-                if (confirmar && (revisado == null || !revisado.isSelected()))
-                    throw new IllegalArgumentException("Marque la confirmación después de revisar los importes.");
-                LocalDate dia = fecha("dpFechaDelCierre");
-                String horaCierre = texto("txtHoraDeCierre");
-                if (confirmar && horaCierre.isBlank())
-                    throw new IllegalArgumentException("Indique la hora de cierre en formato HH:mm.");
-                if (!horaCierre.isBlank()) {
-                    try { java.time.LocalTime.parse(horaCierre); }
-                    catch (java.time.format.DateTimeParseException error) {
-                        throw new IllegalArgumentException("La hora de cierre debe tener formato HH:mm.");
-                    }
-                }
-                String observacion = (horaCierre.isBlank() ? "" : "Hora de cierre: " + horaCierre + "\n")
-                        + texto("txtObservacionesDelCierre");
-                dao.guardarCierre(editando, new ModulosDAO.CierreDatos(dia, texto("txtTurnoCaja"),
-                        dinero("txtFondoInicialS"), dinero("txtCobrosEnEfectivoS"),
-                        dinero("txtOtrosIngresosDeEfectivoS"), dinero("txtSalidasDeEfectivoS"),
-                        dinero("txtEfectivoEsperadoS"), dinero("txtEfectivoContadoS"),
-                        dinero("txtEfectivoEntregadoS"), dinero("txtFondoParaSiguienteTurnoS"),
-                        observacion), confirmar);
-            }
             case "usuarios/editar_usuario" -> {
                 if (editando == null) throw new IllegalArgumentException("Seleccione primero un usuario.");
                 dao.editarUsuario(editando, texto("txtNombres"), texto("txtApellidos"),
@@ -623,34 +560,6 @@ public class ModulosNuevosController {
                 if (precio != null) precio.textProperty().addListener((obs, antes, ahora) -> recalcularPrecio());
             }
         }
-        if (modulo.equals("caja/arqueo")) {
-            for (var entrada : nodos.entrySet()) {
-                if (entrada.getKey().startsWith("spn") && entrada.getValue() instanceof Spinner<?> spinner) {
-                    spinner.getEditor().textProperty().addListener((obs, antes, ahora) -> {
-                        try { recalcularArqueo(); } catch (IllegalArgumentException ignored) { }
-                    });
-                }
-            }
-        }
-        if (modulo.equals("caja/cierre_caja")) {
-            for (String id : List.of("txtFondoInicialS", "txtCobrosEnEfectivoS",
-                    "txtOtrosIngresosDeEfectivoS", "txtSalidasDeEfectivoS", "txtEfectivoContadoS")) {
-                TextField campo = nodo(id, TextField.class);
-                if (campo != null) campo.textProperty().addListener((obs, antes, ahora) -> recalcularCierre());
-            }
-            DatePicker fechaCierre = nodo("dpFechaDelCierre", DatePicker.class);
-            if (fechaCierre != null) fechaCierre.valueProperty().addListener((obs, antes, ahora) -> {
-                try { if (ahora != null) actualizarResumenCierre(); }
-                catch (SQLException error) { Alertas.mostrarError("Caja", error.getMessage()); }
-            });
-            TextField turno = nodo("txtTurnoCaja", TextField.class);
-            if (turno != null) turno.focusedProperty().addListener((obs, antes, enfocado) -> {
-                if (!enfocado && fecha("dpFechaDelCierre") != null) {
-                    try { actualizarResumenCierre(); }
-                    catch (SQLException error) { Alertas.mostrarError("Caja", error.getMessage()); }
-                }
-            });
-        }
     }
 
     private void recalcularStock() {
@@ -676,48 +585,6 @@ public class ModulosNuevosController {
         campo("txtVariacion", anterior.signum() == 0 ? "—" : diferencia
                 .multiply(BigDecimal.valueOf(100)).divide(anterior, 1,
                         java.math.RoundingMode.HALF_UP).toPlainString() + " %");
-    }
-
-    private void recalcularArqueo() {
-        BigDecimal billetes = BigDecimal.ZERO;
-        BigDecimal monedas = BigDecimal.ZERO;
-        String[][] denominaciones = {
-            {"spnBilletesDeS200", "200"}, {"spnBilletesDeS100", "100"},
-            {"spnBilletesDeS50", "50"}, {"spnBilletesDeS20", "20"},
-            {"spnBilletesDeS10", "10"}, {"spnMonedasDeS500", "5"},
-            {"spnMonedasDeS200", "2"}, {"spnMonedasDeS100", "1"},
-            {"spnMonedasDeS050", "0.50"}, {"spnMonedasDeS020", "0.20"},
-            {"spnMonedasDeS010", "0.10"}
-        };
-        for (int i = 0; i < denominaciones.length; i++) {
-            BigDecimal subtotal = new BigDecimal(denominaciones[i][1])
-                    .multiply(BigDecimal.valueOf(cantidad(denominaciones[i][0])));
-            if (i < 5) billetes = billetes.add(subtotal); else monedas = monedas.add(subtotal);
-        }
-        BigDecimal contado = billetes.add(monedas);
-        campo("txtTotalBilletesS", billetes.toPlainString());
-        campo("txtTotalMonedasS", monedas.toPlainString());
-        campo("txtTotalContadoS", contado.toPlainString());
-        BigDecimal esperado = decimalOpcional("txtEfectivoEsperadoS");
-        campo("txtDiferenciaS", contado.subtract(esperado).toPlainString());
-    }
-
-    private void recalcularCierre() {
-        BigDecimal esperado = decimalOpcional("txtFondoInicialS")
-                .add(decimalOpcional("txtCobrosEnEfectivoS"))
-                .add(decimalOpcional("txtOtrosIngresosDeEfectivoS"))
-                .subtract(decimalOpcional("txtSalidasDeEfectivoS"));
-        campo("txtEfectivoEsperadoS", esperado.toPlainString());
-        campo("txtDiferenciaS", decimalOpcional("txtEfectivoContadoS").subtract(esperado).toPlainString());
-    }
-
-    private void actualizarResumenCierre() throws SQLException {
-        BigDecimal[] importes = dao.resumenEfectivo(fecha("dpFechaDelCierre"), texto("txtTurnoCaja"));
-        campo("txtFondoInicialS", importes[0].toPlainString());
-        campo("txtCobrosEnEfectivoS", importes[1].toPlainString());
-        campo("txtOtrosIngresosDeEfectivoS", importes[2].toPlainString());
-        campo("txtSalidasDeEfectivoS", importes[3].toPlainString());
-        recalcularCierre();
     }
 
     private BigDecimal decimalOpcional(String id) {
@@ -812,16 +679,6 @@ public class ModulosNuevosController {
                         .filter(r -> numero(r, 3).signum() == 0).count()));
                 etiqueta("lblProductosActivos", String.valueOf(visibles.stream()
                         .filter(r -> r.celdas().get(4).equals("Activo")).count()));
-            }
-            case "caja/arqueo" -> {
-                etiqueta("lblEsperadoS", sumar(4).toPlainString());
-                etiqueta("lblContadoS", sumar(5).toPlainString());
-                etiqueta("lblDiferenciaS", sumar(6).toPlainString());
-            }
-            case "caja/cierre_caja" -> {
-                etiqueta("lblEfectivoEsperadoS", sumar(4).toPlainString());
-                etiqueta("lblEfectivoContadoS", sumar(5).toPlainString());
-                etiqueta("lblDiferenciaS", sumar(6).toPlainString());
             }
             case "reportes/ingresos" -> {
                 etiqueta("lblCobrosDeAlojamientoS", sumaPorOrigen("Alojamiento").toPlainString());

@@ -104,6 +104,11 @@ public class LibroCajaController {
         colCliente.setCellValueFactory(d -> new SimpleStringProperty(vacioSiNulo(d.getValue().cliente())));
         colResponsable.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().responsable()));
         colTipo.setCellFactory(columna -> celdaDeColor());
+        // todas las celdas centradas en vertical; el monto, a la derecha
+        for (TableColumn<Movimiento, String> columna : List.of(colFecha, colConcepto, colMetodo, colCaja,
+                colDocumento, colCliente, colResponsable)) {
+            columna.setStyle("-fx-alignment: CENTER-LEFT;");
+        }
         colMonto.setStyle("-fx-alignment: CENTER-RIGHT;");
         txtBuscar.setOnAction(evento -> buscar());
         buscar();

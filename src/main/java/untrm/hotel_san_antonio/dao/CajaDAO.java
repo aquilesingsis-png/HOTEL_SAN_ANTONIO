@@ -24,6 +24,10 @@ public class CajaDAO {
                              String metodo, String documento, String cliente, String responsable,
                              String origen) { }
 
+    /** Un cierre de caja ya guardado (borrador o confirmado). */
+    public record Cierre(int id, LocalDate fecha, String turno, String responsable, BigDecimal esperado,
+                         BigDecimal contado, BigDecimal diferencia, String estado) { }
+
     /** Los cuatro origenes del dinero, unidos en una misma tabla virtual. */
     private static final String TODOS = ""
             + "SELECT COALESCE(TIMESTAMP(p.fecha_evento, TIME(p.fecha_pago)), p.fecha_pago) AS fecha, 'INGRESO' AS tipo, "
@@ -58,6 +62,24 @@ public class CajaDAO {
             + "CONCAT('Gasto - ', g.concepto, ' (', g.categoria, ')'), g.monto, UPPER(g.metodo_pago), NULL, '', "
             + "CONCAT(u.nombre, ' ', u.apellido), 'Gasto' "
             + "FROM gasto g JOIN usuario u ON u.id_usuario = g.id_usuario WHERE g.activo = TRUE";
+
+    /** Los ultimos cierres de caja, del mas reciente al mas antiguo (solo el Administrador). */
+    public List<Cierre> listarCierres() throws SQLException {
+        Permisos.requerir("ADMINISTRADOR");
+        String sql = "SELECT c.id_cierre, c.fecha, c.turno, CONCAT(u.nombre, ' ', u.apellido) AS responsable, "
+                + "c.efectivo_esperado, c.efectivo_contado, c.diferencia, c.estado FROM cierre_caja c "
+                + "JOIN usuario u ON u.id_usuario = c.id_usuario ORDER BY c.fecha DESC, c.id_cierre DESC LIMIT 40";
+        List<Cierre> lista = new ArrayList<>();
+        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(new Cierre(rs.getInt("id_cierre"), rs.getDate("fecha").toLocalDate(), rs.getString("turno"),
+                        rs.getString("responsable"), rs.getBigDecimal("efectivo_esperado"),
+                        rs.getBigDecimal("efectivo_contado"), rs.getBigDecimal("diferencia"), rs.getString("estado")));
+            }
+        }
+        return lista;
+    }
 
     /**
      * @param tipo   INGRESO, EGRESO, CARGO o null (todos)

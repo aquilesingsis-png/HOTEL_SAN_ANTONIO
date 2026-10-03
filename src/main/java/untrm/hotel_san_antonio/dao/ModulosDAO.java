@@ -73,14 +73,6 @@ public class ModulosDAO {
                 "SELECT p.id_producto, CONCAT('P',LPAD(p.id_producto,3,'0')), p.nombre, c.nombre, p.stock, "
                 + "IF(p.activo=1,'Activo','Inactivo') FROM producto p JOIN categoria c "
                 + "ON c.id_categoria=p.id_categoria ORDER BY p.nombre");
-            case "caja/arqueo" -> filas(
-                "SELECT a.id_arqueo,a.id_arqueo,a.fecha,a.turno,CONCAT(u.nombre,' ',u.apellido),"
-                + "a.efectivo_esperado,a.efectivo_contado,a.diferencia FROM arqueo_caja a "
-                + "JOIN usuario u ON u.id_usuario=a.id_usuario ORDER BY a.fecha DESC");
-            case "caja/cierre_caja" -> filas(
-                "SELECT c.id_cierre,c.id_cierre,c.fecha,c.turno,CONCAT(u.nombre,' ',u.apellido),"
-                + "c.efectivo_esperado,c.efectivo_contado,c.diferencia,c.estado FROM cierre_caja c "
-                + "JOIN usuario u ON u.id_usuario=c.id_usuario ORDER BY c.fecha DESC,c.id_cierre DESC");
             case "reportes/ingresos" -> filas(
                 "SELECT 0,DATE(p.fecha_pago),'Alojamiento',p.metodo_pago,COUNT(*),SUM(p.monto) "
                 + "FROM pago p GROUP BY DATE(p.fecha_pago),p.metodo_pago UNION ALL "
