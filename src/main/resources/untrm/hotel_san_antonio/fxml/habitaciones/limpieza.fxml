@@ -1,26 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="untrm.hotel_san_antonio.controlador.LimpiezaController"
-    spacing="14" style="-fx-background-color: #F7F4EF; -fx-padding: 24;">
-    <Label text="Seleccione una habitación disponible o en limpieza. Las ocupadas y en mantenimiento no se pueden cambiar aquí." wrapText="true"/>
-    <TableView fx:id="tabla" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-border-color: #E8E2D9;">
-        <columns>
-            <TableColumn fx:id="colNumero" text="Habitación" prefWidth="140"/>
-            <TableColumn fx:id="colTipo" text="Tipo" prefWidth="180"/>
-            <TableColumn fx:id="colPiso" text="Piso" prefWidth="90"/>
-            <TableColumn fx:id="colEstado" text="Estado" prefWidth="160"/>
-        </columns>
-    </TableView>
-    <HBox spacing="10">
-        <Button text="Actualizar" onAction="#actualizar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
-        <Button fx:id="btnPendiente" text="Marcar en limpieza" onAction="#marcarEnLimpieza" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
-        <Button fx:id="btnLista" text="Marcar disponible" onAction="#marcarDisponible" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
-    </HBox>
-    <Label fx:id="lblMensaje" wrapText="true"/>
-</VBox>
+
+<!-- Limpieza: solo las habitaciones que están en limpieza (el check-out las deja así). La lista se actualiza sola;
+     lo único que se hace aquí es marcar disponible la habitación ya limpia. Recepción puede hacer lo mismo en Habitaciones. -->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.LimpiezaController" prefWidth="1050" prefHeight="700" minWidth="0" minHeight="300" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
+    <center>
+        <VBox spacing="18" fillWidth="true" style="-fx-padding: 20 24 26 24; -fx-background-color: #F8F6F2;">
+            <FlowPane hgap="12" vgap="12">
+                <VBox spacing="8" prefWidth="235" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                    <Label text="Habitaciones por limpiar" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                    <Label fx:id="lblPendientes" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                </VBox>
+            </FlowPane>
+            <VBox spacing="12" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Habitaciones en limpieza" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblMensaje" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+                </HBox>
+                <TableView fx:id="tabla" minHeight="260" VBox.vgrow="ALWAYS" userData="tabla-nuevos" style="-fx-background-color: white; -fx-border-color: #E8E2D9; -fx-border-color: #E7E1D8; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 0; -fx-fixed-cell-size: 40;">
+                    <columns>
+                        <TableColumn fx:id="colNumero" text="Habitación" prefWidth="140" minWidth="90"/>
+                        <TableColumn fx:id="colTipo" text="Tipo" prefWidth="200" minWidth="100"/>
+                        <TableColumn fx:id="colPiso" text="Piso" prefWidth="90" minWidth="60"/>
+                    </columns>
+                    <placeholder>
+                        <VBox alignment="CENTER" spacing="8">
+                            <Label text="No hay habitaciones por limpiar" style="-fx-text-fill: #5A3516; -fx-font-size: 15px; -fx-font-weight: bold;"/>
+                            <Label text="Cuando un huésped haga el check-out, la habitación aparecerá aquí." style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+                        </VBox>
+                    </placeholder>
+                </TableView>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button fx:id="btnLista" text="Marcar disponible" onAction="#marcarDisponible" disable="true" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
+                    <Button text="Actualizar" onAction="#actualizar" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                </HBox>
+                <Label text="Elige la habitación que ya se limpió y márcala como disponible. La lista se actualiza sola cada pocos segundos." wrapText="true" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

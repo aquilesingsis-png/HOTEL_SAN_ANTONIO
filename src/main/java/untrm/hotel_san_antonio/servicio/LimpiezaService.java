@@ -10,28 +10,27 @@ import untrm.hotel_san_antonio.util.ConexionBD;
 import untrm.hotel_san_antonio.util.Permisos;
 import untrm.hotel_san_antonio.util.SesionActual;
 
-/** Limpieza solo ve habitaciones y cambia entre pendiente y disponible. */
+/** Limpieza ve solo las habitaciones en limpieza y las marca disponibles cuando ya están limpias. */
 public class LimpiezaService {
     private final HabitacionDAO habitaciones = new HabitacionDAO();
     private final AuditoriaDAO auditoria = new AuditoriaDAO();
 
-    public List<Habitacion> listar() throws SQLException {
+    /** Habitaciones que dejó el check-out y todavía no se limpian. */
+    public List<Habitacion> listarEnLimpieza() throws SQLException {
         Permisos.requerir("ADMINISTRADOR", "LIMPIEZA");
-        return habitaciones.listar();
+        return habitaciones.listar().stream().filter(h -> "LIMPIEZA".equals(h.getEstado())).toList();
     }
 
-    public void cambiarEstado(int idHabitacion, String nuevoEstado) throws SQLException {
+    public void marcarDisponible(int idHabitacion) throws SQLException {
         Permisos.requerir("ADMINISTRADOR", "LIMPIEZA");
-        if (!"LIMPIEZA".equals(nuevoEstado) && !"DISPONIBLE".equals(nuevoEstado)) {
-            throw new IllegalArgumentException("Estado de limpieza no permitido.");
-        }
+        String nuevoEstado = "DISPONIBLE";
         try (Connection con = ConexionBD.conectar()) {
             con.setAutoCommit(false);
             try {
                 String actual = habitaciones.bloquearYObtenerEstado(con, idHabitacion);
                 if (actual == null) throw new IllegalArgumentException("La habitación no existe.");
-                if (!("DISPONIBLE".equals(actual) || "LIMPIEZA".equals(actual))) {
-                    throw new IllegalStateException("La habitación está ocupada o en mantenimiento.");
+                if (!"LIMPIEZA".equals(actual)) {
+                    throw new IllegalStateException("La habitación ya no está en limpieza.");
                 }
                 if (actual.equals(nuevoEstado)) return;
                 if (habitaciones.tieneCheckinActivo(con, idHabitacion))

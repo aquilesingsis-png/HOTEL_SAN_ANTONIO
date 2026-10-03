@@ -46,8 +46,6 @@
                                   userData="/untrm/hotel_san_antonio/fxml/dashboard/dashboard_2.fxml" onAction="#onMenu"/>
                     <ToggleButton text="Habitaciones" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/habitaciones/habitaciones.fxml" onAction="#onMenu"/>
-                    <ToggleButton text="Categorías de habitación" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/habitaciones/categorias_habitacion.fxml" onAction="#onMenu"/>
 
                     <Button text="Reservas  ▸" onAction="#onGrupo" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
                     <VBox userData="Reservas" visible="false" managed="false" spacing="2"
@@ -77,6 +75,9 @@
                     <Label text="ADMINISTRACIÓN" style="-fx-text-fill: #D4A84C; -fx-font-size: 11px; -fx-font-weight: bold;">
                         <padding><Insets top="14" left="8"/></padding>
                     </Label>
+
+                    <ToggleButton text="Categorías de habitación" toggleGroup="$grupoMenu"
+                                  userData="/untrm/hotel_san_antonio/fxml/habitaciones/categorias_habitacion.fxml" onAction="#onMenu"/>
 
                     <ToggleButton text="Usuarios" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/usuarios.fxml" onAction="#onMenu"/>

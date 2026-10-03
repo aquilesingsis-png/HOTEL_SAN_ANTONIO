@@ -18,7 +18,7 @@
             <ScrollPane fx:id="scrollMenu" fitToWidth="true" VBox.vgrow="ALWAYS"
                 style="-fx-background-color: transparent;">
                 <VBox fx:id="barraLateral" spacing="6">
-                    <ToggleButton fx:id="btnInicio" text="Habitaciones y limpieza" selected="true"
+                    <ToggleButton fx:id="btnInicio" text="Limpieza" selected="true"
                         userData="/untrm/hotel_san_antonio/fxml/habitaciones/limpieza.fxml" onAction="#onMenu"/>
                 </VBox>
             </ScrollPane>
