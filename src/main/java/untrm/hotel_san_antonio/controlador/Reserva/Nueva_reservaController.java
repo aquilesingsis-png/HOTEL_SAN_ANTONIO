@@ -47,7 +47,7 @@ public class Nueva_reservaController {
 
     @FXML private ToggleButton btnPersonaNatural;
     @FXML private ToggleButton btnEmpresa;
-    @FXML private ToggleGroup grupoTipoCliente;
+    private final ToggleGroup grupoTipoCliente = new ToggleGroup();
     @FXML private Label lblTipoDocumento;
     @FXML private TextField txtDocumento;
     @FXML private VBox filaDocumentoHuesped;
@@ -108,6 +108,9 @@ public class Nueva_reservaController {
     }
 
     private void configurarTipoCliente() {
+        // Vincular los botones aquí mantiene el FXML editable en SceneBuilder.
+        btnPersonaNatural.setToggleGroup(grupoTipoCliente);
+        btnEmpresa.setToggleGroup(grupoTipoCliente);
         btnPersonaNatural.setSelected(true);
         grupoTipoCliente.selectedToggleProperty().addListener((observable, anterior, actual) -> {
             if (actual == null) {

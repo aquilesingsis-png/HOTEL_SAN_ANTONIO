@@ -44,6 +44,9 @@ Si una base ya tiene el esquema y usuarios, pero `tipo_habitacion`, `habitacion`
 
 - `mvn -o -q package` compiló el proyecto con Java 21.
 - Las 16 vistas administrativas antes sin controlador cargaron con una base de prueba y sus botones con `fx:id` quedaron conectados.
+- Los 20 accesos de almacén, caja, reportes y usuarios se abrieron desde la navegación; se revisaron 82 opciones de filtro.
+- Ocupación muestra también las noches sin reservas del período; la consulta inicial abarca los últimos 30 días y puede agruparse por día, semana o mes.
 - Se probaron altas de categoría y producto, cambio de precio, stock, caja, arqueo, cierre y usuario en una base aislada. Se probaron también los rechazos de stock negativo y eliminación de una categoría con productos.
 - El plano mostró 24 habitaciones de la base local y 23 disponibles para las fechas iniciales.
+- `Nueva_reserva.fxml` se abrió en Gluon SceneBuilder con el plano visible y editable. Tras ese ajuste, se cargaron los 48 FXML con JavaFX sin errores.
 - La base local pasó de 17 a 21 tablas y conservó sus 2 usuarios, 3 reservas, 5 productos y 24 habitaciones. La copia de seguridad previa está fuera del proyecto en `C:\Users\HP\Documents\Codex\2026-10-02\a\work\hotel_san_antonio_backup_2026-10-03.sql`.

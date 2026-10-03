@@ -82,7 +82,7 @@
                                     </FlowPane>
                                     <TableView fx:id="tblRegistros" minHeight="240" prefHeight="330" VBox.vgrow="ALWAYS">
                                         <columns>
-                                            <TableColumn fx:id="colMetodoDePago" text="Método de pago" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colMetodoDePago" text="Método / responsable" prefWidth="195" minWidth="90"/>
                                             <TableColumn fx:id="colCobrosDeAlojamientoS" text="Cobros de alojamiento (S/)" prefWidth="211" minWidth="90"/>
                                             <TableColumn fx:id="colCobrosDeTiendaS" text="Cobros de tienda (S/)" prefWidth="175" minWidth="90"/>
                                             <TableColumn fx:id="colTotalCobradoS" text="Total cobrado (S/)" prefWidth="154" minWidth="90"/>

@@ -23,15 +23,18 @@ La base local pasó de 17 a 21 tablas y conservó 2 usuarios, 3 reservas, 5 prod
 - `mvn -o -q package`: compilación correcta con Java 21.
 - Carga FXML: 48 archivos, 0 errores.
 - Las 16 pantallas administrativas cargaron sus tablas; todos sus botones con `fx:id` quedaron conectados.
+- Los 20 accesos del menú de almacén, caja, reportes y usuarios abrieron correctamente; se probaron 82 opciones de filtro.
+- El reporte de ocupación incluyó seis tipos de habitación con cero ocupación en un día sin reservas y permite agrupar el período por día, semana o mes.
 - Pruebas en base aislada: categoría, producto, precio, entrada de stock, movimiento de caja, arqueo, cierre, pago parcial y final, edición de usuario y las cinco agrupaciones de reporte personalizado.
 - Validaciones probadas: stock negativo, sobrepago y eliminación de categoría con productos se rechazaron.
 - Plano: 24 habitaciones cargadas de la base local; 23 disponibles en las fechas iniciales de la prueba.
+- `Nueva_reserva.fxml` abrió en Gluon SceneBuilder y mostró la muestra del plano con habitaciones; los 48 FXML también cargaron con JavaFX tras este ajuste.
 - PDF: se comprobó estructura válida, una página y tamaño A4 con `pdfinfo`.
 - Las claves del archivo de accesos coincidieron con las cuentas locales.
 
 ## Comprobaciones pendientes fuera del entorno automatizado
 
-No se abrió SceneBuilder en este equipo; la compatibilidad se comprobó cargando el FXML con JavaFX y manteniendo una muestra estática del plano. No se probaron llamadas reales a ApiPeru, SUNAT o Decolecta sin credenciales de esos servicios. Tampoco se hizo una impresión física ni una prueba manual de todos los flujos con ratón en NetBeans.
+No se probaron llamadas reales a ApiPeru, SUNAT o Decolecta sin credenciales de esos servicios. Tampoco se hizo una impresión física ni una prueba manual de todos los flujos con ratón en NetBeans.
 
 Para iniciar y para elegir el SQL correcto, siga `README.md`.
 

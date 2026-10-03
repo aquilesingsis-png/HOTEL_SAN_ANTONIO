@@ -104,7 +104,7 @@ public class ModulosDAO {
                 + "FROM pago p GROUP BY DATE(p.fecha_pago),p.metodo_pago UNION ALL "
                 + "SELECT 0,DATE(v.fecha_venta),'Tienda','NO REGISTRADO',COUNT(*),SUM(v.total) "
                 + "FROM venta_tienda v GROUP BY DATE(v.fecha_venta) ORDER BY 2 DESC");
-            case "reportes/ocupacion" -> ocupacionDiaria();
+            case "reportes/ocupacion" -> ocupacionDiaria(null, null);
             case "reportes/reportes_personalizados" -> filas(
                 "SELECT 0,DATE(p.fecha_pago),'Alojamiento','Pago de reserva',COUNT(*),SUM(p.monto) "
                 + "FROM pago p GROUP BY DATE(p.fecha_pago) UNION ALL "
@@ -158,29 +158,50 @@ public class ModulosDAO {
         int huespedes;
     }
 
-    /** Cuenta cada noche entre check-in y checkout; checkout no ocupa la noche siguiente. */
-    private List<Registro> ocupacionDiaria() throws SQLException {
-        String sql = "SELECT r.fecha_checkin,r.fecha_checkout,r.num_huespedes,h.id_habitacion,"
-                + "t.nombre,(SELECT COUNT(*) FROM habitacion x WHERE x.id_tipo=t.id_tipo) "
-                + "FROM reserva r JOIN habitacion h ON h.id_habitacion=r.id_habitacion "
-                + "JOIN tipo_habitacion t ON t.id_tipo=h.id_tipo "
-                + "WHERE r.estado NOT IN ('CANCELADA','PENDIENTE')";
+    /** Cuenta todas las noches del período, incluidas las de ocupación cero. */
+    public List<Registro> ocupacionDiaria(LocalDate desde, LocalDate hasta) throws SQLException {
+        LocalDate inicio = desde == null ? LocalDate.now().minusDays(29) : desde;
+        LocalDate fin = hasta == null ? LocalDate.now() : hasta;
+        long noches = java.time.temporal.ChronoUnit.DAYS.between(inicio, fin) + 1;
+        if (noches <= 0 || noches > 3660)
+            throw new IllegalArgumentException("El período de ocupación debe tener entre 1 y 3660 días.");
         TreeMap<LocalDate, Map<String, OcupacionDia>> porFecha = new TreeMap<>();
-        try (Connection con = ConexionBD.conectar(); Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                LocalDate ingreso = rs.getDate(1).toLocalDate();
-                LocalDate salida = rs.getDate(2).toLocalDate();
-                int noches = (int) java.time.temporal.ChronoUnit.DAYS.between(ingreso, salida);
-                if (noches <= 0 || noches > 3660) continue;
-                for (int i = 0; i < noches; i++) {
-                    LocalDate fecha = ingreso.plusDays(i);
-                    OcupacionDia dia = porFecha.computeIfAbsent(fecha, x -> new TreeMap<>())
-                            .computeIfAbsent(rs.getString(5), x -> new OcupacionDia());
-                    dia.disponibles = rs.getInt(6);
-                    dia.habitaciones.add(rs.getInt(4));
-                    dia.reservas++;
-                    dia.huespedes += rs.getInt(3);
+        try (Connection con = ConexionBD.conectar()) {
+            Map<String, Integer> inventario = new TreeMap<>();
+            try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(
+                    "SELECT t.nombre,COUNT(h.id_habitacion) FROM tipo_habitacion t "
+                    + "LEFT JOIN habitacion h ON h.id_tipo=t.id_tipo GROUP BY t.id_tipo,t.nombre")) {
+                while (rs.next()) if (rs.getInt(2) > 0) inventario.put(rs.getString(1), rs.getInt(2));
+            }
+            for (LocalDate fecha = inicio; !fecha.isAfter(fin); fecha = fecha.plusDays(1)) {
+                Map<String, OcupacionDia> tipos = new TreeMap<>();
+                for (var tipo : inventario.entrySet()) {
+                    OcupacionDia dia = new OcupacionDia();
+                    dia.disponibles = tipo.getValue();
+                    tipos.put(tipo.getKey(), dia);
+                }
+                porFecha.put(fecha, tipos);
+            }
+            String sql = "SELECT r.fecha_checkin,r.fecha_checkout,r.num_huespedes,h.id_habitacion,t.nombre "
+                    + "FROM reserva r JOIN habitacion h ON h.id_habitacion=r.id_habitacion "
+                    + "JOIN tipo_habitacion t ON t.id_tipo=h.id_tipo "
+                    + "WHERE r.estado NOT IN ('CANCELADA','PENDIENTE') "
+                    + "AND r.fecha_checkin<=? AND r.fecha_checkout>?";
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setDate(1, Date.valueOf(fin));
+                ps.setDate(2, Date.valueOf(inicio));
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        LocalDate ingreso = rs.getDate(1).toLocalDate();
+                        LocalDate salida = rs.getDate(2).toLocalDate();
+                        for (LocalDate fecha = ingreso.isBefore(inicio) ? inicio : ingreso;
+                             fecha.isBefore(salida) && !fecha.isAfter(fin); fecha = fecha.plusDays(1)) {
+                            OcupacionDia dia = porFecha.get(fecha).get(rs.getString(5));
+                            dia.habitaciones.add(rs.getInt(4));
+                            dia.reservas++;
+                            dia.huespedes += rs.getInt(3);
+                        }
+                    }
                 }
             }
         }

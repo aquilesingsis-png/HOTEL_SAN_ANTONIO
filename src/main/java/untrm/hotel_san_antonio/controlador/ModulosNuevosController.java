@@ -69,6 +69,7 @@ public class ModulosNuevosController {
             }
         }
         inicializarCombos();
+        if (modulo.equals("reportes/ocupacion")) establecerPeriodoOcupacion();
         configurarCalculos();
         cargar();
     }
@@ -126,7 +127,9 @@ public class ModulosNuevosController {
             validarFechas();
             int umbral = umbral();
             LocalDate dia = fecha("filtroFecha");
-            List<Registro> registros = dao.consultar(modulo, umbral, dia == null ? LocalDate.now() : dia);
+            List<Registro> registros = modulo.equals("reportes/ocupacion")
+                    ? dao.ocupacionDiaria(fecha("filtroDesde"), fecha("filtroHasta"))
+                    : dao.consultar(modulo, umbral, dia == null ? LocalDate.now() : dia);
             List<Registro> filtrados = registros.stream().filter(this::coincideFiltros).toList();
             visibles.setAll(modulo.equals("reportes/ocupacion")
                     ? agruparOcupacion(filtrados) : filtrados);
@@ -217,8 +220,7 @@ public class ModulosNuevosController {
                 }
                 if (id.equals("filtroEstado") && (modulo.equals("almacen/productos")
                         || modulo.equals("almacen/precios") || modulo.equals("usuarios/editar_usuario"))) {
-                    int indiceEstado = modulo.equals("almacen/productos") ? 7
-                            : modulo.equals("almacen/precios") ? 5 : 6;
+                    int indiceEstado = modulo.equals("almacen/productos") ? 7 : 5;
                     if (!fila.celdas().get(indiceEstado).equalsIgnoreCase(elegido)) return false;
                     continue;
                 }
@@ -264,6 +266,14 @@ public class ModulosNuevosController {
             else if (control instanceof DatePicker fecha) fecha.setValue(null);
             else if (control instanceof ComboBox<?> caja) caja.getSelectionModel().clearSelection();
         }
+        if (modulo.equals("reportes/ocupacion")) establecerPeriodoOcupacion();
+    }
+
+    private void establecerPeriodoOcupacion() {
+        DatePicker desde = nodo("filtroDesde", DatePicker.class);
+        DatePicker hasta = nodo("filtroHasta", DatePicker.class);
+        if (desde != null) desde.setValue(LocalDate.now().minusDays(29));
+        if (hasta != null) hasta.setValue(LocalDate.now());
     }
 
     private void nuevo() throws SQLException {
