@@ -32,6 +32,7 @@ import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.CampoValidacion;
 import untrm.hotel_san_antonio.util.ConsultaApi;
+import untrm.hotel_san_antonio.util.SoloLectura;
 import untrm.hotel_san_antonio.util.Validador;
 
 import java.math.BigDecimal;
@@ -105,6 +106,8 @@ public class ReservaFormController {
         cmbMetodo2.setValue("Yape");
         txtPais.setText("Perú");
 
+        // al cambiar el DNI se vuelven a abrir los nombres hasta que se busque otra vez
+        txtDocumento.textProperty().addListener((obs, antes, ahora) -> bloquearIdentidad(false));
         dpIngreso.setEditable(false);
         dpSalida.setEditable(false);
         dpIngreso.setValue(LocalDate.now());
@@ -308,6 +311,7 @@ public class ReservaFormController {
                 txtPais.setText(local.getPaisProcedencia());
                 txtTelefono.setText(local.getTelefono() == null ? "" : local.getTelefono());
                 txtEmail.setText(local.getEmail() == null ? "" : local.getEmail());
+                bloquearIdentidad(true);
                 verificarIdentidadExistente(dni);
                 return;
             }
@@ -323,6 +327,12 @@ public class ReservaFormController {
                 },
                 () -> CampoValidacion.marcar(txtDocumento, "No se encontraron datos para ese DNI. Puedes completarlos manualmente."),
                 motivo -> Alertas.mostrarInfo("RENIEC", "No se pudo consultar RENIEC (" + motivo + ").\nPuedes ingresar los datos manualmente."));
+    }
+
+    /** Nombres y apellidos de RENIEC o de la base no se editan; si no hay ninguno de los dos, se escriben a mano. */
+    private void bloquearIdentidad(boolean bloqueada) {
+        SoloLectura.aplicar(txtNombres, bloqueada);
+        SoloLectura.aplicar(txtApellidos, bloqueada);
     }
 
     private void verificarIdentidadExistente(String dni) {

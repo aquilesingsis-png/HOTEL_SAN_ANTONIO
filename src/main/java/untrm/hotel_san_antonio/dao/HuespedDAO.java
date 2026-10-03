@@ -67,6 +67,20 @@ public class HuespedDAO {
     }
 
     /** Solo datos de identidad devueltos por el proveedor; preserva teléfono, correo y país. */
+    /** Actualiza pais, telefono y correo de un huesped ya registrado; los datos en blanco (null) no se tocan. */
+    public void actualizarContacto(Connection con, int idHuesped, String pais, String telefono, String email)
+            throws SQLException {
+        String sql = "UPDATE huesped SET pais_procedencia = COALESCE(?, pais_procedencia), "
+                + "telefono = COALESCE(?, telefono), email = COALESCE(?, email) WHERE id_huesped = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, pais);
+            ps.setString(2, telefono);
+            ps.setString(3, email);
+            ps.setInt(4, idHuesped);
+            ps.executeUpdate();
+        }
+    }
+
     public boolean actualizarIdentidadVerificada(Connection con, Huesped local, Huesped verificado)
             throws SQLException {
         if (local.getNombres().equals(verificado.getNombres())

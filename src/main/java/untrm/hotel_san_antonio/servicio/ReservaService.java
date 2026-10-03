@@ -327,9 +327,12 @@ public class ReservaService {
             con.setAutoCommit(false);
             try {
                 Huesped local = huespedDAO.buscarPorDocumento(con, "DNI", dni);
+                String antes = local == null ? "" : (local.getNombres() + " " + local.getApellidos()).trim();
                 if (local != null && huespedDAO.actualizarIdentidadVerificada(con, local, verificado)) {
+                    String detalle = "DNI terminado en " + dni.substring(4) + ". Antes: " + antes + ". Ahora: "
+                            + (verificado.getNombres() + " " + verificado.getApellidos()).trim();
                     auditoriaDAO.registrar(con, usuario, "IDENTIDAD_RENIEC", "huesped", local.getIdHuesped(),
-                            "Nombres y apellidos verificados para DNI terminado en " + dni.substring(4));
+                            detalle.length() > 500 ? detalle.substring(0, 500) : detalle);
                     local.setNombres(verificado.getNombres());
                     local.setApellidos(verificado.getApellidos());
                 }
@@ -423,7 +426,13 @@ public class ReservaService {
     private int obtenerOCrearHuesped(Connection conexion, Huesped huesped) throws SQLException {
         Huesped existente = huespedDAO.buscarPorDocumento(
                 conexion, huesped.getTipoDocumento(), huesped.getNumDocumento());
-        if (existente != null) return existente.getIdHuesped();
+        if (existente != null) {
+            // el nombre lo manda RENIEC; el pais, telefono y correo los puede corregir el recepcionista
+            huespedDAO.actualizarContacto(conexion, existente.getIdHuesped(),
+                    textoOpcional(huesped.getPaisProcedencia()), textoOpcional(huesped.getTelefono()),
+                    textoOpcional(huesped.getEmail()));
+            return existente.getIdHuesped();
+        }
         try {
             return huespedDAO.insertar(conexion, huesped);
         } catch (SQLException error) {

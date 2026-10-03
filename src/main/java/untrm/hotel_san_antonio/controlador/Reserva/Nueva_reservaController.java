@@ -43,6 +43,7 @@ import untrm.hotel_san_antonio.servicio.ReniecService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.ConsultaApi;
+import untrm.hotel_san_antonio.util.SoloLectura;
 import untrm.hotel_san_antonio.util.Validador;
 
 public class Nueva_reservaController {
@@ -379,7 +380,7 @@ public class Nueva_reservaController {
         txtPais.setText(valorSeguro(huesped.getPaisProcedencia()).isBlank() ? "Perú" : huesped.getPaisProcedencia());
         txtTelefono.setText(valorSeguro(huesped.getTelefono()));
         txtCorreo.setText(valorSeguro(huesped.getEmail()));
-        hacerEditablesDatosHuesped(!existente);
+        hacerEditablesDatosHuesped(false); // nombres y apellidos vienen de RENIEC o de la base: no se editan
     }
 
     private void habilitarHuespedManual(String dni, String mensaje) {
@@ -392,12 +393,13 @@ public class Nueva_reservaController {
         lblEstadoBusqueda.setText(mensaje + " DNI: " + dni);
     }
 
-    private void hacerEditablesDatosHuesped(boolean editable) {
-        txtNombres.setDisable(!editable);
-        txtApellidos.setDisable(!editable);
-        txtPais.setDisable(!editable);
-        txtTelefono.setDisable(!editable);
-        txtCorreo.setDisable(!editable);
+    /** Nombres y apellidos solo se escriben a mano si no hay RENIEC ni base local; el resto siempre se puede corregir. */
+    private void hacerEditablesDatosHuesped(boolean identidadEditable) {
+        SoloLectura.aplicar(txtNombres, !identidadEditable);
+        SoloLectura.aplicar(txtApellidos, !identidadEditable);
+        txtPais.setDisable(false);
+        txtTelefono.setDisable(false);
+        txtCorreo.setDisable(false);
     }
 
     private void cargarEmpresa(Empresa empresa, boolean existente) {

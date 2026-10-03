@@ -7,6 +7,7 @@ import javafx.scene.control.TextField;
 import untrm.hotel_san_antonio.modelo.Huesped;
 import untrm.hotel_san_antonio.servicio.ReniecService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
+import untrm.hotel_san_antonio.util.SoloLectura;
 import untrm.hotel_san_antonio.util.Validador;
 
 /** Componente FXML repetible; cada huésped se identifica antes de guardar. */
@@ -24,8 +25,8 @@ public class HuespedAdicionalController {
         txtDni.textProperty().addListener((obs, antes, ahora) -> {
             if (!ahora.equals(dniBuscado)) {
                 dniBuscado = null;
-                txtNombres.setEditable(true);
-                txtApellidos.setEditable(true);
+                SoloLectura.aplicar(txtNombres, false);
+                SoloLectura.aplicar(txtApellidos, false);
                 lblEstado.setText("Busque el DNI antes de guardar.");
             }
         });
@@ -84,7 +85,7 @@ public class HuespedAdicionalController {
             actualizar.setOnSucceeded(ev -> {
                 if (!dni.equals(txtDni.getText().trim())) return;
                 Huesped local = actualizar.getValue();
-                cargar(local == null ? encontrado : local, local != null);
+                cargar(local == null ? encontrado : local, true);
                 dniBuscado = dni;
                 lblEstado.setText("Identidad verificada.");
             });
@@ -103,8 +104,8 @@ public class HuespedAdicionalController {
     private void cargar(Huesped h, boolean local) {
         txtNombres.setText(h.getNombres());
         txtApellidos.setText(h.getApellidos());
-        txtNombres.setEditable(!local);
-        txtApellidos.setEditable(!local);
+        SoloLectura.aplicar(txtNombres, local);
+        SoloLectura.aplicar(txtApellidos, local);
     }
 
     public Huesped obtener() {
