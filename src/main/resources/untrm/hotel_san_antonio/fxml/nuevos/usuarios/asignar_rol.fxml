@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="untrm.hotel_san_antonio.controlador.AsignarRolController" styleClass="nuevos" stylesheets="@../css/nuevos-modulos.css" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300">
+    <top>
+        <VBox spacing="7" styleClass="page-header">
+            <Label text="USUARIOS  /  HOTEL SAN ANTONIO" styleClass="eyebrow" wrapText="true" maxWidth="Infinity"/>
+            <Label text="Asignar rol" styleClass="page-title" wrapText="true" maxWidth="Infinity"/>
+            <Label text="Revisa el perfil actual y prepara la asignación del rol correspondiente." styleClass="subtitle" wrapText="true" maxWidth="Infinity"/>
+        </VBox>
+    </top>
+    <center>
+        <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0">
+            <Tab text="Listado">
+                <content>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" styleClass="content-scroll">
+                        <content>
+                            <VBox spacing="18" fillWidth="true" styleClass="page-content">
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Filtros de consulta" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Buscar usuario o colaborador" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="filtroBuscarUsuarioOColaborador" maxWidth="Infinity" promptText="Buscar usuario o colaborador" onAction="#filtrar"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Rol actual" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <ComboBox fx:id="filtroRolActual" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                                <items>
+                                                    <FXCollections fx:factory="observableArrayList">
+                                                        <String fx:value="Administrador"/>
+                                                        <String fx:value="Recepcionista"/>
+                                                    </FXCollections>
+                                                </items>
+                                            </ComboBox>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Estado" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <ComboBox fx:id="filtroEstado" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                                <items>
+                                                    <FXCollections fx:factory="observableArrayList">
+                                                        <String fx:value="Activo"/>
+                                                        <String fx:value="Inactivo"/>
+                                                    </FXCollections>
+                                                </items>
+                                            </ComboBox>
+                                        </VBox>
+                                    </FlowPane>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <Button fx:id="btnFiltroBuscar" text="Buscar" styleClass="secondary" mnemonicParsing="false" onAction="#filtrar"/>
+                                        <Button fx:id="btnFiltroLimpiarFiltros" text="Limpiar filtros" styleClass="secondary" mnemonicParsing="false" onAction="#limpiarFiltros"/>
+                                    </FlowPane>
+                                </VBox>
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Detalle de asignar rol" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <Button fx:id="btnListaActualizarLista" text="Actualizar lista" styleClass="secondary" mnemonicParsing="false" onAction="#actualizarLista"/>
+                                        <Button fx:id="btnListaSeleccionarUsuario" text="Seleccionar usuario" styleClass="secondary" mnemonicParsing="false" onAction="#seleccionarUsuario"/>
+                                    </FlowPane>
+                                    <TableView fx:id="tblRegistros" minHeight="240" prefHeight="330" VBox.vgrow="ALWAYS">
+                                        <columns>
+                                            <TableColumn fx:id="colCodigo" text="Código" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colColaborador" text="Colaborador" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colUsuario" text="Usuario" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colRolActual" text="Rol actual" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colEstado" text="Estado" prefWidth="145" minWidth="90"/>
+                                        </columns>
+                                        <placeholder>
+                                            <VBox alignment="CENTER" spacing="8">
+                                                <Label text="Sin registros para mostrar" styleClass="empty-title" wrapText="true" maxWidth="Infinity"/>
+                                                <Label text="Los resultados de la consulta aparecerán en este listado." styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                            </VBox>
+                                        </placeholder>
+                                    </TableView>
+                                    <HBox alignment="CENTER_LEFT">
+                                        <Label text="0 registros" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                        <Region HBox.hgrow="ALWAYS"/>
+                                        <Label text="Hotel San Antonio" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </HBox>
+                                </VBox>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+            <Tab text="Formulario">
+                <content>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" styleClass="content-scroll">
+                        <content>
+                            <VBox spacing="18" fillWidth="true" styleClass="page-content">
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Colaborador" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Código de usuario" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtCodigoDeUsuario" maxWidth="Infinity" promptText="Código de usuario" editable="false"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Nombre completo" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtNombreCompleto" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Nombre de usuario" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtNombreDeUsuario" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Rol actual" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <TextField fx:id="txtRolActual" maxWidth="Infinity" text="—" editable="false" styleClass="readonly"/>
+                                        </VBox>
+                                    </FlowPane>
+                                </VBox>
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Asignación de acceso" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Nuevo rol" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <ComboBox fx:id="cmbNuevoRol" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                                <items>
+                                                    <FXCollections fx:factory="observableArrayList">
+                                                        <String fx:value="Administrador"/>
+                                                        <String fx:value="Recepcionista"/>
+                                                        <String fx:value="Limpieza"/>
+                                                    </FXCollections>
+                                                </items>
+                                            </ComboBox>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="248" minWidth="180" maxWidth="Infinity">
+                                            <CheckBox fx:id="chkConfirmoLaAsignacionDelRolSeleccionado" maxWidth="Infinity" text="Confirmo la asignación del rol seleccionado" wrapText="true"/>
+                                        </VBox>
+                                    </FlowPane>
+                                </VBox>
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Alcance de los perfiles" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <Label text="Administrador: operación y administración. Recepcionista: habitaciones y reservas. Limpieza: solo estado de limpieza de habitaciones." styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                </VBox>
+                                <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                    <Button fx:id="btnFormCancelar" text="Cancelar" styleClass="secondary" mnemonicParsing="false" onAction="#cancelar"/>
+                                    <Button fx:id="btnFormGuardarAsignacion" text="Guardar asignación" styleClass="primary" mnemonicParsing="false" onAction="#guardar"/>
+                                </FlowPane>
+                                <Label fx:id="lblMensajeRol" wrapText="true"/>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+        </TabPane>
+    </center>
+</BorderPane>

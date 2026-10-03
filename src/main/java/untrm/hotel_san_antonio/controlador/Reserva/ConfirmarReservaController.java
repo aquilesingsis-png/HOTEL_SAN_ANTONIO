@@ -1,266 +1,123 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package untrm.hotel_san_antonio.controlador.Reserva;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.SQLException;
-import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-
+import untrm.hotel_san_antonio.modelo.Pago;
 import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
 
 public class ConfirmarReservaController {
 
-    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-    @FXML
-    private TextField txtBuscarReserva;
-
-    @FXML
-    private Label lblEstado;
-
-    @FXML
-    private Label lblCodigo;
-
-    @FXML
-    private Label lblFechaReserva;
-
-    @FXML
-    private Label lblCliente;
-
-    @FXML
-    private Label lblDocumento;
-
-    @FXML
-    private Label lblTelefono;
-
-    @FXML
-    private Label lblCorreo;
-
-    @FXML
-    private Label lblIngreso;
-
-    @FXML
-    private Label lblSalida;
-
-    @FXML
-    private Label lblNoches;
-
-    @FXML
-    private Label lblHuespedes;
-
-    @FXML
-    private Label lblHabitacion;
-
-    @FXML
-    private Label lblTotal;
-
-    @FXML
-    private TextArea txtObservaciones;
-
-    @FXML
-    private ChoiceBox<String> cbEstado;
-
-    @FXML
-    private TextArea txtMensaje;
-
-    @FXML
-    private CheckBox chkCorreo;
-
+    @FXML private TextField txtBuscarReserva;
+    @FXML private DetalleReservaController detalleReservaController;
+    @FXML private Label lblAdelanto;
+    @FXML private Label lblMinimo;
+    @FXML private ChoiceBox<String> cbMetodoPago;
+    @FXML private TextField txtMontoPago;
 
     private final ReservaService reservaService = new ReservaService();
-
-    private Reserva reservaActual;
-
+    private Reserva reservaSeleccionada;
 
     @FXML
     public void initialize() {
-
-        cbEstado.getItems().addAll(
-                "Pendiente",
-                "Confirmada"
-        );
-
-        cbEstado.setValue(
-                "Confirmada"
-        );
-
-        limpiar();
+        cbMetodoPago.getItems().setAll("EFECTIVO", "TARJETA", "TRANSFERENCIA", "YAPE");
+        cbMetodoPago.setValue("EFECTIVO");
+        limpiarDetalle();
     }
-
 
     @FXML
     private void buscarReserva() {
-
-        String busqueda =
-                txtBuscarReserva
-                        .getText()
-                        .trim();
-
+        String busqueda = txtBuscarReserva.getText().trim();
         if (busqueda.isEmpty()) {
-
-            Alertas.mostrarAdvertencia(
-                    "Búsqueda requerida",
-                    "Ingrese código, nombre o documento."
-            );
-
+            Alertas.mostrarAdvertencia("Búsqueda requerida", "Ingrese el código exacto de la reserva.");
             return;
         }
-
         try {
-            reservaActual = reservaService.buscarUno(busqueda);
-        } catch (SQLException e) {
-            Alertas.mostrarError("Error de base de datos", "No se pudo buscar la reserva.\n\n" + e.getMessage());
-            return;
+            Reserva encontrada = reservaService.buscarUno(busqueda);
+            if (encontrada == null) {
+                limpiarDetalle();
+                Alertas.mostrarAdvertencia("Sin resultados", "No se encontró una reserva con ese criterio.");
+                return;
+            }
+            reservaSeleccionada = encontrada;
+            mostrarDetalle(encontrada);
+        } catch (IllegalArgumentException error) {
+            limpiarDetalle();
+            Alertas.mostrarAdvertencia("Búsqueda ambigua", error.getMessage());
+        } catch (SQLException error) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo buscar la reserva.\n\n" + error.getMessage());
         }
-
-        if (reservaActual == null) {
-            limpiar();
-            Alertas.mostrarAdvertencia(
-                    "Sin resultados",
-                    "No se encontró ninguna reserva con \"" + busqueda + "\"."
-            );
-            return;
-        }
-
-        cargarReserva(reservaActual);
     }
-
-
-    private void cargarReserva(Reserva r) {
-
-        lblEstado.setText("Reserva " + textoEstado(r.getEstado()));
-        lblCodigo.setText(r.getCodigo());
-        lblFechaReserva.setText(r.getFechaReserva() == null ? "--"
-                : r.getFechaReserva().toLocalDate().format(FORMATO_FECHA));
-        lblCliente.setText(r.getNombreHuesped());
-        lblDocumento.setText(r.getTipoDocumentoHuesped() + " " + r.getNumDocumentoHuesped());
-        lblTelefono.setText(valorSeguro(r.getTelefonoHuesped()));
-        lblCorreo.setText(valorSeguro(r.getEmailHuesped()));
-        lblIngreso.setText(r.getFechaCheckin().format(FORMATO_FECHA));
-        lblSalida.setText(r.getFechaCheckout().format(FORMATO_FECHA));
-        lblNoches.setText(String.valueOf(java.time.temporal.ChronoUnit.DAYS.between(r.getFechaCheckin(), r.getFechaCheckout())));
-        lblHuespedes.setText("--");
-        lblHabitacion.setText(r.getNumeroHabitacion() + " · " + r.getNombreTipoHabitacion());
-        lblTotal.setText(String.format(java.util.Locale.US, "S/ %.2f", r.getMontoTotal()));
-
-        cbEstado.setValue("PENDIENTE".equals(r.getEstado()) ? "Pendiente" : "Confirmada");
-    }
-
-
-    private String textoEstado(String estado) {
-        return switch (estado) {
-            case "PENDIENTE" -> "pendiente";
-            case "CONFIRMADA" -> "confirmada";
-            case "CHECKIN" -> "con check-in hecho";
-            case "FINALIZADA" -> "finalizada";
-            case "CANCELADA" -> "cancelada";
-            default -> estado;
-        };
-    }
-
 
     @FXML
     private void confirmarReserva() {
-
-        if (reservaActual == null || "--".equals(lblCodigo.getText())) {
-
-            Alertas.mostrarAdvertencia(
-                    "Reserva requerida",
-                    "Primero seleccione una reserva."
-            );
-
+        if (reservaSeleccionada == null) {
+            Alertas.mostrarAdvertencia("Reserva requerida", "Primero busque una reserva pendiente.");
             return;
         }
-
-        if ("Pendiente".equals(cbEstado.getValue())) {
-
-            Alertas.mostrarAdvertencia(
-                    "Nada que hacer",
-                    "La reserva ya está pendiente; elija \"Confirmada\" para confirmarla."
-            );
-
-            return;
-        }
-
+        BigDecimal monto;
         try {
-            reservaService.confirmar(reservaActual.getIdReserva(), reservaActual.getEstado());
-        } catch (IllegalStateException e) {
-            Alertas.mostrarAdvertencia("No se puede confirmar", e.getMessage());
-            return;
-        } catch (SQLException e) {
-            Alertas.mostrarError("Error de base de datos", "No se pudo confirmar la reserva.\n\n" + e.getMessage());
+            monto = new BigDecimal(txtMontoPago.getText().trim().replace(',', '.')).setScale(2, RoundingMode.UNNECESSARY);
+        } catch (ArithmeticException | NumberFormatException error) {
+            Alertas.mostrarAdvertencia("Monto inválido", "Ingrese un monto con máximo dos decimales.");
             return;
         }
 
-        Alertas.mostrarInfo(
-                "Reserva confirmada",
-                "La reserva " + reservaActual.getCodigo() + " quedó confirmada."
-        );
-
-        limpiar();
+        Pago pago = new Pago();
+        pago.setMonto(monto);
+        pago.setMetodoPago(cbMetodoPago.getValue());
+        try {
+            reservaService.confirmar(reservaSeleccionada.getIdReserva(), pago);
+            Alertas.mostrarInfo("Reserva confirmada",
+                    "La reserva " + reservaSeleccionada.getCodigo() + " quedó confirmada y el pago fue registrado.");
+            limpiarFormulario();
+        } catch (IllegalArgumentException | IllegalStateException error) {
+            Alertas.mostrarAdvertencia("No se puede confirmar", error.getMessage());
+        } catch (SQLException error) {
+            Alertas.mostrarError("Error de base de datos",
+                    "No se confirmó la reserva; la transacción fue revertida.\n\n" + error.getMessage());
+        }
     }
-
 
     @FXML
     private void volver() {
-
-        limpiar();
+        limpiarFormulario();
     }
 
-
-    private void limpiar() {
-
-        reservaActual = null;
-
-        lblEstado.setText(
-                "Sin reserva seleccionada"
-        );
-
-        lblCodigo.setText("--");
-
-        lblFechaReserva.setText("--");
-
-        lblCliente.setText("--");
-
-        lblDocumento.setText("--");
-
-        lblTelefono.setText("--");
-
-        lblCorreo.setText("--");
-
-        lblIngreso.setText("--");
-
-        lblSalida.setText("--");
-
-        lblNoches.setText("--");
-
-        lblHuespedes.setText("--");
-
-        lblHabitacion.setText("--");
-
-        lblTotal.setText("S/ 0.00");
-
-        txtObservaciones.clear();
-
-        txtMensaje.clear();
-
-        chkCorreo.setSelected(false);
+    private void mostrarDetalle(Reserva reserva) {
+        detalleReservaController.mostrar(reserva);
+        BigDecimal total = reserva.getMontoTotal();
+        BigDecimal adelanto = reserva.getAdelanto() == null ? BigDecimal.ZERO : reserva.getAdelanto();
+        BigDecimal minimo = total.multiply(new BigDecimal("0.50")).setScale(2, RoundingMode.HALF_UP)
+                .subtract(adelanto).max(BigDecimal.ZERO);
+        lblAdelanto.setText(moneda(adelanto));
+        lblMinimo.setText(moneda(minimo));
+        txtMontoPago.setText(minimo.toPlainString());
     }
 
-
-    private String valorSeguro(String valor) {
-        return valor == null || valor.isBlank() ? "--" : valor;
+    private void limpiarFormulario() {
+        txtBuscarReserva.clear();
+        limpiarDetalle();
     }
 
+    private void limpiarDetalle() {
+        reservaSeleccionada = null;
+        detalleReservaController.limpiar();
+        lblAdelanto.setText("S/ 0.00");
+        lblMinimo.setText("S/ 0.00");
+        txtMontoPago.clear();
+    }
+
+    private String moneda(BigDecimal valor) {
+        return String.format(Locale.US, "S/ %.2f", valor);
+    }
 
 }

@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import untrm.hotel_san_antonio.util.Navegacion;
+import untrm.hotel_san_antonio.util.EstiloBotones;
 
 /**
  * Clase principal - arranca JavaFX y carga el Login.
@@ -30,6 +31,9 @@ public class App extends Application {
         double alto = Math.max(700, pantalla.getHeight() * 0.80);
 
         Scene escena = new Scene(raiz, ancho, alto);
+        escena.getStylesheets().add(getClass().getResource(
+                "/untrm/hotel_san_antonio/fxml/app.css").toExternalForm());
+        EstiloBotones.instalar(escena);
         stage.setScene(escena);
         stage.setMinWidth(1024);
         stage.setMinHeight(650);

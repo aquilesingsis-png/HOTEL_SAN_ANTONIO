@@ -15,6 +15,42 @@ import java.util.List;
 
 public class ReservaDAO {
 
+    public void cambiarHabitacionYPrecio(Connection con, int idReserva, int idHabitacion,
+                                         java.math.BigDecimal total) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE reserva SET id_habitacion = ?, monto_total = ? WHERE id_reserva = ?")) {
+            ps.setInt(1, idHabitacion);
+            ps.setBigDecimal(2, total);
+            ps.setInt(3, idReserva);
+            if (ps.executeUpdate() != 1) throw new SQLException("No se pudo actualizar la reserva.");
+        }
+    }
+
+    public void marcarRegistroRetroactivo(Connection con, int idReserva, java.time.LocalDate fechaEvento,
+                                          String motivo, int usuario) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE reserva SET fecha_evento = ?, motivo_registro_tardio = ?, "
+                + "id_usuario_regulariza = ? WHERE id_reserva = ?")) {
+            ps.setDate(1, Date.valueOf(fechaEvento));
+            ps.setString(2, motivo);
+            ps.setInt(3, usuario);
+            ps.setInt(4, idReserva);
+            ps.executeUpdate();
+        }
+    }
+
+    public boolean existeCruceHistorico(Connection con, int idHabitacion,
+                                        java.time.LocalDate ingreso, java.time.LocalDate salida) throws SQLException {
+        String sql = "SELECT 1 FROM reserva WHERE id_habitacion = ? AND estado <> 'CANCELADA' "
+                + "AND fecha_checkin < ? AND fecha_checkout > ? LIMIT 1";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacion);
+            ps.setDate(2, Date.valueOf(salida));
+            ps.setDate(3, Date.valueOf(ingreso));
+            try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
+        }
+    }
+
     /** Columnas que se traen siempre que se necesita mostrar una reserva (con el huesped y la habitacion). */
     private static final String SELECT_BASE =
             "SELECT r.*, "
@@ -115,21 +151,34 @@ public class ReservaDAO {
         return lista;
     }
 
-    /** Busca UNA reserva por codigo, nombre, documento o numero de habitacion (para Confirmar/Cancelar). */
-    public Reserva buscarUno(Connection con, String texto) throws SQLException {
+    /** Busca una reserva únicamente cuando el texto representa un código exacto. */
+    public Reserva buscarPorCodigo(Connection con, String texto) throws SQLException {
         Integer idExacto = extraerIdCodigo(texto);
-        if (idExacto != null) {
-            try (PreparedStatement ps = con.prepareStatement(SELECT_BASE + "WHERE r.id_reserva = ?")) {
-                ps.setInt(1, idExacto);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        return mapearFila(rs);
-                    }
+        if (idExacto == null) {
+            return null;
+        }
+        try (PreparedStatement ps = con.prepareStatement(SELECT_BASE + "WHERE r.id_reserva = ?")) {
+            ps.setInt(1, idExacto);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapearFila(rs);
                 }
             }
         }
-        List<Reserva> resultado = buscar(con, texto, null, null, null);
-        return resultado.isEmpty() ? null : resultado.get(0);
+        return null;
+    }
+
+    /**
+     * Contrato conservado para consumidores externos al módulo. Las acciones sensibles de
+     * Reservas usan buscarPorCodigo y controlan explícitamente las coincidencias ambiguas.
+     */
+    public Reserva buscarUno(Connection con, String texto) throws SQLException {
+        Reserva exacta = buscarPorCodigo(con, texto);
+        if (exacta != null) {
+            return exacta;
+        }
+        List<Reserva> resultados = buscar(con, texto, null, null, null);
+        return resultados.isEmpty() ? null : resultados.get(0);
     }
 
     /** Si "texto" es un codigo de reserva ("R-0005", "R5", "5", "#5"), devuelve el id; si no, null. */
@@ -141,10 +190,11 @@ public class ReservaDAO {
         return limpio.matches("\\d+") ? Integer.valueOf(limpio) : null;
     }
 
-    /** Reservas CONFIRMADA o CHECKIN que se cruzan con el rango [desde, hasta], para el calendario de ocupacion. */
+    /** Reservas que bloquean habitación y se cruzan con el rango, para el calendario. */
     public List<Reserva> listarEnRango(Connection con, LocalDate desde, LocalDate hasta) throws SQLException {
         String sql = "SELECT id_habitacion, fecha_checkin, fecha_checkout, estado FROM reserva "
-                + "WHERE estado IN ('CONFIRMADA','CHECKIN') AND fecha_checkin <= ? AND fecha_checkout > ?";
+                + "WHERE estado IN ('PENDIENTE','CONFIRMADA','CHECKIN') "
+                + "AND fecha_checkin <= ? AND fecha_checkout > ?";
         List<Reserva> lista = new ArrayList<>();
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setDate(1, Date.valueOf(hasta));
@@ -228,15 +278,60 @@ public class ReservaDAO {
         return lista;
     }
 
-    /** Pasa una reserva PENDIENTE a CANCELADA (o CONFIRMADA a CANCELADA), guardando el motivo. */
-    public void cancelar(Connection con, int idReserva, String motivo, String detalle) throws SQLException {
+    /** Cancela solo si el estado persistido continúa siendo cancelable. */
+    public boolean cancelarSiCancelable(Connection con, int idReserva, String motivo, String detalle) throws SQLException {
         String sql = "UPDATE reserva SET estado = 'CANCELADA', motivo_cancelacion = ?, detalle_cancelacion = ? "
-                + "WHERE id_reserva = ?";
+                + "WHERE id_reserva = ? AND estado IN ('PENDIENTE','CONFIRMADA')";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, motivo);
             ps.setString(2, detalle);
             ps.setInt(3, idReserva);
-            ps.executeUpdate();
+            return ps.executeUpdate() == 1;
+        }
+    }
+
+    /** Bloquea la habitación para serializar altas concurrentes sobre la misma fila. */
+    public void bloquearHabitacion(Connection con, int idHabitacion) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT id_habitacion FROM habitacion WHERE id_habitacion = ? FOR UPDATE")) {
+            ps.setInt(1, idHabitacion);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new IllegalStateException("La habitación seleccionada ya no existe.");
+                }
+            }
+        }
+    }
+
+    public int obtenerCapacidadHabitacion(Connection con, int idHabitacion) throws SQLException {
+        String sql = "SELECT t.capacidad FROM habitacion h "
+                + "JOIN tipo_habitacion t ON t.id_tipo = h.id_tipo WHERE h.id_habitacion = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacion);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : -1;
+            }
+        }
+    }
+
+    public Reserva buscarPorId(Connection con, int idReserva, boolean bloquear) throws SQLException {
+        String sql = SELECT_BASE + "WHERE r.id_reserva = ?" + (bloquear ? " FOR UPDATE" : "");
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idReserva);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapearFila(rs) : null;
+            }
+        }
+    }
+
+    public boolean confirmarConAdelantoSiPendiente(Connection con, int idReserva,
+                                                     java.math.BigDecimal adelanto) throws SQLException {
+        String sql = "UPDATE reserva SET estado = 'CONFIRMADA', adelanto = ? "
+                + "WHERE id_reserva = ? AND estado = 'PENDIENTE'";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setBigDecimal(1, adelanto);
+            ps.setInt(2, idReserva);
+            return ps.executeUpdate() == 1;
         }
     }
 
@@ -306,6 +401,17 @@ public class ReservaDAO {
             ps.setString(1, estado);
             ps.setInt(2, idReserva);
             ps.executeUpdate();
+        }
+    }
+
+    public boolean actualizarEstadoSiEs(Connection con, int idReserva, String estadoEsperado,
+                                         String nuevoEstado) throws SQLException {
+        String sql = "UPDATE reserva SET estado = ? WHERE id_reserva = ? AND estado = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, nuevoEstado);
+            ps.setInt(2, idReserva);
+            ps.setString(3, estadoEsperado);
+            return ps.executeUpdate() == 1;
         }
     }
 

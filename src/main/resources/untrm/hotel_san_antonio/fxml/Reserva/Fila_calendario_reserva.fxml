@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      spacing="5" alignment="CENTER_LEFT" stylesheets="@reserva.css" styleClass="fila-calendario">
+    <VBox minWidth="150" prefWidth="150" maxWidth="150" alignment="CENTER_LEFT" spacing="2">
+        <Label fx:id="lblNumeroHabitacion" text="101" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblTipoHabitacion" text="Simple" style="-fx-text-fill: #746A61; -fx-font-size: 10px;"/>
+    </VBox>
+    <HBox fx:id="contenedorDias" spacing="5"/>
+</HBox>

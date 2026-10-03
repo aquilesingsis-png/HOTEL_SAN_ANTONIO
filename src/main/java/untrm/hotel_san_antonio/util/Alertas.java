@@ -4,6 +4,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
 
 import java.util.Optional;
@@ -15,6 +16,9 @@ import java.util.Optional;
  * marron/dorado del resto de la app, para que no desentonen.
  */
 public class Alertas {
+
+    private static final java.util.logging.Logger LOG =
+            java.util.logging.Logger.getLogger(Alertas.class.getName());
 
     private static final String FONDO = "-fx-background-color: #FBF8F3; -fx-font-family: 'Segoe UI';";
 
@@ -28,11 +32,18 @@ public class Alertas {
             + "-fx-background-radius: 6px; -fx-padding: 8px 22px; -fx-cursor: hand;";
 
     public static void mostrarError(String titulo, String mensaje) {
+        LOG.warning(titulo + ": " + mensaje);
         Alert alerta = new Alert(Alert.AlertType.ERROR);
         alerta.setTitle(titulo);
         alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
-        estilizar(alerta.getDialogPane(), "#B64832");
+        Label contenido = new Label(mensaje == null ? "Ocurrió un error." : mensaje.split("\\n\\n", 2)[0]);
+        contenido.setWrapText(true);
+        contenido.setPrefWidth(480);
+        contenido.setStyle("-fx-font-size: 13px; -fx-text-fill: #2C2118;");
+        DialogPane panel = alerta.getDialogPane();
+        panel.setContent(contenido);
+        panel.setMinWidth(540);
+        estilizar(panel, "#B64832");
         alerta.showAndWait();
     }
 

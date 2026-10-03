@@ -14,6 +14,17 @@ import java.util.Map;
 
 public class PagoDAO {
 
+    public BigDecimal sumarPorReserva(Connection con, int idReserva) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT COALESCE(SUM(monto), 0) FROM pago WHERE id_reserva = ?")) {
+            ps.setInt(1, idReserva);
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getBigDecimal(1);
+            }
+        }
+    }
+
     public void insertar(Connection con, Pago p) throws SQLException {
         String sql = "INSERT INTO pago (id_reserva, id_usuario, monto, metodo_pago, tipo_pago) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -26,9 +37,28 @@ public class PagoDAO {
         }
     }
 
+    public void insertarRetroactivo(Connection con, Pago p, LocalDate fechaEvento,
+                                    String motivo, int usuario) throws SQLException {
+        String sql = "INSERT INTO pago (id_reserva, id_usuario, monto, metodo_pago, tipo_pago, "
+                + "fecha_evento, motivo_registro_tardio, id_usuario_regulariza) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, p.getIdReserva());
+            ps.setInt(2, p.getIdUsuario());
+            ps.setBigDecimal(3, p.getMonto());
+            ps.setString(4, p.getMetodoPago());
+            ps.setString(5, p.getTipoPago());
+            ps.setDate(6, Date.valueOf(fechaEvento));
+            ps.setString(7, motivo);
+            ps.setInt(8, usuario);
+            ps.executeUpdate();
+        }
+    }
+
     /** Cuanto se cobro hoy por reservas (adelantos, saldos y pagos completos), para el Dashboard. */
     public BigDecimal sumarHoy(Connection con) throws SQLException {
-        String sql = "SELECT COALESCE(SUM(monto), 0) FROM pago WHERE DATE(fecha_pago) = CURDATE()";
+        String sql = "SELECT COALESCE(SUM(monto), 0) FROM pago "
+                + "WHERE COALESCE(fecha_evento, DATE(fecha_pago)) = CURDATE()";
         try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             rs.next();
             return rs.getBigDecimal(1);
@@ -41,8 +71,9 @@ public class PagoDAO {
         for (LocalDate dia = desde; !dia.isAfter(hasta); dia = dia.plusDays(1)) {
             porDia.put(dia, BigDecimal.ZERO);
         }
-        String sql = "SELECT DATE(fecha_pago) AS dia, SUM(monto) AS total FROM pago "
-                + "WHERE DATE(fecha_pago) BETWEEN ? AND ? GROUP BY DATE(fecha_pago)";
+        String sql = "SELECT COALESCE(fecha_evento, DATE(fecha_pago)) AS dia, SUM(monto) AS total FROM pago "
+                + "WHERE COALESCE(fecha_evento, DATE(fecha_pago)) BETWEEN ? AND ? "
+                + "GROUP BY COALESCE(fecha_evento, DATE(fecha_pago))";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setDate(1, Date.valueOf(desde));
             ps.setDate(2, Date.valueOf(hasta));

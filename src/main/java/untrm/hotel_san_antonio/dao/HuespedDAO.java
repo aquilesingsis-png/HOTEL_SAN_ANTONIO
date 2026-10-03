@@ -18,7 +18,13 @@ public class HuespedDAO {
     }
 
     public Huesped buscarPorDocumento(Connection con, String tipoDocumento, String numDocumento) throws SQLException {
-        String sql = "SELECT * FROM huesped WHERE tipo_documento = ? AND num_documento = ?";
+        return buscarPorDocumento(con, tipoDocumento, numDocumento, false);
+    }
+
+    public Huesped buscarPorDocumento(Connection con, String tipoDocumento, String numDocumento,
+                                      boolean bloquear) throws SQLException {
+        String sql = "SELECT * FROM huesped WHERE tipo_documento = ? AND num_documento = ?"
+                + (bloquear ? " FOR UPDATE" : "");
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, tipoDocumento);
             ps.setString(2, numDocumento);
@@ -57,6 +63,22 @@ public class HuespedDAO {
                 rs.next();
                 return rs.getInt(1);
             }
+        }
+    }
+
+    /** Solo datos de identidad devueltos por el proveedor; preserva teléfono, correo y país. */
+    public boolean actualizarIdentidadVerificada(Connection con, Huesped local, Huesped verificado)
+            throws SQLException {
+        if (local.getNombres().equals(verificado.getNombres())
+                && local.getApellidos().equals(verificado.getApellidos())) {
+            return false;
+        }
+        String sql = "UPDATE huesped SET nombres = ?, apellidos = ? WHERE id_huesped = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, verificado.getNombres());
+            ps.setString(2, verificado.getApellidos());
+            ps.setInt(3, local.getIdHuesped());
+            return ps.executeUpdate() == 1;
         }
     }
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="untrm.hotel_san_antonio.controlador.PrincipalController"
+    style="-fx-background-color: #F7F4EF;">
+    <left>
+        <VBox prefWidth="230" style="-fx-background-color: #3B210F; -fx-padding: 16;" spacing="12">
+            <Label text="HOTEL SAN ANTONIO" style="-fx-text-fill: #E6C77A; -fx-font-weight: bold; -fx-font-size: 18;"/>
+            <ScrollPane fx:id="scrollMenu" fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent;">
+                <VBox fx:id="barraLateral" spacing="6">
+                    <ToggleButton fx:id="btnInicio" text="Habitaciones y limpieza" selected="true"
+                        userData="/untrm/hotel_san_antonio/fxml/habitaciones/limpieza.fxml" onAction="#onMenu"/>
+                </VBox>
+            </ScrollPane>
+            <Button text="Cerrar sesión" onAction="#onCerrarSesion" maxWidth="Infinity"/>
+        </VBox>
+    </left>
+    <top>
+        <HBox spacing="12" style="-fx-background-color: white; -fx-padding: 16;">
+            <Label fx:id="lblTitulo" text="Limpieza" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblFecha"/>
+            <Label fx:id="lblUsuario"/>
+            <Label fx:id="lblRol"/>
+        </HBox>
+    </top>
+    <center><StackPane fx:id="contenido"/></center>
+</BorderPane>

@@ -11,6 +11,8 @@ import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.GridPane;
@@ -18,6 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import untrm.hotel_san_antonio.dao.HabitacionDAO;
 import untrm.hotel_san_antonio.dao.HuespedDAO;
+import untrm.hotel_san_antonio.controlador.Reserva.HuespedesAdicionales;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Huesped;
@@ -80,10 +83,13 @@ public class ReservaFormController {
     @FXML private Label lblHabNumero, lblHabTipo, lblHabCapacidad, lblHabTarifa, lblHabIncluye;
     @FXML private Label lblResCalculo, lblResTotal, lblResMinimo, lblResSaldo;
     @FXML private ScrollPane scrollForm;
+    @FXML private Spinner<Integer> spHuespedes;
+    @FXML private VBox contenedorAcompanantes;
 
     private final HuespedDAO huespedDAO = new HuespedDAO();
     private final ReservaService reservaService = new ReservaService();
     private final HabitacionDAO habitacionDAO = new HabitacionDAO();
+    private HuespedesAdicionales acompanantes;
 
     private Habitacion habitacion;
     private Runnable alGuardar;
@@ -91,6 +97,10 @@ public class ReservaFormController {
 
     @FXML
     public void initialize() {
+        acompanantes = new HuespedesAdicionales(contenedorAcompanantes);
+        spHuespedes.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 1, 1));
+        spHuespedes.valueProperty().addListener((obs, antes, ahora) -> acompanantes.actualizar(ahora));
+        acompanantes.actualizar(1);
         untrm.hotel_san_antonio.util.EstiloBoton.aplicarHoverPrimario(btnGuardar);
         cmbTipoDoc.getItems().addAll(TIPOS_DOC.keySet());
         cmbTipoDoc.setValue("DNI");
@@ -177,6 +187,8 @@ public class ReservaFormController {
         this.alGuardar = alGuardar;
 
         int capacidad = h.getTipo().getCapacidad();
+        spHuespedes.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, capacidad, 1));
+        acompanantes.actualizar(1);
         lblTitulo.setText("Habitación " + h.getNumero() + " · " + h.getTipo().getNombre() + " · Piso " + h.getPiso());
         lblEstadoHab.setText("● Disponible");
         lblHabNumero.setText(h.getNumero());
@@ -300,6 +312,7 @@ public class ReservaFormController {
                 txtPais.setText(local.getPaisProcedencia());
                 txtTelefono.setText(local.getTelefono() == null ? "" : local.getTelefono());
                 txtEmail.setText(local.getEmail() == null ? "" : local.getEmail());
+                verificarIdentidadExistente(dni);
                 return;
             }
         } catch (SQLException e) {
@@ -324,6 +337,27 @@ public class ReservaFormController {
             Alertas.mostrarInfo("RENIEC", "No se pudo consultar RENIEC (" + causa(tarea.getException()) + ").\nPuedes ingresar los datos manualmente.");
         });
         iniciarTarea(tarea);
+    }
+
+    private void verificarIdentidadExistente(String dni) {
+        Task<Huesped> consulta = ReniecService.consultarDni(dni);
+        consulta.setOnSucceeded(e -> {
+            if (!dni.equals(txtDocumento.getText().trim()) || consulta.getValue() == null) return;
+            Task<Huesped> actualizar = new Task<>() {
+                @Override protected Huesped call() throws Exception {
+                    return reservaService.reconciliarIdentidadDni(dni, consulta.getValue());
+                }
+            };
+            actualizar.setOnSucceeded(ev -> {
+                if (!dni.equals(txtDocumento.getText().trim()) || actualizar.getValue() == null) return;
+                txtNombres.setText(actualizar.getValue().getNombres());
+                txtApellidos.setText(actualizar.getValue().getApellidos());
+            });
+            actualizar.setOnFailed(ev -> Alertas.mostrarAdvertencia("RENIEC",
+                    "Se conservaron los datos locales; no se pudo actualizar la identidad."));
+            iniciarTarea(actualizar);
+        });
+        iniciarTarea(consulta);
     }
 
     @FXML
@@ -399,6 +433,15 @@ public class ReservaFormController {
         reserva.setAdelanto(adelanto);
         reserva.setMontoTotal(total);
         reserva.setCanal(CANALES.get(cmbCanal.getValue()));
+        reserva.setNumHuespedes(spHuespedes.getValue());
+
+        java.util.List<Huesped> huespedes;
+        try {
+            huespedes = acompanantes.obtener(huesped);
+        } catch (IllegalArgumentException error) {
+            Alertas.mostrarAdvertencia("Acompañantes", error.getMessage());
+            return;
+        }
 
         String tipoPago = adelanto.compareTo(total) >= 0 ? "COMPLETO" : "ADELANTO";
         java.util.List<Pago> pagos = new java.util.ArrayList<>();
@@ -410,7 +453,7 @@ public class ReservaFormController {
 
         boolean checkin = ingreso.equals(LocalDate.now());
         try {
-            reservaService.registrar(huesped, empresa, reserva, pagos, checkin);
+            reservaService.registrar(huespedes, empresa, reserva, pagos, checkin);
         } catch (ConflictoFechasException e) {
             // la habitacion ya esta reservada en esas fechas: se marcan las dos fechas
             CampoValidacion.marcar(dpIngreso, e.getMessage());

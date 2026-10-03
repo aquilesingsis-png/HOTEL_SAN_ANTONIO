@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<!-- Interfaz visual independiente: sin controlador ni acciones de negocio. -->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" styleClass="nuevos" stylesheets="@../css/nuevos-modulos.css" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300">
+    <top>
+        <VBox spacing="7" styleClass="page-header">
+            <Label text="REPORTES  /  HOTEL SAN ANTONIO" styleClass="eyebrow" wrapText="true" maxWidth="Infinity"/>
+            <Label text="Reporte de ingresos" styleClass="page-title" wrapText="true" maxWidth="Infinity"/>
+            <Label text="Compara cobros de alojamiento y tienda por fecha y método de pago." styleClass="subtitle" wrapText="true" maxWidth="Infinity"/>
+        </VBox>
+    </top>
+    <center>
+        <TabPane fx:id="tabsModulo" tabClosingPolicy="UNAVAILABLE" minWidth="0">
+            <Tab text="Resultado">
+                <content>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" styleClass="content-scroll">
+                        <content>
+                            <VBox spacing="18" fillWidth="true" styleClass="page-content">
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Filtros de consulta" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Desde" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <DatePicker fx:id="filtroDesde" maxWidth="Infinity" promptText="dd/mm/aaaa"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Hasta" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <DatePicker fx:id="filtroHasta" maxWidth="Infinity" promptText="dd/mm/aaaa"/>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Origen" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <ComboBox fx:id="filtroOrigen" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                                <items>
+                                                    <FXCollections fx:factory="observableArrayList">
+                                                        <String fx:value="Alojamiento"/>
+                                                        <String fx:value="Tienda"/>
+                                                    </FXCollections>
+                                                </items>
+                                            </ComboBox>
+                                        </VBox>
+                                        <VBox spacing="7" prefWidth="218" minWidth="180" maxWidth="Infinity">
+                                            <Label text="Método de pago" styleClass="field-label" wrapText="true" maxWidth="Infinity"/>
+                                            <ComboBox fx:id="filtroMetodoDePago" maxWidth="Infinity" promptText="Seleccionar" visibleRowCount="8">
+                                                <items>
+                                                    <FXCollections fx:factory="observableArrayList">
+                                                        <String fx:value="Efectivo"/>
+                                                        <String fx:value="Yape"/>
+                                                        <String fx:value="Transferencia"/>
+                                                        <String fx:value="Tarjeta"/>
+                                                    </FXCollections>
+                                                </items>
+                                            </ComboBox>
+                                        </VBox>
+                                    </FlowPane>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <Button fx:id="btnFiltroBuscar" text="Buscar" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnFiltroLimpiarFiltros" text="Limpiar filtros" styleClass="secondary" mnemonicParsing="false"/>
+                                    </FlowPane>
+                                </VBox>
+                                <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
+                                        <Label text="Cobros de alojamiento (S/)" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
+                                        <Label fx:id="lblCobrosDeAlojamientoS" text="—" styleClass="metric-value"/>
+                                        <Label text="Período seleccionado" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </VBox>
+                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
+                                        <Label text="Cobros de tienda (S/)" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
+                                        <Label fx:id="lblCobrosDeTiendaS" text="—" styleClass="metric-value"/>
+                                        <Label text="Período seleccionado" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </VBox>
+                                    <VBox spacing="8" prefWidth="248" styleClass="metric">
+                                        <Label text="Total cobrado (S/)" styleClass="metric-label" wrapText="true" maxWidth="Infinity"/>
+                                        <Label fx:id="lblTotalCobradoS" text="—" styleClass="metric-value"/>
+                                        <Label text="Período seleccionado" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </VBox>
+                                </FlowPane>
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Detalle de reporte de ingresos" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <FlowPane hgap="12" vgap="12" prefWrapLength="960">
+                                        <Button fx:id="btnListaConsultar" text="Consultar" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnListaImprimir" text="Imprimir" styleClass="secondary" mnemonicParsing="false"/>
+                                        <Button fx:id="btnListaExportar" text="Exportar" styleClass="secondary" mnemonicParsing="false"/>
+                                    </FlowPane>
+                                    <TableView fx:id="tblRegistros" minHeight="240" prefHeight="330" VBox.vgrow="ALWAYS">
+                                        <columns>
+                                            <TableColumn fx:id="colFecha" text="Fecha" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colOrigen" text="Origen" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colMetodoDePago" text="Método de pago" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colOperaciones" text="Operaciones" prefWidth="145" minWidth="90"/>
+                                            <TableColumn fx:id="colImporteCobradoS" text="Importe cobrado (S/)" prefWidth="168" minWidth="90"/>
+                                        </columns>
+                                        <placeholder>
+                                            <VBox alignment="CENTER" spacing="8">
+                                                <Label text="Sin registros para mostrar" styleClass="empty-title" wrapText="true" maxWidth="Infinity"/>
+                                                <Label text="Los resultados de la consulta aparecerán en este listado." styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                            </VBox>
+                                        </placeholder>
+                                    </TableView>
+                                    <HBox alignment="CENTER_LEFT">
+                                        <Label text="0 registros" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                        <Region HBox.hgrow="ALWAYS"/>
+                                        <Label text="Importes expresados en soles" styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                    </HBox>
+                                </VBox>
+                                <VBox spacing="16" styleClass="card">
+                                    <Label text="Distribución del período" styleClass="section-title" wrapText="true" maxWidth="Infinity"/>
+                                    <LineChart fx:id="graficoResumen" animated="false" legendVisible="false" minHeight="220" prefHeight="250">
+                                        <xAxis>
+                                            <CategoryAxis label="Fecha"/>
+                                        </xAxis>
+                                        <yAxis>
+                                            <NumberAxis label="Importe (S/)" forceZeroInRange="true"/>
+                                        </yAxis>
+                                    </LineChart>
+                                    <Label text="Selecciona los filtros del informe para consultar el período." styleClass="muted" wrapText="true" maxWidth="Infinity"/>
+                                </VBox>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+        </TabPane>
+    </center>
+</BorderPane>

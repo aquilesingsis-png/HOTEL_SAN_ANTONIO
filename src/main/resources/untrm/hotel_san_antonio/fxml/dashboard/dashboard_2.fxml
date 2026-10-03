@@ -24,7 +24,7 @@
 -->
 <BorderPane fx:id="rootPane" prefHeight="1020.0" prefWidth="1536.0"
             style="-fx-background-color: #F3EFE7; -fx-font-family: 'Segoe UI';"
-            xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="untrm.hotel_san_antonio.controlador.DashboardController">
 
    <!-- ================= CENTER (contenido) ================= -->
@@ -316,6 +316,7 @@
                                        <children>
                                           <Label text="📅  Próximas llegadas (Hoy)" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" HBox.hgrow="ALWAYS" />
                                           <Button mnemonicParsing="false" onAction="#mostrarSeccion" text="Ver todas"
+                                                  userData="/untrm/hotel_san_antonio/fxml/Reserva/Reservas_programadas.fxml"
                                                   style="-fx-background-color: #F5E6C8; -fx-text-fill: #8A5A1E; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 5 12 5 12; -fx-cursor: hand;" />
                                        </children>
                                     </HBox>
@@ -338,6 +339,7 @@
                                        <children>
                                           <Label text="🔧  Habitaciones en mantenimiento" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" HBox.hgrow="ALWAYS" />
                                           <Button mnemonicParsing="false" onAction="#mostrarSeccion" text="Ver todas"
+                                                  userData="/untrm/hotel_san_antonio/fxml/habitaciones/habitaciones.fxml"
                                                   style="-fx-background-color: #F5E6C8; -fx-text-fill: #8A5A1E; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 5 12 5 12; -fx-cursor: hand;" />
                                        </children>
                                     </HBox>
@@ -359,6 +361,7 @@
                                        <children>
                                           <Label text="🔔  Alertas y pendientes" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" HBox.hgrow="ALWAYS" />
                                           <Button mnemonicParsing="false" onAction="#mostrarSeccion" text="Ver todas"
+                                                  userData="/untrm/hotel_san_antonio/fxml/Reserva/Reservas_programadas.fxml"
                                                   style="-fx-background-color: #F5E6C8; -fx-text-fill: #8A5A1E; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 5 12 5 12; -fx-cursor: hand;" />
                                        </children>
                                     </HBox>
