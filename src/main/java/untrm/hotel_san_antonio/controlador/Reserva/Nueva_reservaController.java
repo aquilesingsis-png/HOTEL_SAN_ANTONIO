@@ -20,6 +20,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
@@ -152,8 +153,26 @@ public class Nueva_reservaController {
 
     private void configurarFechasYHoras() {
         LocalDate hoy = LocalDate.now();
-        dpFechaIngreso.setValue(hoy);
-        dpFechaSalida.setValue(hoy.plusDays(1));
+        // Nueva reserva es para fechas futuras: lo de hoy se hace en Habitaciones (check-in directo)
+        dpFechaIngreso.setEditable(false);
+        dpFechaSalida.setEditable(false);
+        dpFechaIngreso.setValue(hoy.plusDays(1));
+        dpFechaSalida.setValue(hoy.plusDays(2));
+        dpFechaIngreso.setDayCellFactory(dp -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate fecha, boolean vacio) {
+                super.updateItem(fecha, vacio);
+                setDisable(vacio || !fecha.isAfter(LocalDate.now()));
+            }
+        });
+        dpFechaSalida.setDayCellFactory(dp -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate fecha, boolean vacio) {
+                super.updateItem(fecha, vacio);
+                LocalDate ingreso = dpFechaIngreso.getValue();
+                setDisable(vacio || (ingreso != null && !fecha.isAfter(ingreso)));
+            }
+        });
         cbHoraIngreso.getItems().setAll("06:00", "07:00", "08:00", "09:00", "10:00", "11:00",
                 "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00",
                 "20:00", "21:00", "22:00");
@@ -559,13 +578,9 @@ public class Nueva_reservaController {
     }
 
     private void actualizarPagoSugerido(BigDecimal total) {
-        boolean ingresoHoy = LocalDate.now().equals(dpFechaIngreso.getValue());
-        BigDecimal sugerido = ingresoHoy ? total
-                : total.multiply(new BigDecimal("0.50")).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal sugerido = total.multiply(new BigDecimal("0.50")).setScale(2, RoundingMode.HALF_UP);
         txtMontoPago.setText(sugerido.signum() == 0 ? "" : sugerido.toPlainString());
-        lblAyudaPago.setText(ingresoHoy
-                ? "Ingreso hoy: se requiere el pago completo."
-                : "Reserva futura: se requiere al menos el 50 % para confirmar.");
+        lblAyudaPago.setText("Se requiere al menos el 50 % de adelanto para confirmar la reserva.");
     }
 
     @FXML
@@ -575,11 +590,14 @@ public class Nueva_reservaController {
             Empresa empresa = construirEmpresa();
             Reserva reserva = construirReserva();
             Pago pago = construirPago();
-            boolean checkinInmediato = LocalDate.now().equals(reserva.getFechaCheckin());
-            int idReserva = reservaService.registrar(huespedes, empresa, reserva, List.of(pago), checkinInmediato);
-            Alertas.mostrarInfo("Reserva confirmada", checkinInmediato
-                    ? "Se registró el check-in en la habitación " + habitacionSeleccionada.getNumero() + "."
-                    : "La reserva " + String.format("R-%04d", idReserva) + " quedó confirmada.");
+            if (!reserva.getFechaCheckin().isAfter(LocalDate.now())) {
+                Alertas.mostrarAdvertencia("Ingreso de hoy",
+                        "Para un huésped que llega hoy use la pantalla Habitaciones (check-in directo). Aquí solo se reserva desde mañana.");
+                return;
+            }
+            int idReserva = reservaService.registrar(huespedes, empresa, reserva, List.of(pago), false);
+            Alertas.mostrarInfo("Reserva confirmada",
+                    "La reserva " + String.format("R-%04d", idReserva) + " quedó confirmada.");
             limpiarFormulario();
         } catch (ConflictoFechasException error) {
             Alertas.mostrarAdvertencia("Fechas no disponibles", error.getMessage());
@@ -666,8 +684,8 @@ public class Nueva_reservaController {
         txtDocumentoHuesped.clear();
         limpiarCliente("Ingrese el documento y pulse Buscar.");
         LocalDate hoy = LocalDate.now();
-        dpFechaIngreso.setValue(hoy);
-        dpFechaSalida.setValue(hoy.plusDays(1));
+        dpFechaIngreso.setValue(hoy.plusDays(1));
+        dpFechaSalida.setValue(hoy.plusDays(2));
         cbHoraIngreso.setValue("14:00");
         spHuespedes.getValueFactory().setValue(1);
         cbPiso.setValue("Todos los pisos");

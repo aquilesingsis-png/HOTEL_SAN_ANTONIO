@@ -106,10 +106,6 @@
                             </VBox>
 
                             <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                                <Label text="Canal de reserva" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
-                                <ComboBox fx:id="cmbCanal" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
-                            </VBox>
-                            <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                 <Label text="Noches" style="-fx-font-size: 12px; -fx-text-fill: #777777;"/>
                                 <Label fx:id="lblNoches" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2B2B2B; -fx-padding: 6px 0 0 0;"/>
                             </VBox>

@@ -50,15 +50,10 @@ import java.util.Map;
 public class ReservaFormController {
 
     private static final Map<String, String> TIPOS_DOC = new LinkedHashMap<>();
-    private static final Map<String, String> CANALES = new LinkedHashMap<>();
     private static final Map<String, String> METODOS = new LinkedHashMap<>();
     static {
         TIPOS_DOC.put("DNI", "DNI");
         TIPOS_DOC.put("Pasaporte", "PASAPORTE");
-        CANALES.put("Presencial", "PRESENCIAL");
-        CANALES.put("Teléfono", "TELEFONO");
-        CANALES.put("WhatsApp", "WHATSAPP");
-        CANALES.put("Booking", "BOOKING");
         METODOS.put("Efectivo", "EFECTIVO");
         METODOS.put("Yape", "YAPE");
         METODOS.put("Transferencia", "TRANSFERENCIA");
@@ -68,7 +63,7 @@ public class ReservaFormController {
     private static final BigDecimal MITAD = new BigDecimal("0.50");
 
     @FXML private Label lblTitulo, lblEstadoHab;
-    @FXML private ComboBox<String> cmbTipoDoc, cmbCanal, cmbMetodo;
+    @FXML private ComboBox<String> cmbTipoDoc, cmbMetodo;
     @FXML private TextField txtDocumento, txtNombres, txtApellidos, txtPais, txtTelefono, txtEmail, txtAdelanto;
     @FXML private Button btnBuscarDoc, btnBuscarRuc, btnCancelar, btnGuardar;
     @FXML private DatePicker dpIngreso, dpSalida;
@@ -104,8 +99,6 @@ public class ReservaFormController {
         untrm.hotel_san_antonio.util.EstiloBotones.hoverPrimario(btnGuardar);
         cmbTipoDoc.getItems().addAll(TIPOS_DOC.keySet());
         cmbTipoDoc.setValue("DNI");
-        cmbCanal.getItems().addAll(CANALES.keySet());
-        cmbCanal.setValue("Presencial");
         cmbMetodo.getItems().addAll(METODOS.keySet());
         cmbMetodo.setValue("Efectivo");
         cmbMetodo2.getItems().addAll(METODOS.keySet());
@@ -115,12 +108,15 @@ public class ReservaFormController {
         dpIngreso.setEditable(false);
         dpSalida.setEditable(false);
         dpIngreso.setValue(LocalDate.now());
+        // Habitaciones es para quien llega ahora: el ingreso es siempre hoy (las reservas futuras van en Nueva reserva)
+        dpIngreso.setDisable(true);
+        dpIngreso.setStyle(dpIngreso.getStyle() + " -fx-opacity: 1;");
         dpSalida.setValue(LocalDate.now().plusDays(1));
         dpIngreso.setDayCellFactory(dp -> new DateCell() {
             @Override
             public void updateItem(LocalDate fecha, boolean vacio) {
                 super.updateItem(fecha, vacio);
-                setDisable(vacio || fecha.isBefore(LocalDate.now()));
+                setDisable(vacio || !fecha.equals(LocalDate.now()));
             }
         });
         dpSalida.setDayCellFactory(dp -> new DateCell() {
@@ -224,7 +220,7 @@ public class ReservaFormController {
 
     /** Si el ingreso es hoy es un check-in directo: se paga todo. Si no, es una reserva con adelanto. */
     private boolean esCheckin() {
-        return LocalDate.now().equals(dpIngreso.getValue());
+        return true; // el ingreso desde Habitaciones es siempre hoy
     }
 
     /** Monto minimo a pagar ahora: el total en un check-in, el 50 % en una reserva. */
@@ -402,7 +398,7 @@ public class ReservaFormController {
         reserva.setFechaCheckout(dpSalida.getValue());
         reserva.setAdelanto(adelanto);
         reserva.setMontoTotal(total);
-        reserva.setCanal(CANALES.get(cmbCanal.getValue()));
+        reserva.setCanal("PRESENCIAL"); // desde Habitaciones el huesped esta en recepcion
         reserva.setNumHuespedes(spHuespedes.getValue());
 
         java.util.List<Huesped> huespedes;
