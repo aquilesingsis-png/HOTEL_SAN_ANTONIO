@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -22,14 +23,18 @@ import untrm.hotel_san_antonio.util.EstiloGlobal;
  */
 public class LimpiezaController {
     private static final int SEGUNDOS_ENTRE_ACTUALIZACIONES = 10;
+    private static final String TODOS_LOS_PISOS = "Todos los pisos";
 
     @FXML private TableView<Habitacion> tabla;
     @FXML private TableColumn<Habitacion, String> colNumero, colTipo, colPiso;
     @FXML private Button btnLista;
     @FXML private Label lblMensaje;
     @FXML private Label lblPendientes;
+    @FXML private ChoiceBox<String> cmbPiso;
     private final LimpiezaService servicio = new LimpiezaService();
     private Timeline refresco;
+    private List<Habitacion> enLimpieza = List.of();
+    private boolean cargandoPisos;
 
     @FXML private void initialize() {
         colNumero.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getNumero()));
@@ -41,6 +46,9 @@ public class LimpiezaController {
         tabla.getSelectionModel().selectedItemProperty().addListener((obs, antes, ahora) ->
                 btnLista.setDisable(ahora == null));
         EstiloGlobal.restilizarEncabezados(tabla);
+        cmbPiso.getItems().setAll(TODOS_LOS_PISOS);
+        cmbPiso.setValue(TODOS_LOS_PISOS);
+        cmbPiso.valueProperty().addListener((obs, antes, ahora) -> mostrar());
 
         // la lista se renueva sola mientras la pantalla está abierta
         refresco = new Timeline(new KeyFrame(Duration.seconds(SEGUNDOS_ENTRE_ACTUALIZACIONES), e -> cargar(false)));
@@ -64,18 +72,41 @@ public class LimpiezaController {
             @Override protected List<Habitacion> call() throws Exception { return servicio.listarEnLimpieza(); }
         };
         tarea.setOnSucceeded(e -> {
-            Habitacion elegida = tabla.getSelectionModel().getSelectedItem();
-            tabla.getItems().setAll(tarea.getValue());
-            if (elegida != null) {
-                for (Habitacion h : tabla.getItems()) {
-                    if (h.getIdHabitacion() == elegida.getIdHabitacion()) tabla.getSelectionModel().select(h);
-                }
-            }
-            lblPendientes.setText(String.valueOf(tarea.getValue().size()));
+            enLimpieza = tarea.getValue();
+            actualizarPisos();
+            mostrar();
+            lblPendientes.setText(String.valueOf(enLimpieza.size()));
             if (avisar) lblMensaje.setText("Lista actualizada.");
         });
         tarea.setOnFailed(e -> lblMensaje.setText("No se pudieron cargar las habitaciones."));
         ejecutar(tarea);
+    }
+
+    /** El filtro ofrece solo los pisos que tienen habitaciones por limpiar. */
+    private void actualizarPisos() {
+        String elegido = cmbPiso.getValue();
+        List<String> pisos = new java.util.ArrayList<>();
+        pisos.add(TODOS_LOS_PISOS);
+        enLimpieza.stream().map(Habitacion::getPiso).distinct().sorted().forEach(p -> pisos.add("Piso " + p));
+        cargandoPisos = true;
+        cmbPiso.getItems().setAll(pisos);
+        cmbPiso.setValue(pisos.contains(elegido) ? elegido : TODOS_LOS_PISOS);
+        cargandoPisos = false;
+    }
+
+    private void mostrar() {
+        if (cargandoPisos) return;
+        Habitacion elegida = tabla.getSelectionModel().getSelectedItem();
+        String piso = cmbPiso.getValue();
+        List<Habitacion> visibles = enLimpieza.stream()
+                .filter(h -> piso == null || TODOS_LOS_PISOS.equals(piso) || piso.equals("Piso " + h.getPiso()))
+                .toList();
+        tabla.getItems().setAll(visibles);
+        if (elegida != null) {
+            for (Habitacion h : visibles) {
+                if (h.getIdHabitacion() == elegida.getIdHabitacion()) tabla.getSelectionModel().select(h);
+            }
+        }
     }
 
     @FXML private void marcarDisponible() {
