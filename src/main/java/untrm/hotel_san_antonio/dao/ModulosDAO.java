@@ -73,22 +73,6 @@ public class ModulosDAO {
                 "SELECT p.id_producto, CONCAT('P',LPAD(p.id_producto,3,'0')), p.nombre, c.nombre, p.stock, "
                 + "IF(p.activo=1,'Activo','Inactivo') FROM producto p JOIN categoria c "
                 + "ON c.id_categoria=p.id_categoria ORDER BY p.nombre");
-            case "reportes/ingresos" -> filas(
-                "SELECT 0,DATE(p.fecha_pago),'Alojamiento',p.metodo_pago,COUNT(*),SUM(p.monto) "
-                + "FROM pago p GROUP BY DATE(p.fecha_pago),p.metodo_pago UNION ALL "
-                + "SELECT 0,DATE(v.fecha_venta),'Tienda',COALESCE(v.metodo_pago,'NO REGISTRADO'),COUNT(*),SUM(v.total) "
-                + "FROM venta_tienda v GROUP BY DATE(v.fecha_venta),COALESCE(v.metodo_pago,'NO REGISTRADO') ORDER BY 2 DESC");
-            case "reportes/ocupacion" -> ocupacionDiaria(null, null);
-            case "reportes/reportes_personalizados" -> filas(
-                "SELECT 0,DATE(p.fecha_pago),'Alojamiento','Pago de reserva',COUNT(*),SUM(p.monto) "
-                + "FROM pago p GROUP BY DATE(p.fecha_pago) UNION ALL "
-                + "SELECT 0,DATE(v.fecha_venta),'Tienda','Venta de productos',COUNT(*),SUM(v.total) "
-                + "FROM venta_tienda v GROUP BY DATE(v.fecha_venta) ORDER BY 2 DESC");
-            case "reportes/ventas" -> filas(
-                "SELECT 0,CONCAT('P',LPAD(p.id_producto,3,'0')),p.nombre,c.nombre,SUM(d.cantidad),"
-                + "ROUND(SUM(d.subtotal)/SUM(d.cantidad),2),SUM(d.subtotal) FROM detalle_venta d "
-                + "JOIN producto p ON p.id_producto=d.id_producto JOIN categoria c ON c.id_categoria=p.id_categoria "
-                + "GROUP BY p.id_producto,p.nombre,c.nombre ORDER BY SUM(d.subtotal) DESC");
             case "usuarios/editar_usuario" -> filas(
                 "SELECT u.id_usuario,CONCAT('U',LPAD(u.id_usuario,3,'0')),u.nombre,u.apellido,u.usuario,"
                 + "u.rol,IF(u.activo=1,'Activo','Inactivo'),u.fecha_creacion FROM usuario u ORDER BY u.nombre,u.apellido");
@@ -191,63 +175,6 @@ public class ModulosDAO {
                         String.valueOf(dia.reservas), String.valueOf(dia.huespedes)), fecha.getKey()));
             }
         }
-        return resultado;
-    }
-
-    private static final class ResumenReporte {
-        String periodo;
-        String origen;
-        String concepto;
-        LocalDate fecha;
-        BigDecimal cantidad = BigDecimal.ZERO;
-        BigDecimal importe = BigDecimal.ZERO;
-    }
-
-    /** Agrupa movimientos reales de alojamiento y detalle de tienda. */
-    public List<Registro> reportePersonalizado(String fuente, String agrupacion,
-                                               LocalDate desde, LocalDate hasta) throws SQLException {
-        if (!List.of("Todos", "Alojamiento", "Tienda").contains(fuente))
-            throw new IllegalArgumentException("Seleccione una fuente válida.");
-        if (!List.of("Día", "Mes", "Habitación", "Producto", "Método de pago").contains(agrupacion))
-            throw new IllegalArgumentException("Seleccione una agrupación válida.");
-        if (agrupacion.equals("Habitación") && fuente.equals("Tienda"))
-            throw new IllegalArgumentException("Para agrupar por habitación seleccione Alojamiento o Todos.");
-        if (agrupacion.equals("Producto") && fuente.equals("Alojamiento"))
-            throw new IllegalArgumentException("Para agrupar por producto seleccione Tienda o Todos.");
-        String sql = "SELECT 0,DATE(p.fecha_pago),'Alojamiento',CONCAT('Hab. ',h.numero),"
-                + "p.metodo_pago,1,p.monto FROM pago p JOIN reserva r ON r.id_reserva=p.id_reserva "
-                + "JOIN habitacion h ON h.id_habitacion=r.id_habitacion UNION ALL "
-                + "SELECT 0,DATE(v.fecha_venta),'Tienda',pr.nombre,'NO REGISTRADO',d.cantidad,d.subtotal "
-                + "FROM venta_tienda v JOIN detalle_venta d ON d.id_venta=v.id_venta "
-                + "JOIN producto pr ON pr.id_producto=d.id_producto";
-        Map<String, ResumenReporte> grupos = new LinkedHashMap<>();
-        for (Registro fila : filas(sql)) {
-            if (fila.fecha() == null || desde != null && fila.fecha().isBefore(desde)
-                    || hasta != null && fila.fecha().isAfter(hasta)) continue;
-            String origen = fila.celdas().get(1);
-            if (!fuente.equals("Todos") && !fuente.equals(origen)) continue;
-            if (agrupacion.equals("Habitación") && !origen.equals("Alojamiento")) continue;
-            if (agrupacion.equals("Producto") && !origen.equals("Tienda")) continue;
-            String periodo = agrupacion.equals("Mes") ? fila.fecha().toString().substring(0, 7)
-                    : agrupacion.equals("Día") ? fila.fecha().toString()
-                    : desde == null && hasta == null ? "Histórico"
-                    : (desde == null ? "Inicio" : desde) + " a " + (hasta == null ? "Hoy" : hasta);
-            String concepto = switch (agrupacion) {
-                case "Habitación", "Producto" -> fila.celdas().get(2);
-                case "Método de pago" -> fila.celdas().get(3);
-                default -> origen.equals("Tienda") ? "Ventas de tienda" : "Pagos de reserva";
-            };
-            String clave = periodo + "|" + origen + "|" + concepto;
-            ResumenReporte grupo = grupos.computeIfAbsent(clave, x -> new ResumenReporte());
-            grupo.periodo = periodo; grupo.origen = origen; grupo.concepto = concepto;
-            grupo.fecha = fila.fecha();
-            grupo.cantidad = grupo.cantidad.add(new BigDecimal(fila.celdas().get(4)));
-            grupo.importe = grupo.importe.add(new BigDecimal(fila.celdas().get(5)));
-        }
-        List<Registro> resultado = new ArrayList<>();
-        for (ResumenReporte grupo : grupos.values()) resultado.add(new Registro(0,
-                List.of(grupo.periodo, grupo.origen, grupo.concepto,
-                        grupo.cantidad.toPlainString(), grupo.importe.toPlainString()), grupo.fecha));
         return resultado;
     }
 

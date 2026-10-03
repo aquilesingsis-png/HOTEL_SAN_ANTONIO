@@ -7,6 +7,7 @@ import java.util.Set;
  * Una tabla lista para guardarse como PDF o como Excel.
  *
  * @param titulo      titulo del informe
+ * @param hoja        nombre de la hoja de Excel
  * @param descripcion lineas bajo el titulo (filtros usados, fecha de emision...)
  * @param encabezados nombres de las columnas
  * @param filas       los datos, todo como texto
@@ -14,7 +15,7 @@ import java.util.Set;
  * @param pesos       ancho relativo de cada columna
  * @param resumen     pares etiqueta / valor que se muestran al final (totales)
  */
-public record TablaExportable(String titulo, List<String> descripcion, List<String> encabezados,
+public record TablaExportable(String titulo, String hoja, List<String> descripcion, List<String> encabezados,
                               List<List<String>> filas, Set<Integer> numericas, double[] pesos,
                               List<String[]> resumen) {
 }

@@ -23,6 +23,7 @@ public class Navegacion {
     private static final Set<String> MODULOS_OPERATIVOS_NUEVOS = Set.of(
             NUEVOS + "caja/gastos.fxml",
             NUEVOS + "caja/libro_caja.fxml",
+            NUEVOS + "reportes/reportes.fxml",
             NUEVOS + "caja/cierre_arqueo.fxml",
             NUEVOS + "usuarios/crear_usuario.fxml",
             NUEVOS + "usuarios/asignar_rol.fxml",

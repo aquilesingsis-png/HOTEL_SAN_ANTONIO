@@ -1,10 +1,7 @@
 package untrm.hotel_san_antonio.controlador;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -24,10 +21,10 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
 import untrm.hotel_san_antonio.dao.CajaDAO;
 import untrm.hotel_san_antonio.dao.CajaDAO.Movimiento;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.ExportarArchivo;
 import untrm.hotel_san_antonio.util.Navegacion;
 import untrm.hotel_san_antonio.util.PdfTabla;
 import untrm.hotel_san_antonio.util.SesionActual;
@@ -214,43 +211,23 @@ public class LibroCajaController {
 
     @FXML
     private void exportarExcel() {
-        guardarArchivo("xlsx", "Libro de Excel", XlsxTabla::generar);
+        exportar("xlsx", "Libro de Excel", () -> XlsxTabla.generar(armarTabla()));
     }
 
     @FXML
     private void exportarPdf() {
-        guardarArchivo("pdf", "Documento PDF", PdfTabla::generar);
-    }
-
-    private interface Generador {
-        byte[] generar(TablaExportable tabla) throws IOException;
+        exportar("pdf", "Documento PDF", () -> PdfTabla.generar(armarTabla()));
     }
 
     /** Guarda todo lo filtrado (no solo la pagina que se ve) en el formato elegido. */
-    private void guardarArchivo(String extension, String descripcion, Generador generador) {
+    private void exportar(String extension, String descripcion, ExportarArchivo.Generador generador) {
         if (resultado.isEmpty()) {
             Alertas.mostrarInfo("Exportar", "No hay movimientos para exportar. Cambia los filtros.");
             return;
         }
-        FileChooser selector = new FileChooser();
-        selector.setTitle("Guardar caja");
-        selector.setInitialFileName("caja_" + (dpDesde.getValue() == null ? "" : dpDesde.getValue() + "_a_")
-                + (dpHasta.getValue() == null ? LocalDate.now() : dpHasta.getValue()) + "." + extension);
-        selector.getExtensionFilters().add(new FileChooser.ExtensionFilter(descripcion, "*." + extension));
-        File elegido = selector.showSaveDialog(tabla.getScene().getWindow());
-        if (elegido == null) {
-            return;
-        }
-        Path destino = elegido.toPath();
-        if (!destino.getFileName().toString().toLowerCase(Locale.ROOT).endsWith("." + extension)) {
-            destino = destino.resolveSibling(destino.getFileName() + "." + extension);
-        }
-        try {
-            Files.write(destino, generador.generar(armarTabla()));
-            Alertas.mostrarInfo("Archivo guardado", "Se guardó en:\n" + destino.toAbsolutePath());
-        } catch (IOException error) {
-            Alertas.mostrarError("Exportar", "No se pudo guardar el archivo.\n\n" + error.getMessage());
-        }
+        String nombre = "caja_" + (dpDesde.getValue() == null ? "" : dpDesde.getValue() + "_a_")
+                + (dpHasta.getValue() == null ? LocalDate.now() : dpHasta.getValue());
+        ExportarArchivo.guardar(tabla.getScene().getWindow(), nombre, extension, descripcion, generador);
     }
 
     private TablaExportable armarTabla() {
@@ -277,7 +254,7 @@ public class LibroCajaController {
                 new String[] {"Egresos", dinero(total[1])},
                 new String[] {"Neto", dinero(total[0].subtract(total[1]))},
                 new String[] {"Efectivo en caja", dinero(total[2])});
-        return new TablaExportable("Caja - movimientos", descripcion,
+        return new TablaExportable("Caja - movimientos", "Caja", descripcion,
                 List.of("Fecha", "Tipo", "Concepto", "Monto (S/)", "Medio de pago", "Caja / Banco",
                         "Documento", "Cliente", "Registrado por"),
                 filas, Set.of(3), new double[] {1.25, 1.1, 4.2, 0.9, 1.1, 1.2, 1.1, 1.7, 1.5}, resumen);

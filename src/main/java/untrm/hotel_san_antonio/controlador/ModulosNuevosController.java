@@ -7,10 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.DayOfWeek;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -69,7 +66,6 @@ public class ModulosNuevosController {
             }
         }
         inicializarCombos();
-        if (modulo.equals("reportes/ocupacion")) establecerPeriodoOcupacion();
         configurarCalculos();
         cargar();
     }
@@ -77,7 +73,6 @@ public class ModulosNuevosController {
     private void ejecutar(String accion) {
         try {
             if (accion.contains("FiltroLimpiar")) { limpiarFiltros(); cargar(); return; }
-            if (accion.contains("GenerarReporte")) { generarReporte(); return; }
             if (accion.startsWith("btnFiltro") || accion.contains("Actualizar")
                     || accion.contains("Consultar")) {
                 cargar(); return;
@@ -90,21 +85,11 @@ public class ModulosNuevosController {
             if (accion.contains("VerDetalle")) {
                 verDetalle(); return;
             }
-            if (accion.contains("ListaExportar")) {
-                if (modulo.equals("reportes/reportes_personalizados") && "PDF".equals(combo("cmbFormato")))
-                    guardarPdf();
-                else exportarCsv();
-                return;
-            }
+            if (accion.contains("ListaExportar")) { exportarCsv(); return; }
             if (accion.contains("ListaImprimir")) { guardarPdf(); return; }
             if (accion.contains("FormCancelar")) { tab(0); return; }
             if (accion.contains("FormLimpiar")) {
                 limpiarFormulario();
-                if (modulo.equals("reportes/reportes_personalizados")) {
-                    seleccionarCombo("cmbFuente", "Todos");
-                    seleccionarCombo("cmbAgruparPor", "Día");
-                    seleccionarCombo("cmbFormato", "PDF");
-                }
                 return;
             }
             if (accion.contains("EliminarCategoria")) { eliminarCategoria(); return; }
@@ -124,12 +109,9 @@ public class ModulosNuevosController {
             validarFechas();
             int umbral = umbral();
             LocalDate dia = fecha("filtroFecha");
-            List<Registro> registros = modulo.equals("reportes/ocupacion")
-                    ? dao.ocupacionDiaria(fecha("filtroDesde"), fecha("filtroHasta"))
-                    : dao.consultar(modulo, umbral, dia == null ? LocalDate.now() : dia);
+            List<Registro> registros = dao.consultar(modulo, umbral, dia == null ? LocalDate.now() : dia);
             List<Registro> filtrados = registros.stream().filter(this::coincideFiltros).toList();
-            visibles.setAll(modulo.equals("reportes/ocupacion")
-                    ? agruparOcupacion(filtrados) : filtrados);
+            visibles.setAll(filtrados);
             actualizarMetricas();
             actualizarGrafico();
         } catch (SQLException | RuntimeException error) {
@@ -146,36 +128,6 @@ public class ModulosNuevosController {
             throw new IllegalArgumentException("La fecha final debe ser igual o posterior a la inicial.");
     }
 
-    private List<Registro> agruparOcupacion(List<Registro> dias) {
-        String modo = combo("filtroAgruparPor");
-        if (modo.isBlank() || modo.equals("Día")) return dias;
-        Map<String, BigDecimal[]> sumas = new LinkedHashMap<>();
-        Map<String, LocalDate> fechas = new LinkedHashMap<>();
-        for (Registro fila : dias) {
-            LocalDate inicio = modo.equals("Semana")
-                    ? fila.fecha().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-                    : fila.fecha().withDayOfMonth(1);
-            String clave = inicio + "|" + fila.celdas().get(1);
-            BigDecimal[] valores = sumas.computeIfAbsent(clave, k -> new BigDecimal[] {
-                    BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO});
-            fechas.put(clave, inicio);
-            for (int i = 0; i < 4; i++) valores[i] = valores[i].add(numero(fila, i < 2 ? i + 2 : i + 3));
-        }
-        List<Registro> resultado = new ArrayList<>();
-        for (var entrada : sumas.entrySet()) {
-            BigDecimal[] v = entrada.getValue();
-            String porcentaje = v[0].signum() == 0 ? "0.0" : v[1]
-                    .multiply(BigDecimal.valueOf(100)).divide(v[0], 1,
-                            java.math.RoundingMode.HALF_UP).toPlainString();
-            LocalDate inicio = fechas.get(entrada.getKey());
-            String tipo = entrada.getKey().substring(entrada.getKey().indexOf('|') + 1);
-            resultado.add(new Registro(0, List.of(inicio.toString(), tipo,
-                    v[0].toPlainString(), v[1].toPlainString(), porcentaje,
-                    v[2].toPlainString(), v[3].toPlainString()), inicio));
-        }
-        resultado.sort((a, b) -> b.fecha().compareTo(a.fecha()));
-        return resultado;
-    }
 
     private int umbral() {
         String valor = combo("filtroUmbralDeRevision");
@@ -251,14 +203,6 @@ public class ModulosNuevosController {
             else if (control instanceof DatePicker fecha) fecha.setValue(null);
             else if (control instanceof ComboBox<?> caja) caja.getSelectionModel().clearSelection();
         }
-        if (modulo.equals("reportes/ocupacion")) establecerPeriodoOcupacion();
-    }
-
-    private void establecerPeriodoOcupacion() {
-        DatePicker desde = nodo("filtroDesde", DatePicker.class);
-        DatePicker hasta = nodo("filtroHasta", DatePicker.class);
-        if (desde != null) desde.setValue(LocalDate.now().minusDays(29));
-        if (hasta != null) hasta.setValue(LocalDate.now());
     }
 
     private void nuevo() throws SQLException {
@@ -359,38 +303,6 @@ public class ModulosNuevosController {
         }
     }
 
-    private void generarReporte() throws SQLException {
-        if (!modulo.equals("reportes/reportes_personalizados")) { cargar(); return; }
-        LocalDate desde = fecha("dpDesde");
-        LocalDate hasta = fecha("dpHasta");
-        if (desde != null && hasta != null && hasta.isBefore(desde))
-            throw new IllegalArgumentException("La fecha final debe ser igual o posterior a la inicial.");
-        List<Registro> registros = dao.reportePersonalizado(combo("cmbFuente"),
-                combo("cmbAgruparPor"), desde, hasta);
-        visibles.setAll(registros);
-        String orden = combo("cmbOrden");
-        if ("Ascendente".equals(orden)) FXCollections.sort(visibles,
-                (a, b) -> a.celdas().get(0).compareTo(b.celdas().get(0)));
-        else FXCollections.sort(visibles,
-                (a, b) -> b.celdas().get(0).compareTo(a.celdas().get(0)));
-        CheckBox totales = nodo("chkIncluirTotales", CheckBox.class);
-        if (totales != null && totales.isSelected() && !visibles.isEmpty()) {
-            visibles.add(new Registro(0, List.of("TOTAL", "", "",
-                    sumar(3).toPlainString(), sumar(4).toPlainString()), null));
-        }
-        boolean seleccionada = false;
-        for (String id : List.of("chkPeriodo", "chkOrigen", "chkConcepto", "chkCantidad", "chkImporteS")) {
-            CheckBox check = nodo(id, CheckBox.class);
-            seleccionada |= check != null && check.isSelected();
-        }
-        String[] checks = {"chkPeriodo", "chkOrigen", "chkConcepto", "chkCantidad", "chkImporteS"};
-        for (int i = 0; i < checks.length; i++) {
-            CheckBox check = nodo(checks[i], CheckBox.class);
-            tabla.getColumns().get(i).setVisible(!seleccionada || check == null || check.isSelected());
-        }
-        tab(1);
-    }
-
     @SuppressWarnings("unchecked")
     private void inicializarCombos() {
         try {
@@ -414,21 +326,6 @@ public class ModulosNuevosController {
         opciones("cmbMetodoDePago", "Efectivo", "Tarjeta", "Transferencia", "Yape");
         opciones("cmbTipoDePago", "Adelanto", "Saldo", "Completo");
         opciones("filtroUmbralDeRevision", "5 unidades", "10 unidades", "20 unidades");
-        if (modulo.equals("reportes/reportes_personalizados")) {
-            ComboBox<String> fuentes = nodo("cmbFuente", ComboBox.class);
-            if (fuentes != null) fuentes.getItems().setAll("Todos", "Alojamiento", "Tienda");
-            seleccionarCombo("cmbFuente", "Todos");
-            seleccionarCombo("cmbFormato", "PDF");
-            seleccionarCombo("cmbAgruparPor", "Día");
-        }
-        if (modulo.equals("reportes/ocupacion")) {
-            try {
-                ComboBox<String> tipos = nodo("filtroTipoDeHabitacion", ComboBox.class);
-                if (tipos != null) {
-                    for (String tipo : dao.tiposHabitacion()) if (!tipos.getItems().contains(tipo)) tipos.getItems().add(tipo);
-                }
-            } catch (SQLException error) { Alertas.mostrarError("Habitaciones", error.getMessage()); }
-        }
         ComboBox<String> roles = nodo("filtroRol", ComboBox.class);
         if (roles != null && !roles.getItems().contains("Limpieza")) roles.getItems().add("Limpieza");
     }
@@ -629,8 +526,7 @@ public class ModulosNuevosController {
         Path destino = elegido.toPath();
         if (!destino.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".pdf"))
             destino = destino.resolveSibling(destino.getFileName() + ".pdf");
-        String titulo = modulo.equals("reportes/reportes_personalizados")
-                && !texto("txtNombreDelReporte").isBlank() ? texto("txtNombreDelReporte") : modulo.replace('/', ' ');
+        String titulo = modulo.replace('/', ' ');
         StringBuilder contenido = new StringBuilder("HOTEL SAN ANTONIO\n")
                 .append(titulo.toUpperCase(Locale.ROOT)).append("\n")
                 .append("Fecha: ").append(LocalDate.now()).append("\n\n");
@@ -652,9 +548,7 @@ public class ModulosNuevosController {
     }
 
     private String nombreArchivo() {
-        String nombre = modulo.equals("reportes/reportes_personalizados")
-                && !texto("txtNombreDelReporte").isBlank() ? texto("txtNombreDelReporte") : modulo;
-        return nombre.replaceAll("[^A-Za-z0-9_-]", "_");
+        return modulo.replaceAll("[^A-Za-z0-9_-]", "_");
     }
 
     private void actualizarMetricas() {

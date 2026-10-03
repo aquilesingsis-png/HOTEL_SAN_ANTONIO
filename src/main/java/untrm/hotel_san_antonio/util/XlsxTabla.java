@@ -29,7 +29,7 @@ public final class XlsxTabla {
         try (ZipOutputStream zip = new ZipOutputStream(salida, StandardCharsets.UTF_8)) {
             agregar(zip, "[Content_Types].xml", CONTENT_TYPES);
             agregar(zip, "_rels/.rels", RELS);
-            agregar(zip, "xl/workbook.xml", LIBRO);
+            agregar(zip, "xl/workbook.xml", libro(tabla.hoja()));
             agregar(zip, "xl/_rels/workbook.xml.rels", RELS_LIBRO);
             agregar(zip, "xl/styles.xml", ESTILOS);
             agregar(zip, "xl/worksheets/sheet1.xml", hoja(tabla));
@@ -178,10 +178,17 @@ public final class XlsxTabla {
             + "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" Target=\"xl/workbook.xml\"/>"
             + "</Relationships>";
 
-    private static final String LIBRO = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
-            + "<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" "
-            + "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">"
-            + "<sheets><sheet name=\"Caja\" sheetId=\"1\" r:id=\"rId1\"/></sheets></workbook>";
+    /** El nombre de la hoja: hasta 31 caracteres y sin los simbolos que Excel no admite. */
+    private static String libro(String hoja) {
+        String nombre = (hoja == null || hoja.isBlank() ? "Datos" : hoja).replaceAll("[\\[\\]:*?/\\\\]", " ").trim();
+        if (nombre.length() > 31) {
+            nombre = nombre.substring(0, 31);
+        }
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
+                + "<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" "
+                + "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">"
+                + "<sheets><sheet name=\"" + escapar(nombre) + "\" sheetId=\"1\" r:id=\"rId1\"/></sheets></workbook>";
+    }
 
     private static final String RELS_LIBRO = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
             + "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">"

@@ -208,6 +208,16 @@ public final class EstiloGlobal {
         EstiloUtil.alArmarPiel(tabla, () -> Platform.runLater(() -> encabezados(tabla, nuevos)));
     }
 
+    /** Para tablas cuyas columnas se crean despues de mostrarse (por ejemplo, Reportes). */
+    public static void restilizarEncabezados(TableView<?> tabla) {
+        boolean nuevos = "tabla-nuevos".equals(tabla.getUserData());
+        EstiloUtil.alArmarPiel(tabla, () -> Platform.runLater(() -> {
+            tabla.applyCss();
+            tabla.layout();
+            encabezados(tabla, nuevos);
+        }));
+    }
+
     private static <T> TableRow<T> filaEstilizada(boolean nuevos) {
         TableRow<T> fila = new TableRow<>();
         Runnable pintar = () -> fila.setStyle(estiloFila(fila, nuevos));
