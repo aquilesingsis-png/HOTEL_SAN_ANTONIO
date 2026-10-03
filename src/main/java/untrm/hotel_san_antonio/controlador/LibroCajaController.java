@@ -1,12 +1,17 @@
 package untrm.hotel_san_antonio.controlador;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -19,11 +24,15 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 import untrm.hotel_san_antonio.dao.CajaDAO;
 import untrm.hotel_san_antonio.dao.CajaDAO.Movimiento;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.Navegacion;
+import untrm.hotel_san_antonio.util.PdfTabla;
 import untrm.hotel_san_antonio.util.SesionActual;
+import untrm.hotel_san_antonio.util.TablaExportable;
+import untrm.hotel_san_antonio.util.XlsxTabla;
 
 /**
  * Caja: una sola lista con todo el dinero que entra y sale (alojamiento, carrito, movimientos manuales
@@ -169,7 +178,8 @@ public class LibroCajaController {
         txtBuscar.clear();
     }
 
-    private void mostrar() {
+    /** Ingresos, egresos y efectivo en caja de todo lo que se esta viendo (no solo de la pagina). */
+    private BigDecimal[] totales() {
         BigDecimal ingresos = BigDecimal.ZERO;
         BigDecimal egresos = BigDecimal.ZERO;
         BigDecimal efectivo = BigDecimal.ZERO;
@@ -183,11 +193,89 @@ public class LibroCajaController {
                 efectivo = enEfectivo ? efectivo.subtract(m.monto()) : efectivo;
             }
         }
-        lblIngresos.setText(dinero(ingresos));
-        lblEgresos.setText(dinero(egresos));
-        lblNeto.setText(dinero(ingresos.subtract(egresos)));
-        lblEfectivo.setText(dinero(efectivo));
+        return new BigDecimal[] {ingresos, egresos, efectivo};
+    }
+
+    private void mostrar() {
+        BigDecimal[] total = totales();
+        lblIngresos.setText(dinero(total[0]));
+        lblEgresos.setText(dinero(total[1]));
+        lblNeto.setText(dinero(total[0].subtract(total[1])));
+        lblEfectivo.setText(dinero(total[2]));
         mostrarPagina();
+    }
+
+    // ------------------------------------------------------------------ exportar
+
+    @FXML
+    private void exportarExcel() {
+        guardarArchivo("xlsx", "Libro de Excel", XlsxTabla::generar);
+    }
+
+    @FXML
+    private void exportarPdf() {
+        guardarArchivo("pdf", "Documento PDF", PdfTabla::generar);
+    }
+
+    private interface Generador {
+        byte[] generar(TablaExportable tabla) throws IOException;
+    }
+
+    /** Guarda todo lo filtrado (no solo la pagina que se ve) en el formato elegido. */
+    private void guardarArchivo(String extension, String descripcion, Generador generador) {
+        if (resultado.isEmpty()) {
+            Alertas.mostrarInfo("Exportar", "No hay movimientos para exportar. Cambia los filtros.");
+            return;
+        }
+        FileChooser selector = new FileChooser();
+        selector.setTitle("Guardar caja");
+        selector.setInitialFileName("caja_" + (dpDesde.getValue() == null ? "" : dpDesde.getValue() + "_a_")
+                + (dpHasta.getValue() == null ? LocalDate.now() : dpHasta.getValue()) + "." + extension);
+        selector.getExtensionFilters().add(new FileChooser.ExtensionFilter(descripcion, "*." + extension));
+        File elegido = selector.showSaveDialog(tabla.getScene().getWindow());
+        if (elegido == null) {
+            return;
+        }
+        Path destino = elegido.toPath();
+        if (!destino.getFileName().toString().toLowerCase(Locale.ROOT).endsWith("." + extension)) {
+            destino = destino.resolveSibling(destino.getFileName() + "." + extension);
+        }
+        try {
+            Files.write(destino, generador.generar(armarTabla()));
+            Alertas.mostrarInfo("Archivo guardado", "Se guardó en:\n" + destino.toAbsolutePath());
+        } catch (IOException error) {
+            Alertas.mostrarError("Exportar", "No se pudo guardar el archivo.\n\n" + error.getMessage());
+        }
+    }
+
+    private TablaExportable armarTabla() {
+        DateTimeFormatter dia = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        List<String> descripcion = new ArrayList<>();
+        descripcion.add("Período: " + (dpDesde.getValue() == null ? "desde el inicio" : dpDesde.getValue().format(dia))
+                + " al " + (dpHasta.getValue() == null ? "hoy" : dpHasta.getValue().format(dia)));
+        String busqueda = txtBuscar.getText() == null || txtBuscar.getText().isBlank()
+                ? "" : "  ·  Búsqueda: " + txtBuscar.getText().trim();
+        descripcion.add("Origen: " + cmbOrigen.getValue() + "  ·  Tipo: " + cmbTipo.getValue()
+                + "  ·  Medio de pago: " + cmbMetodo.getValue() + busqueda);
+        descripcion.add("Registros: " + resultado.size() + "  ·  Emitido por: "
+                + SesionActual.getUsuario().getNombreCompleto());
+
+        List<List<String>> filas = new ArrayList<>();
+        for (Movimiento m : resultado) {
+            filas.add(List.of(m.fecha().format(FORMATO_FECHA), textoTipo(m.tipo()), m.concepto(),
+                    String.format(Locale.US, "%.2f", m.monto()), textoMetodo(m.metodo()), textoCaja(m.metodo()),
+                    vacioSiNulo(m.documento()), vacioSiNulo(m.cliente()), m.responsable()));
+        }
+        BigDecimal[] total = totales();
+        List<String[]> resumen = List.of(
+                new String[] {"Ingresos", dinero(total[0])},
+                new String[] {"Egresos", dinero(total[1])},
+                new String[] {"Neto", dinero(total[0].subtract(total[1]))},
+                new String[] {"Efectivo en caja", dinero(total[2])});
+        return new TablaExportable("Caja - movimientos", descripcion,
+                List.of("Fecha", "Tipo", "Concepto", "Monto (S/)", "Medio de pago", "Caja / Banco",
+                        "Documento", "Cliente", "Registrado por"),
+                filas, Set.of(3), new double[] {1.25, 1.1, 4.2, 0.9, 1.1, 1.2, 1.1, 1.7, 1.5}, resumen);
     }
 
     private void mostrarPagina() {
