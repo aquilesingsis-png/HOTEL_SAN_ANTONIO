@@ -270,6 +270,12 @@ public class CarritoTiendaController {
             Huesped local = huespedDAO.buscarPorDocumento("DNI", dni);
             if (local != null) {
                 aplicarDatosPersona(dni, (local.getNombres() + " " + local.getApellidos()).trim(), local.getTelefono());
+                // si el nombre cambio en RENIEC, se corrige en la base y aqui
+                ConsultaApi.actualizarIdentidadLocal(dni, h -> {
+                    if (dni.equals(txtBuscarDni.getText().trim())) {
+                        aplicarDatosPersona(dni, (h.getNombres() + " " + h.getApellidos()).trim(), null);
+                    }
+                });
                 return;
             }
         } catch (SQLException e) {

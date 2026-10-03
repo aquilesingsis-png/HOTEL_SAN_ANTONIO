@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Huesped;
 import untrm.hotel_san_antonio.servicio.ReniecService;
+import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.servicio.SunatRucService;
 
 /**
@@ -57,6 +58,28 @@ public final class ConsultaApi {
             alFallar.accept(causa(tarea.getException()));
         });
         iniciar(tarea);
+    }
+
+    /**
+     * Para un DNI que ya esta en la base: lo compara con RENIEC y, si el nombre cambio, lo actualiza en la base
+     * y avisa con el huesped actualizado (en el hilo de la interfaz). Si no hay Internet o no hay cambios,
+     * no hace nada.
+     */
+    public static void actualizarIdentidadLocal(String dni, Consumer<Huesped> alActualizar) {
+        dni(dni, null, reniec -> {
+            Task<Huesped> actualizar = new Task<>() {
+                @Override
+                protected Huesped call() throws Exception {
+                    return new ReservaService().reconciliarIdentidadDni(dni, reniec);
+                }
+            };
+            actualizar.setOnSucceeded(e -> {
+                if (actualizar.getValue() != null) {
+                    alActualizar.accept(actualizar.getValue());
+                }
+            });
+            iniciar(actualizar);
+        }, () -> { }, motivo -> { });
     }
 
     /** Arranca la tarea en un hilo que no impide cerrar el programa. */

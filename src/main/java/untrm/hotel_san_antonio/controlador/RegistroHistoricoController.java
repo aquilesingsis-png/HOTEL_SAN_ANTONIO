@@ -26,6 +26,8 @@ import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ConflictoFechasException;
 import untrm.hotel_san_antonio.servicio.ReniecService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
+import untrm.hotel_san_antonio.util.ConsultaApi;
+import untrm.hotel_san_antonio.util.SoloLectura;
 import untrm.hotel_san_antonio.util.Validador;
 
 /** Captura administrativa de una estadía pasada, con fechas del hecho y de captura separadas. */
@@ -62,7 +64,10 @@ public class RegistroHistoricoController {
         dpIngreso.valueProperty().addListener((obs, antes, ahora) -> recalcular());
         dpSalida.valueProperty().addListener((obs, antes, ahora) -> recalcular());
         txtDni.textProperty().addListener((obs, antes, ahora) -> {
-            if (!ahora.equals(dniBuscado)) dniBuscado = null;
+            if (!ahora.equals(dniBuscado)) {
+                dniBuscado = null;
+                bloquearIdentidad(false);
+            }
         });
         cargarHabitaciones();
     }
@@ -93,12 +98,19 @@ public class RegistroHistoricoController {
             if (!dni.equals(txtDni.getText().trim())) return;
             if (local.getValue() != null) {
                 cargar(local.getValue()); dniBuscado = dni;
-                lblEstado.setText("Huésped local cargado.");
+                bloquearIdentidad(true);
+                lblEstado.setText("Huésped local cargado. Verificando identidad...");
+                ConsultaApi.actualizarIdentidadLocal(dni, actualizado -> {
+                    if (!dni.equals(txtDni.getText().trim())) return;
+                    cargar(actualizado);
+                    lblEstado.setText("Identidad verificada con RENIEC.");
+                });
             } else {
                 Task<Huesped> reniec = ReniecService.consultarDni(dni);
                 reniec.setOnSucceeded(ev -> {
                     if (!dni.equals(txtDni.getText().trim())) return;
                     if (reniec.getValue() != null) cargar(reniec.getValue());
+                    bloquearIdentidad(reniec.getValue() != null);
                     dniBuscado = dni;
                     lblEstado.setText(reniec.getValue() == null
                             ? "Complete los nombres manualmente." : "Identidad autocompletada.");
@@ -112,6 +124,12 @@ public class RegistroHistoricoController {
         });
         local.setOnFailed(e -> lblEstado.setText("No se pudo buscar el huésped local."));
         ejecutar(local, "historico-dni");
+    }
+
+    /** Nombres y apellidos de RENIEC o de la base no se editan; si no hay ninguno de los dos, se escriben a mano. */
+    private void bloquearIdentidad(boolean bloqueada) {
+        SoloLectura.aplicar(txtNombres, bloqueada);
+        SoloLectura.aplicar(txtApellidos, bloqueada);
     }
 
     private void cargar(Huesped h) {

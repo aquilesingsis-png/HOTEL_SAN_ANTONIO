@@ -238,6 +238,12 @@ public class ComprobanteController {
             Huesped local = huespedDAO.buscarPorDocumento("DNI", dni);
             if (local != null) {
                 txtCliente.setText((local.getNombres() + " " + local.getApellidos()).trim());
+                // si el nombre cambio en RENIEC, se corrige en la base y aqui
+                ConsultaApi.actualizarIdentidadLocal(dni, h -> {
+                    if (dni.equals(txtDocumento.getText().trim())) {
+                        txtCliente.setText((h.getNombres() + " " + h.getApellidos()).trim());
+                    }
+                });
                 return;
             }
         } catch (SQLException e) {
