@@ -96,20 +96,8 @@
                     <ToggleButton text="Reportes" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/nuevos/reportes/reportes.fxml" onAction="#onMenu"/>
 
-                    <Button text="Almacén  ▸" onAction="#onGrupo" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
-                    <VBox userData="Almacén" visible="false" managed="false" spacing="2"
-                          style="-fx-background-color: #2E1909; -fx-background-radius: 0 6px 6px 0; -fx-border-color: #B8862D; -fx-border-width: 0 0 0 2px; -fx-padding: 4px 0 4px 0;">
-                        <ToggleButton text="Productos" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/productos.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Categorías" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/categorias.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Stock" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/stock.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Precios" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/precios.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Alertas de stock bajo" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/alertas_stock.fxml" onAction="#onMenu"/>
-                    </VBox>
+                    <ToggleButton text="Almacén" toggleGroup="$grupoMenu"
+                                  userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/almacen.fxml" onAction="#onMenu"/>
                 </VBox>
             </ScrollPane>
 

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Almacén: una sola lista con productos, precio, stock y situación (normal / stock bajo / agotado).
+     Los filtros trabajan al escribir. Crear/editar producto, ajustar stock y categorías abren ventanas emergentes. -->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.AlmacenController" prefWidth="1050" prefHeight="760" minWidth="0" minHeight="300" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="0" style="-fx-background: #F8F6F2; -fx-background-color: #F8F6F2; -fx-background-insets: 0; -fx-padding: 0;">
+            <content>
+                <VBox spacing="18" fillWidth="true" style="-fx-padding: 20 24 26 24; -fx-background-color: #F8F6F2;">
+                    <FlowPane hgap="12" vgap="12">
+                        <VBox spacing="8" prefWidth="235" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                            <Label text="Productos activos" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                            <Label fx:id="lblActivos" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        </VBox>
+                        <VBox spacing="8" prefWidth="235" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                            <Label text="Unidades en stock" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                            <Label fx:id="lblUnidades" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        </VBox>
+                        <VBox spacing="8" prefWidth="235" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                            <Label text="Con stock bajo" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                            <Label fx:id="lblBajo" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        </VBox>
+                        <VBox spacing="8" prefWidth="235" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                            <Label text="Agotados" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                            <Label fx:id="lblAgotados" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        </VBox>
+                    </FlowPane>
+
+                    <VBox spacing="14" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                        <Label text="Filtros" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        <FlowPane hgap="12" vgap="12">
+                            <VBox spacing="6" prefWidth="290">
+                                <Label text="Buscar" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <TextField fx:id="txtBuscar" promptText="Nombre, marca, código de barras o código" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+                            </VBox>
+                            <VBox spacing="6" prefWidth="190">
+                                <Label text="Categoría" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <ChoiceBox fx:id="cmbCategoria" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                            </VBox>
+                            <VBox spacing="6" prefWidth="150">
+                                <Label text="Estado" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <ChoiceBox fx:id="cmbEstado" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                            </VBox>
+                            <VBox spacing="6" prefWidth="170">
+                                <Label text="Situación del stock" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <ChoiceBox fx:id="cmbSituacion" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                            </VBox>
+                            <VBox spacing="6" prefWidth="170">
+                                <Label text="Stock bajo hasta" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <ChoiceBox fx:id="cmbUmbral" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+                            </VBox>
+                        </FlowPane>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Button text="Limpiar filtros" onAction="#limpiar" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                        </HBox>
+                    </VBox>
+
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label fx:id="lblCantidad" text="TOTAL DE PRODUCTOS: 0" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="Exportar Excel" onAction="#exportarExcel" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                            <Button text="Imprimir / PDF" onAction="#exportarPdf" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                        </HBox>
+                        <FlowPane hgap="10" vgap="10">
+                            <Button text="+ Nuevo producto" onAction="#nuevo" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
+                            <Button fx:id="btnEditar" text="Editar producto" onAction="#editar" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                            <Button fx:id="btnStock" text="Ajustar stock" onAction="#ajustarStock" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                            <Button text="Categorías" onAction="#categorias" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                        </FlowPane>
+                        <TableView fx:id="tabla" minHeight="320" prefHeight="520" VBox.vgrow="ALWAYS" userData="tabla-nuevos" style="-fx-background-color: white; -fx-border-color: #E8E2D9; -fx-border-color: #E7E1D8; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 0; -fx-fixed-cell-size: 40;">
+                            <columns>
+                                <TableColumn fx:id="colCodigo" text="Código" prefWidth="80" minWidth="60"/>
+                                <TableColumn fx:id="colBarras" text="Código de barras" prefWidth="140" minWidth="90"/>
+                                <TableColumn fx:id="colProducto" text="Producto" prefWidth="260" minWidth="140"/>
+                                <TableColumn fx:id="colMarca" text="Marca" prefWidth="120" minWidth="80"/>
+                                <TableColumn fx:id="colCategoria" text="Categoría" prefWidth="130" minWidth="90"/>
+                                <TableColumn fx:id="colPrecio" text="Precio (S/)" prefWidth="95" minWidth="80"/>
+                                <TableColumn fx:id="colStock" text="Stock" prefWidth="75" minWidth="60"/>
+                                <TableColumn fx:id="colSituacion" text="Situación" prefWidth="110" minWidth="90"/>
+                                <TableColumn fx:id="colEstado" text="Estado" prefWidth="90" minWidth="70"/>
+                            </columns>
+                            <placeholder>
+                                <VBox alignment="CENTER" spacing="8">
+                                    <Label text="Sin productos para mostrar" style="-fx-text-fill: #5A3516; -fx-font-size: 15px; -fx-font-weight: bold;"/>
+                                    <Label text="Cambia los filtros o crea un producto nuevo." style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+                                </VBox>
+                            </placeholder>
+                        </TableView>
+                        <Label text="Doble clic en un producto para editarlo. El stock solo se cambia con «Ajustar stock» (queda registrado quién y cuándo)." wrapText="true" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

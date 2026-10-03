@@ -13,7 +13,6 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,32 +46,8 @@ public class ModulosDAO {
         }
     }
 
-    public List<Registro> consultar(String modulo, int umbral) throws SQLException {
-        return consultar(modulo, umbral, LocalDate.now());
-    }
-
-    public List<Registro> consultar(String modulo, int umbral, LocalDate dia) throws SQLException {
+    public List<Registro> consultar(String modulo) throws SQLException {
         return switch (modulo) {
-            case "almacen/alertas_stock" -> filas(
-                "SELECT p.id_producto, CONCAT('P',LPAD(p.id_producto,3,'0')), p.nombre, c.nombre, p.stock, ?, "
-                + "GREATEST(?-p.stock,0), CASE WHEN p.stock=0 THEN 'CRÍTICA' WHEN p.stock<=?/2 THEN 'ALTA' ELSE 'MEDIA' END "
-                + "FROM producto p JOIN categoria c ON c.id_categoria=p.id_categoria WHERE p.activo=1 AND p.stock<=? ORDER BY p.stock,p.nombre",
-                umbral, umbral, umbral, umbral);
-            case "almacen/categorias" -> filas(
-                "SELECT c.id_categoria, CONCAT('C',LPAD(c.id_categoria,3,'0')), c.nombre, COUNT(p.id_producto) "
-                + "FROM categoria c LEFT JOIN producto p ON p.id_categoria=c.id_categoria GROUP BY c.id_categoria,c.nombre ORDER BY c.nombre");
-            case "almacen/precios" -> filas(
-                "SELECT p.id_producto, CONCAT('P',LPAD(p.id_producto,3,'0')), p.nombre, COALESCE(p.marca,''), "
-                + "c.nombre, p.precio, IF(p.activo=1,'Activo','Inactivo') "
-                + "FROM producto p JOIN categoria c ON c.id_categoria=p.id_categoria ORDER BY p.nombre");
-            case "almacen/productos" -> filas(
-                "SELECT p.id_producto, CONCAT('P',LPAD(p.id_producto,3,'0')), p.codigo_barra, p.nombre, "
-                + "COALESCE(p.marca,''), c.nombre, p.precio, p.stock, IF(p.activo=1,'Activo','Inactivo') "
-                + "FROM producto p JOIN categoria c ON c.id_categoria=p.id_categoria ORDER BY p.nombre");
-            case "almacen/stock" -> filas(
-                "SELECT p.id_producto, CONCAT('P',LPAD(p.id_producto,3,'0')), p.nombre, c.nombre, p.stock, "
-                + "IF(p.activo=1,'Activo','Inactivo') FROM producto p JOIN categoria c "
-                + "ON c.id_categoria=p.id_categoria ORDER BY p.nombre");
             case "usuarios/editar_usuario" -> filas(
                 "SELECT u.id_usuario,CONCAT('U',LPAD(u.id_usuario,3,'0')),u.nombre,u.apellido,u.usuario,"
                 + "u.rol,IF(u.activo=1,'Activo','Inactivo'),u.fecha_creacion FROM usuario u ORDER BY u.nombre,u.apellido");
@@ -205,20 +180,6 @@ public class ModulosDAO {
         return nombres;
     }
 
-    public int idProductoPorCodigo(String codigo) throws SQLException {
-        if (codigo == null || codigo.isBlank()) throw new IllegalArgumentException("Indique el código del producto.");
-        String normalizado = codigo.trim().replaceFirst("^[Pp]", "");
-        int id = normalizado.matches("\\d+") ? Integer.parseInt(normalizado) : -1;
-        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(
-                "SELECT id_producto FROM producto WHERE (id_producto=? OR codigo_barra=?) AND activo=1")) {
-            ps.setInt(1, id); ps.setString(2, codigo.trim());
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) throw new IllegalArgumentException("No se encontró un producto activo con ese código.");
-                return rs.getInt(1);
-            }
-        }
-    }
-
     public BigDecimal efectivoHoy() throws SQLException {
         String sql = "SELECT COALESCE((SELECT SUM(monto) FROM pago WHERE metodo_pago='EFECTIVO' "
                 + "AND DATE(fecha_pago)=CURDATE()),0) + COALESCE((SELECT SUM(total) FROM venta_tienda WHERE id_habitacion IS NULL "
@@ -259,169 +220,10 @@ public class ModulosDAO {
         }
     }
 
-    public void guardarCategoria(Integer id, String nombre) throws SQLException {
-        admin();
-        if (nombre == null || nombre.isBlank() || nombre.trim().length() > 40)
-            throw new IllegalArgumentException("La categoría debe tener entre 1 y 40 caracteres.");
-        String sql = id == null ? "INSERT INTO categoria(nombre) VALUES (?)"
-                : "UPDATE categoria SET nombre=? WHERE id_categoria=?";
-        try (Connection con = ConexionBD.conectar()) {
-            con.setAutoCommit(false);
-            try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setString(1, nombre.trim());
-                if (id != null) ps.setInt(2, id);
-                if (ps.executeUpdate() != 1) throw new SQLException("No se guardó la categoría.");
-                int afectado = id == null ? claveGenerada(ps) : id;
-                auditoria.registrar(con, usuario(), id == null ? "CATEGORIA_CREAR" : "CATEGORIA_EDITAR",
-                        "categoria", afectado, nombre.trim());
-                con.commit();
-            } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
-        }
-    }
-
-    public void eliminarCategoria(int id) throws SQLException {
-        admin();
-        try (Connection con = ConexionBD.conectar()) {
-            con.setAutoCommit(false);
-            try {
-                try (PreparedStatement ps = con.prepareStatement(
-                        "SELECT COUNT(*) FROM producto WHERE id_categoria=?")) {
-                    ps.setInt(1, id);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        rs.next();
-                        if (rs.getInt(1) > 0) throw new IllegalStateException(
-                                "La categoría tiene productos asociados y no se puede eliminar.");
-                    }
-                }
-                try (PreparedStatement ps = con.prepareStatement("DELETE FROM categoria WHERE id_categoria=?")) {
-                    ps.setInt(1, id);
-                    if (ps.executeUpdate() != 1) throw new SQLException("La categoría ya no existe.");
-                }
-                auditoria.registrar(con, usuario(), "CATEGORIA_ELIMINAR", "categoria", id, "Sin productos asociados");
-                con.commit();
-            } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
-        }
-    }
-
-    public void guardarProducto(Integer id, String codigo, String nombre, String marca,
-                                String categoria, BigDecimal precio, int stock, boolean activo) throws SQLException {
-        admin();
-        if (codigo == null || !codigo.trim().matches("[A-Za-z0-9-]{3,20}"))
-            throw new IllegalArgumentException("El código de barras debe tener 3 a 20 caracteres alfanuméricos.");
-        if (nombre == null || nombre.isBlank() || nombre.trim().length() > 120)
-            throw new IllegalArgumentException("Ingrese un nombre de producto de hasta 120 caracteres.");
-        if (marca != null && marca.trim().length() > 60)
-            throw new IllegalArgumentException("La marca supera 60 caracteres.");
-        validarImporte(precio, "El precio");
-        if (precio.signum() == 0 || precio.compareTo(new BigDecimal("9999.99")) > 0)
-            throw new IllegalArgumentException("El precio debe estar entre S/ 0.01 y S/ 9999.99.");
-        if (stock < 0) throw new IllegalArgumentException("El stock no puede ser negativo.");
-        try (Connection con = ConexionBD.conectar()) {
-            con.setAutoCommit(false);
-            try {
-                int idCategoria = categoriaId(con, categoria);
-                String sql = id == null
-                        ? "INSERT INTO producto(codigo_barra,nombre,marca,id_categoria,precio,stock,activo) VALUES (?,?,?,?,?,?,?)"
-                        : "UPDATE producto SET codigo_barra=?,nombre=?,marca=?,id_categoria=?,precio=?,activo=? WHERE id_producto=?";
-                try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                    ps.setString(1, codigo.trim()); ps.setString(2, nombre.trim());
-                    ps.setString(3, marca == null ? null : marca.trim()); ps.setInt(4, idCategoria);
-                    ps.setBigDecimal(5, precio);
-                    if (id == null) { ps.setInt(6, stock); ps.setBoolean(7, activo); }
-                    else { ps.setBoolean(6, activo); ps.setInt(7, id); }
-                    if (ps.executeUpdate() != 1) throw new SQLException("No se guardó el producto.");
-                    int afectado = id == null ? claveGenerada(ps) : id;
-                    auditoria.registrar(con, usuario(), id == null ? "PRODUCTO_CREAR" : "PRODUCTO_EDITAR",
-                            "producto", afectado, nombre.trim());
-                }
-                con.commit();
-            } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
-        }
-    }
-
-    private int categoriaId(Connection con, String nombre) throws SQLException {
-        if (nombre == null || nombre.isBlank()) throw new IllegalArgumentException("Seleccione una categoría.");
-        try (PreparedStatement ps = con.prepareStatement("SELECT id_categoria FROM categoria WHERE nombre=?")) {
-            ps.setString(1, nombre);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) throw new IllegalArgumentException("La categoría no existe.");
-                return rs.getInt(1);
-            }
-        }
-    }
-
     private int claveGenerada(PreparedStatement ps) throws SQLException {
         try (ResultSet rs = ps.getGeneratedKeys()) {
             if (!rs.next()) throw new SQLException("No se obtuvo el identificador generado.");
             return rs.getInt(1);
-        }
-    }
-
-    public void cambiarPrecio(int idProducto, BigDecimal precio) throws SQLException {
-        admin(); validarImporte(precio, "El precio");
-        if (precio.signum() == 0 || precio.compareTo(new BigDecimal("9999.99")) > 0)
-            throw new IllegalArgumentException("El precio debe estar entre S/ 0.01 y S/ 9999.99.");
-        try (Connection con = ConexionBD.conectar()) {
-            con.setAutoCommit(false);
-            try {
-                BigDecimal anterior;
-                try (PreparedStatement ps = con.prepareStatement(
-                        "SELECT precio FROM producto WHERE id_producto=? AND activo=1 FOR UPDATE")) {
-                    ps.setInt(1, idProducto);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (!rs.next()) throw new IllegalStateException("El producto no existe o está inactivo.");
-                        anterior = rs.getBigDecimal(1);
-                    }
-                }
-                if (anterior.compareTo(precio) == 0) throw new IllegalArgumentException("El precio no cambió.");
-                try (PreparedStatement ps = con.prepareStatement("UPDATE producto SET precio=? WHERE id_producto=?")) {
-                    ps.setBigDecimal(1, precio); ps.setInt(2, idProducto); ps.executeUpdate();
-                }
-                auditoria.registrar(con, usuario(), "PRODUCTO_PRECIO", "producto", idProducto,
-                        anterior + " → " + precio);
-                con.commit();
-            } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
-        }
-    }
-
-    public void moverStock(int idProducto, String tipo, int cantidad, String motivo,
-                           String referencia, String observacion) throws SQLException {
-        admin();
-        if (!List.of("ENTRADA", "SALIDA", "AJUSTE").contains(tipo))
-            throw new IllegalArgumentException("Seleccione el tipo de movimiento.");
-        if (cantidad <= 0) throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
-        if (motivo == null || motivo.isBlank() || motivo.length() > 100)
-            throw new IllegalArgumentException("Indique un motivo válido.");
-        try (Connection con = ConexionBD.conectar()) {
-            con.setAutoCommit(false);
-            try {
-                int anterior;
-                try (PreparedStatement ps = con.prepareStatement(
-                        "SELECT stock FROM producto WHERE id_producto=? AND activo=1 FOR UPDATE")) {
-                    ps.setInt(1, idProducto);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (!rs.next()) throw new IllegalStateException("El producto no existe o está inactivo.");
-                        anterior = rs.getInt(1);
-                    }
-                }
-                int nuevo = "AJUSTE".equals(tipo) ? cantidad : "ENTRADA".equals(tipo)
-                        ? Math.addExact(anterior, cantidad) : anterior - cantidad;
-                if (nuevo < 0) throw new IllegalArgumentException("No hay stock suficiente para la salida.");
-                try (PreparedStatement ps = con.prepareStatement("UPDATE producto SET stock=? WHERE id_producto=?")) {
-                    ps.setInt(1, nuevo); ps.setInt(2, idProducto); ps.executeUpdate();
-                }
-                try (PreparedStatement ps = con.prepareStatement(
-                        "INSERT INTO movimiento_stock(id_producto,id_usuario,tipo,cantidad,stock_anterior,"
-                        + "stock_resultante,motivo,referencia,observacion) VALUES (?,?,?,?,?,?,?,?,?)")) {
-                    ps.setInt(1, idProducto); ps.setInt(2, usuario()); ps.setString(3, tipo);
-                    ps.setInt(4, cantidad); ps.setInt(5, anterior); ps.setInt(6, nuevo);
-                    ps.setString(7, motivo.trim()); ps.setString(8, referencia);
-                    ps.setString(9, observacion); ps.executeUpdate();
-                }
-                auditoria.registrar(con, usuario(), "PRODUCTO_STOCK", "producto", idProducto,
-                        anterior + " → " + nuevo + " (" + tipo + ")");
-                con.commit();
-            } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
         }
     }
 

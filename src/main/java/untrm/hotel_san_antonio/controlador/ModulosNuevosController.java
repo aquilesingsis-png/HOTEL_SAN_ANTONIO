@@ -1,7 +1,6 @@
 package untrm.hotel_san_antonio.controlador;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,14 +13,10 @@ import java.util.Map;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -66,7 +61,6 @@ public class ModulosNuevosController {
             }
         }
         inicializarCombos();
-        configurarCalculos();
         cargar();
     }
 
@@ -78,7 +72,7 @@ public class ModulosNuevosController {
                 cargar(); return;
             }
             if (accion.contains("ListaNuevo")) { nuevo(); return; }
-            if (accion.contains("ListaEditar") || accion.contains("SeleccionarProducto")) {
+            if (accion.contains("ListaEditar")) {
                 editarSeleccionado(); return;
             }
             if (accion.contains("VistaPrevia")) { tab(1); return; }
@@ -92,7 +86,6 @@ public class ModulosNuevosController {
                 limpiarFormulario();
                 return;
             }
-            if (accion.contains("EliminarCategoria")) { eliminarCategoria(); return; }
             if (accion.contains("DesactivarUsuario")) { desactivarUsuario(); return; }
             if (accion.contains("FormGuardar") || accion.contains("FormRegistrarPago")
                     || accion.contains("FormConfirmarCierre")) {
@@ -107,13 +100,9 @@ public class ModulosNuevosController {
     private void cargar() {
         try {
             validarFechas();
-            int umbral = umbral();
-            LocalDate dia = fecha("filtroFecha");
-            List<Registro> registros = dao.consultar(modulo, umbral, dia == null ? LocalDate.now() : dia);
+            List<Registro> registros = dao.consultar(modulo);
             List<Registro> filtrados = registros.stream().filter(this::coincideFiltros).toList();
             visibles.setAll(filtrados);
-            actualizarMetricas();
-            actualizarGrafico();
         } catch (SQLException | RuntimeException error) {
             visibles.clear();
             Alertas.mostrarError("Consulta", "No se pudieron cargar los datos de " + modulo
@@ -129,12 +118,6 @@ public class ModulosNuevosController {
     }
 
 
-    private int umbral() {
-        String valor = combo("filtroUmbralDeRevision");
-        String digitos = valor.replaceAll("[^0-9]", "");
-        return digitos.isEmpty() ? 10 : Math.min(100000, Integer.parseInt(digitos));
-    }
-
     private boolean coincideFiltros(Registro fila) {
         String textoFila = String.join(" ", fila.celdas()).toLowerCase(Locale.ROOT);
         for (var entrada : nodos.entrySet()) {
@@ -149,21 +132,9 @@ public class ModulosNuevosController {
                 if (valor == null) continue;
                 String elegido = valor.toString().trim().toLowerCase(Locale.ROOT);
                 if (elegido.isEmpty() || elegido.startsWith("tod") || elegido.startsWith("seleccion")
-                        || id.contains("Umbral") || id.contains("Agrupar")) continue;
-                if (id.equals("filtroDisponibilidad")) {
-                    boolean conStock = numero(fila, 3).signum() > 0;
-                    if (conStock != elegido.equals("con stock")) return false;
-                    continue;
-                }
-                if (id.equals("filtroPrioridad")) {
-                    boolean agotado = numero(fila, 3).signum() == 0;
-                    if (agotado != elegido.equals("agotado")) return false;
-                    continue;
-                }
-                if (id.equals("filtroEstado") && (modulo.equals("almacen/productos")
-                        || modulo.equals("almacen/precios") || modulo.equals("usuarios/editar_usuario"))) {
-                    int indiceEstado = modulo.equals("almacen/productos") ? 7 : 5;
-                    if (!fila.celdas().get(indiceEstado).equalsIgnoreCase(elegido)) return false;
+                        || id.contains("Agrupar")) continue;
+                if (id.equals("filtroEstado") && modulo.equals("usuarios/editar_usuario")) {
+                    if (!fila.celdas().get(5).equalsIgnoreCase(elegido)) return false;
                     continue;
                 }
                 if (id.equals("filtroAccion") && modulo.equals("usuarios/historial_usuarios")) {
@@ -217,10 +188,6 @@ public class ModulosNuevosController {
         if (cierre != null) cierre.setValue(LocalDate.now());
         DatePicker pago = nodo("dpFechaDelPago", DatePicker.class);
         if (pago != null) pago.setValue(LocalDate.now());
-        if (modulo.equals("almacen/productos")) {
-            Spinner<?> stock = nodo("spnStockInicial", Spinner.class);
-            if (stock != null) stock.setDisable(false);
-        }
         tab(1);
     }
 
@@ -229,21 +196,6 @@ public class ModulosNuevosController {
         editando = fila.id();
         List<String> c = fila.celdas();
         switch (modulo) {
-            case "almacen/categorias" -> {
-                campo("txtCodigo", c.get(0)); campo("txtNombreDeLaCategoria", c.get(1));
-            }
-            case "almacen/precios" -> {
-                campo("txtCodigoDelProducto", c.get(0)); campo("txtProducto", c.get(1));
-                campo("txtPrecioActualS", c.get(4)); campo("txtNuevoPrecioS", c.get(4));
-            }
-            case "almacen/productos" -> {
-                campo("txtCodigo", c.get(0)); campo("txtCodigoDeBarras", c.get(1));
-                campo("txtNombreDelProducto", c.get(2)); campo("txtMarca", c.get(3));
-                seleccionarCombo("cmbCategoria", c.get(4)); campo("txtPrecioDeVentaS", c.get(5));
-                seleccionarCombo("cmbEstado", c.get(7));
-                Spinner<?> stock = nodo("spnStockInicial", Spinner.class);
-                if (stock != null) stock.setDisable(true); // Cambios de stock pasan por Movimientos.
-            }
             case "usuarios/editar_usuario" -> {
                 campo("txtCodigo", c.get(0)); campo("txtNombres", c.get(1));
                 campo("txtApellidos", c.get(2)); campo("txtNombreDeUsuario", c.get(3));
@@ -260,15 +212,6 @@ public class ModulosNuevosController {
 
     private void verDetalle() {
         Registro fila = seleccion();
-        if (modulo.equals("almacen/stock")) {
-            campo("txtCodigoDelProducto", fila.celdas().get(0));
-            campo("txtProducto", fila.celdas().get(1));
-            campo("txtStockActual", fila.celdas().get(3));
-            DatePicker fecha = nodo("dpFecha", DatePicker.class);
-            if (fecha != null) fecha.setValue(LocalDate.now());
-            tab(1);
-            return;
-        }
         StringBuilder detalle = new StringBuilder();
         for (int i = 0; i < tabla.getColumns().size() && i < fila.celdas().size(); i++) {
             detalle.append(tabla.getColumns().get(i).getText()).append(": ")
@@ -305,27 +248,11 @@ public class ModulosNuevosController {
 
     @SuppressWarnings("unchecked")
     private void inicializarCombos() {
-        try {
-            List<String> categorias = dao.categorias();
-            for (String id : List.of("filtroCategoria", "cmbCategoria")) {
-                ComboBox<String> caja = nodo(id, ComboBox.class);
-                if (caja != null) {
-                    caja.getItems().clear();
-                    if (id.startsWith("filtro")) caja.getItems().add("Todas las categorías");
-                    caja.getItems().addAll(categorias);
-                }
-            }
-        } catch (SQLException error) {
-            Alertas.mostrarError("Categorías", error.getMessage());
-        }
         opciones("cmbEstado", "Activo", "Inactivo");
-        opciones("cmbTipoDeMovimiento", "Entrada", "Salida", "Ajuste");
-        opciones("cmbMotivo", "Compra", "Consumo", "Merma", "Corrección");
         opciones("cmbTipo", "Ingreso", "Egreso");
         opciones("cmbConcepto", "Otros ingresos", "Otros egresos", "Ajuste de caja");
         opciones("cmbMetodoDePago", "Efectivo", "Tarjeta", "Transferencia", "Yape");
         opciones("cmbTipoDePago", "Adelanto", "Saldo", "Completo");
-        opciones("filtroUmbralDeRevision", "5 unidades", "10 unidades", "20 unidades");
         ComboBox<String> roles = nodo("filtroRol", ComboBox.class);
         if (roles != null && !roles.getItems().contains("Limpieza")) roles.getItems().add("Limpieza");
     }
@@ -369,42 +296,8 @@ public class ModulosNuevosController {
         return selector == null ? null : selector.getValue();
     }
 
-    private BigDecimal dinero(String id) {
-        String valor = texto(id).replace("S/", "").replace(",", ".").trim();
-        if (valor.isEmpty() || "—".equals(valor)) throw new IllegalArgumentException("Ingrese " + id + ".");
-        try { return new BigDecimal(valor); }
-        catch (NumberFormatException error) { throw new IllegalArgumentException("Importe inválido en " + id + "."); }
-    }
-
-    private int cantidad(String id) {
-        Spinner<?> spinner = nodo(id, Spinner.class);
-        if (spinner == null) throw new IllegalArgumentException("Falta el campo " + id + ".");
-        try { return Integer.parseInt(spinner.getEditor().getText().trim()); }
-        catch (NumberFormatException error) { throw new IllegalArgumentException("Cantidad inválida en " + id + "."); }
-    }
-
-    private String normalizar(String valor) {
-        return valor.trim().toUpperCase(Locale.ROOT).replace('Í', 'I');
-    }
-
     private void guardar(String accion) throws SQLException {
         switch (modulo) {
-            case "almacen/categorias" -> dao.guardarCategoria(editando, texto("txtNombreDeLaCategoria"));
-            case "almacen/precios" -> {
-                if (editando == null) throw new IllegalArgumentException("Seleccione un producto de la tabla.");
-                dao.cambiarPrecio(editando, dinero("txtNuevoPrecioS"));
-            }
-            case "almacen/productos" -> dao.guardarProducto(editando,
-                    texto("txtCodigoDeBarras"), texto("txtNombreDelProducto"), texto("txtMarca"),
-                    combo("cmbCategoria"), dinero("txtPrecioDeVentaS"),
-                    editando == null ? cantidad("spnStockInicial") : 0,
-                    !"Inactivo".equalsIgnoreCase(combo("cmbEstado")));
-            case "almacen/stock" -> {
-                exigirFechaActual("dpFecha");
-                dao.moverStock(dao.idProductoPorCodigo(texto("txtCodigoDelProducto")),
-                        normalizar(combo("cmbTipoDeMovimiento")), cantidad("spnCantidad"),
-                        combo("cmbMotivo"), texto("txtReferenciaSustento"), texto("txtObservaciones"));
-            }
             case "usuarios/editar_usuario" -> {
                 if (editando == null) throw new IllegalArgumentException("Seleccione primero un usuario.");
                 dao.editarUsuario(editando, texto("txtNombres"), texto("txtApellidos"),
@@ -418,20 +311,6 @@ public class ModulosNuevosController {
         cargar();
     }
 
-    private void exigirFechaActual(String id) {
-        LocalDate dia = fecha(id);
-        if (dia != null && !dia.equals(LocalDate.now()))
-            throw new IllegalArgumentException("Esta operación registra la fecha actual. Cambie la fecha a hoy.");
-    }
-
-    private void eliminarCategoria() throws SQLException {
-        Registro fila = seleccion();
-        if (!Alertas.confirmar("Eliminar categoría",
-                "¿Eliminar " + fila.celdas().get(1) + "? Solo se permite si no tiene productos.")) return;
-        dao.eliminarCategoria(fila.id());
-        cargar();
-    }
-
     private void desactivarUsuario() throws SQLException {
         if (editando == null) editarSeleccionado();
         if (!Alertas.confirmar("Desactivar usuario", "¿Desactivar la cuenta seleccionada?")) return;
@@ -439,55 +318,6 @@ public class ModulosNuevosController {
         editando = null;
         tab(0);
         cargar();
-    }
-
-    private void configurarCalculos() {
-        if (modulo.equals("almacen/stock")) {
-            TextField stock = nodo("txtStockActual", TextField.class);
-            ComboBox<?> tipo = nodo("cmbTipoDeMovimiento", ComboBox.class);
-            Spinner<?> cantidad = nodo("spnCantidad", Spinner.class);
-            if (stock != null) stock.textProperty().addListener((obs, antes, ahora) -> recalcularStock());
-            if (tipo != null) tipo.valueProperty().addListener((obs, antes, ahora) -> recalcularStock());
-            if (cantidad != null) cantidad.getEditor().textProperty()
-                    .addListener((obs, antes, ahora) -> recalcularStock());
-        }
-        if (modulo.equals("almacen/precios")) {
-            for (String id : List.of("txtPrecioActualS", "txtNuevoPrecioS")) {
-                TextField precio = nodo(id, TextField.class);
-                if (precio != null) precio.textProperty().addListener((obs, antes, ahora) -> recalcularPrecio());
-            }
-        }
-    }
-
-    private void recalcularStock() {
-        int actual = decimalOpcional("txtStockActual").intValue();
-        int unidades;
-        try { unidades = cantidad("spnCantidad"); }
-        catch (IllegalArgumentException error) { campo("txtExistenciaResultante", "—"); return; }
-        String tipo = normalizar(combo("cmbTipoDeMovimiento"));
-        int resultado = switch (tipo) {
-            case "ENTRADA" -> actual + unidades;
-            case "SALIDA" -> actual - unidades;
-            case "AJUSTE" -> unidades;
-            default -> actual;
-        };
-        campo("txtExistenciaResultante", resultado < 0 ? "Stock insuficiente" : String.valueOf(resultado));
-    }
-
-    private void recalcularPrecio() {
-        BigDecimal anterior = decimalOpcional("txtPrecioActualS");
-        BigDecimal nuevo = decimalOpcional("txtNuevoPrecioS");
-        BigDecimal diferencia = nuevo.subtract(anterior);
-        campo("txtVariacionS", diferencia.toPlainString());
-        campo("txtVariacion", anterior.signum() == 0 ? "—" : diferencia
-                .multiply(BigDecimal.valueOf(100)).divide(anterior, 1,
-                        java.math.RoundingMode.HALF_UP).toPlainString() + " %");
-    }
-
-    private BigDecimal decimalOpcional(String id) {
-        String valor = texto(id).replace("S/", "").replace(",", ".").trim();
-        try { return valor.isBlank() || "—".equals(valor) ? BigDecimal.ZERO : new BigDecimal(valor); }
-        catch (NumberFormatException error) { return BigDecimal.ZERO; }
     }
 
     private void exportarCsv() throws IOException {
@@ -549,107 +379,5 @@ public class ModulosNuevosController {
 
     private String nombreArchivo() {
         return modulo.replaceAll("[^A-Za-z0-9_-]", "_");
-    }
-
-    private void actualizarMetricas() {
-        int total = visibles.size();
-        switch (modulo) {
-            case "almacen/alertas_stock" -> {
-                etiqueta("lblProductosAgotados", String.valueOf(visibles.stream()
-                        .filter(r -> numero(r, 3).signum() == 0).count()));
-                etiqueta("lblProductosConStockBajo", String.valueOf(total));
-                etiqueta("lblUnidadesPorReponer", sumar(5).toPlainString());
-            }
-            case "almacen/productos" -> {
-                etiqueta("lblProductosActivos", String.valueOf(visibles.stream()
-                        .filter(r -> r.celdas().get(7).equals("Activo")).count()));
-                etiqueta("lblUnidadesEnStock", sumar(6).toPlainString());
-                try { etiqueta("lblCategorias", String.valueOf(dao.categorias().size())); }
-                catch (SQLException error) { etiqueta("lblCategorias", "—"); }
-            }
-            case "almacen/stock" -> {
-                etiqueta("lblUnidadesDisponibles", sumar(3).toPlainString());
-                etiqueta("lblProductosSinStock", String.valueOf(visibles.stream()
-                        .filter(r -> numero(r, 3).signum() == 0).count()));
-                etiqueta("lblProductosActivos", String.valueOf(visibles.stream()
-                        .filter(r -> r.celdas().get(4).equals("Activo")).count()));
-            }
-            case "reportes/ingresos" -> {
-                etiqueta("lblCobrosDeAlojamientoS", sumaPorOrigen("Alojamiento").toPlainString());
-                etiqueta("lblCobrosDeTiendaS", sumaPorOrigen("Tienda").toPlainString());
-                etiqueta("lblTotalCobradoS", sumar(4).toPlainString());
-            }
-            case "reportes/ocupacion" -> {
-                etiqueta("lblNochesDisponibles", sumar(2).toPlainString());
-                etiqueta("lblNochesOcupadas", sumar(3).toPlainString());
-                BigDecimal disponible = sumar(2);
-                etiqueta("lblOcupacion", disponible.signum() == 0 ? "0 %" : sumar(3)
-                        .multiply(BigDecimal.valueOf(100)).divide(disponible, 1,
-                                java.math.RoundingMode.HALF_UP) + " %");
-            }
-            case "reportes/ventas" -> {
-                etiqueta("lblVentasRegistradas", String.valueOf(total));
-                etiqueta("lblUnidadesVendidas", sumar(3).toPlainString());
-                etiqueta("lblImporteVendidoS", sumar(5).toPlainString());
-            }
-            default -> { }
-        }
-    }
-
-    private BigDecimal sumaPorOrigen(String origen) {
-        BigDecimal total = BigDecimal.ZERO;
-        for (Registro r : visibles) if (r.celdas().get(1).equals(origen)) total = total.add(numero(r, 4));
-        return total;
-    }
-
-    private BigDecimal sumar(int columna) {
-        BigDecimal total = BigDecimal.ZERO;
-        for (Registro r : visibles) total = total.add(numero(r, columna));
-        return total;
-    }
-
-    private BigDecimal numero(Registro fila, int columna) {
-        if (columna >= fila.celdas().size()) return BigDecimal.ZERO;
-        try { return new BigDecimal(fila.celdas().get(columna).replace(",", ".")); }
-        catch (NumberFormatException error) { return BigDecimal.ZERO; }
-    }
-
-    private void etiqueta(String id, String valor) {
-        Label label = nodo(id, Label.class);
-        if (label != null) label.setText(valor == null || valor.isBlank() ? "—" : valor);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void actualizarGrafico() {
-        BarChart<String, Number> grafico = nodo("graficoResumen", BarChart.class);
-        if (grafico == null) return;
-        XYChart.Series<String, Number> serie = new XYChart.Series<>();
-        int limite = Math.min(visibles.size(), 10);
-        for (int i = 0; i < limite; i++) {
-            Registro fila = visibles.get(i);
-            String nombre = fila.celdas().size() > 1 ? fila.celdas().get(1) : String.valueOf(i + 1);
-            if (nombre.length() > 18) nombre = nombre.substring(0, 18);
-            serie.getData().add(new XYChart.Data<>(nombre, numero(fila, fila.celdas().size() - 1)));
-        }
-        grafico.getData().setAll(serie);
-        pintarGrafico(grafico, serie);
-    }
-
-    /** Barras doradas y fondo claro: lo que antes ponia la hoja de estilos de los modulos. */
-    private void pintarGrafico(BarChart<String, Number> grafico, XYChart.Series<String, Number> serie) {
-        grafico.setPadding(new javafx.geometry.Insets(5));
-        for (XYChart.Data<String, Number> dato : serie.getData()) {
-            if (dato.getNode() != null) {
-                dato.getNode().setStyle("-fx-bar-fill: #B8862D;");
-            } else {
-                dato.nodeProperty().addListener((obs, antes, nodo) -> {
-                    if (nodo != null) nodo.setStyle("-fx-bar-fill: #B8862D;");
-                });
-            }
-        }
-        javafx.application.Platform.runLater(() -> {
-            javafx.scene.Node fondo = grafico.lookup(".chart-plot-background");
-            if (fondo != null) fondo.setStyle("-fx-background-color: #FBF9F5;");
-        });
     }
 }
