@@ -510,7 +510,7 @@ public class DashboardController {
         hilo.start();
     }
 
-    /** Muestra cuántos soles vale 1 dólar (precio de compra) y, abajo, el precio de venta. */
+    /** Muestra cuántos soles vale 1 dólar: el precio de compra, que es el que usa el hotel. */
     private void mostrarTipoCambio(TipoCambio tc) {
         lblTipoCambio.setText(String.format(Locale.US, "1 US$ = S/ %.3f", tc.getCompra()));
         String fecha = tc.getFecha();
@@ -519,7 +519,7 @@ public class DashboardController {
         } catch (RuntimeException ignorado) {
             // si la API manda otro formato de fecha, se muestra tal cual
         }
-        lblTipoCambioFecha.setText(String.format(Locale.US, "Venta S/ %.3f  ·  SUNAT %s", tc.getVenta(), fecha));
+        lblTipoCambioFecha.setText("Precio de compra · SUNAT " + fecha);
     }
 
     private void abrirConversor() {

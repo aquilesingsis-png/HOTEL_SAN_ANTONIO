@@ -4,22 +4,23 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * Conversión entre dólares y soles con el tipo de cambio de la SUNAT, desde el punto de vista del hotel:
- * los dólares que recibe se cambian al precio de Compra, y para dar dólares se usa el precio de Venta.
+ * Conversión entre dólares y soles con el precio de Compra de la SUNAT. El hotel solo recibe dólares y da soles
+ * (nunca entrega dólares), así que el precio de Venta no se usa. Con un solo precio la conversión es reversible
+ * y el hotel no pierde por la diferencia entre compra y venta.
  */
 public final class ConversorDolar {
 
     private ConversorDolar() {
     }
 
-    /** Soles que se obtienen por esos dólares (precio de compra). */
+    /** Soles que se reconocen por esos dólares (precio de compra). */
     public static BigDecimal dolaresASoles(BigDecimal dolares, BigDecimal compra) {
         return dolares.multiply(compra).setScale(2, RoundingMode.HALF_UP);
     }
 
-    /** Dólares que se obtienen por esos soles (precio de venta). */
-    public static BigDecimal solesADolares(BigDecimal soles, BigDecimal venta) {
-        return soles.divide(venta, 2, RoundingMode.HALF_UP);
+    /** Dólares que debe entregar el huésped para pagar esos soles (mismo precio de compra). */
+    public static BigDecimal solesADolares(BigDecimal soles, BigDecimal compra) {
+        return soles.divide(compra, 2, RoundingMode.HALF_UP);
     }
 
     /** Lee un importe escrito por el usuario (acepta coma o punto); null si no es un número válido. */

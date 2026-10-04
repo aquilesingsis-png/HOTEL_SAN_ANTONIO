@@ -16,7 +16,7 @@ import untrm.hotel_san_antonio.util.ConversorDolar;
 
 /**
  * Ventana pequeña del tipo de cambio: se escribe un monto en dólares o en soles y el otro campo muestra su
- * equivalente al instante. Los dólares se pasan a soles con el precio de Compra y los soles a dólares con el de Venta.
+ * equivalente al instante, siempre con el precio de Compra (el hotel recibe dólares y da soles; no entrega dólares).
  */
 public class ConversorDolarController {
 
@@ -62,10 +62,9 @@ public class ConversorDolarController {
         } catch (RuntimeException ignorado) {
             // si la API manda otro formato de fecha, se muestra tal cual
         }
-        lblTasa.setText(String.format(Locale.US, "1 US$ = S/ %.3f  (Compra)   ·   S/ %.3f  (Venta)",
-                tc.getCompra(), tc.getVenta()));
-        lblNota.setText("Tipo de cambio SUNAT del " + fecha + ". Dólares a soles usa el precio de Compra; "
-                + "soles a dólares usa el de Venta.");
+        lblTasa.setText(String.format(Locale.US, "1 US$ = S/ %.3f", tc.getCompra()));
+        lblNota.setText("Tipo de cambio SUNAT del " + fecha + " (precio de compra). El hotel recibe dólares "
+                + "y entrega soles; si el huésped paga de más, el vuelto es en soles.");
         lblMensaje.setText("");
         convertir(!txtDolares.getText().isBlank());
     }
@@ -93,7 +92,7 @@ public class ConversorDolarController {
             lblMensaje.setText("");
             BigDecimal resultado = desdeDolares
                     ? ConversorDolar.dolaresASoles(valor, tipoCambio.getCompra())
-                    : ConversorDolar.solesADolares(valor, tipoCambio.getVenta());
+                    : ConversorDolar.solesADolares(valor, tipoCambio.getCompra());
             destino.setText(resultado.toPlainString());
         } finally {
             escribiendo = false;
