@@ -13,6 +13,7 @@ import untrm.hotel_san_antonio.util.SesionActual;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,8 +23,33 @@ public class VentaService {
     private final VentaTiendaDAO ventaDAO = new VentaTiendaDAO();
     private final DetalleVentaDAO detalleDAO = new DetalleVentaDAO();
     private final ProductoDAO productoDAO = new ProductoDAO();
+    private final DiasSinUsoService diasSinUso = new DiasSinUsoService();
 
     public int registrarVenta(VentaTienda venta, List<DetalleVenta> detalles) throws SQLException {
+        return guardar(venta, detalles, null, null);
+    }
+
+    /**
+     * Venta de un día en que el sistema no se usó. Se guarda con la fecha real del hecho (la fecha de registro
+     * no se toca), con el motivo y con quién la regularizó. Solo vale para ventas cobradas al momento.
+     */
+    public int registrarVentaPasada(VentaTienda venta, List<DetalleVenta> detalles, LocalDate fechaEvento,
+                                    String motivo) throws SQLException {
+        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
+        if (fechaEvento == null || !fechaEvento.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Elija un día anterior a hoy.");
+        }
+        if (motivo == null || motivo.isBlank() || motivo.trim().length() > 300) {
+            throw new IllegalArgumentException("Indique el motivo del registro tardío (máximo 300 caracteres).");
+        }
+        if (venta != null && venta.getIdHabitacion() != null) {
+            throw new IllegalArgumentException("Las ventas cargadas a una habitación se registran con su estadía.");
+        }
+        return guardar(venta, detalles, fechaEvento, motivo.trim());
+    }
+
+    private int guardar(VentaTienda venta, List<DetalleVenta> detalles, LocalDate fechaEvento, String motivo)
+            throws SQLException {
         Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
         if (venta == null) {
             throw new IllegalArgumentException("La venta es obligatoria.");
@@ -69,6 +95,9 @@ public class VentaService {
             boolean autoCommitAnterior = cn.getAutoCommit();
             cn.setAutoCommit(false);
             try {
+                if (fechaEvento != null) {
+                    diasSinUso.requerirDiaPendiente(cn, fechaEvento);
+                }
                 for (DetalleVenta d : detalles) {
                     Producto producto = productoDAO.bloquearParaVenta(cn, d.getIdProducto());
                     if (producto.getPrecio().compareTo(d.getPrecioUnitario()) != 0) {
@@ -81,7 +110,8 @@ public class VentaService {
                     }
                 }
 
-                int idVenta = ventaDAO.insertar(cn, venta);
+                int idVenta = fechaEvento == null ? ventaDAO.insertar(cn, venta)
+                        : ventaDAO.insertarRetroactiva(cn, venta, fechaEvento, motivo, venta.getIdUsuario());
                 for (DetalleVenta d : detalles) {
                     d.setIdVenta(idVenta);
                     detalleDAO.insertar(cn, d);

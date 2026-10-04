@@ -141,8 +141,8 @@ public class ModulosDAO {
 
     public BigDecimal efectivoHoy() throws SQLException {
         String sql = "SELECT COALESCE((SELECT SUM(monto) FROM pago WHERE metodo_pago='EFECTIVO' "
-                + "AND DATE(fecha_pago)=CURDATE()),0) + COALESCE((SELECT SUM(total) FROM venta_tienda WHERE id_habitacion IS NULL "
-                + "AND metodo_pago='EFECTIVO' AND DATE(fecha_venta)=CURDATE()),0) + COALESCE((SELECT SUM(monto) FROM movimiento_caja "
+                + "AND COALESCE(fecha_evento, DATE(fecha_pago))=CURDATE()),0) + COALESCE((SELECT SUM(total) FROM venta_tienda WHERE id_habitacion IS NULL "
+                + "AND metodo_pago='EFECTIVO' AND COALESCE(fecha_evento, DATE(fecha_venta))=CURDATE()),0) + COALESCE((SELECT SUM(monto) FROM movimiento_caja "
                 + "WHERE tipo='INGRESO' AND metodo_pago='EFECTIVO' AND DATE(fecha)=CURDATE()),0) "
                 + "- COALESCE((SELECT SUM(monto) FROM gasto WHERE activo=1 AND metodo_pago='EFECTIVO' "
                 + "AND fecha=CURDATE()),0) - COALESCE((SELECT SUM(monto) FROM movimiento_caja "
@@ -159,9 +159,9 @@ public class ModulosDAO {
         String sql = "SELECT "
                 + "COALESCE((SELECT fondo_siguiente FROM cierre_caja c WHERE c.estado='CONFIRMADO' "
                 + "AND (c.fecha<? OR (c.fecha=? AND c.turno<>?)) ORDER BY c.fecha DESC,c.id_cierre DESC LIMIT 1),0),"
-                + "COALESCE((SELECT SUM(monto) FROM pago WHERE metodo_pago='EFECTIVO' AND DATE(fecha_pago)=?),0) + "
+                + "COALESCE((SELECT SUM(monto) FROM pago WHERE metodo_pago='EFECTIVO' AND COALESCE(fecha_evento, DATE(fecha_pago))=?),0) + "
                 + "COALESCE((SELECT SUM(total) FROM venta_tienda WHERE id_habitacion IS NULL AND metodo_pago='EFECTIVO' "
-                + "AND DATE(fecha_venta)=?),0),"
+                + "AND COALESCE(fecha_evento, DATE(fecha_venta))=?),0),"
                 + "COALESCE((SELECT SUM(monto) FROM movimiento_caja WHERE tipo='INGRESO' "
                 + "AND metodo_pago='EFECTIVO' AND DATE(fecha)=?),0),"
                 + "COALESCE((SELECT SUM(monto) FROM movimiento_caja WHERE tipo='EGRESO' "

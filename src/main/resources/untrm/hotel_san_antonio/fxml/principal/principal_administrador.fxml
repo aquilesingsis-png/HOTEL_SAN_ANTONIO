@@ -59,7 +59,7 @@
                     <ToggleButton text="Comprobantes" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/comprobante/comprobante.fxml" onAction="#onMenu"/>
                     <ToggleButton text="Registro de días pasados" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/Reserva/registro_historico.fxml" onAction="#onMenu"/>
+                                  userData="/untrm/hotel_san_antonio/fxml/nuevos/dias/dias_pasados.fxml" onAction="#onMenu"/>
 
                     <Button text="Caja  ▸" onAction="#onGrupo" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
                     <VBox userData="Caja" visible="false" managed="false" spacing="2"

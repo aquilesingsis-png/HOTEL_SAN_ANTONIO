@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Ventana emergente: ventas del carrito de un día en que el sistema no se usó (cobradas al momento). -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="untrm.hotel_san_antonio.controlador.VentaPasadaFormController"
+      spacing="12" prefWidth="760" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
+    <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
+    <Label fx:id="lblDia" text="Venta de un día pasado" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+    <HBox spacing="12" alignment="BOTTOM_LEFT">
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="Producto" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+            <ChoiceBox fx:id="cmbProducto" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+        </VBox>
+        <VBox spacing="6" prefWidth="90">
+            <Label text="Cantidad" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+            <TextField fx:id="txtCantidad" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+        </VBox>
+        <Button text="Agregar" onAction="#agregar" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
+    </HBox>
+    <TableView fx:id="tabla" minHeight="170" prefHeight="190" userData="tabla-nuevos" style="-fx-background-color: white; -fx-border-color: #E8E2D9; -fx-border-color: #E7E1D8; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 0; -fx-fixed-cell-size: 40;">
+        <columns>
+            <TableColumn fx:id="colProducto" text="Producto" prefWidth="320" minWidth="150"/>
+            <TableColumn fx:id="colCantidad" text="Cant." prefWidth="80" minWidth="60"/>
+            <TableColumn fx:id="colPrecio" text="Precio (S/)" prefWidth="110" minWidth="80"/>
+            <TableColumn fx:id="colSubtotal" text="Subtotal (S/)" prefWidth="120" minWidth="90"/>
+        </columns>
+        <placeholder>
+            <Label text="Aún no agregó productos." style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+        </placeholder>
+    </TableView>
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Button text="Quitar seleccionado" onAction="#quitar" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblTotal" text="Total: S/ 0.00" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+    </HBox>
+    <HBox spacing="14">
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="Medio de pago *" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+            <ChoiceBox fx:id="cmbMetodo" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+        </VBox>
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="Cliente (opcional)" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+            <TextField fx:id="txtCliente" promptText="Cliente varios" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+        </VBox>
+    </HBox>
+    <VBox spacing="6">
+        <Label text="Motivo del registro tardío *" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+        <TextField fx:id="txtMotivo" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+    </VBox>
+    <Label fx:id="lblMensaje" wrapText="true" style="-fx-text-fill: #B64832;"/>
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cerrar" onAction="#cerrar" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+        <Button fx:id="btnRegistrar" text="Registrar venta" onAction="#registrar" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
+    </HBox>
+</VBox>

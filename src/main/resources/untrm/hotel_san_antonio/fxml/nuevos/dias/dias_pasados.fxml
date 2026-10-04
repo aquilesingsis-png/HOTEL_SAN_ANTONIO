@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Registro de días pasados: solo se activa cuando el sistema estuvo sin uso. Se elige un día de esos y se
+     registran las ventas del carrito y las estadías que ocurrieron; el plazo es de 24 horas. -->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="untrm.hotel_san_antonio.controlador.DiasPasadosController" prefWidth="1050" prefHeight="700" minWidth="0" minHeight="300" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
+    <center>
+        <VBox spacing="18" fillWidth="true" style="-fx-padding: 20 24 26 24; -fx-background-color: #F8F6F2;">
+            <FlowPane hgap="12" vgap="12">
+                <VBox spacing="8" prefWidth="300" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                    <Label text="Plazo para ponerse al día" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                    <Label fx:id="lblPlazo" text="—" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                    <Label fx:id="lblVence" wrapText="true" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+                </VBox>
+                <VBox spacing="8" prefWidth="300" style="-fx-padding: 17; -fx-background-color: #F5E6C8; -fx-background-radius: 8; -fx-border-color: #E8D6B3; -fx-border-radius: 8;">
+                    <Label text="Días sin registrar" style="-fx-text-fill: #5A3516; -fx-font-size: 12px;"/>
+                    <Label fx:id="lblPendientes" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                    <Label fx:id="lblDias" wrapText="true" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+                </VBox>
+            </FlowPane>
+
+            <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                <Label text="Día a registrar" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                <Label text="Solo se pueden elegir los días en que el sistema no se usó (marcados en el calendario)." wrapText="true" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <DatePicker fx:id="dpDia" prefWidth="200" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
+                    <Label fx:id="lblResumen" wrapText="true" style="-fx-text-fill: #5A3516;"/>
+                </HBox>
+                <FlowPane hgap="10" vgap="10">
+                    <Button fx:id="btnVenta" text="Registrar venta del carrito" onAction="#venta" disable="true" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
+                    <Button fx:id="btnEstadia" text="Registrar estadía o reserva" onAction="#estadia" disable="true" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
+                    <Button fx:id="btnCompleto" text="Marcar día como completo" onAction="#completo" disable="true" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                    <Button fx:id="btnReabrir" text="Reabrir plazo (24 h más)" onAction="#reabrir" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+                </FlowPane>
+                <Label fx:id="lblMensaje" wrapText="true" style="-fx-text-fill: #B64832;"/>
+            </VBox>
+
+            <VBox spacing="8" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
+                <Label text="Cómo funciona" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                <Label text="1. Elige el día. 2. Registra lo que ocurrió ese día: ventas del carrito y estadías. 3. Cuando termines, marca el día como completo." wrapText="true"/>
+                <Label text="Lo que registres aquí queda marcado como registro tardío en Caja y Reportes, con quién lo hizo y cuándo. El plazo vence a las 24 horas del primer ingreso después del corte; si hace falta más tiempo, el administrador puede reabrirlo (máximo 2 veces, con motivo)." wrapText="true" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

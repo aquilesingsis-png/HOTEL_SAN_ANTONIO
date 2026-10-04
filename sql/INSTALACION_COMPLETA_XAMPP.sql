@@ -225,6 +225,45 @@ ALTER TABLE usuario
     ADD COLUMN bloqueado_hasta DATETIME NULL,
     ADD COLUMN intentos_recuperacion TINYINT NOT NULL DEFAULT 0;
 
+-- REGISTRO DE DIAS PASADOS (cortes de luz o del sistema)
+-- La venta del carrito tambien guarda la fecha real del hecho, igual que el pago de una reserva.
+ALTER TABLE venta_tienda
+    ADD COLUMN fecha_evento DATE NULL,
+    ADD COLUMN motivo_registro_tardio VARCHAR(300) NULL,
+    ADD COLUMN id_usuario_regulariza INT NULL;
+
+-- Un renglon por cada dia que el sistema estuvo en uso: se escribe al iniciar sesion y cada 30 minutos.
+-- Los dias que faltan entre dos renglones son los dias sin uso.
+CREATE TABLE actividad_dia (
+    fecha DATE PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    primer_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ultimo_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_actividad_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
+
+-- Un corte = un tramo de dias seguidos sin uso. El plazo para ponerse al dia es de 24 horas desde el
+-- primer ingreso despues del corte; el administrador puede reabrirlo hasta 2 veces, con motivo.
+CREATE TABLE corte_sistema (
+    id_corte INT AUTO_INCREMENT PRIMARY KEY,
+    dia_desde DATE NOT NULL,
+    dia_hasta DATE NOT NULL,
+    detectado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    habilita_hasta DATETIME NOT NULL,
+    reaperturas TINYINT NOT NULL DEFAULT 0,
+    UNIQUE KEY uq_corte_desde (dia_desde)
+);
+
+-- Dias de un corte que ya se terminaron de registrar.
+CREATE TABLE dia_regularizado (
+    fecha DATE PRIMARY KEY,
+    id_corte INT NOT NULL,
+    id_usuario INT NOT NULL,
+    completado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_dia_reg_corte FOREIGN KEY (id_corte) REFERENCES corte_sistema(id_corte),
+    CONSTRAINT fk_dia_reg_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+);
+
 CREATE TABLE reserva_huesped (
     id_reserva INT NOT NULL,
     id_huesped INT NOT NULL,

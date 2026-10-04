@@ -51,6 +51,22 @@ public class VentaTiendaDAO {
         throw new SQLException("No se obtuvo el identificador de la venta.");
     }
 
+    /** Venta de un día pasado: guarda la fecha real del hecho, el motivo y quién la regularizó. */
+    public int insertarRetroactiva(Connection cn, VentaTienda venta, LocalDate fechaEvento, String motivo,
+                                   int idUsuarioRegulariza) throws SQLException {
+        int id = insertar(cn, venta);
+        try (PreparedStatement ps = cn.prepareStatement(
+                "UPDATE venta_tienda SET fecha_evento = ?, motivo_registro_tardio = ?, id_usuario_regulariza = ? "
+                + "WHERE id_venta = ?")) {
+            ps.setDate(1, Date.valueOf(fechaEvento));
+            ps.setString(2, motivo);
+            ps.setInt(3, idUsuarioRegulariza);
+            ps.setInt(4, id);
+            ps.executeUpdate();
+        }
+        return id;
+    }
+
     private void setNullableInt(PreparedStatement ps, int indice, Integer valor) throws SQLException {
         if (valor == null) {
             ps.setNull(indice, Types.INTEGER);
@@ -112,7 +128,7 @@ public class VentaTiendaDAO {
 
     /** Cuanto se vendio hoy en la tiendita, para el Dashboard. */
     public BigDecimal sumarHoy(Connection con) throws SQLException {
-        String sql = "SELECT COALESCE(SUM(total), 0) FROM venta_tienda WHERE DATE(fecha_venta) = CURDATE()";
+        String sql = "SELECT COALESCE(SUM(total), 0) FROM venta_tienda WHERE COALESCE(fecha_evento, DATE(fecha_venta)) = CURDATE()";
         try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             rs.next();
             return rs.getBigDecimal(1);
@@ -121,7 +137,7 @@ public class VentaTiendaDAO {
 
     /** Cuantas ventas de tiendita se hicieron hoy, para el Dashboard. */
     public int contarHoy(Connection con) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM venta_tienda WHERE DATE(fecha_venta) = CURDATE()";
+        String sql = "SELECT COUNT(*) FROM venta_tienda WHERE COALESCE(fecha_evento, DATE(fecha_venta)) = CURDATE()";
         try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             rs.next();
             return rs.getInt(1);
@@ -134,8 +150,9 @@ public class VentaTiendaDAO {
         for (LocalDate dia = desde; !dia.isAfter(hasta); dia = dia.plusDays(1)) {
             porDia.put(dia, BigDecimal.ZERO);
         }
-        String sql = "SELECT DATE(fecha_venta) AS dia, SUM(total) AS total FROM venta_tienda "
-                + "WHERE DATE(fecha_venta) BETWEEN ? AND ? GROUP BY DATE(fecha_venta)";
+        String sql = "SELECT COALESCE(fecha_evento, DATE(fecha_venta)) AS dia, SUM(total) AS total FROM venta_tienda "
+                + "WHERE COALESCE(fecha_evento, DATE(fecha_venta)) BETWEEN ? AND ? "
+                + "GROUP BY COALESCE(fecha_evento, DATE(fecha_venta))";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setDate(1, Date.valueOf(desde));
             ps.setDate(2, Date.valueOf(hasta));

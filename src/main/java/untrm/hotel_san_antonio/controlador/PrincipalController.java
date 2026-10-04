@@ -66,6 +66,13 @@ public class PrincipalController {
     @FXML private Label lblTitulo, lblFecha, lblUsuario, lblRol;
     private ToggleButton ultimaPantalla;
 
+    // Registro de días pasados: el menú se enciende solo cuando hay días sin uso por registrar
+    private static final String RUTA_DIAS_PASADOS = "/untrm/hotel_san_antonio/fxml/nuevos/dias/dias_pasados.fxml";
+    private static PrincipalController instancia;
+    private ToggleButton btnDiasPasados;
+    private javafx.animation.Timeline latido;
+    private int ultimoCorteAvisado;
+
     /** FXML del marco que corresponde al rol del usuario que inicio sesion (lo usa el Login). */
     public static String rutaMarco(String rol) {
         return "ADMINISTRADOR".equals(rol) ? RUTA_MARCO_ADMIN
@@ -89,6 +96,84 @@ public class PrincipalController {
         aplicarEstiloMenu();
         aplicarTransparenciaViewport();
         abrir(btnInicio);
+        iniciarLatido();
+    }
+
+    // ------------------------------------------------------------ días sin uso
+
+    /**
+     * Anota que el sistema está en uso (al abrir y cada 30 minutos). Si faltan días desde la última vez,
+     * se abre el plazo para registrarlos y se avisa una vez en esta sesión.
+     */
+    private void iniciarLatido() {
+        instancia = this;
+        btnDiasPasados = buscarPorRuta(RUTA_DIAS_PASADOS);
+        encenderDiasPasados(false);
+        consultarDiasSinUso(true);
+        latido = new javafx.animation.Timeline(new javafx.animation.KeyFrame(
+                javafx.util.Duration.minutes(30), e -> consultarDiasSinUso(true)));
+        latido.setCycleCount(javafx.animation.Timeline.INDEFINITE);
+        latido.play();
+    }
+
+    private void consultarDiasSinUso(boolean avisar) {
+        javafx.concurrent.Task<untrm.hotel_san_antonio.servicio.DiasSinUsoService.Estado> tarea =
+                new javafx.concurrent.Task<>() {
+            @Override
+            protected untrm.hotel_san_antonio.servicio.DiasSinUsoService.Estado call() throws Exception {
+                return new untrm.hotel_san_antonio.servicio.DiasSinUsoService().registrarActividad();
+            }
+        };
+        tarea.setOnSucceeded(e -> aplicarEstadoDias(tarea.getValue(), avisar));
+        Thread hilo = new Thread(tarea, "latido-sistema");
+        hilo.setDaemon(true);
+        hilo.start();
+    }
+
+    /** Las pantallas de registro avisan aquí cuando cambia el estado (día completado, plazo reabierto). */
+    public static void refrescarDiasPasados() {
+        if (instancia != null) {
+            instancia.consultarDiasSinUso(false);
+        }
+    }
+
+    private void aplicarEstadoDias(untrm.hotel_san_antonio.servicio.DiasSinUsoService.Estado estado, boolean avisar) {
+        boolean admin = SesionActual.esAdministrador();
+        boolean activo = estado.abierto() || (admin && estado.puedeReabrir());
+        encenderDiasPasados(activo);
+        if (btnDiasPasados == null || !avisar || !estado.abierto() || estado.idCorte() == ultimoCorteAvisado) {
+            return;
+        }
+        ultimoCorteAvisado = estado.idCorte();
+        DateTimeFormatter corto = DateTimeFormatter.ofPattern("dd/MM");
+        String dias = estado.pendientes().stream().map(d -> d.format(corto))
+                .collect(java.util.stream.Collectors.joining(", "));
+        boolean ir = Alertas.confirmar("Días sin registrar",
+                "El sistema no se usó los días: " + dias + ".\n\nTiene hasta el "
+                + estado.habilitaHasta().format(DateTimeFormatter.ofPattern("dd/MM 'a las' HH:mm"))
+                + " para registrar lo que ocurrió en esos días (ventas del carrito y estadías). "
+                + "Pasado ese plazo, solo el administrador podrá reabrirlo.\n\n¿Quiere registrarlo ahora?");
+        if (ir) {
+            btnDiasPasados.setSelected(true);
+            abrir(btnDiasPasados);
+        }
+    }
+
+    /** El botón queda opaco y sin respuesta mientras no haya nada por registrar. */
+    private void encenderDiasPasados(boolean activo) {
+        if (btnDiasPasados != null) {
+            btnDiasPasados.setDisable(!activo);
+            btnDiasPasados.setOpacity(activo ? 1 : 0.4);
+        }
+    }
+
+    private ToggleButton buscarPorRuta(String ruta) {
+        for (Node hijo : barraLateral.getChildren()) {
+            if (hijo instanceof ToggleButton boton && ruta.equals(String.valueOf(boton.getUserData()))) {
+                return boton;
+            }
+        }
+        return null;
     }
 
     /**
@@ -278,6 +363,10 @@ public class PrincipalController {
         if (!Alertas.confirmar("Cerrar sesión", "¿Deseas cerrar la sesión?")) {
             return;
         }
+        if (latido != null) {
+            latido.stop();
+        }
+        instancia = null;
         SesionActual.cerrar();
         try {
             Navegacion.irA(RUTA_LOGIN);

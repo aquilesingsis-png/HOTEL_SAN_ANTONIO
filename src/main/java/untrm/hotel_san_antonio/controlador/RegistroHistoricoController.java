@@ -44,6 +44,7 @@ public class RegistroHistoricoController {
     private final Map<String,Habitacion> habitaciones = new HashMap<>();
     private HuespedesAdicionales acompanantes;
     private String dniBuscado;
+    private Runnable alGuardar;
 
     @FXML private void initialize() {
         acompanantes = new HuespedesAdicionales(contenedorAcompanantes);
@@ -70,6 +71,19 @@ public class RegistroHistoricoController {
             }
         });
         cargarHabitaciones();
+    }
+
+    /**
+     * Abre el formulario para un día sin uso: la fecha del hecho y la del pago quedan fijas en ese día.
+     *
+     * @param alGuardar se ejecuta al registrar la estadía, para actualizar el resumen del día
+     */
+    public void iniciar(LocalDate dia, Runnable alGuardar) {
+        this.alGuardar = alGuardar;
+        dpEvento.setValue(dia);
+        dpPago.setValue(dia);
+        dpEvento.setDisable(true);
+        dpPago.setDisable(true);
     }
 
     @FXML private void cargarHabitaciones() {
@@ -175,6 +189,7 @@ public class RegistroHistoricoController {
             lblEstado.setText("Estadía histórica R-" + String.format("%04d", tarea.getValue())
                     + " registrada con fecha real y auditoría.");
             btnGuardar.setDisable(false);
+            if (alGuardar != null) alGuardar.run();
         });
         tarea.setOnFailed(e -> {
             btnGuardar.setDisable(false);

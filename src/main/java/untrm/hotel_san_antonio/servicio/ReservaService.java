@@ -146,7 +146,7 @@ public class ReservaService {
     public int registrarHistorica(List<Huesped> huespedes, Empresa empresa, Reserva reserva,
                                   Pago pago, LocalDate fechaEvento, LocalDate fechaPagoReal,
                                   String motivo) throws SQLException {
-        Permisos.requerir("ADMINISTRADOR");
+        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
         validarHuespedes(huespedes, reserva);
         validarEmpresa(empresa);
         if (reserva.getFechaCheckin() == null || reserva.getFechaCheckout() == null
@@ -171,6 +171,8 @@ public class ReservaService {
         try (Connection con = ConexionBD.conectar()) {
             con.setAutoCommit(false);
             try {
+                new DiasSinUsoService().requerirDiaPendiente(con, fechaEvento);
+                new DiasSinUsoService().requerirDiaPendiente(con, fechaPagoReal);
                 reservaDAO.bloquearHabitacion(con, reserva.getIdHabitacion());
                 int capacidad = reservaDAO.obtenerCapacidadHabitacion(con, reserva.getIdHabitacion());
                 if (capacidad <= 0 || huespedes.size() > capacidad)

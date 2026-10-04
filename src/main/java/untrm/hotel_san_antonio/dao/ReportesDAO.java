@@ -141,7 +141,7 @@ public class ReportesDAO {
         String sql = "SELECT dia, origen, metodo, monto FROM ("
                 + "SELECT DATE(COALESCE(TIMESTAMP(p.fecha_evento, TIME(p.fecha_pago)), p.fecha_pago)) AS dia, "
                 + "'Alojamiento' AS origen, p.metodo_pago AS metodo, p.monto AS monto FROM pago p "
-                + "UNION ALL SELECT DATE(v.fecha_venta), 'Tienda', COALESCE(v.metodo_pago, 'NO REGISTRADO'), v.total "
+                + "UNION ALL SELECT COALESCE(v.fecha_evento, DATE(v.fecha_venta)), 'Tienda', COALESCE(v.metodo_pago, 'NO REGISTRADO'), v.total "
                 + "FROM venta_tienda v WHERE v.id_habitacion IS NULL) t WHERE dia BETWEEN ? AND ? ";
         List<Object> valores = new ArrayList<>(List.of(Date.valueOf(desde), Date.valueOf(hasta)));
         if (origen != null) {
@@ -232,11 +232,11 @@ public class ReportesDAO {
     public Resultado ventas(LocalDate desde, LocalDate hasta, String categoria, String texto,
                             String agrupacion) throws SQLException {
         validar(desde, hasta);
-        StringBuilder sql = new StringBuilder("SELECT DATE(v.fecha_venta) AS dia, v.id_venta, p.codigo_barra, "
+        StringBuilder sql = new StringBuilder("SELECT COALESCE(v.fecha_evento, DATE(v.fecha_venta)) AS dia, v.id_venta, p.codigo_barra, "
                 + "p.nombre AS producto, c.nombre AS categoria, d.cantidad, d.subtotal "
                 + "FROM detalle_venta d JOIN venta_tienda v ON v.id_venta = d.id_venta "
                 + "JOIN producto p ON p.id_producto = d.id_producto JOIN categoria c ON c.id_categoria = p.id_categoria "
-                + "WHERE DATE(v.fecha_venta) BETWEEN ? AND ? ");
+                + "WHERE COALESCE(v.fecha_evento, DATE(v.fecha_venta)) BETWEEN ? AND ? ");
         List<Object> valores = new ArrayList<>(List.of(Date.valueOf(desde), Date.valueOf(hasta)));
         if (categoria != null) {
             sql.append("AND c.nombre = ? ");
@@ -247,7 +247,7 @@ public class ReportesDAO {
             valores.add("%" + texto.trim() + "%");
             valores.add("%" + texto.trim() + "%");
         }
-        sql.append("ORDER BY v.fecha_venta");
+        sql.append("ORDER BY COALESCE(v.fecha_evento, DATE(v.fecha_venta)), v.fecha_venta");
 
         // grupo -> [unidades, importe]
         Map<String, BigDecimal[]> grupos = new LinkedHashMap<>();

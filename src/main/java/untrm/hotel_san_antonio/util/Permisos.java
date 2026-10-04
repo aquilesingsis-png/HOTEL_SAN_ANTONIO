@@ -15,7 +15,9 @@ public final class Permisos {
             BASE + "habitaciones/tarjeta_habitacion.fxml",
             BASE + "carrito/carrito_tienda.fxml",
             BASE + "comprobante/comprobante.fxml",
-            BASE + "nuevos/caja/libro_caja.fxml");
+            BASE + "nuevos/caja/libro_caja.fxml",
+            BASE + "nuevos/dias/dias_pasados.fxml",
+            BASE + "nuevos/dias/venta_pasada_form.fxml");
 
     private Permisos() {}
 
@@ -36,8 +38,7 @@ public final class Permisos {
         String rol = actual.getRol();
         if ("ADMINISTRADOR".equals(rol)) return;
         if ("RECEPCIONISTA".equals(rol) && (RECEPCION.contains(ruta)
-                || (ruta.startsWith(BASE + "Reserva/")
-                    && !ruta.equals(BASE + "Reserva/registro_historico.fxml"))
+                || ruta.startsWith(BASE + "Reserva/")
                 || ruta.equals(BASE + "principal/principal_recepcionista.fxml"))) return;
         if ("LIMPIEZA".equals(rol) && (ruta.equals(BASE + "principal/principal_limpieza.fxml")
                 || ruta.equals(BASE + "habitaciones/limpieza.fxml"))) return;
