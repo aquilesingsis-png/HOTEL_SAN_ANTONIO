@@ -130,7 +130,7 @@ public class LoginController {
     }
 
     private void aplicarFondo() {
-        Image imagen = new Image(getClass().getResource("/untrm/hotel_san_antonio/images/fondo_login.png").toExternalForm());
+        Image imagen = new Image(getClass().getResource("/untrm/hotel_san_antonio/images/fondo_login.jpg").toExternalForm());
         BackgroundSize tamano = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, false, true);
         rootLogin.setBackground(new Background(new BackgroundImage(imagen,
                 BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, tamano)));

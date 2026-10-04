@@ -36,7 +36,8 @@ public final class EstiloGlobal {
     private static final String ESTILO_PREVIO = "estiloGlobalPrevio";
 
     /** Fuente y fondo general de cada ventana. */
-    private static final String RAIZ = "-fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-background-color: #F7F4EF; ";
+    private static final String RAIZ_SIN_FONDO = "-fx-font-family: 'Segoe UI'; -fx-font-size: 13px; ";
+    private static final String RAIZ = RAIZ_SIN_FONDO + "-fx-background-color: #F7F4EF; ";
 
     /** Debe coincidir con el valor base que los FXML dan a un Button sin otro color. */
     private static final String BOTON_BASE =
@@ -74,7 +75,10 @@ public final class EstiloGlobal {
 
     private static void aplicarRaiz(Node raiz) {
         if (raiz.getProperties().putIfAbsent(MARCA + "Raiz", Boolean.TRUE) == null) {
-            raiz.setStyle(RAIZ + raiz.getStyle());
+            // una pantalla que ya trae su imagen de fondo (el Login) no debe recibir el color liso: lo taparía
+            boolean conImagen = raiz instanceof javafx.scene.layout.Region region
+                    && region.getBackground() != null && !region.getBackground().getImages().isEmpty();
+            raiz.setStyle((conImagen ? RAIZ_SIN_FONDO : RAIZ) + raiz.getStyle());
         }
     }
 
