@@ -15,7 +15,7 @@ import javafx.fxml.FXML;
 
 import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.BarChart;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
@@ -534,25 +534,32 @@ public class DashboardController {
     // GRÁFICO DE MOVIMIENTO POR HORA
     // =========================================================
 
-    /** Barras con la cantidad de operaciones (ventas del carrito y cobros de reservas) de cada hora. */
+    /**
+     * Gráfico de líneas con puntos: cuántas operaciones (ventas del carrito y cobros de reservas) hubo en cada
+     * hora, para ver si el movimiento sube o baja a lo largo del día. Recepción ve las 24 horas de hoy; el
+     * administrador, el acumulado de 30 días entre las 7h y las 21h (más si hay movimiento fuera de ese rango).
+     */
     private void crearGraficoHoras(Map<Integer, Integer> porHora) {
         contenedorGraficoHoras.getChildren().clear();
 
-        int desde = 7;
-        int hasta = 21;
-        for (int hora : porHora.keySet()) {
-            desde = Math.min(desde, hora);
-            hasta = Math.max(hasta, hora);
+        int desde = 0;
+        int hasta = 23;
+        if (SesionActual.esAdministrador()) {
+            desde = 7;
+            hasta = 21;
+            for (int hora : porHora.keySet()) {
+                desde = Math.min(desde, hora);
+                hasta = Math.max(hasta, hora);
+            }
         }
 
         CategoryAxis ejeX = new CategoryAxis();
         NumberAxis ejeY = new NumberAxis();
-        BarChart<String, Number> grafico = new BarChart<>(ejeX, ejeY);
+        LineChart<String, Number> grafico = new LineChart<>(ejeX, ejeY);
         grafico.setLegendVisible(false);
         grafico.setAnimated(false);
+        grafico.setCreateSymbols(true);
         grafico.setPrefHeight(230);
-        grafico.setBarGap(2);
-        grafico.setCategoryGap(6);
         grafico.setStyle("-fx-background-color: transparent; -fx-padding: 0;");
         grafico.setVerticalGridLinesVisible(false);
 
@@ -576,20 +583,20 @@ public class DashboardController {
         }
         grafico.getData().add(serie);
 
+        // al pasar el mouse por cada punto se ve cuántas operaciones fueron a esa hora
         for (XYChart.Data<String, Number> dato : serie.getData()) {
-            Runnable pintar = () -> {
-                Node barra = dato.getNode();
-                if (barra != null) {
-                    barra.setStyle("-fx-bar-fill: #B8862D;");
+            Runnable ayuda = () -> {
+                Node punto = dato.getNode();
+                if (punto != null) {
                     int n = dato.getYValue().intValue();
-                    Tooltip.install(barra, new Tooltip(n + (n == 1 ? " operación a las " : " operaciones a las ")
+                    Tooltip.install(punto, new Tooltip(n + (n == 1 ? " operación a las " : " operaciones a las ")
                             + dato.getXValue()));
                 }
             };
             if (dato.getNode() != null) {
-                pintar.run();
+                ayuda.run();
             } else {
-                dato.nodeProperty().addListener((obs, antes, nodo) -> pintar.run());
+                dato.nodeProperty().addListener((obs, antes, nodo) -> ayuda.run());
             }
         }
         contenedorGraficoHoras.getChildren().add(grafico);
