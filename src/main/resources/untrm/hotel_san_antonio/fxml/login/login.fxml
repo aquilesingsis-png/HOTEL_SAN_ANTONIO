@@ -38,7 +38,7 @@
             <Insets bottom="40.0" left="58.0" right="58.0" top="40.0" />
         </padding>
 
-        <VBox alignment="CENTER_LEFT" maxWidth="620.0" minWidth="300.0" spacing="14.0" HBox.hgrow="ALWAYS">
+        <VBox alignment="CENTER_LEFT" maxWidth="Infinity" minWidth="300.0" spacing="14.0" HBox.hgrow="ALWAYS">
             <Region VBox.vgrow="ALWAYS" />
 
             <Label text="Hotel San Antonio"
@@ -46,7 +46,7 @@
             <Label text="★  ★  ★" style="-fx-font-size: 19px; -fx-text-fill: #E6C77A;" />
             <Label maxWidth="450.0" wrapText="true" text="Tu mejor experiencia turística en Bagua"
                    style="-fx-font-family: Georgia; -fx-font-size: 24px; -fx-font-style: italic; -fx-text-fill: rgba(255,255,255,0.94); -fx-effect: dropshadow(gaussian, rgba(39,18,4,0.76), 10, 0.2, 0, 2);" />
-            <Region prefHeight="4.0" prefWidth="76.0" style="-fx-background-color: #D4A84C; -fx-background-radius: 3px; -fx-max-height: 4px;" />
+            <Region prefHeight="4.0" prefWidth="76.0" maxWidth="620.0" style="-fx-background-color: #D4A84C; -fx-background-radius: 3px; -fx-max-height: 4px;" />
 
             <Region VBox.vgrow="ALWAYS" />
         </VBox>
