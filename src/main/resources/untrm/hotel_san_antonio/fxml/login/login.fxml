@@ -41,11 +41,6 @@
         <VBox alignment="CENTER_LEFT" maxWidth="620.0" minWidth="300.0" spacing="14.0" HBox.hgrow="ALWAYS">
             <Region VBox.vgrow="ALWAYS" />
 
-            <ImageView fitHeight="104.0" preserveRatio="true" smooth="true">
-                <image>
-                    <Image url="@../../images/logo_san_antonio.png" />
-                </image>
-            </ImageView>
             <Label text="Hotel San Antonio"
                    style="-fx-font-family: Georgia; -fx-font-size: 44px; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(39,18,4,0.72), 12, 0.25, 0, 2);" />
             <Label text="★  ★  ★" style="-fx-font-size: 19px; -fx-text-fill: #E6C77A;" />
