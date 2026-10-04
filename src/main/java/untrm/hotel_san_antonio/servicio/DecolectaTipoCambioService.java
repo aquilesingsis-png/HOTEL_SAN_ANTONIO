@@ -21,6 +21,21 @@ public class DecolectaTipoCambioService {
 
     private static final String ENDPOINT = "https://api.decolecta.com/v1/tipo-cambio/sunat";
 
+    /** El tipo de cambio de la SUNAT cambia una vez al día: se guarda un rato para no consultar a cada rato. */
+    private static final long VIGENCIA_MS = 2L * 60 * 60 * 1000;
+    private static volatile TipoCambio ultimo;
+    private static volatile long consultadoEn;
+
+    /** El último valor consultado hace menos de 2 horas, o null si hay que volver a consultar. */
+    public static TipoCambio vigente() {
+        return ultimo != null && System.currentTimeMillis() - consultadoEn < VIGENCIA_MS ? ultimo : null;
+    }
+
+    /** El último valor consultado, aunque ya sea viejo (sirve de respaldo si no hay internet). */
+    public static TipoCambio ultimoConocido() {
+        return ultimo;
+    }
+
     public static Task<TipoCambio> consultarHoy() {
         return new Task<>() {
             @Override
@@ -46,6 +61,8 @@ public class DecolectaTipoCambioService {
                 tc.setMonedaBase(json.get("base_currency").getAsString());
                 tc.setMonedaDestino(json.get("quote_currency").getAsString());
                 tc.setFecha(json.get("date").getAsString());
+                ultimo = tc;
+                consultadoEn = System.currentTimeMillis();
                 return tc;
             }
         };

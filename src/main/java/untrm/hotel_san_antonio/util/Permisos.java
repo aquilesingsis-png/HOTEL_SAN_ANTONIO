@@ -8,6 +8,7 @@ public final class Permisos {
     private static final String BASE = "/untrm/hotel_san_antonio/fxml/";
     private static final Set<String> RECEPCION = Set.of(
             BASE + "dashboard/dashboard_2.fxml",
+            BASE + "dashboard/conversor_dolar.fxml",
             BASE + "habitaciones/habitaciones.fxml",
             BASE + "habitaciones/reserva_form.fxml",
             BASE + "habitaciones/cuenta_habitacion.fxml",

@@ -166,10 +166,8 @@ public class DashboardController {
     @FXML private Label lblTipoCambio;
     @FXML private Label lblTipoCambioFecha;
 
-    /** El tipo de cambio de la SUNAT cambia una vez al día: se guarda un rato para no consultar en cada visita. */
-    private static TipoCambio tipoCambioGuardado;
-    private static long tipoCambioConsultadoEn;
-    private static final long VIGENCIA_TIPO_CAMBIO_MS = 2L * 60 * 60 * 1000;
+    @FXML private HBox cajaTipoCambio;
+    private static final String RUTA_CONVERSOR = "/untrm/hotel_san_antonio/fxml/dashboard/conversor_dolar.fxml";
 
     @FXML
     private ScrollPane scrollDashboard;
@@ -486,20 +484,22 @@ public class DashboardController {
     // =========================================================
 
     private void cargarTipoCambio() {
-        if (tipoCambioGuardado != null
-                && System.currentTimeMillis() - tipoCambioConsultadoEn < VIGENCIA_TIPO_CAMBIO_MS) {
-            mostrarTipoCambio(tipoCambioGuardado);
+        // al hacer clic en la tarjeta se abre el conversor de dólares y soles
+        cajaTipoCambio.setCursor(javafx.scene.Cursor.HAND);
+        Tooltip.install(cajaTipoCambio, new Tooltip("Clic para convertir dólares y soles"));
+        cajaTipoCambio.setOnMouseClicked(e -> abrirConversor());
+
+        TipoCambio vigente = DecolectaTipoCambioService.vigente();
+        if (vigente != null) {
+            mostrarTipoCambio(vigente);
             return;
         }
         javafx.concurrent.Task<TipoCambio> tarea = DecolectaTipoCambioService.consultarHoy();
-        tarea.setOnSucceeded(e -> {
-            tipoCambioGuardado = tarea.getValue();
-            tipoCambioConsultadoEn = System.currentTimeMillis();
-            mostrarTipoCambio(tipoCambioGuardado);
-        });
+        tarea.setOnSucceeded(e -> mostrarTipoCambio(tarea.getValue()));
         tarea.setOnFailed(e -> {
-            if (tipoCambioGuardado != null) {
-                mostrarTipoCambio(tipoCambioGuardado);
+            TipoCambio anterior = DecolectaTipoCambioService.ultimoConocido();
+            if (anterior != null) {
+                mostrarTipoCambio(anterior);
                 return;
             }
             lblTipoCambio.setText("Dólar: no disponible");
@@ -510,16 +510,24 @@ public class DashboardController {
         hilo.start();
     }
 
+    /** Muestra cuántos soles vale 1 dólar (precio de compra) y, abajo, el precio de venta. */
     private void mostrarTipoCambio(TipoCambio tc) {
-        lblTipoCambio.setText(String.format(Locale.US, "Dólar  Compra S/ %.3f  ·  Venta S/ %.3f",
-                tc.getCompra(), tc.getVenta()));
+        lblTipoCambio.setText(String.format(Locale.US, "1 US$ = S/ %.3f", tc.getCompra()));
         String fecha = tc.getFecha();
         try {
             fecha = LocalDate.parse(tc.getFecha()).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         } catch (RuntimeException ignorado) {
             // si la API manda otro formato de fecha, se muestra tal cual
         }
-        lblTipoCambioFecha.setText("Tipo de cambio SUNAT · " + fecha);
+        lblTipoCambioFecha.setText(String.format(Locale.US, "Venta S/ %.3f  ·  SUNAT %s", tc.getVenta(), fecha));
+    }
+
+    private void abrirConversor() {
+        try {
+            Navegacion.abrirModal(RUTA_CONVERSOR, "Conversor de dólares");
+        } catch (IOException | SecurityException error) {
+            Alertas.mostrarError("Error", "No se pudo abrir el conversor.\n\n" + error.getMessage());
+        }
     }
 
     // =========================================================

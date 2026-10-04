@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Ventana pequeña: conversor de dólares y soles con el tipo de cambio de la SUNAT. -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="untrm.hotel_san_antonio.controlador.ConversorDolarController"
+      spacing="12" prefWidth="480" style="-fx-background-color: #F8F6F2; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px; -fx-text-fill: #2B2B2B; -fx-accent: #B8862D; -fx-focus-color: #B8862D; -fx-faint-focus-color: #F5E6C8;">
+    <padding><Insets top="22" right="26" bottom="22" left="26"/></padding>
+    <Label text="Conversor de dólares" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+    <VBox spacing="4" style="-fx-background-color: #E3EEFB; -fx-background-radius: 8; -fx-padding: 12 14;">
+        <Label fx:id="lblTasa" text="Consultando el tipo de cambio…" wrapText="true" style="-fx-font-weight: bold; -fx-text-fill: #1F3A5C; -fx-font-size: 14px;"/>
+    </VBox>
+    <HBox spacing="14">
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="Dólares (US$)" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+            <TextField fx:id="txtDolares" promptText="0.00" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+        </VBox>
+        <VBox spacing="6" HBox.hgrow="ALWAYS">
+            <Label text="Soles (S/)" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+            <TextField fx:id="txtSoles" promptText="0.00" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+        </VBox>
+    </HBox>
+    <Label text="Escribe en cualquiera de los dos campos: el otro se calcula solo." wrapText="true" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+    <Label fx:id="lblNota" wrapText="true" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
+    <Label fx:id="lblMensaje" wrapText="true" style="-fx-text-fill: #B64832;"/>
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Limpiar" onAction="#limpiar" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
+        <Button text="Cerrar" onAction="#cerrar" userData="primary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: #B8862D; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #B8862D;"/>
+    </HBox>
+</VBox>
