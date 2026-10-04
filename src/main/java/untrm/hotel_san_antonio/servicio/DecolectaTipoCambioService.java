@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 
 /**
  * API 3 (una de las 3 del documento): Tipo de cambio SUNAT via Decolecta.
@@ -27,11 +28,15 @@ public class DecolectaTipoCambioService {
                 HttpRequest request = HttpRequest.newBuilder(URI.create(ENDPOINT))
                         .header("Accept", "application/json")
                         .header("Authorization", "Bearer " + ApiConfig.getDecolectaToken())
+                        .timeout(Duration.ofSeconds(8))
                         .GET()
                         .build();
 
-                HttpClient client = HttpClient.newHttpClient();
+                HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(8)).build();
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() != 200) {
+                    throw new java.io.IOException("La API de tipo de cambio respondió " + response.statusCode());
+                }
 
                 JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
 

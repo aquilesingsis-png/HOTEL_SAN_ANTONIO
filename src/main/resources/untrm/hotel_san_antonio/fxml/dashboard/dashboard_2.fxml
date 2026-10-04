@@ -50,6 +50,17 @@
                                     <Label text="Aquí tienes un resumen de la actividad del hotel." style="-fx-font-size: 13px; -fx-text-fill: #6A5F52;" />
                                  </children>
                               </VBox>
+                              <HBox fx:id="cajaTipoCambio" alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #E3EEFB; -fx-background-radius: 10; -fx-padding: 10 18 10 14;">
+                                 <children>
+                                    <Label text="💱" style="-fx-font-size: 16px;" />
+                                    <VBox>
+                                       <children>
+                                          <Label fx:id="lblTipoCambio" text="Dólar: consultando…" style="-fx-font-size: 12px; -fx-text-fill: #1F3A5C; -fx-font-weight: bold;" />
+                                          <Label fx:id="lblTipoCambioFecha" text="Tipo de cambio SUNAT" style="-fx-font-size: 12px; -fx-text-fill: #2C2118; -fx-font-weight: bold;" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
                               <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #F5E6C8; -fx-background-radius: 10; -fx-padding: 10 18 10 14;">
                                  <children>
                                     <Label text="📅" style="-fx-font-size: 16px;" />
@@ -253,7 +264,21 @@
                                  </children>
                               </VBox>
 
-                              <VBox spacing="8.0" HBox.hgrow="ALWAYS"
+                                                            <VBox fx:id="tarjetaHoras" spacing="8.0" HBox.hgrow="ALWAYS"
+                                    style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT">
+                                       <children>
+                                          <Label fx:id="lblTituloHoras" text="⏱  Movimiento de hoy por hora" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" HBox.hgrow="ALWAYS" />
+                                          <Label fx:id="lblSubtituloHoras" text="Hoy ▾" style="-fx-font-size: 11px; -fx-text-fill: #6A5F52; -fx-background-color: #F2EFE9; -fx-background-radius: 8; -fx-padding: 4 10 4 10;" />
+                                       </children>
+                                    </HBox>
+
+                                    <StackPane fx:id="contenedorGraficoHoras" prefHeight="230.0" />
+                                 </children>
+                              </VBox>
+
+<VBox fx:id="tarjetaSemana" spacing="8.0" HBox.hgrow="ALWAYS"
                                     style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
                                  <children>
                                     <HBox alignment="CENTER_LEFT">
@@ -268,7 +293,7 @@
                                  </children>
                               </VBox>
 
-                              <VBox alignment="CENTER" prefWidth="330.0" spacing="6.0"
+                              <VBox fx:id="tarjetaDistribucion" alignment="CENTER" prefWidth="330.0" spacing="6.0"
                                     style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
                                  <children>
                                     <Label text="🧾  Distribución de ingresos (Hoy)" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />

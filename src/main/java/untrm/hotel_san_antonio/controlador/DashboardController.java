@@ -15,6 +15,7 @@ import javafx.fxml.FXML;
 
 import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
@@ -27,6 +28,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -35,6 +37,8 @@ import javafx.scene.layout.VBox;
 
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Reserva;
+import untrm.hotel_san_antonio.modelo.TipoCambio;
+import untrm.hotel_san_antonio.servicio.DecolectaTipoCambioService;
 import untrm.hotel_san_antonio.servicio.DashboardService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.EstiloUtil;
@@ -152,6 +156,21 @@ public class DashboardController {
     @FXML
     private VBox listaAlertas;
 
+    // Tarjetas que cambian según el rol y el widget del tipo de cambio
+    @FXML private VBox tarjetaSemana;
+    @FXML private VBox tarjetaDistribucion;
+    @FXML private VBox tarjetaHoras;
+    @FXML private Label lblTituloHoras;
+    @FXML private Label lblSubtituloHoras;
+    @FXML private StackPane contenedorGraficoHoras;
+    @FXML private Label lblTipoCambio;
+    @FXML private Label lblTipoCambioFecha;
+
+    /** El tipo de cambio de la SUNAT cambia una vez al día: se guarda un rato para no consultar en cada visita. */
+    private static TipoCambio tipoCambioGuardado;
+    private static long tipoCambioConsultadoEn;
+    private static final long VIGENCIA_TIPO_CAMBIO_MS = 2L * 60 * 60 * 1000;
+
     @FXML
     private ScrollPane scrollDashboard;
 
@@ -241,6 +260,8 @@ public class DashboardController {
             });
         }
 
+        configurarSegunRol();
+        cargarTipoCambio();
         configurarColumnas();
 
         // Estilo de las mini-tablas (encabezado y filas), antes resuelto por ".mini-table" en el .css
@@ -317,6 +338,7 @@ public class DashboardController {
         colorearRodajas(chartDistribucion, "#8A5A1E", "#D9A53B");
 
         crearGraficoIngresos(r.ingresosUltimaSemana);
+        crearGraficoHoras(r.movimientoPorHora);
 
         tablaLlegadas.getItems().setAll(r.llegadasHoy);
         tablaMantenimiento.getItems().setAll(r.enMantenimiento);
@@ -379,25 +401,190 @@ public class DashboardController {
 
         listaAlertas.getChildren().clear();
 
-        if (r.pendientesConfirmar > 0) {
-            listaAlertas.getChildren().add(crearAlerta("#E3A12F",
-                    r.pendientesConfirmar + (r.pendientesConfirmar == 1
-                            ? " reserva pendiente de confirmar" : " reservas pendientes de confirmar")));
+        if (SesionActual.esAdministrador()) {
+            // Lo que le toca vigilar al administrador
+            if (r.productosAgotados > 0) {
+                listaAlertas.getChildren().add(crearAlerta("#D9433A",
+                        plural(r.productosAgotados, "producto agotado", "productos agotados")));
+            }
+            if (r.productosStockBajo > 0) {
+                listaAlertas.getChildren().add(crearAlerta("#E3A12F",
+                        plural(r.productosStockBajo, "producto con stock bajo", "productos con stock bajo")));
+            }
+            if (r.cuentasBloqueadas > 0) {
+                listaAlertas.getChildren().add(crearAlerta("#D9433A",
+                        plural(r.cuentasBloqueadas, "cuenta bloqueada por intentos", "cuentas bloqueadas por intentos")));
+            }
+            if (r.diasSinRespaldo < 0) {
+                listaAlertas.getChildren().add(crearAlerta("#D9433A", "Todavía no se hizo un respaldo de la base"));
+            } else if (r.diasSinRespaldo > 0) {
+                listaAlertas.getChildren().add(crearAlerta("#E3A12F",
+                        "Hace " + r.diasSinRespaldo + " días sin respaldo de la base"));
+            }
+        } else {
+            // Lo que le toca atender a Recepción hoy
+            long sinCheckin = r.llegadasHoy.stream().filter(l -> "CONFIRMADA".equals(l.getEstado())).count();
+            if (sinCheckin > 0) {
+                listaAlertas.getChildren().add(crearAlerta("#E3A12F",
+                        plural((int) sinCheckin, "llegada de hoy sin check-in", "llegadas de hoy sin check-in")));
+            }
+            if (!r.salidasHoy.isEmpty()) {
+                listaAlertas.getChildren().add(crearAlerta("#6A9BD1",
+                        plural(r.salidasHoy.size(), "salida de hoy", "salidas de hoy")
+                                + ": " + String.join(", ", r.salidasHoy)));
+            }
+        }
+        if (r.diasSinRegistrar > 0 && r.registroAbierto) {
+            listaAlertas.getChildren().add(crearAlerta("#E3A12F", plural(r.diasSinRegistrar,
+                    "día sin registrar (abra «Registro de días pasados»)",
+                    "días sin registrar (abra «Registro de días pasados»)")));
         }
         if (r.mantenimiento > 0) {
             listaAlertas.getChildren().add(crearAlerta("#B3ACA2",
-                    r.mantenimiento + (r.mantenimiento == 1
-                            ? " habitación en mantenimiento" : " habitaciones en mantenimiento")));
+                    plural(r.mantenimiento, "habitación en mantenimiento", "habitaciones en mantenimiento")));
         }
         if (r.limpieza > 0) {
             listaAlertas.getChildren().add(crearAlerta("#D9A53B",
-                    r.limpieza + (r.limpieza == 1 ? " habitación en limpieza" : " habitaciones en limpieza")));
+                    plural(r.limpieza, "habitación en limpieza", "habitaciones en limpieza")));
         }
         if (listaAlertas.getChildren().isEmpty()) {
             Label sinAlertas = new Label("Sin alertas por ahora.");
             sinAlertas.setStyle("-fx-font-size: 12px; -fx-text-fill: #8A7F70;");
             listaAlertas.getChildren().add(sinAlertas);
         }
+    }
+
+    private String plural(int cantidad, String singular, String plural) {
+        return cantidad + " " + (cantidad == 1 ? singular : plural);
+    }
+
+    // =========================================================
+    // LO QUE CAMBIA SEGÚN EL ROL
+    // =========================================================
+
+    /**
+     * El administrador ve todo. Recepción no ve el dinero acumulado (ingresos de la semana ni la distribución):
+     * solo lo del día, y en lugar del gráfico semanal ve el movimiento de hoy hora por hora.
+     */
+    private void configurarSegunRol() {
+        boolean admin = SesionActual.esAdministrador();
+        mostrar(tarjetaSemana, admin);
+        mostrar(tarjetaDistribucion, admin);
+        lblTituloHoras.setText(admin ? "⏱  Horas de más movimiento" : "⏱  Movimiento de hoy por hora");
+        lblSubtituloHoras.setText(admin ? "Últimos 30 días ▾" : "Hoy ▾");
+    }
+
+    private void mostrar(Node nodo, boolean visible) {
+        if (nodo != null) {
+            nodo.setVisible(visible);
+            nodo.setManaged(visible);
+        }
+    }
+
+    // =========================================================
+    // TIPO DE CAMBIO (API de la SUNAT vía Decolecta)
+    // =========================================================
+
+    private void cargarTipoCambio() {
+        if (tipoCambioGuardado != null
+                && System.currentTimeMillis() - tipoCambioConsultadoEn < VIGENCIA_TIPO_CAMBIO_MS) {
+            mostrarTipoCambio(tipoCambioGuardado);
+            return;
+        }
+        javafx.concurrent.Task<TipoCambio> tarea = DecolectaTipoCambioService.consultarHoy();
+        tarea.setOnSucceeded(e -> {
+            tipoCambioGuardado = tarea.getValue();
+            tipoCambioConsultadoEn = System.currentTimeMillis();
+            mostrarTipoCambio(tipoCambioGuardado);
+        });
+        tarea.setOnFailed(e -> {
+            if (tipoCambioGuardado != null) {
+                mostrarTipoCambio(tipoCambioGuardado);
+                return;
+            }
+            lblTipoCambio.setText("Dólar: no disponible");
+            lblTipoCambioFecha.setText("Sin conexión o sin clave de la API");
+        });
+        Thread hilo = new Thread(tarea, "tipo-cambio");
+        hilo.setDaemon(true);
+        hilo.start();
+    }
+
+    private void mostrarTipoCambio(TipoCambio tc) {
+        lblTipoCambio.setText(String.format(Locale.US, "Dólar  Compra S/ %.3f  ·  Venta S/ %.3f",
+                tc.getCompra(), tc.getVenta()));
+        String fecha = tc.getFecha();
+        try {
+            fecha = LocalDate.parse(tc.getFecha()).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        } catch (RuntimeException ignorado) {
+            // si la API manda otro formato de fecha, se muestra tal cual
+        }
+        lblTipoCambioFecha.setText("Tipo de cambio SUNAT · " + fecha);
+    }
+
+    // =========================================================
+    // GRÁFICO DE MOVIMIENTO POR HORA
+    // =========================================================
+
+    /** Barras con la cantidad de operaciones (ventas del carrito y cobros de reservas) de cada hora. */
+    private void crearGraficoHoras(Map<Integer, Integer> porHora) {
+        contenedorGraficoHoras.getChildren().clear();
+
+        int desde = 7;
+        int hasta = 21;
+        for (int hora : porHora.keySet()) {
+            desde = Math.min(desde, hora);
+            hasta = Math.max(hasta, hora);
+        }
+
+        CategoryAxis ejeX = new CategoryAxis();
+        NumberAxis ejeY = new NumberAxis();
+        BarChart<String, Number> grafico = new BarChart<>(ejeX, ejeY);
+        grafico.setLegendVisible(false);
+        grafico.setAnimated(false);
+        grafico.setPrefHeight(230);
+        grafico.setBarGap(2);
+        grafico.setCategoryGap(6);
+        grafico.setStyle("-fx-background-color: transparent; -fx-padding: 0;");
+        grafico.setVerticalGridLinesVisible(false);
+
+        int maximo = porHora.values().stream().mapToInt(Integer::intValue).max().orElse(0);
+        int techo = Math.max(4, (int) Math.ceil(maximo * 1.2));
+        ejeY.setAutoRanging(false);
+        ejeY.setLowerBound(0);
+        ejeY.setUpperBound(techo);
+        ejeY.setTickUnit(Math.max(1, Math.ceil(techo / 4.0)));
+        ejeY.setMinorTickVisible(false);
+        ejeY.setTickMarkVisible(false);
+        ejeX.setTickMarkVisible(false);
+        ejeX.setTickLabelFill(Color.web("#A89B89"));
+        ejeY.setTickLabelFill(Color.web("#A89B89"));
+        ejeX.setStyle("-fx-font-size: 10.5px;");
+        ejeY.setStyle("-fx-font-size: 10.5px;");
+
+        XYChart.Series<String, Number> serie = new XYChart.Series<>();
+        for (int hora = desde; hora <= hasta; hora++) {
+            serie.getData().add(new XYChart.Data<>(hora + "h", porHora.getOrDefault(hora, 0)));
+        }
+        grafico.getData().add(serie);
+
+        for (XYChart.Data<String, Number> dato : serie.getData()) {
+            Runnable pintar = () -> {
+                Node barra = dato.getNode();
+                if (barra != null) {
+                    barra.setStyle("-fx-bar-fill: #B8862D;");
+                    int n = dato.getYValue().intValue();
+                    Tooltip.install(barra, new Tooltip(n + (n == 1 ? " operación a las " : " operaciones a las ")
+                            + dato.getXValue()));
+                }
+            };
+            if (dato.getNode() != null) {
+                pintar.run();
+            } else {
+                dato.nodeProperty().addListener((obs, antes, nodo) -> pintar.run());
+            }
+        }
+        contenedorGraficoHoras.getChildren().add(grafico);
     }
 
     private HBox crearAlerta(String color, String texto) {
