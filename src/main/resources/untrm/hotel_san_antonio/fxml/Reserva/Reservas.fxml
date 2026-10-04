@@ -12,7 +12,7 @@
 <!-- Pantalla Reservas: ver y gestionar las reservas existentes, en Calendario o en Lista.
      Para crear una reserva se usa "Nueva reserva". Las dos vistas comparten el buscador. -->
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="untrm.hotel_san_antonio.controlador.Reserva.ReservasController"
+      fx:controller="untrm.hotel_san_antonio.controlador.ReservasController"
       spacing="14" style="-fx-background-color: #F7F4EF;">
     <fx:define><ToggleGroup fx:id="grupoVista"/></fx:define>
     <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>

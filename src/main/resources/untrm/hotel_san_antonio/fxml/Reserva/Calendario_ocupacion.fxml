@@ -12,7 +12,7 @@
 <!-- Vista "Calendario" de la pantalla Reservas (Reservas.fxml): solo muestra la ocupacion.
      Para reservar se usa "Nueva reserva"; al hacer clic en una reserva se abre su detalle. -->
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="untrm.hotel_san_antonio.controlador.Reserva.CalendarioOcupacionController"
+      fx:controller="untrm.hotel_san_antonio.controlador.CalendarioOcupacionController"
       spacing="12">
     <fx:define><ToggleGroup fx:id="grupoVista"/></fx:define>
     <HBox spacing="10" alignment="CENTER_LEFT">

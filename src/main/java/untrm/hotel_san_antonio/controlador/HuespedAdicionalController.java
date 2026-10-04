@@ -1,4 +1,4 @@
-package untrm.hotel_san_antonio.controlador.Reserva;
+package untrm.hotel_san_antonio.controlador;
 
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;

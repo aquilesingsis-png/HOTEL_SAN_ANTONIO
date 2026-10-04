@@ -1,4 +1,4 @@
-package untrm.hotel_san_antonio.controlador.Reserva;
+package untrm.hotel_san_antonio.controlador;
 
 import java.util.HashMap;
 import java.util.Map;

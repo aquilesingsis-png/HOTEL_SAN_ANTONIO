@@ -13,7 +13,7 @@
 <!-- Vista "Lista" de la pantalla Reservas (Reservas.fxml). El buscador por cliente, DNI, codigo
      o habitacion esta en el encabezado de Reservas y se comparte con la vista Calendario. -->
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="untrm.hotel_san_antonio.controlador.Reserva.ReservasProgramadasController"
+      fx:controller="untrm.hotel_san_antonio.controlador.ReservasProgramadasController"
       spacing="12">
     <fx:define><ToggleGroup fx:id="grupoEstados"/></fx:define>
     <HBox spacing="7">
