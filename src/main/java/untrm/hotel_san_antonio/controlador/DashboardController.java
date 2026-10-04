@@ -779,7 +779,10 @@ public class DashboardController {
             return;
         }
         try {
-            Navegacion.mostrar(destino);
+            // por el menú del marco, para que el título y la opción marcada cambien con la pantalla
+            if (!PrincipalController.irAPantalla(destino)) {
+                Navegacion.mostrar(destino);
+            }
         } catch (IOException | SecurityException error) {
             Alertas.mostrarError("Navegación", "No se pudo abrir la lista solicitada.");
         }

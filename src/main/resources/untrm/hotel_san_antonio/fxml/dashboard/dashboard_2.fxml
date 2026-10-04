@@ -383,8 +383,6 @@
                                     <HBox alignment="CENTER_LEFT">
                                        <children>
                                           <Label text="🔔  Alertas y pendientes" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" HBox.hgrow="ALWAYS" />
-                                          <Button mnemonicParsing="false" onAction="#mostrarSeccion" text="Ver todas"
-                                                  userData="/untrm/hotel_san_antonio/fxml/Reserva/Reservas.fxml" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #F5E6C8; -fx-text-fill: #8A5A1E; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 5 12 5 12; -fx-cursor: hand;" />
                                        </children>
                                     </HBox>
                                     <VBox fx:id="listaAlertas" spacing="4.0" />

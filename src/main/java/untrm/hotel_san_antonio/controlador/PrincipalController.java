@@ -130,6 +130,52 @@ public class PrincipalController {
         hilo.start();
     }
 
+    /**
+     * Abre una pantalla desde dentro de otra (por ejemplo, los «Ver todas» de Inicio) pasando por el menú:
+     * así el título y la opción marcada del menú siempre coinciden con lo que se ve, y se puede volver.
+     *
+     * @return false si el menú de este rol no tiene esa pantalla
+     */
+    public static boolean irAPantalla(String ruta) {
+        return instancia != null && instancia.abrirPorRuta(ruta);
+    }
+
+    private boolean abrirPorRuta(String ruta) {
+        ToggleButton destino = buscarEnMenu(ruta);
+        if (destino == null) {
+            return false;
+        }
+        destino.setSelected(true);
+        Object padre = destino.getParent();
+        boolean enSubmenu = padre instanceof VBox && padre != barraLateral;
+        plegarGrupos(enSubmenu ? (VBox) padre : null);
+        if (enSubmenu) {
+            int posicion = barraLateral.getChildren().indexOf(padre);
+            if (posicion > 0 && barraLateral.getChildren().get(posicion - 1) instanceof Button grupo) {
+                establecerDesplegado(grupo, (Node) padre, true);
+            }
+        }
+        abrir(destino);
+        return true;
+    }
+
+    /** Busca la opción del menú (también dentro de los submenús) que abre esa pantalla. */
+    private ToggleButton buscarEnMenu(String ruta) {
+        for (Node hijo : barraLateral.getChildren()) {
+            if (hijo instanceof ToggleButton boton && ruta.equals(String.valueOf(boton.getUserData()))) {
+                return boton;
+            }
+            if (hijo instanceof VBox submenu) {
+                for (Node sub : submenu.getChildren()) {
+                    if (sub instanceof ToggleButton boton && ruta.equals(String.valueOf(boton.getUserData()))) {
+                        return boton;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     /** Las pantallas de registro avisan aquí cuando cambia el estado (día completado, plazo reabierto). */
     public static void refrescarDiasPasados() {
         if (instancia != null) {
