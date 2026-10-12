@@ -18,3 +18,8 @@ ALTER TABLE comprobante
     ADD COLUMN IF NOT EXISTS cliente_direccion VARCHAR(200) NULL,
     ADD COLUMN IF NOT EXISTS subtotal          DECIMAL(8,2) NULL,
     ADD COLUMN IF NOT EXISTS igv               DECIMAL(8,2) NULL;
+
+-- 2) CIERRE DE CAJA: hora en que se confirma cada cierre. Un cierre cuenta lo cobrado y pagado desde la hora
+--    del cierre anterior, asi hay dos o tres turnos al dia (manana, tarde, noche) sin contar nada dos veces.
+ALTER TABLE cierre_caja
+    ADD COLUMN IF NOT EXISTS fecha_confirmacion DATETIME NULL;

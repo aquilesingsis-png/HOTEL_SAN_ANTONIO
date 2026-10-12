@@ -22,10 +22,6 @@ import untrm.hotel_san_antonio.util.SesionActual;
 /** Consultas y cambios de las pantallas administrativas antiguas. */
 public class ModulosDAO {
     public record Registro(int id, List<String> celdas, LocalDate fecha) { }
-    public record CierreDatos(LocalDate fecha, String turno, BigDecimal fondo, BigDecimal cobros,
-                              BigDecimal otros, BigDecimal salidas, BigDecimal esperado,
-                              BigDecimal contado, BigDecimal entregado, BigDecimal siguiente,
-                              String observacion) { }
     private final AuditoriaDAO auditoria = new AuditoriaDAO();
 
     private int usuario() {
@@ -153,32 +149,6 @@ public class ModulosDAO {
         }
     }
 
-    /** Componentes de efectivo para el cierre de una fecha y turno. */
-    public BigDecimal[] resumenEfectivo(LocalDate fecha, String turno) throws SQLException {
-        if (fecha == null) throw new IllegalArgumentException("Seleccione la fecha del cierre.");
-        String sql = "SELECT "
-                + "COALESCE((SELECT fondo_siguiente FROM cierre_caja c WHERE c.estado='CONFIRMADO' "
-                + "AND (c.fecha<? OR (c.fecha=? AND c.turno<>?)) ORDER BY c.fecha DESC,c.id_cierre DESC LIMIT 1),0),"
-                + "COALESCE((SELECT SUM(monto) FROM pago WHERE metodo_pago='EFECTIVO' AND COALESCE(fecha_evento, DATE(fecha_pago))=?),0) + "
-                + "COALESCE((SELECT SUM(total) FROM venta_tienda WHERE id_habitacion IS NULL AND metodo_pago='EFECTIVO' "
-                + "AND COALESCE(fecha_evento, DATE(fecha_venta))=?),0),"
-                + "COALESCE((SELECT SUM(monto) FROM movimiento_caja WHERE tipo='INGRESO' "
-                + "AND metodo_pago='EFECTIVO' AND DATE(fecha)=?),0),"
-                + "COALESCE((SELECT SUM(monto) FROM movimiento_caja WHERE tipo='EGRESO' "
-                + "AND metodo_pago='EFECTIVO' AND DATE(fecha)=?),0) + "
-                + "COALESCE((SELECT SUM(monto) FROM gasto WHERE activo=1 AND metodo_pago='EFECTIVO' AND fecha=?),0)";
-        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setDate(1, Date.valueOf(fecha)); ps.setDate(2, Date.valueOf(fecha));
-            ps.setString(3, turno == null ? "" : turno.trim());
-            for (int i = 4; i <= 8; i++) ps.setDate(i, Date.valueOf(fecha));
-            try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return new BigDecimal[] {rs.getBigDecimal(1), rs.getBigDecimal(2),
-                        rs.getBigDecimal(3), rs.getBigDecimal(4)};
-            }
-        }
-    }
-
     private int claveGenerada(PreparedStatement ps) throws SQLException {
         try (ResultSet rs = ps.getGeneratedKeys()) {
             if (!rs.next()) throw new SQLException("No se obtuvo el identificador generado.");
@@ -214,101 +184,6 @@ public class ModulosDAO {
                 ps.executeUpdate();
                 auditoria.registrar(con, usuario(), "CAJA_MOVIMIENTO", "movimiento_caja",
                         claveGenerada(ps), tipo + " " + monto + " " + concepto.trim());
-                con.commit();
-            } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
-        }
-    }
-
-    public void guardarArqueo(String turno, BigDecimal esperado, BigDecimal contado,
-                              String observacion) throws SQLException {
-        admin();
-        if (turno == null || turno.isBlank() || turno.length() > 50)
-            throw new IllegalArgumentException("Indique un turno de hasta 50 caracteres.");
-        validarImporte(esperado, "El efectivo esperado");
-        validarImporte(contado, "El efectivo contado");
-        try (Connection con = ConexionBD.conectar()) {
-            con.setAutoCommit(false);
-            try (PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO arqueo_caja(id_usuario,turno,efectivo_esperado,efectivo_contado,diferencia,observacion) "
-                    + "VALUES (?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
-                ps.setInt(1, usuario()); ps.setString(2, turno.trim()); ps.setBigDecimal(3, esperado);
-                ps.setBigDecimal(4, contado); ps.setBigDecimal(5, contado.subtract(esperado));
-                ps.setString(6, observacion); ps.executeUpdate();
-                auditoria.registrar(con, usuario(), "CAJA_ARQUEO", "arqueo_caja", claveGenerada(ps),
-                        "Diferencia: " + contado.subtract(esperado));
-                con.commit();
-            } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
-        }
-    }
-
-    public void guardarCierre(Integer id, CierreDatos datos, boolean confirmar) throws SQLException {
-        admin();
-        if (datos.fecha() == null || datos.fecha().isAfter(LocalDate.now()))
-            throw new IllegalArgumentException("La fecha del cierre no puede ser futura.");
-        if (datos.turno() == null || datos.turno().isBlank() || datos.turno().length() > 50)
-            throw new IllegalArgumentException("Indique un turno de hasta 50 caracteres.");
-        for (BigDecimal valor : List.of(datos.fondo(), datos.cobros(), datos.otros(), datos.salidas(),
-                datos.esperado(), datos.contado(), datos.entregado(), datos.siguiente())) {
-            validarImporte(valor, "Los importes del cierre");
-        }
-        BigDecimal calculado = datos.fondo().add(datos.cobros()).add(datos.otros()).subtract(datos.salidas());
-        if (calculado.compareTo(datos.esperado()) != 0)
-            throw new IllegalArgumentException("El efectivo esperado no coincide con fondo + cobros + ingresos - salidas.");
-        if (datos.entregado().add(datos.siguiente()).compareTo(datos.contado()) != 0)
-            throw new IllegalArgumentException("Efectivo entregado + fondo siguiente debe igualar el contado.");
-        if (datos.observacion() != null && datos.observacion().length() > 500)
-            throw new IllegalArgumentException("La observación del cierre supera 500 caracteres.");
-        try (Connection con = ConexionBD.conectar()) {
-            con.setAutoCommit(false);
-            try {
-                if (id == null) {
-                    try (PreparedStatement ps = con.prepareStatement(
-                            "SELECT id_cierre,estado FROM cierre_caja WHERE fecha=? AND turno=? FOR UPDATE")) {
-                        ps.setDate(1, Date.valueOf(datos.fecha()));
-                        ps.setString(2, datos.turno().trim());
-                        try (ResultSet rs = ps.executeQuery()) {
-                            if (rs.next()) {
-                                if ("CONFIRMADO".equals(rs.getString(2)))
-                                    throw new IllegalStateException("El cierre de ese día y turno ya está confirmado.");
-                                id = rs.getInt(1);
-                            }
-                        }
-                    }
-                }
-                if (id != null) {
-                    try (PreparedStatement ps = con.prepareStatement(
-                            "SELECT estado FROM cierre_caja WHERE id_cierre=? FOR UPDATE")) {
-                        ps.setInt(1, id);
-                        try (ResultSet rs = ps.executeQuery()) {
-                            if (!rs.next()) throw new IllegalStateException("El cierre ya no existe.");
-                            if ("CONFIRMADO".equals(rs.getString(1)))
-                                throw new IllegalStateException("Un cierre confirmado no se puede modificar.");
-                        }
-                    }
-                }
-                String sql = id == null
-                        ? "INSERT INTO cierre_caja(id_usuario,fecha,turno,fondo_inicial,cobros_efectivo,otros_ingresos,"
-                          + "salidas_efectivo,efectivo_esperado,efectivo_contado,diferencia,efectivo_entregado,"
-                          + "fondo_siguiente,observacion,estado) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
-                        : "UPDATE cierre_caja SET id_usuario=?,fecha=?,turno=?,fondo_inicial=?,cobros_efectivo=?,"
-                          + "otros_ingresos=?,salidas_efectivo=?,efectivo_esperado=?,efectivo_contado=?,diferencia=?,"
-                          + "efectivo_entregado=?,fondo_siguiente=?,observacion=?,estado=? WHERE id_cierre=?";
-                try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                    ps.setInt(1, usuario()); ps.setDate(2, Date.valueOf(datos.fecha()));
-                    ps.setString(3, datos.turno().trim()); ps.setBigDecimal(4, datos.fondo());
-                    ps.setBigDecimal(5, datos.cobros()); ps.setBigDecimal(6, datos.otros());
-                    ps.setBigDecimal(7, datos.salidas()); ps.setBigDecimal(8, datos.esperado());
-                    ps.setBigDecimal(9, datos.contado());
-                    ps.setBigDecimal(10, datos.contado().subtract(datos.esperado()));
-                    ps.setBigDecimal(11, datos.entregado()); ps.setBigDecimal(12, datos.siguiente());
-                    ps.setString(13, datos.observacion());
-                    ps.setString(14, confirmar ? "CONFIRMADO" : "BORRADOR");
-                    if (id != null) ps.setInt(15, id);
-                    if (ps.executeUpdate() != 1) throw new SQLException("No se guardó el cierre.");
-                    int afectado = id == null ? claveGenerada(ps) : id;
-                    auditoria.registrar(con, usuario(), confirmar ? "CAJA_CIERRE" : "CAJA_BORRADOR",
-                            "cierre_caja", afectado, datos.fecha() + " / " + datos.turno());
-                }
                 con.commit();
             } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
         }

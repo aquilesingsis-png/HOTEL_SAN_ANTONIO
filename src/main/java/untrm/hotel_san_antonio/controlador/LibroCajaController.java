@@ -83,12 +83,10 @@ public class LibroCajaController {
         cmbMetodo.getItems().setAll(TODOS, "Efectivo", "Yape", "Transferencia", "Tarjeta");
         restablecerFiltros();
 
-        // Solo el Administrador registra movimientos a mano y cierra la caja
+        // Solo el Administrador registra movimientos a mano; cada turno (recepcion o administrador) cierra su caja
         boolean admin = SesionActual.esAdministrador();
         btnNuevo.setVisible(admin);
         btnNuevo.setManaged(admin);
-        btnCerrarCaja.setVisible(admin);
-        btnCerrarCaja.setManaged(admin);
 
         colFecha.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().fecha().format(FORMATO_FECHA)));
         colTipo.setCellValueFactory(d -> new SimpleStringProperty(textoTipo(d.getValue().tipo())));

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import untrm.hotel_san_antonio.util.ConexionBD;
 import untrm.hotel_san_antonio.util.Permisos;
+import untrm.hotel_san_antonio.util.SesionActual;
 
 /**
  * Libro de caja: una sola lista con todo el dinero que entra y sale, venga de donde venga
@@ -24,9 +25,9 @@ public class CajaDAO {
                              String metodo, String documento, String cliente, String responsable,
                              String origen) { }
 
-    /** Un cierre de caja ya guardado (borrador o confirmado). */
+    /** Un cierre de caja ya guardado (borrador o confirmado); confirmado es la hora en que se confirmo. */
     public record Cierre(int id, LocalDate fecha, String turno, String responsable, BigDecimal esperado,
-                         BigDecimal contado, BigDecimal diferencia, String estado) { }
+                         BigDecimal contado, BigDecimal diferencia, String estado, LocalDateTime confirmado) { }
 
     /** Los cuatro origenes del dinero, unidos en una misma tabla virtual. */
     private static final String TODOS = ""
@@ -66,19 +67,28 @@ public class CajaDAO {
             + "CONCAT(u.nombre, ' ', u.apellido), 'Gasto' "
             + "FROM gasto g JOIN usuario u ON u.id_usuario = g.id_usuario WHERE g.activo = TRUE";
 
-    /** Los ultimos cierres de caja, del mas reciente al mas antiguo (solo el Administrador). */
+    /** Los ultimos cierres de caja, del mas reciente al mas antiguo: el Administrador ve todos; recepcion, los suyos. */
     public List<Cierre> listarCierres() throws SQLException {
-        Permisos.requerir("ADMINISTRADOR");
+        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
+        boolean todos = SesionActual.esAdministrador();
         String sql = "SELECT c.id_cierre, c.fecha, c.turno, CONCAT(u.nombre, ' ', u.apellido) AS responsable, "
-                + "c.efectivo_esperado, c.efectivo_contado, c.diferencia, c.estado FROM cierre_caja c "
-                + "JOIN usuario u ON u.id_usuario = c.id_usuario ORDER BY c.fecha DESC, c.id_cierre DESC LIMIT 40";
+                + "c.efectivo_esperado, c.efectivo_contado, c.diferencia, c.estado, c.fecha_confirmacion "
+                + "FROM cierre_caja c JOIN usuario u ON u.id_usuario = c.id_usuario "
+                + (todos ? "" : "WHERE c.id_usuario = ? ")
+                + "ORDER BY c.fecha DESC, c.id_cierre DESC LIMIT 40";
         List<Cierre> lista = new ArrayList<>();
-        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                lista.add(new Cierre(rs.getInt("id_cierre"), rs.getDate("fecha").toLocalDate(), rs.getString("turno"),
-                        rs.getString("responsable"), rs.getBigDecimal("efectivo_esperado"),
-                        rs.getBigDecimal("efectivo_contado"), rs.getBigDecimal("diferencia"), rs.getString("estado")));
+        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql)) {
+            if (!todos) {
+                ps.setInt(1, SesionActual.getUsuario().getIdUsuario());
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.sql.Timestamp confirmado = rs.getTimestamp("fecha_confirmacion");
+                    lista.add(new Cierre(rs.getInt("id_cierre"), rs.getDate("fecha").toLocalDate(), rs.getString("turno"),
+                            rs.getString("responsable"), rs.getBigDecimal("efectivo_esperado"),
+                            rs.getBigDecimal("efectivo_contado"), rs.getBigDecimal("diferencia"), rs.getString("estado"),
+                            confirmado == null ? null : confirmado.toLocalDateTime()));
+                }
             }
         }
         return lista;
