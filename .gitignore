@@ -2,3 +2,15 @@
 .idea/
 config.properties
 target/
+
+# Archivos que genera la aplicacion y que llevan datos de huespedes o claves cifradas: no se suben
+registros/
+*.log
+hotel_san_antonio_*.sql
+copias-seguridad-db/
+caja_*.xlsx
+caja_*.pdf
+reporte_*.xlsx
+reporte_*.pdf
+almacen_*.xlsx
+almacen_*.pdf

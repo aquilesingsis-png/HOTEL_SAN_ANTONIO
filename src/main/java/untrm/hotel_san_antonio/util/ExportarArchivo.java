@@ -29,10 +29,12 @@ public final class ExportarArchivo {
         selector.setTitle("Guardar archivo");
         selector.setInitialFileName(nombreSugerido.replaceAll("[^A-Za-z0-9_.-]", "_") + "." + extension);
         selector.getExtensionFilters().add(new FileChooser.ExtensionFilter(descripcion, "*." + extension));
+        CarpetaGuardado.preparar(selector);
         File elegido = selector.showSaveDialog(ventana);
         if (elegido == null) {
             return;
         }
+        CarpetaGuardado.recordar(elegido);
         Path destino = elegido.toPath();
         if (!destino.getFileName().toString().toLowerCase(Locale.ROOT).endsWith("." + extension)) {
             destino = destino.resolveSibling(destino.getFileName() + "." + extension);

@@ -14,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import untrm.hotel_san_antonio.util.CarpetaGuardado;
 import untrm.hotel_san_antonio.servicio.RespaldoService;
 import untrm.hotel_san_antonio.servicio.RespaldoService.Resultado;
 import untrm.hotel_san_antonio.servicio.RespaldoService.UltimoRespaldo;
@@ -51,10 +52,12 @@ public class RespaldoController {
         selector.setTitle("Guardar respaldo de la base de datos");
         selector.setInitialFileName(RespaldoService.nombreSugerido());
         selector.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivo SQL", "*.sql"));
+        CarpetaGuardado.preparar(selector);
         File elegido = selector.showSaveDialog(btnCrear.getScene().getWindow());
         if (elegido == null) {
             return;
         }
+        CarpetaGuardado.recordar(elegido);
         File archivo = elegido.getName().toLowerCase(Locale.ROOT).endsWith(".sql")
                 ? elegido : new File(elegido.getParentFile(), elegido.getName() + ".sql");
 
