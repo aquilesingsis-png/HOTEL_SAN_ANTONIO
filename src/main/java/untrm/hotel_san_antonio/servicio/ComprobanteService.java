@@ -8,6 +8,7 @@ import untrm.hotel_san_antonio.dao.HabitacionDAO;
 import untrm.hotel_san_antonio.dao.ReservaDAO;
 import untrm.hotel_san_antonio.dao.VentaTiendaDAO;
 import untrm.hotel_san_antonio.modelo.Comprobante;
+import untrm.hotel_san_antonio.modelo.ComprobanteDocumento;
 import untrm.hotel_san_antonio.modelo.CuentaHabitacion;
 import untrm.hotel_san_antonio.modelo.DetalleVenta;
 import untrm.hotel_san_antonio.modelo.Habitacion;
@@ -16,10 +17,16 @@ import untrm.hotel_san_antonio.modelo.VentaTienda;
 import untrm.hotel_san_antonio.util.ConexionBD;
 import untrm.hotel_san_antonio.util.Permisos;
 import untrm.hotel_san_antonio.util.SesionActual;
+import untrm.hotel_san_antonio.util.Validador;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -27,11 +34,15 @@ import java.util.Set;
  * Genera el comprobante (boleta/nota de venta/factura) de una estadia que hizo check-in, o de una
  * venta de tienda que todavia no tiene comprobante. No cambia el estado de la reserva/habitacion:
  * eso lo hace el check-out por separado (son dos pasos distintos, como en cualquier hotel real).
+ * Cada comprobante guarda a quien se emitio y su subtotal e IGV, para poder imprimirlo de nuevo.
  */
 public class ComprobanteService {
 
     private static final Set<String> TIPOS = Set.of("BOLETA", "FACTURA", "NOTA_VENTA");
     private static final int INTENTOS_NUMERO = 5;
+    /** El precio ya incluye IGV (18 %). */
+    private static final BigDecimal FACTOR_IGV = new BigDecimal("1.18");
+    private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final ReservaDAO reservaDAO = new ReservaDAO();
     private final HabitacionDAO habitacionDAO = new HabitacionDAO();
@@ -40,6 +51,18 @@ public class ComprobanteService {
     private final DetalleVentaDAO detalleDAO = new DetalleVentaDAO();
     private final ComprobanteDAO comprobanteDAO = new ComprobanteDAO();
     private final AuditoriaDAO auditoriaDAO = new AuditoriaDAO();
+
+    /**
+     * A quien se emite el comprobante. Todo puede quedar vacio salvo en una factura (RUC, razon social y
+     * direccion); sin datos, el comprobante sale a nombre de "Cliente varios".
+     *
+     * @param tipoDocumento "DNI" o "RUC" (se ignora si no hay documento)
+     */
+    public record DatosCliente(String tipoDocumento, String documento, String nombre, String direccion) {
+        public static DatosCliente vacio() {
+            return new DatosCliente(null, null, null, null);
+        }
+    }
 
     /** Lo que se hace dentro de la transaccion de una emision. */
     @FunctionalInterface
@@ -114,18 +137,64 @@ public class ComprobanteService {
         }
     }
 
+    /** Un comprobante ya emitido, por su numero (ej. "B001-000009"), listo para volver a imprimirlo; null si no existe. */
+    public ComprobanteDocumento documentoPorNumero(String numero) throws SQLException {
+        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
+        if (numero == null || numero.isBlank()) {
+            return null;
+        }
+        try (Connection con = ConexionBD.conectar()) {
+            Comprobante c = comprobanteDAO.buscarPorNumero(con, numero.trim().toUpperCase(java.util.Locale.ROOT));
+            return c == null ? null : armarDocumento(con, c);
+        }
+    }
+
+    /** Un comprobante ya emitido, por su id, listo para imprimirlo; null si no existe. */
+    public ComprobanteDocumento documento(int idComprobante) throws SQLException {
+        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
+        try (Connection con = ConexionBD.conectar()) {
+            Comprobante c = comprobanteDAO.buscarPorId(con, idComprobante);
+            return c == null ? null : armarDocumento(con, c);
+        }
+    }
+
+    /** Las lineas salen de lo guardado: los productos enlazados al comprobante y, si es de una estadia, el alojamiento. */
+    private ComprobanteDocumento armarDocumento(Connection con, Comprobante c) throws SQLException {
+        List<ComprobanteDocumento.Linea> lineas = new ArrayList<>();
+        BigDecimal consumos = BigDecimal.ZERO;
+        for (DetalleVenta d : detalleDAO.listarPorComprobante(con, c.getIdComprobante())) {
+            lineas.add(new ComprobanteDocumento.Linea(d.getNombreProducto(), d.getCantidad(),
+                    d.getPrecioUnitario(), d.getSubtotal()));
+            consumos = consumos.add(d.getSubtotal());
+        }
+        if (c.getIdReserva() != null) {
+            Reserva r = reservaDAO.buscarPorId(con, c.getIdReserva(), false);
+            BigDecimal alojamiento = c.getMontoTotal().subtract(consumos);
+            String concepto = "Alojamiento";
+            if (r != null) {
+                long noches = ChronoUnit.DAYS.between(r.getFechaCheckin(), r.getFechaCheckout());
+                concepto = "Alojamiento · Hab. " + r.getNumeroHabitacion() + " · "
+                        + r.getFechaCheckin().format(FECHA) + " a " + r.getFechaCheckout().format(FECHA)
+                        + " (" + noches + (noches == 1 ? " noche)" : " noches)");
+            }
+            lineas.add(0, new ComprobanteDocumento.Linea(concepto, 1, alojamiento, alojamiento));
+        }
+        return new ComprobanteDocumento(c, lineas);
+    }
+
     /**
      * Genera el comprobante de una estadia y enlaza a el los consumos de tienda que quedaron
      * pendientes durante la estadia. Cada estadia tiene un solo comprobante, y la cuenta (total y saldo)
      * se vuelve a armar desde la base: lo que mostraba la pantalla pudo haber cambiado.
      * @throws IllegalStateException si todavia hay saldo pendiente o la estadia ya tiene comprobante
      */
-    public Comprobante generarParaEstadia(CuentaHabitacion cuenta, String tipo) throws SQLException {
+    public Comprobante generarParaEstadia(CuentaHabitacion cuenta, String tipo, DatosCliente cliente) throws SQLException {
         Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
         validarTipo(tipo);
         if (cuenta == null) {
             throw new IllegalArgumentException("Cargue primero la cuenta de la habitación.");
         }
+        DatosCliente datos = validarCliente(tipo, cliente);
         int idUsuario = SesionActual.getUsuario().getIdUsuario();
         return emitirEnTransaccion(tipo, con -> {
             // la reserva queda bloqueada: dos personas no pueden emitir a la vez el comprobante de una estadia
@@ -146,11 +215,8 @@ public class ComprobanteService {
                 throw new IllegalStateException("Aún hay un saldo pendiente de S/ "
                         + CuentaHabitacion.formato(real.getSaldo()) + ". Registra el pago antes de generar el comprobante.");
             }
-            Comprobante c = new Comprobante();
+            Comprobante c = nuevo(tipo, idUsuario, real.getTotalCuenta(), datos);
             c.setIdReserva(reserva.getIdReserva());
-            c.setIdUsuario(idUsuario);
-            c.setTipo(tipo);
-            c.setMontoTotal(real.getTotalCuenta());
             int idComprobante = insertarConNumero(con, c);
 
             ventaDAO.enlazarComprobantePorEstadia(con, real.getIdHabitacion(), real.getIdHuesped(),
@@ -163,12 +229,13 @@ public class ComprobanteService {
     }
 
     /** Genera el comprobante de una venta de tienda que no estaba ligada a ninguna habitacion. */
-    public Comprobante generarParaVenta(VentaTienda venta, String tipo) throws SQLException {
+    public Comprobante generarParaVenta(VentaTienda venta, String tipo, DatosCliente cliente) throws SQLException {
         Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
         validarTipo(tipo);
         if (venta == null) {
             throw new IllegalArgumentException("Cargue primero la venta.");
         }
+        DatosCliente datos = validarCliente(tipo, cliente);
         int idUsuario = SesionActual.getUsuario().getIdUsuario();
         return emitirEnTransaccion(tipo, con -> {
             // el total sale de la base y no de lo que trae la pantalla
@@ -179,11 +246,7 @@ public class ComprobanteService {
             if (real.getIdHabitacion() != null) {
                 throw new IllegalStateException("La venta está cargada a una habitación: se factura junto con su estadía.");
             }
-            Comprobante c = new Comprobante();
-            c.setIdReserva(null);
-            c.setIdUsuario(idUsuario);
-            c.setTipo(tipo);
-            c.setMontoTotal(real.getTotal());
+            Comprobante c = nuevo(tipo, idUsuario, real.getTotal(), datos);
             int idComprobante = insertarConNumero(con, c);
 
             if (!ventaDAO.enlazarComprobante(con, real.getIdVenta(), idComprobante)) {
@@ -200,6 +263,66 @@ public class ComprobanteService {
         if (tipo == null || !TIPOS.contains(tipo)) {
             throw new IllegalArgumentException("Seleccione el tipo de comprobante.");
         }
+    }
+
+    /** Revisa los datos del cliente: en una factura son obligatorios; en lo demas, si se dan, deben ser validos. */
+    private DatosCliente validarCliente(String tipoComprobante, DatosCliente cliente) {
+        DatosCliente c = cliente == null ? DatosCliente.vacio() : cliente;
+        String documento = limpio(c.documento());
+        String nombre = limpio(c.nombre());
+        String direccion = limpio(c.direccion());
+        String tipoDocumento = null;
+        if ("FACTURA".equals(tipoComprobante)) {
+            if (documento == null || !Validador.esRucValido(documento)) {
+                throw new IllegalArgumentException("Para una factura ingrese un RUC válido de 11 dígitos.");
+            }
+            if (nombre == null) {
+                throw new IllegalArgumentException("Ingrese la razón social de la empresa.");
+            }
+            if (direccion == null) {
+                throw new IllegalArgumentException("La dirección es obligatoria para una factura.");
+            }
+            tipoDocumento = "RUC";
+        } else if (documento != null) {
+            boolean ruc = "RUC".equals(c.tipoDocumento());
+            if (!(ruc ? Validador.esRucValido(documento) : Validador.esDniValido(documento))) {
+                throw new IllegalArgumentException(ruc ? "El RUC debe tener 11 dígitos válidos."
+                        : "El DNI debe tener exactamente 8 dígitos.");
+            }
+            tipoDocumento = ruc ? "RUC" : "DNI";
+        }
+        if (nombre != null && nombre.length() > 150) {
+            throw new IllegalArgumentException("El nombre o razón social no puede superar 150 caracteres.");
+        }
+        if (direccion != null && direccion.length() > 200) {
+            throw new IllegalArgumentException("La dirección no puede superar 200 caracteres.");
+        }
+        return new DatosCliente(tipoDocumento, documento, nombre, direccion);
+    }
+
+    private String limpio(String texto) {
+        return texto == null || texto.isBlank() ? null : texto.trim();
+    }
+
+    /** Un comprobante nuevo, con el cliente y el desglose del total en subtotal e IGV (la nota de venta no desglosa). */
+    private Comprobante nuevo(String tipo, int idUsuario, BigDecimal total, DatosCliente datos) {
+        Comprobante c = new Comprobante();
+        c.setIdUsuario(idUsuario);
+        c.setTipo(tipo);
+        c.setMontoTotal(total);
+        c.setClienteTipoDoc(datos.tipoDocumento());
+        c.setClienteDocumento(datos.documento());
+        c.setClienteNombre(datos.nombre());
+        c.setClienteDireccion(datos.direccion());
+        if ("NOTA_VENTA".equals(tipo)) {
+            c.setSubtotal(total);
+            c.setIgv(BigDecimal.ZERO.setScale(2));
+        } else {
+            BigDecimal subtotal = total.divide(FACTOR_IGV, 2, RoundingMode.HALF_UP);
+            c.setSubtotal(subtotal);
+            c.setIgv(total.subtract(subtotal));
+        }
+        return c;
     }
 
     /** Ejecuta la emision en una transaccion y suelta al final el turno de la serie. */
@@ -228,7 +351,9 @@ public class ComprobanteService {
         for (int intento = 1; ; intento++) {
             c.setNumero(comprobanteDAO.generarNumero(con, c.getTipo()));
             try {
-                return comprobanteDAO.insertar(con, c);
+                int id = comprobanteDAO.insertar(con, c);
+                c.setIdComprobante(id);
+                return id;
             } catch (SQLIntegrityConstraintViolationException duplicado) {
                 if (intento >= INTENTOS_NUMERO) {
                     throw duplicado;

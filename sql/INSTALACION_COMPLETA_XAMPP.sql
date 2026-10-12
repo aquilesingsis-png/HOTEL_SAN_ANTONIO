@@ -445,3 +445,17 @@ VALUES
     ('Administrador', 'General', 'admin', 'pbkdf2$210000$FVo8kZDdc3y2STloxFeYyw==$xHoFg4lRwcaVryP+TNi/oX+u3u7qIccvPhDECFrK3nU=', 'ADMINISTRADOR', 1),
     ('Recepcionista', 'Hotel', 'recepcion', 'pbkdf2$210000$5sb/E5bxvBZDFTsjcJZOsQ==$yGorwxiscuwz/WW0hDG2c0nr8h0tVufaluYnIm9Fhyg=', 'RECEPCIONISTA', 1);
 COMMIT;
+
+
+-- ---------------------------------------------------------------------
+-- ACTUALIZACION 12/10/2026 (es la misma de sql/ACTUALIZAR_BD_2026-10-12.sql, para las bases que ya existian)
+-- ---------------------------------------------------------------------
+
+-- COMPROBANTE: cliente, subtotal e IGV, para poder reimprimirlo igual que se emitio.
+ALTER TABLE comprobante
+    ADD COLUMN IF NOT EXISTS cliente_tipo_doc  VARCHAR(10)  NULL,
+    ADD COLUMN IF NOT EXISTS cliente_documento VARCHAR(20)  NULL,
+    ADD COLUMN IF NOT EXISTS cliente_nombre    VARCHAR(150) NULL,
+    ADD COLUMN IF NOT EXISTS cliente_direccion VARCHAR(200) NULL,
+    ADD COLUMN IF NOT EXISTS subtotal          DECIMAL(8,2) NULL,
+    ADD COLUMN IF NOT EXISTS igv               DECIMAL(8,2) NULL;

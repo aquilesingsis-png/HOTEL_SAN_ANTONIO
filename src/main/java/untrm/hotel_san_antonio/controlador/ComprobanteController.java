@@ -6,16 +6,10 @@ package untrm.hotel_san_antonio.controlador;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -29,11 +23,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
 
 import untrm.hotel_san_antonio.dao.EmpresaDAO;
 import untrm.hotel_san_antonio.dao.HuespedDAO;
 import untrm.hotel_san_antonio.modelo.Comprobante;
+import untrm.hotel_san_antonio.modelo.ComprobanteDocumento;
 import untrm.hotel_san_antonio.modelo.CuentaHabitacion;
 import untrm.hotel_san_antonio.modelo.DetalleVenta;
 import untrm.hotel_san_antonio.modelo.Empresa;
@@ -42,6 +36,7 @@ import untrm.hotel_san_antonio.servicio.ComprobanteService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.ConsultaApi;
 import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.util.PdfTexto;
 import untrm.hotel_san_antonio.util.Validador;
 
 /**
@@ -83,11 +78,14 @@ public class ComprobanteController {
 
     private CuentaHabitacion cuentaActual;
     private ComprobanteService.VentaPendiente ventaActual;
+    /** Id del comprobante que se acaba de emitir o de cargar para reimprimir (0 = ninguno). */
+    private int comprobanteEmitidoId;
 
     @FXML
     public void initialize() {
 
-        cmbOrigen.setItems(FXCollections.observableArrayList("Cuenta de habitación", "Venta de tienda"));
+        cmbOrigen.setItems(FXCollections.observableArrayList("Cuenta de habitación", "Venta de tienda",
+                "Comprobante emitido"));
         cmbOrigen.setValue("Cuenta de habitación");
         cmbOrigen.valueProperty().addListener((obs, antes, ahora) -> actualizarOrigen());
 
@@ -109,9 +107,11 @@ public class ComprobanteController {
     }
 
     private void actualizarOrigen() {
-        boolean tienda = "Venta de tienda".equals(cmbOrigen.getValue());
-        lblEtiquetaReferencia.setText(tienda ? "N.º de venta" : "Referencia");
-        txtReferencia.setPromptText(tienda ? "Ej. 5" : "Ej. R-0005 o 207");
+        String origen = cmbOrigen.getValue();
+        boolean tienda = "Venta de tienda".equals(origen);
+        boolean emitido = "Comprobante emitido".equals(origen);
+        lblEtiquetaReferencia.setText(tienda ? "N.º de venta" : emitido ? "N.º de comprobante" : "Referencia");
+        txtReferencia.setPromptText(tienda ? "Ej. 5" : emitido ? "Ej. B001-000009" : "Ej. R-0005 o 207");
         txtReferencia.clear();
         limpiarOperacion();
     }
@@ -131,7 +131,9 @@ public class ComprobanteController {
 
         boolean esVentaTienda = "Venta de tienda".equals(cmbOrigen.getValue());
         try {
-            if (esVentaTienda) {
+            if ("Comprobante emitido".equals(cmbOrigen.getValue())) {
+                cargarComprobanteEmitido(referencia);
+            } else if (esVentaTienda) {
                 cargarVenta(referencia);
             } else {
                 cargarEstadia(referencia);
@@ -142,6 +144,37 @@ public class ComprobanteController {
         } catch (SQLException e) {
             Alertas.mostrarError("Error de base de datos", "No se pudo cargar la operación.\n\n" + e.getMessage());
         }
+    }
+
+    /** Carga un comprobante ya emitido para volver a imprimirlo, tal como quedo guardado. */
+    private void cargarComprobanteEmitido(String referencia) throws SQLException {
+        ComprobanteDocumento documento = comprobanteService.documentoPorNumero(referencia);
+        limpiarOperacion();
+        if (documento == null) {
+            Alertas.mostrarInfo("No encontrado", "No existe un comprobante con el número \"" + referencia + "\".");
+            return;
+        }
+        Comprobante c = documento.getComprobante();
+        comprobanteEmitidoId = c.getIdComprobante();
+
+        ObservableList<FilaDetalle> filas = FXCollections.observableArrayList();
+        for (ComprobanteDocumento.Linea l : documento.getLineas()) {
+            filas.add(new FilaDetalle(l.concepto(), l.cantidad(), l.precio(), l.importe()));
+        }
+        tblDetalle.setItems(filas);
+        mostrarTotales(c.getMontoTotal(), c.getMontoTotal(), BigDecimal.ZERO);
+
+        cmbTipoComprobante.setValue(switch (c.getTipo()) {
+            case "FACTURA" -> "Factura";
+            case "NOTA_VENTA" -> "Nota de venta";
+            default -> "Boleta";
+        });
+        cmbTipoDocumento.setValue("RUC".equals(c.getClienteTipoDoc()) ? "RUC" : "DNI");
+        txtDocumento.setText(c.getClienteDocumento() == null ? "" : c.getClienteDocumento());
+        txtCliente.setText(c.getClienteNombre() == null ? "Cliente varios" : c.getClienteNombre());
+        txtDireccion.setText(c.getClienteDireccion() == null ? "" : c.getClienteDireccion());
+        txtNumero.setText(c.getNumero());
+        btnImprimir.setDisable(false);
     }
 
     private void cargarEstadia(String referencia) throws SQLException {
@@ -294,6 +327,11 @@ public class ComprobanteController {
     @FXML
     private void onGenerar() {
         if (cuentaActual == null && ventaActual == null) {
+            if (comprobanteEmitidoId > 0) {
+                Alertas.mostrarInfo("Comprobante ya emitido",
+                        "Ese comprobante ya fue emitido. Usa «Guardar PDF» para imprimirlo de nuevo.");
+                return;
+            }
             Alertas.mostrarInfo("Sin operación", "Primero carga una operación con \"Cargar cuenta\".");
             return;
         }
@@ -325,16 +363,19 @@ public class ComprobanteController {
         // Boleta y Nota de venta: el cliente puede preferir no dar sus datos (queda "Cliente varios").
 
         try {
+            ComprobanteService.DatosCliente cliente = new ComprobanteService.DatosCliente(
+                    cmbTipoDocumento.getValue(), documento, nombre, txtDireccion.getText());
             Comprobante generado = cuentaActual != null
-                    ? comprobanteService.generarParaEstadia(cuentaActual, tipo)
-                    : comprobanteService.generarParaVenta(ventaActual.venta, tipo);
+                    ? comprobanteService.generarParaEstadia(cuentaActual, tipo, cliente)
+                    : comprobanteService.generarParaVenta(ventaActual.venta, tipo, cliente);
 
+            comprobanteEmitidoId = generado.getIdComprobante();
             txtNumero.setText(generado.getNumero());
             btnImprimir.setDisable(false);
 
             Alertas.mostrarInfo("Comprobante generado", "Se generó el comprobante " + generado.getNumero()
                     + " por " + formatoMoneda(generado.getMontoTotal()) + ".");
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException | IllegalArgumentException e) {
             Alertas.mostrarInfo("No se puede generar", e.getMessage());
         } catch (SQLException e) {
             Alertas.mostrarError("Error de base de datos", "No se pudo generar el comprobante.\n\n" + e.getMessage());
@@ -393,80 +434,26 @@ public class ComprobanteController {
 
     @FXML
     private void onImprimir() {
-        if (txtNumero.getText() == null || txtNumero.getText().isBlank()) {
+        if (txtNumero.getText() == null || txtNumero.getText().isBlank() || comprobanteEmitidoId <= 0) {
             Alertas.mostrarInfo("Guardar PDF", "Primero genere el comprobante.");
             return;
         }
-        FileChooser selector = new FileChooser();
-        selector.setTitle("Guardar comprobante en PDF");
-        selector.setInitialFileName("comprobante_" + txtNumero.getText().replaceAll("[^A-Za-z0-9_-]", "_") + ".pdf");
-        selector.getExtensionFilters().add(new FileChooser.ExtensionFilter("Documento PDF", "*.pdf"));
-        java.io.File elegido = selector.showSaveDialog(btnImprimir.getScene().getWindow());
-        if (elegido == null) return;
-        Path destino = elegido.toPath();
-        if (!destino.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".pdf")) {
-            destino = destino.resolveSibling(destino.getFileName() + ".pdf");
-        }
         try {
-            Files.write(destino, crearPdf("HOTEL SAN ANTONIO\n" + textoComprobante()));
-            Alertas.mostrarInfo("PDF guardado", "Comprobante guardado en:\n" + destino.toAbsolutePath());
-        } catch (IOException error) {
-            Alertas.mostrarError("Guardar PDF", "No se pudo guardar el comprobante.\n" + error.getMessage());
+            // el PDF sale de lo guardado en la base, no de lo que hay en pantalla
+            ComprobanteDocumento documento = comprobanteService.documento(comprobanteEmitidoId);
+            if (documento == null) {
+                Alertas.mostrarInfo("Guardar PDF", "No se encontró el comprobante en la base de datos.");
+                return;
+            }
+            ImpresionComprobante.guardarPdf(btnImprimir.getScene().getWindow(), documento);
+        } catch (SQLException error) {
+            Alertas.mostrarError("Guardar PDF", "No se pudo leer el comprobante.\n" + error.getMessage());
         }
     }
 
     /** PDF A4 de texto, sin depender de una impresora o de bibliotecas externas. */
     static byte[] crearPdf(String texto) throws IOException {
-        Charset codificacion = Charset.forName("windows-1252");
-        List<String> lineas = new ArrayList<>();
-        for (String linea : texto.split("\\R", -1)) {
-            String restante = linea;
-            while (restante.length() > 82) {
-                int corte = restante.lastIndexOf(' ', 82);
-                if (corte < 20) corte = 82;
-                lineas.add(restante.substring(0, corte));
-                restante = restante.substring(corte).stripLeading();
-            }
-            lineas.add(restante);
-        }
-        int paginas = Math.max(1, (lineas.size() + 47) / 48);
-        String[] objetos = new String[4 + paginas * 2];
-        objetos[1] = "<< /Type /Catalog /Pages 2 0 R >>";
-        objetos[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
-        StringBuilder hijos = new StringBuilder();
-        for (int pagina = 0; pagina < paginas; pagina++) {
-            int idPagina = 4 + pagina * 2;
-            int idContenido = idPagina + 1;
-            hijos.append(idPagina).append(" 0 R ");
-            objetos[idPagina] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] "
-                    + "/Resources << /Font << /F1 3 0 R >> >> /Contents " + idContenido + " 0 R >>";
-            StringBuilder contenido = new StringBuilder("BT /F1 11 Tf 48 790 Td 15 TL\n");
-            int fin = Math.min(lineas.size(), (pagina + 1) * 48);
-            for (int i = pagina * 48; i < fin; i++) {
-                String limpia = lineas.get(i).replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)");
-                contenido.append('(').append(limpia).append(") Tj T*\n");
-            }
-            contenido.append("ET\n");
-            byte[] bytesContenido = contenido.toString().getBytes(codificacion);
-            objetos[idContenido] = "<< /Length " + bytesContenido.length + " >>\nstream\n"
-                    + contenido + "endstream";
-        }
-        objetos[2] = "<< /Type /Pages /Kids [ " + hijos + "] /Count " + paginas + " >>";
-        ByteArrayOutputStream salida = new ByteArrayOutputStream();
-        salida.write("%PDF-1.4\n".getBytes(codificacion));
-        int[] posiciones = new int[objetos.length];
-        for (int i = 1; i < objetos.length; i++) {
-            posiciones[i] = salida.size();
-            salida.write((i + " 0 obj\n" + objetos[i] + "\nendobj\n").getBytes(codificacion));
-        }
-        int inicioIndice = salida.size();
-        salida.write(("xref\n0 " + objetos.length + "\n0000000000 65535 f \n").getBytes(codificacion));
-        for (int i = 1; i < objetos.length; i++) {
-            salida.write(String.format(Locale.ROOT, "%010d 00000 n \n", posiciones[i]).getBytes(codificacion));
-        }
-        salida.write(("trailer\n<< /Size " + objetos.length + " /Root 1 0 R >>\nstartxref\n"
-                + inicioIndice + "\n%%EOF\n").getBytes(codificacion));
-        return salida.toByteArray();
+        return PdfTexto.crear(texto);
     }
 
     @FXML
@@ -483,6 +470,7 @@ public class ComprobanteController {
     private void limpiarOperacion() {
         cuentaActual = null;
         ventaActual = null;
+        comprobanteEmitidoId = 0;
         tblDetalle.getItems().clear();
         lblTotal.setText(formatoMoneda(BigDecimal.ZERO));
         lblPagado.setText(formatoMoneda(BigDecimal.ZERO));
