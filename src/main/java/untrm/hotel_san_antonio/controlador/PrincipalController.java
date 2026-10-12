@@ -110,8 +110,12 @@ public class PrincipalController {
         btnDiasPasados = buscarPorRuta(RUTA_DIAS_PASADOS);
         encenderDiasPasados(false);
         consultarDiasSinUso(true);
+        marcarNoLlegaron();
         latido = new javafx.animation.Timeline(new javafx.animation.KeyFrame(
-                javafx.util.Duration.minutes(30), e -> consultarDiasSinUso(true)));
+                javafx.util.Duration.minutes(30), e -> {
+                    consultarDiasSinUso(true);
+                    marcarNoLlegaron();
+                }));
         latido.setCycleCount(javafx.animation.Timeline.INDEFINITE);
         latido.play();
     }
@@ -126,6 +130,25 @@ public class PrincipalController {
         };
         tarea.setOnSucceeded(e -> aplicarEstadoDias(tarea.getValue(), avisar));
         Thread hilo = new Thread(tarea, "latido-sistema");
+        hilo.setDaemon(true);
+        hilo.start();
+    }
+
+    /** Las reservas confirmadas que no llegaron pasan solas a canceladas ("No llegó"); solo recepcion y administrador. */
+    private void marcarNoLlegaron() {
+        Usuario actual = SesionActual.getUsuario();
+        if (actual == null || "LIMPIEZA".equals(actual.getRol())) {
+            return;
+        }
+        javafx.concurrent.Task<Integer> tarea = new javafx.concurrent.Task<>() {
+            @Override
+            protected Integer call() throws Exception {
+                return new untrm.hotel_san_antonio.servicio.ReservaService().marcarNoLlegaron();
+            }
+        };
+        tarea.setOnFailed(e -> untrm.hotel_san_antonio.util.Registro.fallo(
+                "PrincipalController.marcarNoLlegaron", tarea.getException()));
+        Thread hilo = new Thread(tarea, "no-llegaron");
         hilo.setDaemon(true);
         hilo.start();
     }

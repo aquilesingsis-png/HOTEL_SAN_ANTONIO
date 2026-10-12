@@ -433,6 +433,11 @@ public class DashboardController {
                                 + ": " + String.join(", ", r.salidasHoy)));
             }
         }
+        if (!r.estadiasVencidas.isEmpty()) {
+            listaAlertas.getChildren().add(crearAlerta("#D9433A",
+                    plural(r.estadiasVencidas.size(), "estadía vencida", "estadías vencidas")
+                            + ": hab. " + String.join(", ", r.estadiasVencidas)));
+        }
         if (r.diasSinRegistrar > 0 && r.registroAbierto) {
             listaAlertas.getChildren().add(crearAlerta("#E3A12F", plural(r.diasSinRegistrar,
                     "día sin registrar (abra «Registro de días pasados»)",

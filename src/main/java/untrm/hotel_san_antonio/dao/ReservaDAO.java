@@ -294,6 +294,23 @@ public class ReservaDAO {
         }
     }
 
+    /**
+     * Reservas confirmadas que no llegaron: se dan por perdidas desde el mediodia del dia siguiente al de la
+     * llegada (un huesped puede llegar de madrugada y seguir siendo de la noche reservada).
+     */
+    public List<Reserva> listarNoLlegaron(Connection con) throws SQLException {
+        String sql = SELECT_BASE + "WHERE r.estado = 'CONFIRMADA' "
+                + "AND TIMESTAMP(DATE_ADD(r.fecha_checkin, INTERVAL 1 DAY), '12:00:00') <= NOW() "
+                + "ORDER BY r.fecha_checkin, r.id_reserva FOR UPDATE";
+        List<Reserva> lista = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(mapearFila(rs));
+            }
+        }
+        return lista;
+    }
+
     /** Bloquea la habitación para serializar altas concurrentes sobre la misma fila. */
     public void bloquearHabitacion(Connection con, int idHabitacion) throws SQLException {
         try (PreparedStatement ps = con.prepareStatement(

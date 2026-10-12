@@ -142,6 +142,37 @@ public class ReservaService {
         }
     }
 
+    /**
+     * Cancela las reservas confirmadas cuyo huesped no llego (desde el mediodia del dia siguiente al de su llegada).
+     * El adelanto no se devuelve: queda como cobrado, igual que en cualquier cancelacion.
+     * @return cuantas reservas se marcaron
+     */
+    public int marcarNoLlegaron() throws SQLException {
+        int idUsuario = obtenerIdUsuarioAutenticado();
+        try (Connection conexion = ConexionBD.conectar()) {
+            conexion.setAutoCommit(false);
+            try {
+                List<Reserva> noLlegaron = reservaDAO.listarNoLlegaron(conexion);
+                int marcadas = 0;
+                for (Reserva r : noLlegaron) {
+                    if (reservaDAO.cancelarSiCancelable(conexion, r.getIdReserva(), "No llegó",
+                            "Cancelada por el sistema: no hizo check-in hasta el mediodía del día siguiente a su llegada. "
+                            + "El adelanto no se devuelve.")) {
+                        auditoriaDAO.registrar(conexion, idUsuario, "RESERVA_NO_LLEGO", "reserva", r.getIdReserva(),
+                                "hab. " + r.getNumeroHabitacion() + " · debía llegar el "
+                                + r.getFechaCheckin().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                        marcadas++;
+                    }
+                }
+                conexion.commit();
+                return marcadas;
+            } catch (SQLException | RuntimeException error) {
+                conexion.rollback();
+                throw error;
+            }
+        }
+    }
+
     private String numeroHabitacion(Connection con, int idHabitacion) throws SQLException {
         Habitacion h = habitacionDAO.buscarPorId(con, idHabitacion);
         return h == null ? String.valueOf(idHabitacion) : h.getNumero();
