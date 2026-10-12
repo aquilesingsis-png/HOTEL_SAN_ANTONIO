@@ -6,6 +6,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -189,5 +190,50 @@ public class CajaDAO {
             }
         }
         return sql.toString();
+    }
+
+    private final AuditoriaDAO auditoria = new AuditoriaDAO();
+
+    private int claveGenerada(PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.getGeneratedKeys()) {
+            if (!rs.next()) throw new SQLException("No se obtuvo el identificador generado.");
+            return rs.getInt(1);
+        }
+    }
+
+    /** Un ingreso o egreso de caja escrito a mano (solo el Administrador). */
+    public void guardarMovimientoCaja(String tipo, String concepto, String metodo,
+                                      BigDecimal monto, String referencia, String observacion,
+                                      String turno) throws SQLException {
+        Permisos.requerir("ADMINISTRADOR");
+        if (!List.of("INGRESO", "EGRESO").contains(tipo))
+            throw new IllegalArgumentException("Seleccione ingreso o egreso.");
+        if (concepto == null || concepto.isBlank() || concepto.length() > 150)
+            throw new IllegalArgumentException("Indique un concepto de hasta 150 caracteres.");
+        if (!List.of("EFECTIVO", "TARJETA", "TRANSFERENCIA", "YAPE").contains(metodo))
+            throw new IllegalArgumentException("Seleccione un método de pago válido.");
+        if (monto == null || monto.signum() <= 0 || monto.scale() > 2
+                || monto.compareTo(new BigDecimal("99999999.99")) > 0) {
+            throw new IllegalArgumentException("El monto debe ser mayor que cero, con hasta dos decimales.");
+        }
+        if (turno == null || turno.isBlank() || turno.length() > 50)
+            throw new IllegalArgumentException("Indique el turno o caja (hasta 50 caracteres).");
+        String nota = "Turno/caja: " + turno.trim()
+                + (observacion == null || observacion.isBlank() ? "" : "\n" + observacion.trim());
+        if (nota.length() > 500) throw new IllegalArgumentException("La observación supera 500 caracteres.");
+        try (Connection con = ConexionBD.conectar()) {
+            con.setAutoCommit(false);
+            try (PreparedStatement ps = con.prepareStatement(
+                    "INSERT INTO movimiento_caja(id_usuario,tipo,concepto,metodo_pago,monto,referencia,observacion) "
+                    + "VALUES (?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
+                ps.setInt(1, SesionActual.getUsuario().getIdUsuario()); ps.setString(2, tipo); ps.setString(3, concepto.trim());
+                ps.setString(4, metodo); ps.setBigDecimal(5, monto);
+                ps.setString(6, referencia); ps.setString(7, nota);
+                ps.executeUpdate();
+                auditoria.registrar(con, SesionActual.getUsuario().getIdUsuario(), "CAJA_MOVIMIENTO", "movimiento_caja",
+                        claveGenerada(ps), tipo + " " + monto + " " + concepto.trim());
+                con.commit();
+            } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
+        }
     }
 }

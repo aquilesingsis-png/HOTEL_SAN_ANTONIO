@@ -1,6 +1,5 @@
 package untrm.hotel_san_antonio.controlador;
 
-import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +15,7 @@ import javafx.stage.Stage;
 import untrm.hotel_san_antonio.servicio.UsuarioService;
 import untrm.hotel_san_antonio.servicio.UsuarioService.Cambio;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Consulta;
 import untrm.hotel_san_antonio.util.EstiloGlobal;
 
 /** Ventana con el historial de cambios de usuarios: altas, ediciones, cambios de rol y recuperaciones. */
@@ -34,6 +34,7 @@ public class HistorialUsuariosController {
 
     private final UsuarioService servicio = new UsuarioService();
     private List<Cambio> todos = List.of();
+    private final Consulta<List<Cambio>> consulta = new Consulta<>();
 
     @FXML
     public void initialize() {
@@ -47,12 +48,15 @@ public class HistorialUsuariosController {
         }
         txtBuscar.textProperty().addListener((o, antes, ahora) -> filtrar());
         EstiloGlobal.restilizarEncabezados(tabla);
-        try {
-            todos = servicio.listarHistorial();
-        } catch (SQLException | SecurityException error) {
-            Alertas.mostrarError("Historial", "No se pudo cargar el historial.\n\n" + error.getMessage());
-        }
-        filtrar();
+        consulta.lanzar(tabla, () -> servicio.listarHistorial(),
+                lista -> {
+                    todos = lista;
+                    filtrar();
+                },
+                error -> {
+                    Alertas.mostrarError("Historial", "No se pudo cargar el historial.\n\n" + error.getMessage());
+                    filtrar();
+                });
     }
 
     private void filtrar() {

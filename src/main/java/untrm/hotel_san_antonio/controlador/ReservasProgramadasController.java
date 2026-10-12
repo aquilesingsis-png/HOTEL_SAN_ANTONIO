@@ -1,7 +1,6 @@
 package untrm.hotel_san_antonio.controlador;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -17,6 +16,7 @@ import untrm.hotel_san_antonio.dao.ReservaDAO;
 import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Consulta;
 import untrm.hotel_san_antonio.util.Navegacion;
 
 /** Vista "Lista" de la pantalla Reservas. El texto a buscar se lo pasa ReservasController. */
@@ -49,6 +49,7 @@ public class ReservasProgramadasController {
 
     private final ReservaService reservaService = new ReservaService();
     private List<Reserva> resultadoCompleto = List.of();
+    private final Consulta<List<Reserva>> consulta = new Consulta<>();
     private String textoBusqueda = "";
     private int paginaActual = 1;
 
@@ -113,17 +114,24 @@ public class ReservasProgramadasController {
     }
 
     private void buscarYMostrar() {
-        try {
-            resultadoCompleto = reservaService.buscar(
-                    textoBusqueda, estadoSeleccionado(), dpDesde.getValue(), dpHasta.getValue());
-        } catch (IllegalArgumentException error) {
-            Alertas.mostrarAdvertencia("Filtro inválido", error.getMessage());
-            return;
-        } catch (SQLException error) {
-            resultadoCompleto = List.of();
-            Alertas.mostrarError("Error de base de datos", "No se pudieron cargar las reservas.\n\n" + error.getMessage());
-        }
-        actualizarPagina();
+        String texto = textoBusqueda;
+        String estado = estadoSeleccionado();
+        java.time.LocalDate desde = dpDesde.getValue();
+        java.time.LocalDate hasta = dpHasta.getValue();
+        consulta.lanzar(tablaReservas, () -> reservaService.buscar(texto, estado, desde, hasta),
+                lista -> {
+                    resultadoCompleto = lista;
+                    actualizarPagina();
+                },
+                error -> {
+                    if (error instanceof IllegalArgumentException) {
+                        Alertas.mostrarAdvertencia("Filtro inválido", error.getMessage());
+                        return;
+                    }
+                    resultadoCompleto = List.of();
+                    Alertas.mostrarError("Error de base de datos", "No se pudieron cargar las reservas.\n\n" + error.getMessage());
+                    actualizarPagina();
+                });
     }
 
     @FXML

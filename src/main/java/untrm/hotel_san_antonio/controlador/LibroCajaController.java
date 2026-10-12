@@ -25,6 +25,7 @@ import untrm.hotel_san_antonio.dao.CajaDAO;
 import untrm.hotel_san_antonio.dao.CajaDAO.Movimiento;
 import untrm.hotel_san_antonio.servicio.VentaService;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Consulta;
 import untrm.hotel_san_antonio.util.ExportarArchivo;
 import untrm.hotel_san_antonio.util.Navegacion;
 import untrm.hotel_san_antonio.util.PdfTabla;
@@ -80,6 +81,7 @@ public class LibroCajaController {
     private List<Movimiento> resultado = List.of();
     private CajaDAO.Totales totalesActuales = new CajaDAO.Totales(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
     private boolean recortado;
+    private final Consulta<Carga> consulta = new Consulta<>();
     private int pagina = 1;
 
     @FXML
@@ -119,26 +121,36 @@ public class LibroCajaController {
         buscar();
     }
 
+    /** Lo que trae una busqueda: la lista (con uno de mas que el limite, para saber si hay mas) y los totales completos. */
+    private record Carga(List<Movimiento> lista, CajaDAO.Totales totales) { }
+
     @FXML
     private void buscar() {
-        try {
-            resultado = cajaDAO.listar(dpDesde.getValue(), dpHasta.getValue(), tipoElegido(), metodoElegido(),
-                    origenElegido(), txtBuscar.getText());
-            totalesActuales = cajaDAO.totales(dpDesde.getValue(), dpHasta.getValue(), tipoElegido(), metodoElegido(),
-                    origenElegido(), txtBuscar.getText());
-        } catch (SQLException error) {
-            resultado = List.of();
-            totalesActuales = new CajaDAO.Totales(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
-            Alertas.mostrarError("Error de base de datos", "No se pudo cargar la caja.\n\n" + error.getMessage());
-        } catch (SecurityException error) {
-            resultado = List.of();
-            Alertas.mostrarError("Caja", error.getMessage());
-        }
+        LocalDate desde = dpDesde.getValue();
+        LocalDate hasta = dpHasta.getValue();
+        String tipo = tipoElegido();
+        String metodo = metodoElegido();
+        String origen = origenElegido();
+        String texto = txtBuscar.getText();
+        consulta.lanzar(tabla,
+                () -> new Carga(cajaDAO.listar(desde, hasta, tipo, metodo, origen, texto),
+                        cajaDAO.totales(desde, hasta, tipo, metodo, origen, texto)),
+                carga -> mostrarCarga(carga.lista(), carga.totales()),
+                error -> {
+                    mostrarCarga(List.of(), new CajaDAO.Totales(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
+                    if (error instanceof SecurityException) {
+                        Alertas.mostrarError("Caja", error.getMessage());
+                    } else {
+                        Alertas.mostrarError("Error de base de datos", "No se pudo cargar la caja.\n\n" + error.getMessage());
+                    }
+                });
+    }
+
+    private void mostrarCarga(List<Movimiento> lista, CajaDAO.Totales totales) {
+        totalesActuales = totales;
         // la lista trae uno de mas que el limite: asi se sabe que hay mas y no se muestra en silencio un corte
-        recortado = resultado.size() > CajaDAO.LIMITE;
-        if (recortado) {
-            resultado = List.copyOf(resultado.subList(0, CajaDAO.LIMITE));
-        }
+        recortado = lista.size() > CajaDAO.LIMITE;
+        resultado = recortado ? List.copyOf(lista.subList(0, CajaDAO.LIMITE)) : lista;
         pagina = 1;
         mostrar();
     }

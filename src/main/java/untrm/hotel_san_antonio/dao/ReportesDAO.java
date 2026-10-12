@@ -7,6 +7,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
@@ -16,7 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import untrm.hotel_san_antonio.dao.ModulosDAO.Registro;
+import java.util.TreeMap;
 import untrm.hotel_san_antonio.util.ConexionBD;
 import untrm.hotel_san_antonio.util.Permisos;
 
@@ -43,7 +44,95 @@ public class ReportesDAO {
     private static final int MAX_BARRAS = 31;
     private static final int MAX_RANKING = 10;
 
-    private final ModulosDAO modulosDAO = new ModulosDAO();
+    /** Una fila del reporte de ocupacion: un tipo de habitacion en un dia. */
+    public record FilaOcupacion(int id, List<String> celdas, LocalDate fecha) { }
+
+    private static final class OcupacionDia {
+        int disponibles;
+        final Set<Integer> habitaciones = new HashSet<>();
+        int reservas;
+        int huespedes;
+    }
+
+    /** Cuenta todas las noches del período, incluidas las de ocupación cero. */
+    public List<FilaOcupacion> ocupacionDiaria(LocalDate desde, LocalDate hasta) throws SQLException {
+        LocalDate inicio = desde == null ? LocalDate.now().minusDays(29) : desde;
+        LocalDate fin = hasta == null ? LocalDate.now() : hasta;
+        long noches = java.time.temporal.ChronoUnit.DAYS.between(inicio, fin) + 1;
+        if (noches <= 0 || noches > 3660)
+            throw new IllegalArgumentException("El período de ocupación debe tener entre 1 y 3660 días.");
+        TreeMap<LocalDate, Map<String, OcupacionDia>> porFecha = new TreeMap<>();
+        try (Connection con = ConexionBD.conectar()) {
+            Map<String, Integer> inventario = new TreeMap<>();
+            try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(
+                    "SELECT t.nombre,COUNT(h.id_habitacion) FROM tipo_habitacion t "
+                    + "LEFT JOIN habitacion h ON h.id_tipo=t.id_tipo GROUP BY t.id_tipo,t.nombre")) {
+                while (rs.next()) if (rs.getInt(2) > 0) inventario.put(rs.getString(1), rs.getInt(2));
+            }
+            for (LocalDate fecha = inicio; !fecha.isAfter(fin); fecha = fecha.plusDays(1)) {
+                Map<String, OcupacionDia> tipos = new TreeMap<>();
+                for (var tipo : inventario.entrySet()) {
+                    OcupacionDia dia = new OcupacionDia();
+                    dia.disponibles = tipo.getValue();
+                    tipos.put(tipo.getKey(), dia);
+                }
+                porFecha.put(fecha, tipos);
+            }
+            String sql = "SELECT r.fecha_checkin,r.fecha_checkout,r.num_huespedes,h.id_habitacion,t.nombre "
+                    + "FROM reserva r JOIN habitacion h ON h.id_habitacion=r.id_habitacion "
+                    + "JOIN tipo_habitacion t ON t.id_tipo=h.id_tipo "
+                    + "WHERE r.estado <> 'CANCELADA' "
+                    + "AND r.fecha_checkin<=? AND r.fecha_checkout>?";
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setDate(1, Date.valueOf(fin));
+                ps.setDate(2, Date.valueOf(inicio));
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        LocalDate ingreso = rs.getDate(1).toLocalDate();
+                        LocalDate salida = rs.getDate(2).toLocalDate();
+                        for (LocalDate fecha = ingreso.isBefore(inicio) ? inicio : ingreso;
+                             fecha.isBefore(salida) && !fecha.isAfter(fin); fecha = fecha.plusDays(1)) {
+                            OcupacionDia dia = porFecha.get(fecha).get(rs.getString(5));
+                            dia.habitaciones.add(rs.getInt(4));
+                            dia.reservas++;
+                            dia.huespedes += rs.getInt(3);
+                        }
+                    }
+                }
+            }
+        }
+        List<FilaOcupacion> resultado = new ArrayList<>();
+        for (var fecha : porFecha.descendingMap().entrySet()) {
+            for (var tipo : fecha.getValue().entrySet()) {
+                OcupacionDia dia = tipo.getValue();
+                int ocupadas = dia.habitaciones.size();
+                String porcentaje = dia.disponibles == 0 ? "0.0" : BigDecimal.valueOf(ocupadas * 100L)
+                        .divide(BigDecimal.valueOf(dia.disponibles), 1, RoundingMode.HALF_UP).toPlainString();
+                resultado.add(new FilaOcupacion(0, List.of(fecha.getKey().toString(), tipo.getKey(),
+                        String.valueOf(dia.disponibles), String.valueOf(ocupadas), porcentaje,
+                        String.valueOf(dia.reservas), String.valueOf(dia.huespedes)), fecha.getKey()));
+            }
+        }
+        return resultado;
+    }
+
+    public List<String> categorias() throws SQLException {
+        List<String> lista = new ArrayList<>();
+        try (Connection con = ConexionBD.conectar(); Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery("SELECT nombre FROM categoria ORDER BY nombre")) {
+            while (rs.next()) lista.add(rs.getString(1));
+        }
+        return lista;
+    }
+
+    public List<String> tiposHabitacion() throws SQLException {
+        List<String> tipos = new ArrayList<>();
+        try (Connection con = ConexionBD.conectar(); Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery("SELECT nombre FROM tipo_habitacion ORDER BY nombre")) {
+            while (rs.next()) tipos.add(rs.getString(1));
+        }
+        return tipos;
+    }
 
     private void validar(LocalDate desde, LocalDate hasta) {
         Permisos.requerir("ADMINISTRADOR");
@@ -67,9 +156,9 @@ public class ReportesDAO {
         Map<String, long[]> porPeriodoYTipo = new LinkedHashMap<>();
         Map<String, long[]> porPeriodo = new LinkedHashMap<>();
         Map<String, LocalDate> inicioPeriodo = new LinkedHashMap<>();
-        List<Registro> dias = modulosDAO.ocupacionDiaria(desde, hasta);
+        List<FilaOcupacion> dias = ocupacionDiaria(desde, hasta);
         for (int i = dias.size() - 1; i >= 0; i--) { // del mas antiguo al mas reciente
-            Registro dia = dias.get(i);
+            FilaOcupacion dia = dias.get(i);
             List<String> c = dia.celdas();
             if (tipo != null && !tipo.equals(c.get(1))) {
                 continue;

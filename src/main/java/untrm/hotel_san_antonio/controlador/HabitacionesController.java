@@ -11,6 +11,7 @@ import untrm.hotel_san_antonio.servicio.CuentaService;
 import untrm.hotel_san_antonio.servicio.HabitacionService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Consulta;
 import untrm.hotel_san_antonio.util.Navegacion;
 
 import java.io.IOException;
@@ -38,6 +39,7 @@ public class HabitacionesController {
     private final ReservaService reservaService = new ReservaService();
 
     private List<Habitacion> habitaciones = new ArrayList<>();
+    private final Consulta<List<Habitacion>> consulta = new Consulta<>();
     private String estadoSeleccionado = null; // null = todos los estados
     private String tipoSeleccionado = null;   // null = todos los tipos
 
@@ -65,14 +67,14 @@ public class HabitacionesController {
     }
 
     private void cargarHabitaciones() {
-        try {
-            habitaciones = habitacionDAO.listar();
-        } catch (SQLException e) {
-            Alertas.mostrarError("Error de conexión",
-                    "No se pudieron cargar las habitaciones. Verifica que MySQL/XAMPP esté encendido.\n\n" + e.getMessage());
-            return;
-        }
-        construirTarjetas();
+        consulta.lanzar(contenedorPisos, () -> habitacionDAO.listar(),
+                lista -> {
+                    habitaciones = lista;
+                    construirTarjetas();
+                },
+                error -> Alertas.mostrarError("Error de conexión",
+                        "No se pudieron cargar las habitaciones. Verifica que MySQL/XAMPP esté encendido.\n\n"
+                        + error.getMessage()));
     }
 
     private void construirTarjetas() {

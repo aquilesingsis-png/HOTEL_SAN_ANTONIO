@@ -19,10 +19,10 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
-import untrm.hotel_san_antonio.dao.ModulosDAO;
 import untrm.hotel_san_antonio.dao.ReportesDAO;
 import untrm.hotel_san_antonio.dao.ReportesDAO.Resultado;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Consulta;
 import untrm.hotel_san_antonio.util.EstiloGlobal;
 import untrm.hotel_san_antonio.util.ExportarArchivo;
 import untrm.hotel_san_antonio.util.PdfTabla;
@@ -68,7 +68,7 @@ public class ReportesController {
     @FXML private TableView<List<String>> tabla;
 
     private final ReportesDAO dao = new ReportesDAO();
-    private final ModulosDAO modulosDAO = new ModulosDAO();
+    private final Consulta<Resultado> consulta = new Consulta<>();
     private Resultado ultimo;
     private String ultimoReporte;
     private String ultimaAgrupacion;
@@ -114,7 +114,7 @@ public class ReportesController {
                 case OCUPACION -> {
                     lblFiltro1.setText("Tipo de habitación");
                     cmbFiltro1.getItems().setAll(TODOS);
-                    cmbFiltro1.getItems().addAll(listaSegura(() -> modulosDAO.tiposHabitacion()));
+                    cmbFiltro1.getItems().addAll(listaSegura(() -> dao.tiposHabitacion()));
                     cmbAgrupar.getItems().setAll("Día", "Semana", "Mes");
                 }
                 case INGRESOS -> {
@@ -130,7 +130,7 @@ public class ReportesController {
                 default -> {
                     lblFiltro1.setText("Categoría");
                     cmbFiltro1.getItems().setAll(TODOS);
-                    cmbFiltro1.getItems().addAll(listaSegura(() -> modulosDAO.categorias()));
+                    cmbFiltro1.getItems().addAll(listaSegura(() -> dao.categorias()));
                     boxBuscar.setVisible(true);
                     boxBuscar.setManaged(true);
                     cmbAgrupar.getItems().setAll("Producto", "Categoría", "Día", "Mes");
@@ -172,24 +172,30 @@ public class ReportesController {
             return;
         }
         String agrupacion = cmbAgrupar.getValue() == null ? "" : cmbAgrupar.getValue();
-        try {
-            Resultado r = switch (reporte) {
-                case OCUPACION -> dao.ocupacion(dpDesde.getValue(), dpHasta.getValue(),
-                        elegido(cmbFiltro1), agrupacion);
-                case INGRESOS -> dao.ingresos(dpDesde.getValue(), dpHasta.getValue(), elegido(cmbFiltro1),
-                        metodo(), agrupacion);
-                default -> dao.ventas(dpDesde.getValue(), dpHasta.getValue(), elegido(cmbFiltro1),
-                        txtBuscar.getText(), agrupacion);
-            };
-            ultimo = r;
-            ultimoReporte = reporte;
-            ultimaAgrupacion = agrupacion;
-            mostrar(r);
-        } catch (IllegalArgumentException | SecurityException error) {
-            Alertas.mostrarAdvertencia("Reportes", error.getMessage());
-        } catch (SQLException error) {
-            Alertas.mostrarError("Error de base de datos", "No se pudo generar el reporte.\n\n" + error.getMessage());
-        }
+        LocalDate desde = dpDesde.getValue();
+        LocalDate hasta = dpHasta.getValue();
+        String filtro = elegido(cmbFiltro1);
+        String metodo = metodo();
+        String texto = txtBuscar.getText();
+        consulta.lanzar(tabla,
+                () -> switch (reporte) {
+                    case OCUPACION -> dao.ocupacion(desde, hasta, filtro, agrupacion);
+                    case INGRESOS -> dao.ingresos(desde, hasta, filtro, metodo, agrupacion);
+                    default -> dao.ventas(desde, hasta, filtro, texto, agrupacion);
+                },
+                r -> {
+                    ultimo = r;
+                    ultimoReporte = reporte;
+                    ultimaAgrupacion = agrupacion;
+                    mostrar(r);
+                },
+                error -> {
+                    if (error instanceof IllegalArgumentException || error instanceof SecurityException) {
+                        Alertas.mostrarAdvertencia("Reportes", error.getMessage());
+                    } else {
+                        Alertas.mostrarError("Error de base de datos", "No se pudo generar el reporte.\n\n" + error.getMessage());
+                    }
+                });
     }
 
     private String elegido(ChoiceBox<String> caja) {

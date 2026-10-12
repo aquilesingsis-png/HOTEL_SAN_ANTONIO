@@ -26,6 +26,7 @@ import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Consulta;
 import untrm.hotel_san_antonio.util.Navegacion;
 
 public class CalendarioOcupacionController {
@@ -54,6 +55,7 @@ public class CalendarioOcupacionController {
     private LocalDate finPeriodo;
     private List<Habitacion> habitaciones = List.of();
     private Map<Integer, List<Reserva>> reservasPorHabitacion = Map.of();
+    private final Consulta<Datos> consulta = new Consulta<>();
     private String textoCliente = "";
 
     @FXML
@@ -123,22 +125,33 @@ public class CalendarioOcupacionController {
         cargarDatos();
     }
 
+    /** Lo que trae una consulta del calendario: las habitaciones y las reservas del periodo. */
+    private record Datos(List<Habitacion> habitaciones, Map<Integer, List<Reserva>> reservas) { }
+
     private void cargarDatos() {
-        try {
-            habitaciones = reservaService.listarHabitaciones();
-            reservasPorHabitacion = reservaService.listarEnRango(inicioPeriodo, finPeriodo).stream()
-                    .collect(Collectors.groupingBy(Reserva::getIdHabitacion));
-            renderizarCabecera();
-            renderizarHabitaciones();
-        } catch (SQLException error) {
-            habitaciones = List.of();
-            reservasPorHabitacion = Map.of();
-            mostrarSinDatos("No se pudo cargar el calendario.");
-            Alertas.mostrarError("Error de base de datos", error.getMessage());
-        } catch (IOException error) {
-            mostrarSinDatos("No se pudieron cargar los componentes del calendario.");
-            Alertas.mostrarError("Error de interfaz", error.getMessage());
-        }
+        LocalDate desde = inicioPeriodo;
+        LocalDate hasta = finPeriodo;
+        consulta.lanzar(contenedorHabitaciones,
+                () -> new Datos(reservaService.listarHabitaciones(),
+                        reservaService.listarEnRango(desde, hasta).stream()
+                                .collect(Collectors.groupingBy(Reserva::getIdHabitacion))),
+                datos -> {
+                    habitaciones = datos.habitaciones();
+                    reservasPorHabitacion = datos.reservas();
+                    try {
+                        renderizarCabecera();
+                        renderizarHabitaciones();
+                    } catch (IOException error) {
+                        mostrarSinDatos("No se pudieron cargar los componentes del calendario.");
+                        Alertas.mostrarError("Error de interfaz", error.getMessage());
+                    }
+                },
+                error -> {
+                    habitaciones = List.of();
+                    reservasPorHabitacion = Map.of();
+                    mostrarSinDatos("No se pudo cargar el calendario.");
+                    Alertas.mostrarError("Error de base de datos", error.getMessage());
+                });
     }
 
     private void renderizarCabecera() throws IOException {
