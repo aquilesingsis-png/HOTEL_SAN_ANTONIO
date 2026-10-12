@@ -2,6 +2,7 @@ package untrm.hotel_san_antonio.servicio;
 
 /** La cuenta está bloqueada por demasiados intentos de ingreso fallidos. */
 public class CuentaBloqueadaException extends Exception {
+    private static final long serialVersionUID = 1L;
     private final int minutos;
 
     public CuentaBloqueadaException(int minutos) {

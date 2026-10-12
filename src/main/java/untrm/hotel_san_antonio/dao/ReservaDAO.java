@@ -426,14 +426,6 @@ public class ReservaDAO {
         }
     }
 
-    public void actualizarEstado(Connection con, int idReserva, String estado) throws SQLException {
-        try (PreparedStatement ps = con.prepareStatement("UPDATE reserva SET estado = ? WHERE id_reserva = ?")) {
-            ps.setString(1, estado);
-            ps.setInt(2, idReserva);
-            ps.executeUpdate();
-        }
-    }
-
     public boolean actualizarEstadoSiEs(Connection con, int idReserva, String estadoEsperado,
                                          String nuevoEstado) throws SQLException {
         String sql = "UPDATE reserva SET estado = ? WHERE id_reserva = ? AND estado = ?";

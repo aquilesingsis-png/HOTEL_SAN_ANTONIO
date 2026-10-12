@@ -59,19 +59,6 @@ public class ProductoDAO {
         return productos;
     }
 
-    public int obtenerStockParaActualizar(Connection cn, int idProducto) throws SQLException {
-        String sql = "SELECT stock FROM producto WHERE id_producto = ? AND activo = 1 FOR UPDATE";
-        try (PreparedStatement ps = cn.prepareStatement(sql)) {
-            ps.setInt(1, idProducto);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    throw new SQLException("El producto ya no está disponible.");
-                }
-                return rs.getInt("stock");
-            }
-        }
-    }
-
     /** Consulta el producto actual sin depender del filtro visible en la tienda. */
     public Producto buscarActivoPorId(int idProducto) throws SQLException {
         String sql = "SELECT id_producto, nombre, precio, stock FROM producto "

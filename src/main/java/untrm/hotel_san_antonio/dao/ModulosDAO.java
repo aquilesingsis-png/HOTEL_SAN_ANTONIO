@@ -126,15 +126,6 @@ public class ModulosDAO {
         return tipos;
     }
 
-    public List<String> responsables() throws SQLException {
-        List<String> nombres = new ArrayList<>();
-        try (Connection con = ConexionBD.conectar(); Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery("SELECT CONCAT(nombre,' ',apellido) FROM usuario ORDER BY nombre,apellido")) {
-            while (rs.next()) nombres.add(rs.getString(1));
-        }
-        return nombres;
-    }
-
     private int claveGenerada(PreparedStatement ps) throws SQLException {
         try (ResultSet rs = ps.getGeneratedKeys()) {
             if (!rs.next()) throw new SQLException("No se obtuvo el identificador generado.");

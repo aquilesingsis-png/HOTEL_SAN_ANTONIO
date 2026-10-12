@@ -94,31 +94,6 @@ public class UsuarioService {
         try (Connection con = ConexionBD.conectar()) { return usuarios.listar(con); }
     }
 
-    public void asignarRol(int idUsuario, String nuevoRol) throws SQLException {
-        Permisos.requerir("ADMINISTRADOR");
-        if (idUsuario == SesionActual.getUsuario().getIdUsuario())
-            throw new IllegalArgumentException("No cambie su propio rol durante una sesión activa.");
-        try (Connection con = ConexionBD.conectar()) {
-            con.setAutoCommit(false);
-            try {
-                Usuario afectado = usuarios.bloquearPorId(con, idUsuario);
-                if (afectado == null) throw new IllegalArgumentException("El usuario no existe.");
-                if (!usuarios.listarRoles(con).contains(nuevoRol))
-                    throw new IllegalArgumentException("El rol no existe en la base de datos.");
-                if (nuevoRol.equals(afectado.getRol())) return;
-                if ("ADMINISTRADOR".equals(afectado.getRol())
-                        && usuarios.contarAdministradoresActivos(con) <= 1)
-                    throw new IllegalStateException("Debe permanecer al menos un administrador activo.");
-                usuarios.cambiarRol(con, idUsuario, nuevoRol);
-                auditoria.registrar(con, SesionActual.getUsuario().getIdUsuario(),
-                        "USUARIO_ROL", "usuario", idUsuario, afectado.getRol() + " → " + nuevoRol);
-                con.commit();
-            } catch (SQLException | RuntimeException error) {
-                con.rollback(); throw error;
-            }
-        }
-    }
-
     /** Una fila del historial de cambios de usuarios. */
     public record Cambio(java.time.LocalDateTime fecha, String afectado, String accion, String detalle, String realizadoPor) { }
 

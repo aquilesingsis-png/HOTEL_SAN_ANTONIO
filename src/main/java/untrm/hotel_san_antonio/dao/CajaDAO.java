@@ -98,18 +98,18 @@ public class CajaDAO {
         return lista;
     }
 
-    /**
-     * @param tipo   INGRESO, EGRESO, CARGO, ANULADA o null (todos)
-     * @param metodo EFECTIVO, YAPE, TRANSFERENCIA, TARJETA o null (todos)
-     * @param origen Alojamiento, Carrito, Manual, Gasto o null (todos)
-     * @param texto  se busca en el concepto, el cliente, el responsable y el documento
-     */
     /** Cuantos renglones trae como maximo la lista; si hay mas, la pantalla avisa y los totales siguen completos. */
     public static final int LIMITE = 5000;
 
     /** Ingresos, egresos y efectivo en caja (ingresos menos egresos en efectivo) de todo lo que cumple los filtros. */
     public record Totales(BigDecimal ingresos, BigDecimal egresos, BigDecimal efectivo) { }
 
+    /**
+     * @param tipo   INGRESO, EGRESO, CARGO, ANULADA o null (todos)
+     * @param metodo EFECTIVO, YAPE, TRANSFERENCIA, TARJETA o null (todos)
+     * @param origen Alojamiento, Carrito, Manual, Gasto o null (todos)
+     * @param texto  se busca en el concepto, el cliente, el responsable y el documento
+     */
     public List<Movimiento> listar(LocalDate desde, LocalDate hasta, String tipo, String metodo,
                                    String origen, String texto) throws SQLException {
         Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");

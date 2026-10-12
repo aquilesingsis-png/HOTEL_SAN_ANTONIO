@@ -390,19 +390,38 @@ public class CarritoTiendaController {
     }
 
     private void agregarProducto(Producto p) {
-        if(p.getStock()<=0){ Alertas.mostrarInfo("Stock", "Este producto no tiene stock disponible."); return; }
-        DetalleVenta d=buscarDetalle(p.getIdProducto());
-        if(d==null){ 
-            d=new DetalleVenta(); d.setIdProducto(p.getIdProducto()); d.setNombreProducto(p.getNombre()); d.setCantidad(1); d.setPrecioUnitario(p.getPrecio()); d.setSubtotal(p.getPrecio()); carrito.add(d); }
-        else { 
-            if(d.getCantidad()>=p.getStock()){Alertas.mostrarInfo("Stock","No hay más unidades disponibles.");return;} d.setCantidad(d.getCantidad()+1); recalcular(d); tablaCarrito.refresh(); }
+        if (p.getStock() <= 0) {
+            Alertas.mostrarInfo("Stock", "Este producto no tiene stock disponible.");
+            return;
+        }
+        DetalleVenta d = buscarDetalle(p.getIdProducto());
+        if (d == null) {
+            d = new DetalleVenta();
+            d.setIdProducto(p.getIdProducto());
+            d.setNombreProducto(p.getNombre());
+            d.setCantidad(1);
+            d.setPrecioUnitario(p.getPrecio());
+            d.setSubtotal(p.getPrecio());
+            carrito.add(d);
+        } else {
+            if (d.getCantidad() >= p.getStock()) {
+                Alertas.mostrarInfo("Stock", "No hay más unidades disponibles.");
+                return;
+            }
+            d.setCantidad(d.getCantidad() + 1);
+            recalcular(d);
+            tablaCarrito.refresh();
+        }
         actualizarTotales();
     }
 
-    @FXML 
-    private void onSumarCantidad(){
-        DetalleVenta d=tablaCarrito.getSelectionModel().getSelectedItem();
-        if(d==null){ Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito."); return; }
+    @FXML
+    private void onSumarCantidad() {
+        DetalleVenta d = tablaCarrito.getSelectionModel().getSelectedItem();
+        if (d == null) {
+            Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito.");
+            return;
+        }
         Producto p;
         try {
             p = productoDAO.buscarActivoPorId(d.getIdProducto());
@@ -410,36 +429,72 @@ public class CarritoTiendaController {
             Alertas.mostrarError("Producto", "No se pudo comprobar el stock.\n" + ex.getMessage());
             return;
         }
-        if(p==null){ Alertas.mostrarInfo("Producto", "El producto ya no está disponible."); return; }
+        if (p == null) {
+            Alertas.mostrarInfo("Producto", "El producto ya no está disponible.");
+            return;
+        }
         if (p.getPrecio().compareTo(d.getPrecioUnitario()) != 0) {
             Alertas.mostrarInfo("Precio actualizado", "El precio cambió. Retire el producto y agréguelo de nuevo.");
             return;
         }
-        if(d.getCantidad()>=p.getStock()){ Alertas.mostrarInfo("Stock", "No hay más unidades disponibles."); return; }
-        d.setCantidad(d.getCantidad()+1); recalcular(d); tablaCarrito.refresh(); actualizarTotales();
+        if (d.getCantidad() >= p.getStock()) {
+            Alertas.mostrarInfo("Stock", "No hay más unidades disponibles.");
+            return;
+        }
+        d.setCantidad(d.getCantidad() + 1);
+        recalcular(d);
+        tablaCarrito.refresh();
+        actualizarTotales();
     }
-    @FXML 
-    private void onRestarCantidad(){
-        DetalleVenta d=tablaCarrito.getSelectionModel().getSelectedItem();
-        if(d==null){ Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito."); return; }
-        if(d.getCantidad()<=1)carrito.remove(d); else {d.setCantidad(d.getCantidad()-1);recalcular(d);}
-        tablaCarrito.refresh();actualizarTotales();
+
+    @FXML
+    private void onRestarCantidad() {
+        DetalleVenta d = tablaCarrito.getSelectionModel().getSelectedItem();
+        if (d == null) {
+            Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito.");
+            return;
+        }
+        if (d.getCantidad() <= 1) {
+            carrito.remove(d);
+        } else {
+            d.setCantidad(d.getCantidad() - 1);
+            recalcular(d);
+        }
+        tablaCarrito.refresh();
+        actualizarTotales();
     }
-    @FXML 
-    private void onQuitarProducto(){
-        DetalleVenta d=tablaCarrito.getSelectionModel().getSelectedItem();
-        if(d==null){ Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito."); return; }
-        carrito.remove(d);actualizarTotales();
+
+    @FXML
+    private void onQuitarProducto() {
+        DetalleVenta d = tablaCarrito.getSelectionModel().getSelectedItem();
+        if (d == null) {
+            Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito.");
+            return;
+        }
+        carrito.remove(d);
+        actualizarTotales();
     }
-    @FXML 
-    private void onVaciarCarrito(){
-        if (carrito.isEmpty()) { Alertas.mostrarInfo("Carrito", "El carrito ya está vacío."); return; }
-        if (Alertas.confirmar("Vaciar carrito","¿Deseas retirar todos los productos?")) {
-            carrito.clear(); actualizarTotales();
+
+    @FXML
+    private void onVaciarCarrito() {
+        if (carrito.isEmpty()) {
+            Alertas.mostrarInfo("Carrito", "El carrito ya está vacío.");
+            return;
+        }
+        if (Alertas.confirmar("Vaciar carrito", "¿Deseas retirar todos los productos?")) {
+            carrito.clear();
+            actualizarTotales();
         }
     }
-    @FXML 
-    private void onCancelar(){ if(carrito.isEmpty() || Alertas.confirmar("Cancelar","¿Deseas cancelar la venta actual?")){carrito.clear();limpiarCliente();actualizarTotales();} }
+
+    @FXML
+    private void onCancelar() {
+        if (carrito.isEmpty() || Alertas.confirmar("Cancelar", "¿Deseas cancelar la venta actual?")) {
+            carrito.clear();
+            limpiarCliente();
+            actualizarTotales();
+        }
+    }
 
     @FXML
     private void onConfirmarVenta() {
@@ -577,34 +632,87 @@ public class CarritoTiendaController {
         return campo.getText() == null ? "" : campo.getText().trim();
     }
 
-    private void actualizarTotales(){
-        BigDecimal total=totalCarrito();
-        BigDecimal subtotal=total.divide(new BigDecimal("1.18"),2,RoundingMode.HALF_UP);
-        BigDecimal igv=total.subtract(subtotal);
-        lblSubtotal.setText(moneda(subtotal)); lblIgv.setText(moneda(igv)); lblTotal.setText(moneda(total)); actualizarVuelto();
+    private void actualizarTotales() {
+        BigDecimal total = totalCarrito();
+        BigDecimal subtotal = total.divide(new BigDecimal("1.18"), 2, RoundingMode.HALF_UP);
+        BigDecimal igv = total.subtract(subtotal);
+        lblSubtotal.setText(moneda(subtotal));
+        lblIgv.setText(moneda(igv));
+        lblTotal.setText(moneda(total));
+        actualizarVuelto();
     }
-    private void actualizarVuelto(){ BigDecimal vuelto=obtenerMontoRecibido().subtract(totalCarrito()); 
-    if(vuelto.signum()<0)vuelto=BigDecimal.ZERO; lblVuelto.setText(moneda(vuelto)); }
-    private BigDecimal obtenerMontoRecibido(){ 
-        try{return new BigDecimal(txtMontoRecibido.getText().replace("S/","").trim());
-        }catch(Exception e){
-            return BigDecimal.ZERO;} }
-    private BigDecimal totalCarrito(){ BigDecimal t=BigDecimal.ZERO; 
-    for(DetalleVenta d:carrito)
-        if(d.getSubtotal()!=null)t=t.add(d.getSubtotal()); 
-    return t.setScale(2,RoundingMode.HALF_UP); }
-    private String moneda(BigDecimal v){
-        return "S/ "+v.setScale(2,RoundingMode.HALF_UP);}
-    private void recalcular(DetalleVenta d){d.setSubtotal(d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad())));}
-    private DetalleVenta buscarDetalle(int id){
-        for(DetalleVenta d:carrito)
-            if(d.getIdProducto()==id)
+
+    private void actualizarVuelto() {
+        BigDecimal vuelto = obtenerMontoRecibido().subtract(totalCarrito());
+        if (vuelto.signum() < 0) {
+            vuelto = BigDecimal.ZERO;
+        }
+        lblVuelto.setText(moneda(vuelto));
+    }
+
+    private BigDecimal obtenerMontoRecibido() {
+        try {
+            return new BigDecimal(txtMontoRecibido.getText().replace("S/", "").trim());
+        } catch (Exception e) {
+            return BigDecimal.ZERO;
+        }
+    }
+
+    private BigDecimal totalCarrito() {
+        BigDecimal total = BigDecimal.ZERO;
+        for (DetalleVenta d : carrito) {
+            if (d.getSubtotal() != null) {
+                total = total.add(d.getSubtotal());
+            }
+        }
+        return total.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private String moneda(BigDecimal v) {
+        return "S/ " + v.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private void recalcular(DetalleVenta d) {
+        d.setSubtotal(d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad())));
+    }
+
+    private DetalleVenta buscarDetalle(int id) {
+        for (DetalleVenta d : carrito) {
+            if (d.getIdProducto() == id) {
                 return d;
-        return null;}
-    private void limpiarCliente(){txtBuscarDni.clear();txtNombreCliente.clear();txtDireccion.clear();txtMontoRecibido.clear();cmbHabitacion.getSelectionModel().clearSelection();btnSinComprobante.setSelected(true);}
-    @FXML 
-    private void onCerrar(){((Stage)tablaCarrito.getScene().getWindow()).close();}
+            }
+        }
+        return null;
+    }
 
-    private static class EstadiaActiva { final int idHuesped,idHabitacion; final String numero,huesped; EstadiaActiva(int h,int hab,String n,String hu){idHuesped=h;idHabitacion=hab;numero=n;huesped=hu;} public String toString(){return "Hab. "+numero+" — "+huesped;} }
+    private void limpiarCliente() {
+        txtBuscarDni.clear();
+        txtNombreCliente.clear();
+        txtDireccion.clear();
+        txtMontoRecibido.clear();
+        cmbHabitacion.getSelectionModel().clearSelection();
+        btnSinComprobante.setSelected(true);
+    }
+
+    @FXML
+    private void onCerrar() {
+        ((Stage) tablaCarrito.getScene().getWindow()).close();
+    }
+
+    private static class EstadiaActiva {
+        final int idHuesped, idHabitacion;
+        final String numero, huesped;
+
+        EstadiaActiva(int idHuesped, int idHabitacion, String numero, String huesped) {
+            this.idHuesped = idHuesped;
+            this.idHabitacion = idHabitacion;
+            this.numero = numero;
+            this.huesped = huesped;
+        }
+
+        @Override
+        public String toString() {
+            return "Hab. " + numero + " — " + huesped;
+        }
+    }
 }
-

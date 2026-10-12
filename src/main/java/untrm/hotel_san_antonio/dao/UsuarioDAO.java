@@ -15,13 +15,6 @@ import java.util.regex.Pattern;
 
 public class UsuarioDAO {
 
-    public boolean hayUsuarios(Connection con) throws SQLException {
-        try (PreparedStatement ps = con.prepareStatement("SELECT 1 FROM usuario LIMIT 1");
-             ResultSet rs = ps.executeQuery()) {
-            return rs.next();
-        }
-    }
-
     public List<String> listarRoles(Connection con) throws SQLException {
         String sql = "SELECT COLUMN_TYPE FROM information_schema.COLUMNS "
                 + "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'usuario' AND COLUMN_NAME = 'rol'";

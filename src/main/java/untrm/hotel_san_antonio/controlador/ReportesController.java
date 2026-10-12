@@ -232,7 +232,8 @@ public class ReportesController {
         for (int i = 0; i < r.etiquetas().size(); i++) {
             serie.getData().add(new XYChart.Data<>(corto(r.etiquetas().get(i)), r.valores().get(i)));
         }
-        grafico.getData().setAll(serie);
+        grafico.getData().clear();
+        grafico.getData().add(serie);
         pintarGrafico(serie, r.etiquetas());
     }
 
