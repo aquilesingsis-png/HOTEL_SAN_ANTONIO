@@ -42,5 +42,7 @@
         <Label fx:id="lblHuespedes" text="--" GridPane.rowIndex="4" GridPane.columnIndex="3"/>
         <Label text="Total" style="-fx-font-weight: bold;" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
         <Label fx:id="lblTotal" text="S/ 0.00" style="-fx-font-weight: bold;" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+        <Label text="Reservó por" style="-fx-font-weight: bold;" GridPane.rowIndex="5" GridPane.columnIndex="2"/>
+        <Label fx:id="lblCanal" text="--" GridPane.rowIndex="5" GridPane.columnIndex="3"/>
     </GridPane>
 </VBox>

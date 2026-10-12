@@ -85,6 +85,7 @@
                     <VBox spacing="4"><Label text="Ingreso *"/><DatePicker fx:id="dpFechaIngreso" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/></VBox>
                     <VBox spacing="4"><Label text="Salida *"/><DatePicker fx:id="dpFechaSalida" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/></VBox>
                     <VBox spacing="4"><Label text="Hora de llegada"/><ChoiceBox fx:id="cbHoraIngreso" prefWidth="120" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/></VBox>
+                    <VBox spacing="4"><Label text="Reservó por *"/><ChoiceBox fx:id="cbCanal" prefWidth="140" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/></VBox>
                     <VBox spacing="4"><Label text="Huéspedes *"/><Spinner fx:id="spHuespedes" prefWidth="100" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/></VBox>
                     <VBox spacing="4"><Label text="Noches"/><Label fx:id="lblNoches" text="0" style="-fx-font-size: 18px; -fx-font-weight: bold;"/></VBox>
                 </HBox>

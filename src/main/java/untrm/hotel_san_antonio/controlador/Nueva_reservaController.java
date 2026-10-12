@@ -81,6 +81,16 @@ public class Nueva_reservaController {
     @FXML private DatePicker dpFechaIngreso;
     @FXML private DatePicker dpFechaSalida;
     @FXML private ChoiceBox<String> cbHoraIngreso;
+    @FXML private ChoiceBox<String> cbCanal;
+
+    /** Por donde reservo el cliente: lo que se ve y lo que se guarda en reserva.canal. */
+    private static final java.util.Map<String, String> CANALES = new java.util.LinkedHashMap<>();
+    static {
+        CANALES.put("Teléfono", "TELEFONO");
+        CANALES.put("WhatsApp", "WHATSAPP");
+        CANALES.put("Booking", "BOOKING");
+        CANALES.put("Presencial", "PRESENCIAL");
+    }
     @FXML private Spinner<Integer> spHuespedes;
     @FXML private VBox contenedorAcompanantes;
     @FXML private Label lblNoches;
@@ -174,6 +184,8 @@ public class Nueva_reservaController {
                 "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00",
                 "20:00", "21:00", "22:00");
         cbHoraIngreso.setValue("14:00");
+        cbCanal.getItems().setAll(CANALES.keySet());
+        cbCanal.setValue("Teléfono");
         dpFechaIngreso.valueProperty().addListener((observable, anterior, actual) -> actualizarFechasYHabitaciones());
         dpFechaSalida.valueProperty().addListener((observable, anterior, actual) -> actualizarFechasYHabitaciones());
     }
@@ -703,7 +715,7 @@ public class Nueva_reservaController {
         reserva.setNumHuespedes(spHuespedes.getValue());
         reserva.setMontoTotal(habitacionSeleccionada.getTipo().getPrecioBase().multiply(
                 BigDecimal.valueOf(ChronoUnit.DAYS.between(dpFechaIngreso.getValue(), dpFechaSalida.getValue()))));
-        reserva.setCanal("PRESENCIAL");
+        reserva.setCanal(CANALES.getOrDefault(cbCanal.getValue(), "TELEFONO"));
         return reserva;
     }
 
@@ -737,6 +749,7 @@ public class Nueva_reservaController {
         dpFechaIngreso.setValue(hoy.plusDays(1));
         dpFechaSalida.setValue(hoy.plusDays(2));
         cbHoraIngreso.setValue("14:00");
+        cbCanal.setValue("Teléfono");
         spHuespedes.getValueFactory().setValue(1);
         cbPiso.setValue("Todos los pisos");
         cbTipoHabitacion.setValue("Todos los tipos");

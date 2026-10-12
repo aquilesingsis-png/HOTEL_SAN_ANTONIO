@@ -25,6 +25,7 @@ public class DetalleReservaController {
     @FXML private Label lblHabitacion;
     @FXML private Label lblHuespedes;
     @FXML private Label lblTotal;
+    @FXML private Label lblCanal;
 
     public void mostrar(Reserva reserva) {
         lblEstado.setText(textoEstado(reserva.getEstado()));
@@ -41,10 +42,22 @@ public class DetalleReservaController {
         lblHabitacion.setText(reserva.getNumeroHabitacion() + " · " + reserva.getNombreTipoHabitacion());
         lblHuespedes.setText(String.valueOf(reserva.getNumHuespedes()));
         lblTotal.setText(String.format(Locale.US, "S/ %.2f", reserva.getMontoTotal()));
+        lblCanal.setText(textoCanal(reserva.getCanal()));
+    }
+
+    private String textoCanal(String canal) {
+        return switch (canal == null ? "" : canal) {
+            case "TELEFONO" -> "Teléfono";
+            case "WHATSAPP" -> "WhatsApp";
+            case "BOOKING" -> "Booking";
+            case "PRESENCIAL" -> "Presencial";
+            default -> "--";
+        };
     }
 
     public void limpiar() {
         lblEstado.setText("Sin reserva seleccionada");
+        lblCanal.setText("--");
         lblCodigo.setText("--");
         lblCliente.setText("--");
         lblDocumento.setText("--");

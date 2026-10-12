@@ -40,6 +40,7 @@ public class ReservaService {
     private static final int MAX_DIAS_ANTICIPACION = 365;
     private static final BigDecimal PORCENTAJE_ADELANTO = new BigDecimal("0.50");
     private static final Set<String> METODOS_PAGO = Set.of("YAPE", "TRANSFERENCIA", "EFECTIVO", "TARJETA");
+    private static final Set<String> CANALES = Set.of("TELEFONO", "WHATSAPP", "BOOKING", "PRESENCIAL");
 
     private final HuespedDAO huespedDAO = new HuespedDAO();
     private final EmpresaDAO empresaDAO = new EmpresaDAO();
@@ -721,6 +722,9 @@ public class ReservaService {
         }
         if (reserva.getNumHuespedes() <= 0) {
             throw new IllegalArgumentException("La cantidad de huéspedes debe ser mayor a cero.");
+        }
+        if (reserva.getCanal() == null || !CANALES.contains(reserva.getCanal())) {
+            throw new IllegalArgumentException("Indique por dónde reservó el cliente.");
         }
         if (reserva.getMontoTotal() == null || reserva.getMontoTotal().signum() <= 0) {
             throw new IllegalArgumentException("El total de la estadía no es válido.");
