@@ -18,7 +18,6 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import untrm.hotel_san_antonio.dao.HabitacionDAO;
 import untrm.hotel_san_antonio.dao.HuespedDAO;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Habitacion;
@@ -27,6 +26,7 @@ import untrm.hotel_san_antonio.modelo.Pago;
 import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ConflictoFechasException;
 import untrm.hotel_san_antonio.servicio.ReniecService;
+import untrm.hotel_san_antonio.servicio.HabitacionService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.CampoValidacion;
@@ -83,7 +83,7 @@ public class ReservaFormController {
 
     private final HuespedDAO huespedDAO = new HuespedDAO();
     private final ReservaService reservaService = new ReservaService();
-    private final HabitacionDAO habitacionDAO = new HabitacionDAO();
+    private final HabitacionService habitacionService = new HabitacionService();
     private HuespedesAdicionales acompanantes;
 
     private Habitacion habitacion;
@@ -591,7 +591,7 @@ public class ReservaFormController {
                     + " en mantenimiento por \"" + motivo + "\"? No se podrán registrar huéspedes hasta que termine." + aviso)) {
                 return;
             }
-            if (!habitacionDAO.cambiarEstadoSiEs(habitacion.getIdHabitacion(), "DISPONIBLE", "MANTENIMIENTO", motivo)) {
+            if (!habitacionService.cambiarEstado(habitacion.getIdHabitacion(), "DISPONIBLE", "MANTENIMIENTO", motivo)) {
                 Alertas.mostrarInfo("Mantenimiento", "La habitación ya no está disponible (cambió mientras tenías esta ventana abierta).");
                 if (alGuardar != null) {
                     alGuardar.run();
@@ -603,6 +603,8 @@ public class ReservaFormController {
                 alGuardar.run();
             }
             cerrar();
+        } catch (IllegalStateException | IllegalArgumentException | SecurityException e) {
+            Alertas.mostrarInfo("Mantenimiento", e.getMessage());
         } catch (SQLException e) {
             Alertas.mostrarError("Error", "No se pudo cambiar el estado.\n\n" + e.getMessage());
         }

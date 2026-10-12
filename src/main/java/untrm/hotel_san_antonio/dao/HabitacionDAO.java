@@ -279,4 +279,16 @@ public class HabitacionDAO {
             ps.executeUpdate();
         }
     }
+
+    /** Igual, dejando registrado el motivo del mantenimiento (null lo borra: al salir de MANTENIMIENTO). */
+    public void cambiarEstado(Connection con, int idHabitacion, String nuevoEstado, String motivoMantenimiento)
+            throws SQLException {
+        String sql = "UPDATE habitacion SET estado = ?, motivo_mantenimiento = ? WHERE id_habitacion = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, nuevoEstado);
+            ps.setString(2, motivoMantenimiento);
+            ps.setInt(3, idHabitacion);
+            ps.executeUpdate();
+        }
+    }
 }
