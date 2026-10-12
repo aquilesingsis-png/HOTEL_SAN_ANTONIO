@@ -1,7 +1,9 @@
 package untrm.hotel_san_antonio.util;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,16 +17,20 @@ import java.util.logging.Logger;
  * Configuración JDBC: valores locales incluidos para XAMPP, archivo externo
  * editable y, con prioridad mayor, propiedades JVM o variables de entorno.
  * La configuración se lee una vez y solo se vuelve a leer si config.properties cambia.
- * Si la base no responde, la conexión falla a los pocos segundos en vez de dejar la pantalla colgada.
+ * Las conexiones salen de un pequeño grupo (HikariCP): cerrar una conexión la devuelve al grupo, no la corta.
+ * Si la base no responde, la conexión falla a los 5 segundos en vez de dejar la pantalla colgada.
  */
 public class ConexionBD {
     private static final Logger LOG = Logger.getLogger(ConexionBD.class.getName());
-    private static final String TIEMPO_CONEXION_MS = "5000";
+    private static final int TIEMPO_CONEXION_MS = 5000;
     private static final String TIEMPO_RESPUESTA_MS = "60000";
+    private static final int CONEXIONES_MAXIMAS = 10;
 
     private static Properties configuracion;
     private static long marcaArchivo = Long.MIN_VALUE;
     private static boolean avisoSinArchivo;
+    private static HikariDataSource grupo;
+    private static String claveDelGrupo;
 
     public static Connection conectar() throws SQLException {
         Properties archivo = configuracion();
@@ -35,12 +41,31 @@ public class ConexionBD {
             throw new SQLException("Configure db.url y db.user en config.properties o mediante HOTEL_DB_URL y HOTEL_DB_USER.");
         }
         if (password == null) password = "";
-        Properties conexion = new Properties();
-        conexion.setProperty("user", usuario);
-        conexion.setProperty("password", password);
-        if (!url.contains("connectTimeout")) conexion.setProperty("connectTimeout", TIEMPO_CONEXION_MS);
-        if (!url.contains("socketTimeout")) conexion.setProperty("socketTimeout", TIEMPO_RESPUESTA_MS);
-        return DriverManager.getConnection(url, conexion);
+        return grupo(url, usuario, password).getConnection();
+    }
+
+    /** El grupo de conexiones; si cambia la configuración (url, usuario o clave), se arma uno nuevo. */
+    private static synchronized HikariDataSource grupo(String url, String usuario, String password) {
+        String clave = url + "\n" + usuario + "\n" + password;
+        if (grupo == null || grupo.isClosed() || !clave.equals(claveDelGrupo)) {
+            if (grupo != null && !grupo.isClosed()) {
+                grupo.close();
+            }
+            HikariConfig config = new HikariConfig();
+            config.setPoolName("hotel-san-antonio");
+            config.setJdbcUrl(url);
+            config.setUsername(usuario);
+            config.setPassword(password);
+            config.setMaximumPoolSize(CONEXIONES_MAXIMAS);
+            config.setMinimumIdle(1);
+            config.setConnectionTimeout(TIEMPO_CONEXION_MS);
+            config.setInitializationFailTimeout(-1); // el aviso de que MySQL no responde sale al pedir la conexión
+            if (!url.contains("connectTimeout")) config.addDataSourceProperty("connectTimeout", String.valueOf(TIEMPO_CONEXION_MS));
+            if (!url.contains("socketTimeout")) config.addDataSourceProperty("socketTimeout", TIEMPO_RESPUESTA_MS);
+            grupo = new HikariDataSource(config);
+            claveDelGrupo = clave;
+        }
+        return grupo;
     }
 
     /** Valores incluidos + config.properties (de la carpeta desde donde se abre el programa). */

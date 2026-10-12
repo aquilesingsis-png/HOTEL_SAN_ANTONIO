@@ -196,7 +196,17 @@ public class LoginController {
     }
 
     private String mensajeErrorInicio(Throwable error) {
-        if (error instanceof SQLException sql) {
+        // el grupo de conexiones envuelve el error de MySQL: se busca el SQLException con el estado en la cadena
+        SQLException sql = null;
+        for (Throwable causa = error; causa != null && sql == null; causa = causa.getCause()) {
+            if (causa instanceof SQLException e && e.getSQLState() != null) {
+                sql = e;
+            }
+        }
+        if (sql == null && error instanceof SQLException e) {
+            sql = e;
+        }
+        if (sql != null) {
             String estado = sql.getSQLState();
             if (estado != null && estado.startsWith("08")) {
                 return "No se pudo comunicar con MySQL. Encienda MySQL en XAMPP y compruebe el puerto de db.url en config.properties.";
