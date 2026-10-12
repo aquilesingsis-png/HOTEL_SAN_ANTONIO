@@ -526,3 +526,13 @@ ALTER TABLE tipo_habitacion ADD CONSTRAINT IF NOT EXISTS chk_tipo_precio      CH
 CREATE INDEX IF NOT EXISTS idx_pago_fecha        ON pago (fecha_pago);
 CREATE INDEX IF NOT EXISTS idx_venta_fecha       ON venta_tienda (fecha_venta);
 CREATE INDEX IF NOT EXISTS idx_movcaja_fecha     ON movimiento_caja (fecha);
+
+-- 7) ALMACEN: una entrada por compra guarda el costo por unidad y, si se anota como gasto "Reposicion de tienda",
+--    el numero de ese gasto.
+ALTER TABLE movimiento_stock
+    ADD COLUMN IF NOT EXISTS costo_unitario DECIMAL(8,2) NULL,
+    ADD COLUMN IF NOT EXISTS id_gasto INT NULL;
+ALTER TABLE movimiento_stock
+    ADD CONSTRAINT fk_ms_gasto FOREIGN KEY IF NOT EXISTS (id_gasto) REFERENCES gasto(id_gasto);
+ALTER TABLE movimiento_stock
+    ADD CONSTRAINT IF NOT EXISTS chk_ms_costo CHECK (costo_unitario IS NULL OR costo_unitario > 0);
