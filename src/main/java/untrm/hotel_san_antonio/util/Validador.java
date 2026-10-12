@@ -16,7 +16,10 @@ public class Validador {
     private static final Pattern NOMBRE = Pattern.compile("^\\p{L}[\\p{L} .'-]{0,79}$");
     private static final Pattern PAIS = Pattern.compile("^\\p{L}[\\p{L} .'-]{0,59}$");
     private static final Pattern MONTO = Pattern.compile("^\\d+(\\.\\d{1,2})?$");
-    private static final Pattern TELEFONO = Pattern.compile("^9\\d{8}$");
+    // celular peruano (9 digitos que empiezan con 9) o numero internacional (+ y de 7 a 15 digitos)
+    private static final Pattern TELEFONO = Pattern.compile("^(9\\d{8}|\\+\\d{7,15})$");
+    public static final String ERROR_TELEFONO =
+            "El teléfono debe tener 9 dígitos y empezar con 9, o ser un número internacional (+ y de 7 a 15 dígitos).";
 
     private static final Pattern PASAPORTE = Pattern.compile("^[A-Za-z0-9]{6,20}$");
 

@@ -21,6 +21,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -64,6 +65,7 @@ public class Nueva_reservaController {
             + "-fx-background-color: #704313; -fx-border-color: #3B210F; -fx-text-fill: white; -fx-cursor: hand;";
 
     @FXML private CheckBox chkEmpresa;
+    @FXML private ComboBox<String> cmbTipoDocumento;
     @FXML private TextField txtDocumento;
     @FXML private VBox filaRuc;
     @FXML private TextField txtRuc;
@@ -123,7 +125,18 @@ public class Nueva_reservaController {
     }
 
     private void configurarTipoCliente() {
-        // El huesped siempre se registra con su DNI; el RUC solo aparece si pide factura.
+        // El huesped se registra con su DNI o, si es extranjero, con su pasaporte; el RUC solo aparece si pide factura.
+        cmbTipoDocumento.getItems().setAll("DNI", "Pasaporte");
+        cmbTipoDocumento.setValue("DNI");
+        cmbTipoDocumento.valueProperty().addListener((observable, anterior, actual) -> {
+            if (inicializando) {
+                return;
+            }
+            secuenciaConsulta++;
+            txtDocumento.clear();
+            txtDocumento.setPromptText("Pasaporte".equals(actual) ? "6 a 20 letras o números" : "8 dígitos");
+            limpiarCliente("Ingrese el documento y pulse Buscar.");
+        });
         chkEmpresa.selectedProperty().addListener((observable, anterior, actual) -> actualizarTipoCliente());
         actualizarTipoCliente();
     }
@@ -208,8 +221,8 @@ public class Nueva_reservaController {
         int consultaActual = ++secuenciaConsulta;
         limpiarCliente("Buscando primero en la base de datos local...");
         String documento = txtDocumento.getText().trim();
-        if (!Validador.esDniValido(documento)) {
-            mostrarErrorDocumento("El DNI debe contener 8 dígitos válidos.");
+        if (!documentoValido(documento)) {
+            mostrarErrorDocumento(mensajeDocumentoInvalido());
             return;
         }
         if (chkEmpresa.isSelected()) {
@@ -230,8 +243,8 @@ public class Nueva_reservaController {
         int consultaActual = ++secuenciaConsulta;
         limpiarCliente("");
         String dni = txtDocumento.getText().trim();
-        if (!Validador.esDniValido(dni)) {
-            mostrarErrorDocumento("Escriba primero el DNI del huésped (8 dígitos).");
+        if (!documentoValido(dni)) {
+            mostrarErrorDocumento("Escriba primero el " + nombreDocumento() + " del huésped.");
             return;
         }
         Empresa empresa = null;
@@ -289,11 +302,13 @@ public class Nueva_reservaController {
 
     private void buscarHuesped(String dni, Empresa empresa, int consultaActual) {
         try {
-            Huesped huespedLocal = reservaService.buscarHuespedLocal("DNI", dni);
+            Huesped huespedLocal = reservaService.buscarHuespedLocal(tipoDocumento(), dni);
             if (huespedLocal != null) {
                 cargarHuesped(huespedLocal, true);
                 completarBusqueda(empresa, dni, consultaActual, "Huésped encontrado en la base local.");
-                verificarIdentidadExistente(dni, consultaActual);
+                if ("DNI".equals(tipoDocumento())) {
+                    verificarIdentidadExistente(dni, consultaActual);
+                }
                 return;
             }
         } catch (SQLException error) {
@@ -302,6 +317,12 @@ public class Nueva_reservaController {
             return;
         }
 
+        if (!"DNI".equals(tipoDocumento())) {
+            // RENIEC solo conoce DNI: un extranjero se registra a mano con su pasaporte
+            habilitarHuespedManual(dni, "Pasaporte nuevo: ingrese los datos del huésped.");
+            completarBusqueda(empresa, dni, consultaActual, lblEstadoBusqueda.getText());
+            return;
+        }
         bloquearBusqueda("Huésped no encontrado localmente. Consultando RENIEC...");
         ConsultaApi.dni(dni, null,
                 huesped -> {
@@ -382,7 +403,8 @@ public class Nueva_reservaController {
     private void cargarHuesped(Huesped huesped, boolean existente) {
         txtNombres.setText(valorSeguro(huesped.getNombres()));
         txtApellidos.setText(valorSeguro(huesped.getApellidos()));
-        txtPais.setText(valorSeguro(huesped.getPaisProcedencia()).isBlank() ? "Perú" : huesped.getPaisProcedencia());
+        txtPais.setText(valorSeguro(huesped.getPaisProcedencia()).isBlank()
+                ? ("DNI".equals(tipoDocumento()) ? "Perú" : "") : huesped.getPaisProcedencia());
         txtTelefono.setText(valorSeguro(huesped.getTelefono()));
         txtCorreo.setText(valorSeguro(huesped.getEmail()));
         hacerEditablesDatosHuesped(false); // nombres y apellidos vienen de RENIEC o de la base: no se editan
@@ -391,11 +413,11 @@ public class Nueva_reservaController {
     private void habilitarHuespedManual(String dni, String mensaje) {
         txtNombres.clear();
         txtApellidos.clear();
-        txtPais.setText("Perú");
+        txtPais.setText("DNI".equals(tipoDocumento()) ? "Perú" : "");
         txtTelefono.clear();
         txtCorreo.clear();
         hacerEditablesDatosHuesped(true);
-        lblEstadoBusqueda.setText(mensaje + " DNI: " + dni);
+        lblEstadoBusqueda.setText(mensaje + " " + nombreDocumento() + ": " + dni);
     }
 
     /** Nombres y apellidos solo se escriben a mano si no hay RENIEC ni base local; el resto siempre se puede corregir. */
@@ -431,6 +453,24 @@ public class Nueva_reservaController {
 
     private void desbloquearBusqueda() {
         btnBuscarCliente.setDisable(false);
+    }
+
+    /** "DNI" o "PASAPORTE", como se guarda en la base. */
+    private String tipoDocumento() {
+        return "Pasaporte".equals(cmbTipoDocumento.getValue()) ? "PASAPORTE" : "DNI";
+    }
+
+    private String nombreDocumento() {
+        return "Pasaporte".equals(cmbTipoDocumento.getValue()) ? "pasaporte" : "DNI";
+    }
+
+    private boolean documentoValido(String documento) {
+        return "DNI".equals(tipoDocumento()) ? Validador.esDniValido(documento) : Validador.esPasaporteValido(documento);
+    }
+
+    private String mensajeDocumentoInvalido() {
+        return "DNI".equals(tipoDocumento()) ? "El DNI debe contener 8 dígitos válidos."
+                : "El pasaporte debe tener entre 6 y 20 letras o números.";
     }
 
     private void mostrarErrorDocumento(String mensaje) {
@@ -627,7 +667,7 @@ public class Nueva_reservaController {
         if (!datosClienteListos || !documentoActual.equals(documentoHuespedResuelto)) {
             throw new IllegalArgumentException("Busque nuevamente el documento del huésped antes de guardar.");
         }
-        return new Huesped("DNI", documentoActual, txtNombres.getText().trim(), txtApellidos.getText().trim(),
+        return new Huesped(tipoDocumento(), documentoActual, txtNombres.getText().trim(), txtApellidos.getText().trim(),
                 txtPais.getText().trim(), textoOpcional(txtTelefono.getText()), textoOpcional(txtCorreo.getText()));
     }
 
@@ -692,6 +732,7 @@ public class Nueva_reservaController {
     private void limpiarFormulario() {
         secuenciaConsulta++;
         chkEmpresa.setSelected(false);
+        cmbTipoDocumento.setValue("DNI");
         txtDocumento.clear();
         txtRuc.clear();
         limpiarCliente("Ingrese el documento y pulse Buscar.");

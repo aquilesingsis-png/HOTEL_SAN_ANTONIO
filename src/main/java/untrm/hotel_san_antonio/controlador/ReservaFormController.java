@@ -148,7 +148,7 @@ public class ReservaFormController {
             txtDocumento.clear();
             btnBuscarDoc.setDisable(!"DNI".equals(ahora));
         });
-        txtTelefono.setTextFormatter(new TextFormatter<String>(c -> c.getControlNewText().matches("\\d{0,9}") ? c : null));
+        txtTelefono.setTextFormatter(new TextFormatter<String>(c -> c.getControlNewText().matches("\\d{0,9}|\\+\\d{0,15}") ? c : null));
         txtRuc.setTextFormatter(new TextFormatter<String>(c -> c.getControlNewText().matches("\\d{0,11}") ? c : null));
         txtAdelanto.setTextFormatter(new TextFormatter<String>(c -> c.getControlNewText().matches("\\d{0,6}(\\.\\d{0,2})?") ? c : null));
 
@@ -500,7 +500,7 @@ public class ReservaFormController {
         }
         String telefono = txtTelefono.getText().trim();
         if (!telefono.isEmpty() && !Validador.esTelefonoValido(telefono)) {
-            invalido(txtTelefono, "El teléfono debe tener 9 dígitos y empezar con 9.");
+            invalido(txtTelefono, Validador.ERROR_TELEFONO);
         }
         String email = txtEmail.getText().trim();
         if (!email.isEmpty() && !Validador.esEmailValido(email)) {

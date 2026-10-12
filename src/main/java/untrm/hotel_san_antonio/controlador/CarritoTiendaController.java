@@ -440,7 +440,7 @@ public class CarritoTiendaController {
         }
         String telefono = txtTelefono.getText() == null ? "" : txtTelefono.getText().trim();
         if (!telefono.isEmpty() && !Validador.esTelefonoValido(telefono)) {
-            Alertas.mostrarInfo("Teléfono inválido", "Ingrese un celular válido de 9 dígitos o deje el campo vacío.");
+            Alertas.mostrarInfo("Teléfono inválido", Validador.ERROR_TELEFONO + " También puede dejar el campo vacío.");
             txtTelefono.requestFocus();
             return;
         }

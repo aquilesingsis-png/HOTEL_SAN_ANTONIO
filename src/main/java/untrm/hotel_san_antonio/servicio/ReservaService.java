@@ -606,7 +606,7 @@ public class ReservaService {
         }
         if (huesped.getTelefono() != null && !huesped.getTelefono().isBlank()
                 && !Validador.esTelefonoValido(huesped.getTelefono())) {
-            throw new IllegalArgumentException("El teléfono debe tener 9 dígitos y empezar con 9.");
+            throw new IllegalArgumentException(Validador.ERROR_TELEFONO);
         }
         if (huesped.getEmail() != null && !huesped.getEmail().isBlank()
                 && !Validador.esEmailValido(huesped.getEmail())) {
