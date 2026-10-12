@@ -117,4 +117,15 @@ public class ProductoDAO {
             }
         }
     }
+
+    /** Devuelve al stock lo que una venta anulada se habia llevado (aunque el producto ya este desactivado). */
+    public void reponerStock(Connection cn, int idProducto, int cantidad) throws SQLException {
+        try (PreparedStatement ps = cn.prepareStatement("UPDATE producto SET stock = stock + ? WHERE id_producto = ?")) {
+            ps.setInt(1, cantidad);
+            ps.setInt(2, idProducto);
+            if (ps.executeUpdate() != 1) {
+                throw new SQLException("No se pudo devolver el stock del producto.");
+            }
+        }
+    }
 }

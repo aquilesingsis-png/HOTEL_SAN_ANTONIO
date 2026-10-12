@@ -51,6 +51,9 @@ public class ComprobanteDocumento {
         StringBuilder texto = new StringBuilder();
         texto.append("HOTEL SAN ANTONIO\n");
         texto.append(nombreTipo(c.getTipo())).append("   N.º ").append(c.getNumero()).append('\n');
+        if (c.isAnulado()) {
+            texto.append("*** COMPROBANTE ANULADO ***\n");
+        }
         if (c.getFechaEmision() != null) {
             texto.append("Fecha de emisión: ").append(c.getFechaEmision().format(FECHA_HORA)).append('\n');
         }

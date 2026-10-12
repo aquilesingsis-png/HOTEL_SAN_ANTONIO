@@ -67,7 +67,8 @@ public class CierreCajaDAO {
         Timestamp h = Timestamp.valueOf(hasta);
         BigDecimal cobros = suma(con, "SELECT COALESCE((SELECT SUM(monto) FROM pago WHERE metodo_pago = 'EFECTIVO' "
                 + "AND fecha_pago >= ? AND fecha_pago < ?), 0) + COALESCE((SELECT SUM(total) FROM venta_tienda "
-                + "WHERE id_habitacion IS NULL AND metodo_pago = 'EFECTIVO' AND fecha_venta >= ? AND fecha_venta < ?), 0)",
+                + "WHERE id_habitacion IS NULL AND metodo_pago = 'EFECTIVO' AND estado = 'ACTIVA' "
+                + "AND fecha_venta >= ? AND fecha_venta < ?), 0)",
                 d, h);
         BigDecimal otros = suma(con, "SELECT COALESCE(SUM(monto), 0) FROM movimiento_caja WHERE tipo = 'INGRESO' "
                 + "AND metodo_pago = 'EFECTIVO' AND fecha >= ? AND fecha < ?", d, h);
@@ -206,6 +207,29 @@ public class CierreCajaDAO {
                 }
             }
         }
+    }
+
+    /** Hora del ultimo cierre confirmado: lo cobrado antes de esa hora ya se conto en un cierre. Null si no hay. */
+    public LocalDateTime ultimaConfirmacion(Connection con) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement("SELECT MAX(COALESCE(fecha_confirmacion, fecha_registro)) "
+                + "FROM cierre_caja WHERE estado = 'CONFIRMADO'");
+             ResultSet rs = ps.executeQuery()) {
+            rs.next();
+            Timestamp cuando = rs.getTimestamp(1);
+            return cuando == null ? null : cuando.toLocalDateTime();
+        }
+    }
+
+    /**
+     * Toma el turno de los cierres: mientras se tiene, nadie confirma un cierre. Lo usa quien anula una venta
+     * cobrada, para que el cierre no cuente una venta que se esta anulando. Se suelta con liberarCierres.
+     */
+    public void bloquearCierres(Connection con) throws SQLException {
+        tomarTurno(con);
+    }
+
+    public void liberarCierres(Connection con) {
+        soltarTurno(con);
     }
 
     private boolean tomarTurno(Connection con) throws SQLException {

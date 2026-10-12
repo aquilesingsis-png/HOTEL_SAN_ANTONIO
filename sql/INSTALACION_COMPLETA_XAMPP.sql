@@ -464,3 +464,28 @@ ALTER TABLE comprobante
 --    del cierre anterior, asi hay dos o tres turnos al dia (manana, tarde, noche) sin contar nada dos veces.
 ALTER TABLE cierre_caja
     ADD COLUMN IF NOT EXISTS fecha_confirmacion DATETIME NULL;
+
+-- 3) ANULAR SIN BORRAR: una venta de tienda o un comprobante que se anula no se elimina, queda marcado como anulado
+--    con quien lo anulo, cuando y por que. Una venta anulada ya no suma en caja, cierres, reportes ni inicio
+--    (y devuelve su stock); un comprobante anulado conserva su numero, que no se vuelve a usar.
+ALTER TABLE venta_tienda
+    ADD COLUMN IF NOT EXISTS estado ENUM('ACTIVA','ANULADA') NOT NULL DEFAULT 'ACTIVA',
+    ADD COLUMN IF NOT EXISTS fecha_anulacion DATETIME NULL,
+    ADD COLUMN IF NOT EXISTS id_usuario_anula INT NULL,
+    ADD COLUMN IF NOT EXISTS motivo_anulacion VARCHAR(200) NULL;
+ALTER TABLE venta_tienda
+    ADD CONSTRAINT fk_venta_usuario_anula FOREIGN KEY IF NOT EXISTS (id_usuario_anula) REFERENCES usuario(id_usuario);
+ALTER TABLE venta_tienda
+    ADD CONSTRAINT IF NOT EXISTS chk_venta_anulada CHECK (estado = 'ACTIVA' OR (fecha_anulacion IS NOT NULL
+        AND id_usuario_anula IS NOT NULL AND motivo_anulacion IS NOT NULL));
+
+ALTER TABLE comprobante
+    ADD COLUMN IF NOT EXISTS estado ENUM('EMITIDO','ANULADO') NOT NULL DEFAULT 'EMITIDO',
+    ADD COLUMN IF NOT EXISTS fecha_anulacion DATETIME NULL,
+    ADD COLUMN IF NOT EXISTS id_usuario_anula INT NULL,
+    ADD COLUMN IF NOT EXISTS motivo_anulacion VARCHAR(200) NULL;
+ALTER TABLE comprobante
+    ADD CONSTRAINT fk_comprobante_usuario_anula FOREIGN KEY IF NOT EXISTS (id_usuario_anula) REFERENCES usuario(id_usuario);
+ALTER TABLE comprobante
+    ADD CONSTRAINT IF NOT EXISTS chk_comprobante_anulado CHECK (estado = 'EMITIDO' OR (fecha_anulacion IS NOT NULL
+        AND id_usuario_anula IS NOT NULL AND motivo_anulacion IS NOT NULL));

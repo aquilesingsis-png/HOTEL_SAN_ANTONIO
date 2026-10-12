@@ -16,6 +16,7 @@ import untrm.hotel_san_antonio.modelo.CuentaHabitacion;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Pago;
 import untrm.hotel_san_antonio.servicio.CuentaService;
+import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.CampoValidacion;
 
@@ -52,7 +53,7 @@ public class CuentaHabitacionController {
     @FXML private Spinner<Integer> spnNoches;
     @FXML private Label lblNuevaSalida;
     @FXML private Button btnAmpliar;
-    @FXML private Button btnRegistrarPago, btnCheckOut, btnCerrar;
+    @FXML private Button btnRegistrarPago, btnCheckOut, btnCerrar, btnDeshacerCheckIn;
     @FXML private CheckBox chkDividirPago;
     @FXML private VBox boxSegundoPago;
     @FXML private ComboBox<String> cmbMetodo2;
@@ -63,6 +64,7 @@ public class CuentaHabitacionController {
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final CuentaService cuentaService = new CuentaService();
+    private final ReservaService reservaService = new ReservaService();
 
     private CuentaHabitacion cuentaActual;
     private Habitacion habitacion;
@@ -269,6 +271,33 @@ public class CuentaHabitacionController {
             Alertas.mostrarError("Check-Out", e.getMessage());
         } catch (SQLException e) {
             Alertas.mostrarError("Error", "No se pudo hacer el check-out.\n\n" + e.getMessage());
+        }
+    }
+
+    /** Deshace un check-in hecho por error (el mismo dia y sin consumos ni comprobante). */
+    @FXML
+    private void onDeshacerCheckIn() {
+        String motivo = Alertas.pedirTexto("Deshacer check-in", "Habitación " + habitacion.getNumero() + " · "
+                + cuentaActual.getHuesped() + "\nSolo se puede el mismo día del check-in y si aún no hay consumos ni "
+                + "comprobante.\nEscribe el motivo:", "Ej. entró a la habitación equivocada");
+        if (motivo == null) {
+            return;
+        }
+        if (!Alertas.confirmar("Deshacer check-in", "¿Deshacer el check-in de la habitación " + habitacion.getNumero()
+                + "?\n\nLa reserva vuelve a «Confirmada» y la habitación queda disponible. Los pagos registrados "
+                + "se conservan.")) {
+            return;
+        }
+        try {
+            reservaService.deshacerCheckIn(habitacion.getIdHabitacion(), motivo);
+            if (alCambiar != null) {
+                alCambiar.run();
+            }
+            cerrar();
+        } catch (IllegalStateException | IllegalArgumentException | SecurityException e) {
+            Alertas.mostrarInfo("No se puede deshacer", e.getMessage());
+        } catch (SQLException e) {
+            Alertas.mostrarError("Error", "No se pudo deshacer el check-in.\n\n" + e.getMessage());
         }
     }
 

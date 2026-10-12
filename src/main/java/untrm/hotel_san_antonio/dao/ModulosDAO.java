@@ -135,20 +135,6 @@ public class ModulosDAO {
         return nombres;
     }
 
-    public BigDecimal efectivoHoy() throws SQLException {
-        String sql = "SELECT COALESCE((SELECT SUM(monto) FROM pago WHERE metodo_pago='EFECTIVO' "
-                + "AND COALESCE(fecha_evento, DATE(fecha_pago))=CURDATE()),0) + COALESCE((SELECT SUM(total) FROM venta_tienda WHERE id_habitacion IS NULL "
-                + "AND metodo_pago='EFECTIVO' AND COALESCE(fecha_evento, DATE(fecha_venta))=CURDATE()),0) + COALESCE((SELECT SUM(monto) FROM movimiento_caja "
-                + "WHERE tipo='INGRESO' AND metodo_pago='EFECTIVO' AND DATE(fecha)=CURDATE()),0) "
-                + "- COALESCE((SELECT SUM(monto) FROM gasto WHERE activo=1 AND metodo_pago='EFECTIVO' "
-                + "AND fecha=CURDATE()),0) - COALESCE((SELECT SUM(monto) FROM movimiento_caja "
-                + "WHERE tipo='EGRESO' AND metodo_pago='EFECTIVO' AND DATE(fecha)=CURDATE()),0)";
-        try (Connection con = ConexionBD.conectar(); Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            rs.next(); return rs.getBigDecimal(1);
-        }
-    }
-
     private int claveGenerada(PreparedStatement ps) throws SQLException {
         try (ResultSet rs = ps.getGeneratedKeys()) {
             if (!rs.next()) throw new SQLException("No se obtuvo el identificador generado.");

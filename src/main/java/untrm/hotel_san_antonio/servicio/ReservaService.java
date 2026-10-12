@@ -5,11 +5,14 @@ import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
+import untrm.hotel_san_antonio.dao.ComprobanteDAO;
+import untrm.hotel_san_antonio.dao.CuentaDAO;
 import untrm.hotel_san_antonio.dao.EmpresaDAO;
 import untrm.hotel_san_antonio.dao.HabitacionDAO;
 import untrm.hotel_san_antonio.dao.HuespedDAO;
@@ -19,6 +22,7 @@ import untrm.hotel_san_antonio.dao.ReservaHuespedDAO;
 import untrm.hotel_san_antonio.dao.AuditoriaDAO;
 import untrm.hotel_san_antonio.dao.CambioHabitacionDAO;
 import untrm.hotel_san_antonio.dao.VentaTiendaDAO;
+import untrm.hotel_san_antonio.modelo.CuentaHabitacion;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Huesped;
@@ -46,6 +50,8 @@ public class ReservaService {
     private final AuditoriaDAO auditoriaDAO = new AuditoriaDAO();
     private final CambioHabitacionDAO cambioHabitacionDAO = new CambioHabitacionDAO();
     private final VentaTiendaDAO ventaDAO = new VentaTiendaDAO();
+    private final CuentaDAO cuentaDAO = new CuentaDAO();
+    private final ComprobanteDAO comprobanteDAO = new ComprobanteDAO();
 
     public record ResultadoCambio(BigDecimal total, BigDecimal pagado, BigDecimal saldo) {}
 
@@ -263,6 +269,55 @@ public class ReservaService {
                 habitacionDAO.cambiarEstado(conexion, idHabitacion, "OCUPADA");
                 auditoriaDAO.registrar(conexion, idUsuario, "CHECKIN", "reserva", idReserva,
                         "hab. " + numeroHabitacion(conexion, idHabitacion));
+                conexion.commit();
+            } catch (SQLException | RuntimeException error) {
+                conexion.rollback();
+                throw error;
+            }
+        }
+    }
+
+    /**
+     * Deshace un check-in hecho por error: la reserva vuelve a CONFIRMADA y la habitacion a DISPONIBLE. Solo el mismo
+     * dia en que se hizo y mientras la estadia no tenga consumos de tienda ni comprobante. Los pagos se conservan
+     * en la reserva (si hay que devolverlos, se registra un egreso en Caja).
+     */
+    public void deshacerCheckIn(int idHabitacion, String motivo) throws SQLException {
+        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
+        String razon = motivo == null ? "" : motivo.trim();
+        if (razon.length() < 3 || razon.length() > 200) {
+            throw new IllegalArgumentException("Indique el motivo (entre 3 y 200 caracteres).");
+        }
+        int idUsuario = obtenerIdUsuarioAutenticado();
+        try (Connection conexion = ConexionBD.conectar()) {
+            conexion.setAutoCommit(false);
+            try {
+                reservaDAO.bloquearHabitacion(conexion, idHabitacion);
+                CuentaHabitacion cuenta = cuentaDAO.obtener(conexion, idHabitacion);
+                if (cuenta == null) {
+                    throw new IllegalStateException("La habitación no tiene una estadía en curso.");
+                }
+                int idReserva = cuenta.getIdReserva();
+                LocalDateTime hecho = auditoriaDAO.ultimaFecha(conexion, "reserva", idReserva, "CHECKIN", "CHECKIN_DIRECTO");
+                if (hecho == null || !hecho.toLocalDate().equals(LocalDate.now())) {
+                    throw new IllegalStateException("El check-in de esta habitación no se hizo hoy, por eso ya no se puede deshacer.");
+                }
+                String comprobante = comprobanteDAO.numeroDeReserva(conexion, idReserva);
+                if (comprobante != null) {
+                    throw new IllegalStateException("La estadía ya tiene el comprobante " + comprobante
+                            + ". El administrador debe anularlo primero.");
+                }
+                if (ventaDAO.contarConsumosActivos(conexion, idHabitacion, cuenta.getIdHuesped(), cuenta.getIngreso()) > 0) {
+                    throw new IllegalStateException("Ya hay consumos de la tienda cargados a esta habitación. "
+                            + "Anúlalos primero y vuelve a intentarlo.");
+                }
+                if (!reservaDAO.actualizarEstadoSiEs(conexion, idReserva, "CHECKIN", "CONFIRMADA")) {
+                    throw new IllegalStateException("La estadía ya no está en curso.");
+                }
+                habitacionDAO.cambiarEstado(conexion, idHabitacion, "DISPONIBLE");
+                auditoriaDAO.registrar(conexion, idUsuario, "CHECKIN_DESHACER", "reserva", idReserva,
+                        "hab. " + numeroHabitacion(conexion, idHabitacion) + " · R-" + String.format("%04d", idReserva)
+                        + " · " + cuenta.getHuesped() + " · motivo: " + razon);
                 conexion.commit();
             } catch (SQLException | RuntimeException error) {
                 conexion.rollback();

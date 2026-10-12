@@ -196,6 +196,7 @@
     <bottom>
         <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-border-color: #E5E5E5; -fx-border-width: 1px 0 0 0;">
             <padding><Insets top="14" right="22" bottom="14" left="22"/></padding>
+            <Button fx:id="btnDeshacerCheckIn" text="Deshacer check-in" onAction="#onDeshacerCheckIn" userData="danger" style="-fx-background-color: white; -fx-text-fill: #B3261E; -fx-border-color: #B3261E; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 8px 20px; -fx-cursor: hand;"/>
             <Label fx:id="lblAviso" text="Cobra el saldo pendiente para poder hacer el check-out."
                    style="-fx-text-fill: #777777;" wrapText="true"/>
             <Region HBox.hgrow="ALWAYS"/>

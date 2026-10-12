@@ -324,6 +324,24 @@ public class ReservaDAO {
         }
     }
 
+    /**
+     * Bloquea y devuelve el id de la estadia en curso (CHECKIN) de ese huesped en esa habitacion que ya habia
+     * empezado el dia indicado, o -1 si ya no hay (la estadia termino o es de otro huesped).
+     */
+    public int bloquearEstadiaEnCurso(Connection con, int idHabitacion, int idHuesped, LocalDate dia)
+            throws SQLException {
+        String sql = "SELECT id_reserva FROM reserva WHERE id_habitacion = ? AND id_huesped = ? "
+                + "AND estado = 'CHECKIN' AND fecha_checkin <= ? ORDER BY fecha_checkin DESC LIMIT 1 FOR UPDATE";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacion);
+            ps.setInt(2, idHuesped);
+            ps.setDate(3, Date.valueOf(dia));
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : -1;
+            }
+        }
+    }
+
     public int obtenerCapacidadHabitacion(Connection con, int idHabitacion) throws SQLException {
         String sql = "SELECT t.capacidad FROM habitacion h "
                 + "JOIN tipo_habitacion t ON t.id_tipo = h.id_tipo WHERE h.id_habitacion = ?";

@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.sql.Types;
 
 public class ComprobanteDAO {
@@ -63,10 +64,10 @@ public class ComprobanteDAO {
         return serie + "-" + String.format("%06d", ultimo + 1);
     }
 
-    /** Numero del comprobante ya emitido para esa estadia, o null si todavia no tiene. */
+    /** Numero del comprobante vigente (no anulado) de esa estadia, o null si todavia no tiene. */
     public String numeroDeReserva(Connection con, int idReserva) throws SQLException {
         try (PreparedStatement ps = con.prepareStatement(
-                "SELECT numero FROM comprobante WHERE id_reserva = ? LIMIT 1")) {
+                "SELECT numero FROM comprobante WHERE id_reserva = ? AND estado = 'EMITIDO' LIMIT 1")) {
             ps.setInt(1, idReserva);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? rs.getString(1) : null;
@@ -85,8 +86,10 @@ public class ComprobanteDAO {
     }
 
     private Comprobante buscar(Connection con, String condicion, String texto, Integer id) throws SQLException {
-        String sql = "SELECT c.*, CONCAT(u.nombre, ' ', u.apellido) AS emitido_por FROM comprobante c "
-                + "JOIN usuario u ON u.id_usuario = c.id_usuario WHERE " + condicion;
+        String sql = "SELECT c.*, CONCAT(u.nombre, ' ', u.apellido) AS emitido_por, "
+                + "CONCAT(ua.nombre, ' ', ua.apellido) AS anulado_por FROM comprobante c "
+                + "JOIN usuario u ON u.id_usuario = c.id_usuario "
+                + "LEFT JOIN usuario ua ON ua.id_usuario = c.id_usuario_anula WHERE " + condicion;
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             if (texto != null) {
                 ps.setString(1, texto);
@@ -113,8 +116,40 @@ public class ComprobanteDAO {
                 c.setSubtotal(rs.getBigDecimal("subtotal"));
                 c.setIgv(rs.getBigDecimal("igv"));
                 c.setEmitidoPor(rs.getString("emitido_por"));
+                c.setEstado(rs.getString("estado"));
+                Timestamp anulado = rs.getTimestamp("fecha_anulacion");
+                c.setFechaAnulacion(anulado == null ? null : anulado.toLocalDateTime());
+                c.setMotivoAnulacion(rs.getString("motivo_anulacion"));
+                c.setAnuladoPor(rs.getString("anulado_por"));
                 return c;
             }
+        }
+    }
+
+    /** Reserva la fila del comprobante hasta terminar la transaccion (dos personas no lo anulan a la vez). */
+    public boolean bloquear(Connection con, int idComprobante) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT id_comprobante FROM comprobante WHERE id_comprobante = ? FOR UPDATE")) {
+            ps.setInt(1, idComprobante);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    /**
+     * Anula el comprobante (no se borra y su numero no se vuelve a usar): queda quien lo anulo, cuando y por que.
+     *
+     * @return false si ya estaba anulado
+     */
+    public boolean anular(Connection con, int idComprobante, int idUsuario, String motivo) throws SQLException {
+        String sql = "UPDATE comprobante SET estado = 'ANULADO', fecha_anulacion = NOW(), id_usuario_anula = ?, "
+                + "motivo_anulacion = ? WHERE id_comprobante = ? AND estado = 'EMITIDO'";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            ps.setString(2, motivo);
+            ps.setInt(3, idComprobante);
+            return ps.executeUpdate() == 1;
         }
     }
 

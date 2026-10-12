@@ -72,7 +72,8 @@ public class DashboardDAO {
         String sql = "SELECT h, COUNT(*) FROM ("
                 + "SELECT HOUR(fecha_pago) AS h, DATE(fecha_pago) AS d FROM pago WHERE fecha_evento IS NULL "
                 + "UNION ALL "
-                + "SELECT HOUR(fecha_venta), DATE(fecha_venta) FROM venta_tienda WHERE fecha_evento IS NULL"
+                + "SELECT HOUR(fecha_venta), DATE(fecha_venta) FROM venta_tienda WHERE fecha_evento IS NULL "
+                + "AND estado = 'ACTIVA'"
                 + ") t WHERE d >= " + desde + " GROUP BY h";
         Map<Integer, Integer> porHora = new TreeMap<>();
         try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {

@@ -40,7 +40,7 @@ public class DetalleVentaDAO {
     public List<DetalleVenta> listarPorComprobante(Connection con, int idComprobante) throws SQLException {
         String sql = "SELECT d.id_detalle, d.id_venta, d.id_producto, d.cantidad, d.precio_unitario, d.subtotal, "
                 + "p.nombre FROM venta_tienda v JOIN detalle_venta d ON d.id_venta = v.id_venta "
-                + "JOIN producto p ON p.id_producto = d.id_producto WHERE v.id_comprobante = ? "
+                + "JOIN producto p ON p.id_producto = d.id_producto WHERE v.id_comprobante = ? AND v.estado = 'ACTIVA' "
                 + "ORDER BY v.fecha_venta, d.id_detalle";
         List<DetalleVenta> lista = new ArrayList<>();
         try (PreparedStatement ps = con.prepareStatement(sql)) {

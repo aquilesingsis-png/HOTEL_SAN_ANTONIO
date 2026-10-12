@@ -20,10 +20,13 @@ import untrm.hotel_san_antonio.util.SesionActual;
  */
 public class CajaDAO {
 
-    /** Un renglon del libro de caja. tipo: INGRESO, EGRESO o CARGO (venta cargada a una habitacion). */
+    /**
+     * Un renglon del libro de caja. tipo: INGRESO, EGRESO, CARGO (venta cargada a una habitacion) o ANULADA
+     * (venta anulada: se ve pero no suma). idOrigen es el numero de la reserva, venta, movimiento o gasto.
+     */
     public record Movimiento(LocalDateTime fecha, String tipo, String concepto, BigDecimal monto,
                              String metodo, String documento, String cliente, String responsable,
-                             String origen) { }
+                             String origen, int idOrigen) { }
 
     /** Un cierre de caja ya guardado (borrador o confirmado); confirmado es la hora en que se confirmo. */
     public record Cierre(int id, LocalDate fecha, String turno, String responsable, BigDecimal esperado,
@@ -37,34 +40,35 @@ public class CajaDAO {
             + "' - Habitación ', hab.numero, ' (R-', LPAD(r.id_reserva, 4, '0'), ')', "
             + "IF(p.fecha_evento IS NULL, '', ' · registro tardío')) AS concepto, "
             + "p.monto AS monto, p.metodo_pago AS metodo, "
-            + "(SELECT MIN(c.numero) FROM comprobante c WHERE c.id_reserva = r.id_reserva) AS documento, "
+            + "(SELECT MIN(c.numero) FROM comprobante c WHERE c.id_reserva = r.id_reserva AND c.estado = 'EMITIDO') AS documento, "
             + "CONCAT(h.nombres, ' ', h.apellidos) AS cliente, CONCAT(u.nombre, ' ', u.apellido) AS responsable, "
-            + "'Alojamiento' AS origen "
+            + "'Alojamiento' AS origen, r.id_reserva AS id_origen "
             + "FROM pago p JOIN reserva r ON r.id_reserva = p.id_reserva "
             + "JOIN huesped h ON h.id_huesped = r.id_huesped JOIN habitacion hab ON hab.id_habitacion = r.id_habitacion "
             + "JOIN usuario u ON u.id_usuario = p.id_usuario "
             + "UNION ALL "
             + "SELECT COALESCE(TIMESTAMP(v.fecha_evento, TIME(v.fecha_venta)), v.fecha_venta), "
-            + "IF(v.id_habitacion IS NULL, 'INGRESO', 'CARGO'), "
+            + "IF(v.estado = 'ANULADA', 'ANULADA', IF(v.id_habitacion IS NULL, 'INGRESO', 'CARGO')), "
             + "CONCAT('Venta de tienda', IF(v.fecha_evento IS NULL, '', ' (registro tardío)'), ' - ', COALESCE((SELECT GROUP_CONCAT(CONCAT(d.cantidad, ' x ', pr.nombre) SEPARATOR ', ') "
             + "FROM detalle_venta d JOIN producto pr ON pr.id_producto = d.id_producto WHERE d.id_venta = v.id_venta), "
-            + "'sin detalle'), IF(v.id_habitacion IS NULL, '', CONCAT(' (a la habitación ', hb.numero, ')'))), "
+            + "'sin detalle'), IF(v.id_habitacion IS NULL, '', CONCAT(' (a la habitación ', hb.numero, ')')), "
+            + "IF(v.estado = 'ANULADA', CONCAT(' · ANULADA: ', v.motivo_anulacion), '')), "
             + "v.total, IF(v.id_habitacion IS NULL, COALESCE(v.metodo_pago, 'NO REGISTRADO'), 'CARGO A HABITACION'), "
             + "(SELECT c.numero FROM comprobante c WHERE c.id_comprobante = v.id_comprobante), "
             + "COALESCE(v.cliente_externo, (SELECT CONCAT(h2.nombres, ' ', h2.apellidos) FROM huesped h2 "
             + "WHERE h2.id_huesped = v.id_huesped), 'Cliente varios'), "
-            + "CONCAT(u.nombre, ' ', u.apellido), 'Carrito' "
+            + "CONCAT(u.nombre, ' ', u.apellido), 'Carrito', v.id_venta "
             + "FROM venta_tienda v JOIN usuario u ON u.id_usuario = v.id_usuario "
             + "LEFT JOIN habitacion hb ON hb.id_habitacion = v.id_habitacion "
             + "UNION ALL "
             + "SELECT m.fecha, m.tipo, CONCAT('Movimiento de caja - ', m.concepto, "
             + "IF(m.referencia IS NULL OR m.referencia = '', '', CONCAT(' (', m.referencia, ')'))), "
-            + "m.monto, m.metodo_pago, NULL, '', CONCAT(u.nombre, ' ', u.apellido), 'Manual' "
+            + "m.monto, m.metodo_pago, NULL, '', CONCAT(u.nombre, ' ', u.apellido), 'Manual', m.id_movimiento "
             + "FROM movimiento_caja m JOIN usuario u ON u.id_usuario = m.id_usuario "
             + "UNION ALL "
             + "SELECT TIMESTAMP(g.fecha, TIME(g.fecha_registro)), 'EGRESO', "
             + "CONCAT('Gasto - ', g.concepto, ' (', g.categoria, ')'), g.monto, UPPER(g.metodo_pago), NULL, '', "
-            + "CONCAT(u.nombre, ' ', u.apellido), 'Gasto' "
+            + "CONCAT(u.nombre, ' ', u.apellido), 'Gasto', g.id_gasto "
             + "FROM gasto g JOIN usuario u ON u.id_usuario = g.id_usuario WHERE g.activo = TRUE";
 
     /** Los ultimos cierres de caja, del mas reciente al mas antiguo: el Administrador ve todos; recepcion, los suyos. */
@@ -95,7 +99,7 @@ public class CajaDAO {
     }
 
     /**
-     * @param tipo   INGRESO, EGRESO, CARGO o null (todos)
+     * @param tipo   INGRESO, EGRESO, CARGO, ANULADA o null (todos)
      * @param metodo EFECTIVO, YAPE, TRANSFERENCIA, TARJETA o null (todos)
      * @param origen Alojamiento, Carrito, Manual, Gasto o null (todos)
      * @param texto  se busca en el concepto, el cliente, el responsable y el documento
@@ -144,7 +148,7 @@ public class CajaDAO {
                     lista.add(new Movimiento(rs.getTimestamp("fecha").toLocalDateTime(), rs.getString("tipo"),
                             rs.getString("concepto"), rs.getBigDecimal("monto"), rs.getString("metodo"),
                             rs.getString("documento"), rs.getString("cliente"), rs.getString("responsable"),
-                            rs.getString("origen")));
+                            rs.getString("origen"), rs.getInt("id_origen")));
                 }
             }
         }

@@ -23,6 +23,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import untrm.hotel_san_antonio.dao.CajaDAO;
 import untrm.hotel_san_antonio.dao.CajaDAO.Movimiento;
+import untrm.hotel_san_antonio.servicio.VentaService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.ExportarArchivo;
 import untrm.hotel_san_antonio.util.Navegacion;
@@ -51,6 +52,7 @@ public class LibroCajaController {
     @FXML private TextField txtBuscar;
     @FXML private Button btnNuevo;
     @FXML private Button btnCerrarCaja;
+    @FXML private Button btnAnularVenta;
 
     @FXML private Label lblIngresos;
     @FXML private Label lblEgresos;
@@ -73,13 +75,14 @@ public class LibroCajaController {
     @FXML private Button btnSiguiente;
 
     private final CajaDAO cajaDAO = new CajaDAO();
+    private final VentaService ventaService = new VentaService();
     private List<Movimiento> resultado = List.of();
     private int pagina = 1;
 
     @FXML
     public void initialize() {
         cmbOrigen.getItems().setAll(TODOS, "Alojamiento", "Carrito", "Manual", "Gasto");
-        cmbTipo.getItems().setAll(TODOS, "Ingreso", "Egreso", "Cargo a habitación");
+        cmbTipo.getItems().setAll(TODOS, "Ingreso", "Egreso", "Cargo a habitación", "Anulada");
         cmbMetodo.getItems().setAll(TODOS, "Efectivo", "Yape", "Transferencia", "Tarjeta");
         restablecerFiltros();
 
@@ -106,6 +109,10 @@ public class LibroCajaController {
         }
         colMonto.setStyle("-fx-alignment: CENTER-RIGHT;");
         txtBuscar.setOnAction(evento -> buscar());
+        // solo se puede anular una venta del carrito que todavia no este anulada
+        btnAnularVenta.setDisable(true);
+        tabla.getSelectionModel().selectedItemProperty().addListener((obs, antes, ahora) ->
+                btnAnularVenta.setDisable(!esVentaAnulable(ahora)));
         buscar();
     }
 
@@ -148,6 +155,49 @@ public class LibroCajaController {
         } catch (IOException | SecurityException error) {
             Alertas.mostrarError("Error", "No se pudo abrir el cierre de caja.\n\n" + error.getMessage());
         }
+    }
+
+    /** Anula la venta seleccionada: pide el motivo, avisa lo que pasa y deja todo en la auditoria. */
+    @FXML
+    private void anularVenta() {
+        Movimiento fila = tabla.getSelectionModel().getSelectedItem();
+        if (!esVentaAnulable(fila)) {
+            Alertas.mostrarInfo("Anular venta", "Selecciona en la lista una venta del carrito que no esté anulada.");
+            return;
+        }
+        String motivo = Alertas.pedirTexto("Anular venta N.º " + fila.idOrigen(),
+                "Venta N.º " + fila.idOrigen() + " · " + dinero(fila.monto()) + "\nEscribe el motivo de la anulación:",
+                "Ej. el cliente devolvió el producto");
+        if (motivo == null) {
+            return;
+        }
+        if (!Alertas.confirmar("Anular venta", "¿Anular la venta N.º " + fila.idOrigen() + " por " + dinero(fila.monto())
+                + "?\n\nLos productos vuelven al stock y la venta deja de contar en caja. Si tiene boleta o factura, "
+                + "también se anula.\nEsto no se puede deshacer.")) {
+            return;
+        }
+        try {
+            VentaService.Anulacion anulada = ventaService.anular(fila.idOrigen(), motivo);
+            buscar();
+            StringBuilder aviso = new StringBuilder("Se anuló la venta N.º " + anulada.idVenta() + ". Volvieron "
+                    + anulada.unidades() + (anulada.unidades() == 1 ? " unidad" : " unidades") + " al stock.");
+            if (anulada.comprobanteAnulado() != null) {
+                aviso.append("\nTambién se anuló el comprobante ").append(anulada.comprobanteAnulado()).append('.');
+            }
+            if (anulada.aDevolver().signum() > 0) {
+                aviso.append("\n\nOjo: el huésped ya había pagado ").append(dinero(anulada.aDevolver()))
+                        .append(" de este consumo. Devuélvele ese dinero y regístralo como egreso en Caja (+ Nuevo movimiento).");
+            }
+            Alertas.mostrarInfo("Venta anulada", aviso.toString());
+        } catch (IllegalStateException | IllegalArgumentException | SecurityException error) {
+            Alertas.mostrarInfo("No se puede anular", error.getMessage());
+        } catch (SQLException error) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo anular la venta.\n\n" + error.getMessage());
+        }
+    }
+
+    private boolean esVentaAnulable(Movimiento fila) {
+        return fila != null && "Carrito".equals(fila.origen()) && !"ANULADA".equals(fila.tipo());
     }
 
     @FXML
@@ -288,6 +338,8 @@ public class LibroCajaController {
                     setStyle("-fx-text-fill: #1F7A3E; -fx-font-weight: bold;");
                 } else if ("Egreso".equals(texto)) {
                     setStyle("-fx-text-fill: #B3261E; -fx-font-weight: bold;");
+                } else if ("Anulada".equals(texto)) {
+                    setStyle("-fx-text-fill: #8A8076; -fx-font-style: italic;");
                 } else {
                     setStyle("-fx-text-fill: #6A5F52;");
                 }
@@ -302,6 +354,7 @@ public class LibroCajaController {
             case "Ingreso" -> "INGRESO";
             case "Egreso" -> "EGRESO";
             case "Cargo a habitación" -> "CARGO";
+            case "Anulada" -> "ANULADA";
             default -> null;
         };
     }
@@ -322,6 +375,7 @@ public class LibroCajaController {
         return switch (tipo) {
             case "INGRESO" -> "Ingreso";
             case "EGRESO" -> "Egreso";
+            case "ANULADA" -> "Anulada";
             default -> "Cargo a habitación";
         };
     }

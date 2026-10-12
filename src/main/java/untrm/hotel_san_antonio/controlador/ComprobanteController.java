@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -37,6 +38,7 @@ import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.ConsultaApi;
 import untrm.hotel_san_antonio.util.ConexionBD;
 import untrm.hotel_san_antonio.util.PdfTexto;
+import untrm.hotel_san_antonio.util.SesionActual;
 import untrm.hotel_san_antonio.util.Validador;
 
 /**
@@ -71,6 +73,9 @@ public class ComprobanteController {
     @FXML private Button btnImprimir;
     @FXML private Button btnCancelar;
     @FXML private Button btnGenerar;
+    @FXML private Button btnAnular;
+
+    private static final DateTimeFormatter FECHA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final ComprobanteService comprobanteService = new ComprobanteService();
     private final HuespedDAO huespedDAO = new HuespedDAO();
@@ -96,6 +101,11 @@ public class ComprobanteController {
         cmbTipoDocumento.setValue("DNI");
 
         dpFecha.setValue(LocalDate.now());
+
+        // anular un comprobante es decision del administrador
+        boolean admin = SesionActual.esAdministrador();
+        btnAnular.setVisible(admin);
+        btnAnular.setManaged(admin);
 
         colConcepto.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getConcepto()));
         colCantidad.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().getCantidad())));
@@ -154,6 +164,11 @@ public class ComprobanteController {
             Alertas.mostrarInfo("No encontrado", "No existe un comprobante con el número \"" + referencia + "\".");
             return;
         }
+        mostrarComprobanteEmitido(documento, true);
+    }
+
+    /** Muestra un comprobante ya emitido; si esta anulado lo marca (y, con avisar, cuenta cuando, quien y por que). */
+    private void mostrarComprobanteEmitido(ComprobanteDocumento documento, boolean avisar) {
         Comprobante c = documento.getComprobante();
         comprobanteEmitidoId = c.getIdComprobante();
 
@@ -162,7 +177,7 @@ public class ComprobanteController {
             filas.add(new FilaDetalle(l.concepto(), l.cantidad(), l.precio(), l.importe()));
         }
         tblDetalle.setItems(filas);
-        mostrarTotales(c.getMontoTotal(), c.getMontoTotal(), BigDecimal.ZERO);
+        mostrarTotales(c.getMontoTotal(), c.isAnulado() ? BigDecimal.ZERO : c.getMontoTotal(), BigDecimal.ZERO);
 
         cmbTipoComprobante.setValue(switch (c.getTipo()) {
             case "FACTURA" -> "Factura";
@@ -174,7 +189,20 @@ public class ComprobanteController {
         txtCliente.setText(c.getClienteNombre() == null ? "Cliente varios" : c.getClienteNombre());
         txtDireccion.setText(c.getClienteDireccion() == null ? "" : c.getClienteDireccion());
         txtNumero.setText(c.getNumero());
-        btnImprimir.setDisable(false);
+        btnImprimir.setDisable(c.isAnulado());
+        btnAnular.setDisable(c.isAnulado());
+        if (c.isAnulado()) {
+            lblEstadoCuenta.setText("ANULADO");
+            lblEstadoCuenta.setStyle("-fx-background-color: #FCE3E1; -fx-padding: 3 8; -fx-background-radius: 3; "
+                    + "-fx-text-fill: #B3261E; -fx-font-weight: bold;");
+            if (avisar) {
+                Alertas.mostrarInfo("Comprobante anulado", "El comprobante " + c.getNumero() + " fue anulado el "
+                        + (c.getFechaAnulacion() == null ? "—" : c.getFechaAnulacion().format(FECHA_HORA))
+                        + (c.getAnuladoPor() == null ? "" : " por " + c.getAnuladoPor())
+                        + ".\nMotivo: " + c.getMotivoAnulacion()
+                        + "\n\nSe conserva con su número, pero ya no vale ni se imprime.");
+            }
+        }
     }
 
     private void cargarEstadia(String referencia) throws SQLException {
@@ -187,6 +215,8 @@ public class ComprobanteController {
         }
         cuentaActual = cuenta;
         ventaActual = null;
+        comprobanteEmitidoId = 0;
+        btnAnular.setDisable(true);
 
         ObservableList<FilaDetalle> filas = FXCollections.observableArrayList();
         for (CuentaHabitacion.Linea l : cuenta.getCargos()) {
@@ -216,6 +246,8 @@ public class ComprobanteController {
         }
         ventaActual = resultado;
         cuentaActual = null;
+        comprobanteEmitidoId = 0;
+        btnAnular.setDisable(true);
 
         ObservableList<FilaDetalle> filas = FXCollections.observableArrayList();
         for (DetalleVenta d : resultado.detalle) {
@@ -372,6 +404,7 @@ public class ComprobanteController {
             comprobanteEmitidoId = generado.getIdComprobante();
             txtNumero.setText(generado.getNumero());
             btnImprimir.setDisable(false);
+            btnAnular.setDisable(false);
 
             Alertas.mostrarInfo("Comprobante generado", "Se generó el comprobante " + generado.getNumero()
                     + " por " + formatoMoneda(generado.getMontoTotal()) + ".");
@@ -445,6 +478,10 @@ public class ComprobanteController {
                 Alertas.mostrarInfo("Guardar PDF", "No se encontró el comprobante en la base de datos.");
                 return;
             }
+            if (documento.getComprobante().isAnulado()) {
+                Alertas.mostrarInfo("Guardar PDF", "Un comprobante anulado no se imprime.");
+                return;
+            }
             ImpresionComprobante.guardarPdf(btnImprimir.getScene().getWindow(), documento);
         } catch (SQLException error) {
             Alertas.mostrarError("Guardar PDF", "No se pudo leer el comprobante.\n" + error.getMessage());
@@ -454,6 +491,41 @@ public class ComprobanteController {
     /** PDF A4 de texto, sin depender de una impresora o de bibliotecas externas. */
     static byte[] crearPdf(String texto) throws IOException {
         return PdfTexto.crear(texto);
+    }
+
+    /** Anula el comprobante cargado o recien emitido (solo el administrador): pide el motivo y avisa lo que pasa. */
+    @FXML
+    private void onAnular() {
+        if (comprobanteEmitidoId <= 0) {
+            Alertas.mostrarInfo("Anular comprobante", "Primero genera un comprobante o carga uno emitido.");
+            return;
+        }
+        String numero = txtNumero.getText();
+        String motivo = Alertas.pedirTexto("Anular comprobante", "Comprobante " + numero + " · " + lblTotal.getText()
+                + "\nEscribe el motivo de la anulación:", "Ej. DNI mal digitado");
+        if (motivo == null) {
+            return;
+        }
+        if (!Alertas.confirmar("Anular comprobante", "¿Anular el comprobante " + numero + "?\n\n"
+                + "Se conserva con su número, que no se vuelve a usar, y se puede emitir otro en su lugar.\n"
+                + "Esto no se puede deshacer.")) {
+            return;
+        }
+        try {
+            Comprobante anulado = comprobanteService.anular(comprobanteEmitidoId, motivo);
+            Alertas.mostrarInfo("Comprobante anulado", "Se anuló el comprobante " + anulado.getNumero() + ".");
+            if ("Comprobante emitido".equals(cmbOrigen.getValue())) {
+                ComprobanteDocumento documento = comprobanteService.documento(anulado.getIdComprobante());
+                limpiarOperacion();
+                mostrarComprobanteEmitido(documento, false);
+            } else {
+                onCargarOperacion(); // la operacion volvio a quedar sin comprobante: se carga de nuevo para emitir otro
+            }
+        } catch (IllegalStateException | IllegalArgumentException | SecurityException e) {
+            Alertas.mostrarInfo("No se puede anular", e.getMessage());
+        } catch (SQLException e) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo anular el comprobante.\n\n" + e.getMessage());
+        }
     }
 
     @FXML
@@ -479,6 +551,7 @@ public class ComprobanteController {
         lblEstadoCuenta.setStyle("-fx-background-color: #F3EEE7; -fx-padding: 3 8; -fx-background-radius: 3; -fx-text-fill: #999999;");
         txtNumero.clear();
         btnImprimir.setDisable(true);
+        btnAnular.setDisable(true);
     }
 
     private String formatoMoneda(BigDecimal monto) {

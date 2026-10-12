@@ -78,7 +78,7 @@ public class CuentaDAO {
         String sqlConsumos = "SELECT v.fecha_venta, p.nombre, d.cantidad, d.precio_unitario, d.subtotal "
                 + "FROM venta_tienda v JOIN detalle_venta d ON d.id_venta = v.id_venta "
                 + "JOIN producto p ON p.id_producto = d.id_producto "
-                + "WHERE v.id_habitacion = ? AND v.id_huesped = ? AND v.id_comprobante IS NULL "
+                + "WHERE v.id_habitacion = ? AND v.id_huesped = ? AND v.id_comprobante IS NULL AND v.estado = 'ACTIVA' "
                 + "AND v.fecha_venta >= ? ORDER BY v.fecha_venta";
         try (PreparedStatement ps = con.prepareStatement(sqlConsumos)) {
             ps.setInt(1, idHabitacion);

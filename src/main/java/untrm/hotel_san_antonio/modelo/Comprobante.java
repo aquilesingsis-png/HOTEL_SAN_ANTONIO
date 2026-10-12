@@ -19,6 +19,10 @@ public class Comprobante {
     private BigDecimal subtotal;
     private BigDecimal igv;
     private String emitidoPor;       // nombre de quien lo emitio (solo al leerlo de la base)
+    private String estado = "EMITIDO"; // EMITIDO o ANULADO (un comprobante anulado no se borra ni se reutiliza)
+    private LocalDateTime fechaAnulacion;
+    private String motivoAnulacion;
+    private String anuladoPor;       // nombre de quien lo anulo (solo al leerlo de la base)
 
     public Comprobante() {}
 
@@ -63,4 +67,17 @@ public class Comprobante {
 
     public String getEmitidoPor() { return emitidoPor; }
     public void setEmitidoPor(String emitidoPor) { this.emitidoPor = emitidoPor; }
+
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
+    public boolean isAnulado() { return "ANULADO".equals(estado); }
+
+    public LocalDateTime getFechaAnulacion() { return fechaAnulacion; }
+    public void setFechaAnulacion(LocalDateTime fechaAnulacion) { this.fechaAnulacion = fechaAnulacion; }
+
+    public String getMotivoAnulacion() { return motivoAnulacion; }
+    public void setMotivoAnulacion(String motivoAnulacion) { this.motivoAnulacion = motivoAnulacion; }
+
+    public String getAnuladoPor() { return anuladoPor; }
+    public void setAnuladoPor(String anuladoPor) { this.anuladoPor = anuladoPor; }
 }

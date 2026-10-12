@@ -161,6 +161,9 @@ public class ComprobanteService {
     /** Las lineas salen de lo guardado: los productos enlazados al comprobante y, si es de una estadia, el alojamiento. */
     private ComprobanteDocumento armarDocumento(Connection con, Comprobante c) throws SQLException {
         List<ComprobanteDocumento.Linea> lineas = new ArrayList<>();
+        if (c.isAnulado()) {
+            return new ComprobanteDocumento(c, lineas); // ya no corresponde a ninguna operacion: se muestra sin detalle
+        }
         BigDecimal consumos = BigDecimal.ZERO;
         for (DetalleVenta d : detalleDAO.listarPorComprobante(con, c.getIdComprobante())) {
             lineas.add(new ComprobanteDocumento.Linea(d.getNombreProducto(), d.getCantidad(),
@@ -241,7 +244,7 @@ public class ComprobanteService {
             // el total sale de la base y no de lo que trae la pantalla
             VentaTienda real = ventaDAO.buscarPendientePorId(con, venta.getIdVenta(), true);
             if (real == null) {
-                throw new IllegalStateException("La venta no existe o ya tiene comprobante.");
+                throw new IllegalStateException("La venta no existe, ya tiene comprobante o está anulada.");
             }
             if (real.getIdHabitacion() != null) {
                 throw new IllegalStateException("La venta está cargada a una habitación: se factura junto con su estadía.");
@@ -257,6 +260,63 @@ public class ComprobanteService {
                     + " · S/ " + CuentaHabitacion.formato(c.getMontoTotal()));
             return c;
         });
+    }
+
+    /**
+     * Anula un comprobante emitido (solo el administrador). No se borra y su numero no se vuelve a usar. Si era de
+     * una venta de tienda, la venta queda otra vez sin comprobante y se puede emitir uno nuevo; si era de una
+     * estadia, solo se puede mientras siga en curso (despues ya no se podria emitir otro) y sus consumos vuelven a
+     * la cuenta de la habitacion.
+     *
+     * @return el comprobante ya anulado
+     */
+    public Comprobante anular(int idComprobante, String motivo) throws SQLException {
+        Permisos.requerir("ADMINISTRADOR");
+        String razon = motivo == null ? "" : motivo.trim();
+        if (razon.length() < 3 || razon.length() > 200) {
+            throw new IllegalArgumentException("Indique el motivo de la anulación (entre 3 y 200 caracteres).");
+        }
+        int idUsuario = SesionActual.getUsuario().getIdUsuario();
+        try (Connection con = ConexionBD.conectar()) {
+            // lectura previa, fuera de la transaccion: solo sirve para saber que hay que bloquear primero
+            Comprobante previo = comprobanteDAO.buscarPorId(con, idComprobante);
+            if (previo == null) {
+                throw new IllegalStateException("El comprobante ya no existe.");
+            }
+            con.setAutoCommit(false);
+            try {
+                // todas las operaciones bloquean en el mismo orden (estadia, ventas, comprobante) para no trabarse entre si
+                Reserva reserva = null;
+                if (previo.getIdReserva() != null) {
+                    reserva = reservaDAO.buscarPorId(con, previo.getIdReserva(), true);
+                } else {
+                    ventaDAO.bloquearPorComprobante(con, idComprobante);
+                }
+                if (!comprobanteDAO.bloquear(con, idComprobante)) {
+                    throw new IllegalStateException("El comprobante ya no existe.");
+                }
+                Comprobante c = comprobanteDAO.buscarPorId(con, idComprobante);
+                if (c.isAnulado()) {
+                    throw new IllegalStateException("El comprobante " + c.getNumero() + " ya está anulado.");
+                }
+                if (c.getIdReserva() != null && (reserva == null || !"CHECKIN".equals(reserva.getEstado()))) {
+                    throw new IllegalStateException("El comprobante " + c.getNumero() + " es de una estadía que ya "
+                            + "terminó (check-out hecho): ya no se puede anular porque no se podría emitir otro en su lugar.");
+                }
+                ventaDAO.desenlazarComprobante(con, idComprobante);
+                if (!comprobanteDAO.anular(con, idComprobante, idUsuario, razon)) {
+                    throw new IllegalStateException("El comprobante " + c.getNumero() + " ya está anulado.");
+                }
+                auditoriaDAO.registrar(con, idUsuario, "COMPROBANTE_ANULAR", "comprobante", idComprobante,
+                        c.getNumero() + " · S/ " + CuentaHabitacion.formato(c.getMontoTotal()) + " · motivo: " + razon);
+                Comprobante anulado = comprobanteDAO.buscarPorId(con, idComprobante);
+                con.commit();
+                return anulado;
+            } catch (SQLException | RuntimeException e) {
+                con.rollback();
+                throw e;
+            }
+        }
     }
 
     private void validarTipo(String tipo) {
