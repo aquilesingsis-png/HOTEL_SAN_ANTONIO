@@ -185,7 +185,7 @@ public class Nueva_reservaController {
                 "20:00", "21:00", "22:00");
         cbHoraIngreso.setValue("14:00");
         cbCanal.getItems().setAll(CANALES.keySet());
-        cbCanal.setValue("Teléfono");
+        cbCanal.setValue("WhatsApp");
         dpFechaIngreso.valueProperty().addListener((observable, anterior, actual) -> actualizarFechasYHabitaciones());
         dpFechaSalida.valueProperty().addListener((observable, anterior, actual) -> actualizarFechasYHabitaciones());
     }
@@ -715,7 +715,7 @@ public class Nueva_reservaController {
         reserva.setNumHuespedes(spHuespedes.getValue());
         reserva.setMontoTotal(habitacionSeleccionada.getTipo().getPrecioBase().multiply(
                 BigDecimal.valueOf(ChronoUnit.DAYS.between(dpFechaIngreso.getValue(), dpFechaSalida.getValue()))));
-        reserva.setCanal(CANALES.getOrDefault(cbCanal.getValue(), "TELEFONO"));
+        reserva.setCanal(CANALES.getOrDefault(cbCanal.getValue(), "WHATSAPP"));
         return reserva;
     }
 
@@ -749,7 +749,7 @@ public class Nueva_reservaController {
         dpFechaIngreso.setValue(hoy.plusDays(1));
         dpFechaSalida.setValue(hoy.plusDays(2));
         cbHoraIngreso.setValue("14:00");
-        cbCanal.setValue("Teléfono");
+        cbCanal.setValue("WhatsApp");
         spHuespedes.getValueFactory().setValue(1);
         cbPiso.setValue("Todos los pisos");
         cbTipoHabitacion.setValue("Todos los tipos");
