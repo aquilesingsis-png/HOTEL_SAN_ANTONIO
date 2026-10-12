@@ -17,16 +17,59 @@ public class ComprobanteDAO {
             "NOTA_VENTA", "NV001"
     );
 
-    /** Siguiente numero correlativo de la serie de ese tipo (ej. "B001-000002"). */
+    /**
+     * Reserva el turno para emitir en la serie de ese tipo: una sola persona a la vez toma el siguiente
+     * numero (aunque sea desde otra PC); las demas esperan hasta 10 segundos. Se suelta con liberarSerie.
+     */
+    public void bloquearSerie(Connection con, String tipo) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement("SELECT GET_LOCK(?, 10)")) {
+            ps.setString(1, "hotel_comprobante_" + tipo);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next() || rs.getInt(1) != 1) {
+                    throw new IllegalStateException(
+                            "Otra persona está emitiendo un comprobante. Intenta de nuevo en unos segundos.");
+                }
+            }
+        }
+    }
+
+    /** Suelta el turno de la serie (si no se tenia, no pasa nada). */
+    public void liberarSerie(Connection con, String tipo) {
+        try (PreparedStatement ps = con.prepareStatement("SELECT RELEASE_LOCK(?)")) {
+            ps.setString(1, "hotel_comprobante_" + tipo);
+            ps.executeQuery().close();
+        } catch (SQLException ignorado) {
+            // al cerrarse la conexion el turno se suelta igual
+        }
+    }
+
+    /**
+     * Siguiente numero correlativo de la serie de ese tipo (ej. "B001-000002"): el ultimo emitido mas uno.
+     * Se llama con el turno de la serie ya tomado; la lectura con bloqueo trae siempre el dato mas reciente.
+     */
     public String generarNumero(Connection con, String tipo) throws SQLException {
         String serie = SERIE.getOrDefault(tipo, "X001");
-        String sql = "SELECT COUNT(*) FROM comprobante WHERE tipo = ?";
+        String sql = "SELECT numero FROM comprobante WHERE tipo = ? ORDER BY id_comprobante DESC LIMIT 1 FOR UPDATE";
+        int ultimo = 0;
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, tipo);
             try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                int correlativo = rs.getInt(1) + 1;
-                return serie + "-" + String.format("%06d", correlativo);
+                if (rs.next()) {
+                    String numero = rs.getString(1);
+                    ultimo = Integer.parseInt(numero.substring(numero.lastIndexOf('-') + 1));
+                }
+            }
+        }
+        return serie + "-" + String.format("%06d", ultimo + 1);
+    }
+
+    /** Numero del comprobante ya emitido para esa estadia, o null si todavia no tiene. */
+    public String numeroDeReserva(Connection con, int idReserva) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT numero FROM comprobante WHERE id_reserva = ? LIMIT 1")) {
+            ps.setInt(1, idReserva);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getString(1) : null;
             }
         }
     }

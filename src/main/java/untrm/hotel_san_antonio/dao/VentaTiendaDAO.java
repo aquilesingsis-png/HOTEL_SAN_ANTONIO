@@ -77,7 +77,13 @@ public class VentaTiendaDAO {
 
     /** Una venta que todavia no tiene comprobante (id_comprobante IS NULL), o null si no existe o ya se facturo. */
     public VentaTienda buscarPendientePorId(Connection con, int idVenta) throws SQLException {
-        String sql = "SELECT * FROM venta_tienda WHERE id_venta = ? AND id_comprobante IS NULL";
+        return buscarPendientePorId(con, idVenta, false);
+    }
+
+    /** Igual, pero con bloquear = true la fila queda reservada hasta terminar la transaccion. */
+    public VentaTienda buscarPendientePorId(Connection con, int idVenta, boolean bloquear) throws SQLException {
+        String sql = "SELECT * FROM venta_tienda WHERE id_venta = ? AND id_comprobante IS NULL"
+                + (bloquear ? " FOR UPDATE" : "");
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idVenta);
             try (ResultSet rs = ps.executeQuery()) {
