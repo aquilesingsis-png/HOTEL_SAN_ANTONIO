@@ -99,13 +99,20 @@ public class VentaTiendaDAO {
         }
     }
 
-    /** Enlaza a un comprobante recien generado la venta indicada (para el origen "Venta de tienda"). */
-    public void enlazarComprobante(Connection con, int idVenta, int idComprobante) throws SQLException {
-        String sql = "UPDATE venta_tienda SET id_comprobante = ? WHERE id_venta = ? AND id_comprobante IS NULL";
+    /**
+     * Enlaza a un comprobante recien generado la venta indicada (para el origen "Venta de tienda").
+     * Solo enlaza ventas cobradas en el momento: una cargada a una habitacion se cobra y se factura
+     * junto con la estadia.
+     *
+     * @return false si la venta ya tenia comprobante o esta cargada a una habitacion
+     */
+    public boolean enlazarComprobante(Connection con, int idVenta, int idComprobante) throws SQLException {
+        String sql = "UPDATE venta_tienda SET id_comprobante = ? "
+                + "WHERE id_venta = ? AND id_comprobante IS NULL AND id_habitacion IS NULL";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idComprobante);
             ps.setInt(2, idVenta);
-            ps.executeUpdate();
+            return ps.executeUpdate() == 1;
         }
     }
 
@@ -123,6 +130,26 @@ public class VentaTiendaDAO {
             ps.setInt(3, idHuesped);
             ps.setDate(4, Date.valueOf(ingreso));
             ps.executeUpdate();
+        }
+    }
+
+    /**
+     * Al cambiar de habitacion durante la estadia, los consumos que siguen sin cobrar pasan a la
+     * habitacion nueva: la cuenta se arma por habitacion y, si se quedaran en la anterior, ya no se
+     * cobrarian (mismos criterios que CuentaDAO).
+     *
+     * @return cuantas ventas se trasladaron
+     */
+    public int trasladarConsumosPendientes(Connection con, int idHabitacionAnterior, int idHabitacionNueva,
+                                           int idHuesped, LocalDate ingreso) throws SQLException {
+        String sql = "UPDATE venta_tienda SET id_habitacion = ? WHERE id_habitacion = ? AND id_huesped = ? "
+                + "AND id_comprobante IS NULL AND fecha_venta >= ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacionNueva);
+            ps.setInt(2, idHabitacionAnterior);
+            ps.setInt(3, idHuesped);
+            ps.setDate(4, Date.valueOf(ingreso));
+            return ps.executeUpdate();
         }
     }
 

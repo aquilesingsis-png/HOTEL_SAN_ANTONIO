@@ -18,6 +18,7 @@ import untrm.hotel_san_antonio.dao.ReservaDAO;
 import untrm.hotel_san_antonio.dao.ReservaHuespedDAO;
 import untrm.hotel_san_antonio.dao.AuditoriaDAO;
 import untrm.hotel_san_antonio.dao.CambioHabitacionDAO;
+import untrm.hotel_san_antonio.dao.VentaTiendaDAO;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Huesped;
@@ -44,6 +45,7 @@ public class ReservaService {
     private final ReservaHuespedDAO reservaHuespedDAO = new ReservaHuespedDAO();
     private final AuditoriaDAO auditoriaDAO = new AuditoriaDAO();
     private final CambioHabitacionDAO cambioHabitacionDAO = new CambioHabitacionDAO();
+    private final VentaTiendaDAO ventaDAO = new VentaTiendaDAO();
 
     public record ResultadoCambio(BigDecimal total, BigDecimal pagado, BigDecimal saldo) {}
 
@@ -118,14 +120,19 @@ public class ReservaService {
                 if (totalNuevo.signum() < 0) throw new IllegalStateException("La tarifa calculada no es válida.");
                 BigDecimal pagado = pagoDAO.sumarPorReserva(con, idReserva);
                 reservaDAO.cambiarHabitacionYPrecio(con, idReserva, idNueva, totalNuevo);
+                int consumosTrasladados = 0;
                 if ("CHECKIN".equals(reserva.getEstado())) {
                     habitacionDAO.cambiarEstado(con, idAnterior, "LIMPIEZA");
                     habitacionDAO.cambiarEstado(con, idNueva, "OCUPADA");
+                    // la cuenta se arma por habitación: los consumos aún sin cobrar se van con el huésped
+                    consumosTrasladados = ventaDAO.trasladarConsumosPendientes(con, idAnterior, idNueva,
+                            reserva.getIdHuesped(), reserva.getFechaCheckin());
                 }
                 cambioHabitacionDAO.registrar(con, idReserva, idAnterior, idNueva, usuario,
                         reserva.getMontoTotal(), totalNuevo, textoOpcional(motivo));
                 auditoriaDAO.registrar(con, usuario, "CAMBIO_HABITACION", "reserva", idReserva,
-                        anterior.getNumero() + " → " + nueva.getNumero());
+                        anterior.getNumero() + " → " + nueva.getNumero()
+                        + (consumosTrasladados > 0 ? " · consumos trasladados: " + consumosTrasladados : ""));
                 con.commit();
                 return new ResultadoCambio(totalNuevo, pagado, totalNuevo.subtract(pagado));
             } catch (SQLException | RuntimeException error) {

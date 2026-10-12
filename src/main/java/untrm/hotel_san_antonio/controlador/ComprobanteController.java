@@ -136,6 +136,9 @@ public class ComprobanteController {
             } else {
                 cargarEstadia(referencia);
             }
+        } catch (IllegalStateException e) {
+            limpiarOperacion();
+            Alertas.mostrarInfo("No se puede cargar", e.getMessage());
         } catch (SQLException e) {
             Alertas.mostrarError("Error de base de datos", "No se pudo cargar la operación.\n\n" + e.getMessage());
         }

@@ -73,7 +73,10 @@ public class ComprobanteService {
         }
     }
 
-    /** @return la venta y su detalle, o null si no existe esa venta o ya tiene comprobante */
+    /**
+     * @return la venta y su detalle, o null si no existe esa venta o ya tiene comprobante
+     * @throws IllegalStateException si la venta esta cargada a una habitacion (se factura con la estadia)
+     */
     public VentaPendiente cargarVentaPorReferencia(String referencia) throws SQLException {
         String soloDigitos = referencia.trim().replaceAll("\\D", "");
         if (soloDigitos.isEmpty()) {
@@ -84,6 +87,12 @@ public class ComprobanteService {
             VentaTienda venta = ventaDAO.buscarPendientePorId(con, idVenta);
             if (venta == null) {
                 return null;
+            }
+            if (venta.getIdHabitacion() != null) {
+                Habitacion cargada = habitacionDAO.buscarPorId(con, venta.getIdHabitacion());
+                throw new IllegalStateException("La venta N.º " + idVenta + " está cargada a la habitación"
+                        + (cargada == null ? "" : " " + cargada.getNumero())
+                        + " y se factura junto con su estadía. Búscala con el origen «Cuenta de habitación».");
             }
             List<DetalleVenta> detalle = detalleDAO.listarPorVenta(con, idVenta);
             return new VentaPendiente(venta, detalle);
@@ -138,7 +147,9 @@ public class ComprobanteService {
                 int idComprobante = comprobanteDAO.insertar(con, c);
                 c.setIdComprobante(idComprobante);
 
-                ventaDAO.enlazarComprobante(con, venta.getIdVenta(), idComprobante);
+                if (!ventaDAO.enlazarComprobante(con, venta.getIdVenta(), idComprobante)) {
+                    throw new IllegalStateException("La venta ya tiene comprobante o está cargada a una habitación.");
+                }
 
                 con.commit();
                 return c;
