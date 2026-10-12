@@ -42,6 +42,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import untrm.hotel_san_antonio.util.Registro;
 
 /**
  * Ventana "Registrar huesped y reserva": se abre al hacer clic en una habitacion
@@ -348,8 +349,11 @@ public class ReservaFormController {
                 txtNombres.setText(actualizar.getValue().getNombres());
                 txtApellidos.setText(actualizar.getValue().getApellidos());
             });
-            actualizar.setOnFailed(ev -> Alertas.mostrarAdvertencia("RENIEC",
-                    "Se conservaron los datos locales; no se pudo actualizar la identidad."));
+            actualizar.setOnFailed(ev -> {
+                Registro.fallo("ReservaFormController.verificarIdentidadExistente", actualizar.getException());
+                Alertas.mostrarAdvertencia("RENIEC",
+                    "Se conservaron los datos locales; no se pudo actualizar la identidad.");
+            });
             ConsultaApi.iniciar(actualizar);
         });
         ConsultaApi.iniciar(consulta);

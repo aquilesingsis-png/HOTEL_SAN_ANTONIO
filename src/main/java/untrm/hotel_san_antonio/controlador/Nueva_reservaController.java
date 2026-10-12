@@ -45,6 +45,7 @@ import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.ConsultaApi;
 import untrm.hotel_san_antonio.util.SoloLectura;
 import untrm.hotel_san_antonio.util.Validador;
+import untrm.hotel_san_antonio.util.Registro;
 
 public class Nueva_reservaController {
 
@@ -344,11 +345,15 @@ public class Nueva_reservaController {
                 txtApellidos.setText(h.getApellidos());
                 lblEstadoBusqueda.setText("Identidad actualizada desde RENIEC; se conservaron los datos de contacto.");
             });
-            actualizar.setOnFailed(ev -> lblEstadoBusqueda.setText(
-                    "Se cargaron datos locales; no se pudo actualizar la identidad."));
+            actualizar.setOnFailed(ev -> {
+                Registro.fallo("Nueva_reservaController.verificarIdentidadExistente", actualizar.getException());
+                lblEstadoBusqueda.setText(
+                    "Se cargaron datos locales; no se pudo actualizar la identidad.");
+            });
             ConsultaApi.iniciar(actualizar);
         });
         consulta.setOnFailed(evento -> {
+            Registro.fallo("Nueva_reservaController.verificarIdentidadExistente", consulta.getException());
             if (consultaActual == secuenciaConsulta) {
                 lblEstadoBusqueda.setText("Huésped local cargado; RENIEC no está disponible.");
             }

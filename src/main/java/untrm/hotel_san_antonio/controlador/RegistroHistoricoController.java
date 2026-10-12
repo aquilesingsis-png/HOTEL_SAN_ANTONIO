@@ -28,6 +28,7 @@ import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.ConsultaApi;
 import untrm.hotel_san_antonio.util.SoloLectura;
 import untrm.hotel_san_antonio.util.Validador;
+import untrm.hotel_san_antonio.util.Registro;
 
 /** Captura administrativa de una estadía pasada, con fechas del hecho y de captura separadas. */
 public class RegistroHistoricoController {
@@ -97,7 +98,10 @@ public class RegistroHistoricoController {
                 habitaciones.put(nombre, h); cmbHabitacion.getItems().add(nombre);
             }
         });
-        tarea.setOnFailed(e -> lblEstado.setText("No se pudieron cargar las habitaciones."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("RegistroHistoricoController.cargarHabitaciones", tarea.getException());
+            lblEstado.setText("No se pudieron cargar las habitaciones.");
+        });
         ejecutar(tarea, "historico-habitaciones");
     }
 
@@ -129,13 +133,17 @@ public class RegistroHistoricoController {
                             ? "Complete los nombres manualmente." : "Identidad autocompletada.");
                 });
                 reniec.setOnFailed(ev -> {
+                    Registro.fallo("RegistroHistoricoController.buscarDni", reniec.getException());
                     dniBuscado = dni;
                     lblEstado.setText("RENIEC no disponible. Complete los nombres manualmente.");
                 });
                 ejecutar(reniec, "historico-reniec");
             }
         });
-        local.setOnFailed(e -> lblEstado.setText("No se pudo buscar el huésped local."));
+        local.setOnFailed(e -> {
+            Registro.fallo("RegistroHistoricoController.buscarDni", local.getException());
+            lblEstado.setText("No se pudo buscar el huésped local.");
+        });
         ejecutar(local, "historico-dni");
     }
 

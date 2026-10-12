@@ -24,6 +24,7 @@ import untrm.hotel_san_antonio.servicio.DiasSinUsoService.Estado;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.Navegacion;
 import untrm.hotel_san_antonio.util.SesionActual;
+import untrm.hotel_san_antonio.util.Registro;
 
 /**
  * Registro de días pasados: solo se activa cuando el sistema estuvo sin uso (por ejemplo, un corte de luz).
@@ -98,7 +99,10 @@ public class DiasPasadosController {
             @Override protected Estado call() throws Exception { return servicio.estado(); }
         };
         tarea.setOnSucceeded(e -> aplicar(tarea.getValue()));
-        tarea.setOnFailed(e -> lblMensaje.setText("No se pudo consultar el estado del sistema."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("DiasPasadosController.cargar", tarea.getException());
+            lblMensaje.setText("No se pudo consultar el estado del sistema.");
+        });
         ejecutar(tarea);
     }
 

@@ -15,6 +15,7 @@ import javafx.scene.control.TextField;
 import untrm.hotel_san_antonio.modelo.Gasto;
 import untrm.hotel_san_antonio.servicio.GastoService;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Registro;
 
 public class GastosController {
     @FXML private DatePicker dpFecha, dpDesde, dpHasta;
@@ -59,7 +60,10 @@ public class GastosController {
             lblTotal.setText("Total filtrado: S/ " + total);
             lblMensaje.setText(tarea.getValue().size() + " gasto(s) encontrado(s).");
         });
-        tarea.setOnFailed(e -> lblMensaje.setText("No se pudieron cargar los gastos."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("GastosController.filtrar", tarea.getException());
+            lblMensaje.setText("No se pudieron cargar los gastos.");
+        });
         ejecutar(tarea);
     }
 
@@ -97,7 +101,10 @@ public class GastosController {
             }
         };
         tarea.setOnSucceeded(e -> { limpiar(); filtrar(); });
-        tarea.setOnFailed(e -> lblMensaje.setText("No se pudo desactivar el gasto."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("GastosController.desactivar", tarea.getException());
+            lblMensaje.setText("No se pudo desactivar el gasto.");
+        });
         ejecutar(tarea);
     }
 

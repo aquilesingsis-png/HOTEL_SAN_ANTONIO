@@ -24,6 +24,7 @@ import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.ConsultaApi;
 import untrm.hotel_san_antonio.util.Navegacion;
+import untrm.hotel_san_antonio.util.Registro;
 
 /**
  * Ventana emergente con el detalle de una reserva (se abre desde el Calendario y desde la Lista).
@@ -93,7 +94,10 @@ public class DetalleReservaVentanaController {
             }
         };
         tarea.setOnSucceeded(e -> mostrarPagos(tarea.getValue()));
-        tarea.setOnFailed(e -> lblResumenPagos.setText("No se pudieron cargar los pagos."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("DetalleReservaVentanaController.cargarPagos", tarea.getException());
+            lblResumenPagos.setText("No se pudieron cargar los pagos.");
+        });
         ConsultaApi.iniciar(tarea);
     }
 
@@ -169,7 +173,10 @@ public class DetalleReservaVentanaController {
         tarea.setOnSucceeded(e -> lblHuespedes.setText(tarea.getValue().stream()
                 .map(h -> h.getNombres() + " " + h.getApellidos() + " (" + h.getNumDocumento() + ")")
                 .collect(java.util.stream.Collectors.joining("\n"))));
-        tarea.setOnFailed(e -> lblHuespedes.setText("No se pudieron cargar los huéspedes."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("DetalleReservaVentanaController.cargarHuespedes", tarea.getException());
+            lblHuespedes.setText("No se pudieron cargar los huéspedes.");
+        });
         ConsultaApi.iniciar(tarea);
     }
 

@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import untrm.hotel_san_antonio.util.Navegacion;
+import untrm.hotel_san_antonio.util.Registro;
 import untrm.hotel_san_antonio.util.EstiloGlobal;
 
 /**
@@ -41,6 +42,7 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
+        Registro.iniciar();
         launch(args);
     }
 }

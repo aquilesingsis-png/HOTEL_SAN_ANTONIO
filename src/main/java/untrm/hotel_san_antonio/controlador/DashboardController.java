@@ -44,6 +44,7 @@ import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.EstiloUtil;
 import untrm.hotel_san_antonio.util.Navegacion;
 import untrm.hotel_san_antonio.util.SesionActual;
+import untrm.hotel_san_antonio.util.Registro;
 
 public class DashboardController {
 
@@ -497,6 +498,7 @@ public class DashboardController {
         javafx.concurrent.Task<TipoCambio> tarea = DecolectaTipoCambioService.consultarHoy();
         tarea.setOnSucceeded(e -> mostrarTipoCambio(tarea.getValue()));
         tarea.setOnFailed(e -> {
+            Registro.fallo("DashboardController.cargarTipoCambio", tarea.getException());
             TipoCambio anterior = DecolectaTipoCambioService.ultimoConocido();
             if (anterior != null) {
                 mostrarTipoCambio(anterior);

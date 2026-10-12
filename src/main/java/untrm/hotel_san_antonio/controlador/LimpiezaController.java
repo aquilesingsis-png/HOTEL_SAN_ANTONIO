@@ -16,6 +16,7 @@ import javafx.util.Duration;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.servicio.LimpiezaService;
 import untrm.hotel_san_antonio.util.EstiloGlobal;
+import untrm.hotel_san_antonio.util.Registro;
 
 /**
  * Limpieza: muestra solo las habitaciones que dejó el check-out (estado LIMPIEZA) y se actualiza sola.
@@ -78,7 +79,10 @@ public class LimpiezaController {
             lblPendientes.setText(String.valueOf(enLimpieza.size()));
             if (avisar) lblMensaje.setText("Lista actualizada.");
         });
-        tarea.setOnFailed(e -> lblMensaje.setText("No se pudieron cargar las habitaciones."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("LimpiezaController.cargar", tarea.getException());
+            lblMensaje.setText("No se pudieron cargar las habitaciones.");
+        });
         ejecutar(tarea);
     }
 

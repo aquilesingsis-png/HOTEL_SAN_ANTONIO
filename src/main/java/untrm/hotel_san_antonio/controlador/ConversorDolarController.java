@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import untrm.hotel_san_antonio.modelo.TipoCambio;
 import untrm.hotel_san_antonio.servicio.DecolectaTipoCambioService;
 import untrm.hotel_san_antonio.util.ConversorDolar;
+import untrm.hotel_san_antonio.util.Registro;
 
 /**
  * Ventana pequeña del tipo de cambio: se escribe un monto en dólares o en soles y el otro campo muestra su
@@ -42,6 +43,7 @@ public class ConversorDolarController {
         Task<TipoCambio> tarea = DecolectaTipoCambioService.consultarHoy();
         tarea.setOnSucceeded(e -> usar(tarea.getValue()));
         tarea.setOnFailed(e -> {
+            Registro.fallo("ConversorDolarController.initialize", tarea.getException());
             if (DecolectaTipoCambioService.ultimoConocido() != null) {
                 usar(DecolectaTipoCambioService.ultimoConocido());
                 return;

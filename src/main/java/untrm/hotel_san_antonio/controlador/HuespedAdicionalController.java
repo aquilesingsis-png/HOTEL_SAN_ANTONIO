@@ -9,6 +9,7 @@ import untrm.hotel_san_antonio.servicio.ReniecService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.SoloLectura;
 import untrm.hotel_san_antonio.util.Validador;
+import untrm.hotel_san_antonio.util.Registro;
 
 /** Componente FXML repetible; cada huésped se identifica antes de guardar. */
 public class HuespedAdicionalController {
@@ -63,7 +64,10 @@ public class HuespedAdicionalController {
             }
             consultarReniec(dni, existente != null);
         });
-        local.setOnFailed(e -> lblEstado.setText("No se pudo consultar la base de datos."));
+        local.setOnFailed(e -> {
+            Registro.fallo("HuespedAdicionalController.buscar", local.getException());
+            lblEstado.setText("No se pudo consultar la base de datos.");
+        });
         ejecutar(local, "buscar-acompanante");
     }
 
@@ -89,10 +93,14 @@ public class HuespedAdicionalController {
                 dniBuscado = dni;
                 lblEstado.setText("Identidad verificada.");
             });
-            actualizar.setOnFailed(ev -> lblEstado.setText("No se pudo actualizar la identidad local."));
+            actualizar.setOnFailed(ev -> {
+                Registro.fallo("HuespedAdicionalController.consultarReniec", actualizar.getException());
+                lblEstado.setText("No se pudo actualizar la identidad local.");
+            });
             ejecutar(actualizar, "actualizar-identidad-acompanante");
         });
         consulta.setOnFailed(e -> {
+            Registro.fallo("HuespedAdicionalController.consultarReniec", consulta.getException());
             if (!dni.equals(txtDni.getText().trim())) return;
             dniBuscado = dni;
             lblEstado.setText(existeLocal ? "Datos locales cargados; RENIEC no disponible."
