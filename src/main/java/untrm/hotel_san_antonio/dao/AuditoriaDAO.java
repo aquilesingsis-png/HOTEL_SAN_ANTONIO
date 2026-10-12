@@ -14,7 +14,7 @@ public class AuditoriaDAO {
             ps.setString(2, accion);
             ps.setString(3, entidad);
             ps.setInt(4, idEntidad);
-            ps.setString(5, detalle);
+            ps.setString(5, detalle != null && detalle.length() > 500 ? detalle.substring(0, 497) + "..." : detalle);
             ps.executeUpdate();
         }
     }

@@ -142,6 +142,11 @@ public class ReservaService {
         }
     }
 
+    private String numeroHabitacion(Connection con, int idHabitacion) throws SQLException {
+        Habitacion h = habitacionDAO.buscarPorId(con, idHabitacion);
+        return h == null ? String.valueOf(idHabitacion) : h.getNumero();
+    }
+
     private boolean esMismoTipoOSuperior(Connection con, Habitacion anterior, Habitacion nueva) throws SQLException {
         if (anterior.getIdTipo() == nueva.getIdTipo()) return true;
         Integer actual = habitacionDAO.nivelCategoria(con, anterior.getIdTipo());
@@ -211,7 +216,7 @@ public class ReservaService {
     }
 
     public void hacerCheckIn(int idHabitacion) throws SQLException {
-        obtenerIdUsuarioAutenticado();
+        int idUsuario = obtenerIdUsuarioAutenticado();
         try (Connection conexion = ConexionBD.conectar()) {
             conexion.setAutoCommit(false);
             try {
@@ -225,6 +230,8 @@ public class ReservaService {
                     throw new IllegalStateException("La habitación no tiene una reserva confirmada para hoy.");
                 }
                 habitacionDAO.cambiarEstado(conexion, idHabitacion, "OCUPADA");
+                auditoriaDAO.registrar(conexion, idUsuario, "CHECKIN", "reserva", idReserva,
+                        "hab. " + numeroHabitacion(conexion, idHabitacion));
                 conexion.commit();
             } catch (SQLException | RuntimeException error) {
                 conexion.rollback();
@@ -276,6 +283,11 @@ public class ReservaService {
                 if (checkinInmediato) {
                     habitacionDAO.cambiarEstado(conexion, reserva.getIdHabitacion(), "OCUPADA");
                 }
+                auditoriaDAO.registrar(conexion, idUsuario, checkinInmediato ? "CHECKIN_DIRECTO" : "RESERVA_CREAR",
+                        "reserva", idReserva, "hab. " + numeroHabitacion(conexion, reserva.getIdHabitacion())
+                        + " · " + reserva.getFechaCheckin() + " → " + reserva.getFechaCheckout()
+                        + " · total S/ " + reserva.getMontoTotal().setScale(2, RoundingMode.HALF_UP)
+                        + " · pagado S/ " + sumaPagos.setScale(2, RoundingMode.HALF_UP));
                 conexion.commit();
                 return idReserva;
             } catch (SQLException | RuntimeException error) {
@@ -341,7 +353,7 @@ public class ReservaService {
 
     /** Cancela solo si el estado persistido continúa siendo PENDIENTE o CONFIRMADA. */
     public void cancelar(int idReserva, String motivo, String detalle) throws SQLException {
-        obtenerIdUsuarioAutenticado();
+        int idUsuario = obtenerIdUsuarioAutenticado();
         if (motivo == null || motivo.isBlank()) {
             throw new IllegalArgumentException("Seleccione un motivo de cancelación.");
         }
@@ -349,8 +361,19 @@ public class ReservaService {
             throw new IllegalArgumentException("El detalle de cancelación no puede superar 500 caracteres.");
         }
         try (Connection conexion = ConexionBD.conectar()) {
-            if (!reservaDAO.cancelarSiCancelable(conexion, idReserva, motivo.trim(), textoOpcional(detalle))) {
-                throw new IllegalStateException("La reserva ya no está en un estado que permita cancelarla.");
+            conexion.setAutoCommit(false);
+            try {
+                Reserva reserva = reservaDAO.buscarPorId(conexion, idReserva, true);
+                if (!reservaDAO.cancelarSiCancelable(conexion, idReserva, motivo.trim(), textoOpcional(detalle))) {
+                    throw new IllegalStateException("La reserva ya no está en un estado que permita cancelarla.");
+                }
+                auditoriaDAO.registrar(conexion, idUsuario, "RESERVA_CANCELAR", "reserva", idReserva,
+                        "hab. " + (reserva == null ? "?" : reserva.getNumeroHabitacion()) + " · " + motivo.trim()
+                        + (textoOpcional(detalle) == null ? "" : " · " + textoOpcional(detalle)));
+                conexion.commit();
+            } catch (SQLException | RuntimeException error) {
+                conexion.rollback();
+                throw error;
             }
         }
     }
