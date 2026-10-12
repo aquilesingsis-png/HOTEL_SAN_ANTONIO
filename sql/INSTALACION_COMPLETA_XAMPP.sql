@@ -1,6 +1,13 @@
--- HOTEL SAN ANTONIO: INSTALACION COMPLETA PARA XAMPP/MARIADB
--- SOLO para una base nueva sin tablas. NO ejecutar sobre la base existente.
--- Crea 21 tablas, tipos, 24 habitaciones, catalogo de tienda y dos cuentas.
+-- HOTEL SAN ANTONIO: SCRIPT UNICO DE LA BASE DE DATOS PARA XAMPP/MARIADB (es el unico .sql del proyecto)
+--
+-- BASE NUEVA (sin tablas): ejecute el archivo completo.
+-- BASE QUE YA EXISTE (con datos): NO ejecute el archivo completo (fallaria: las tablas ya existen). Ejecute SOLO
+--   el ultimo bloque del archivo, el de las actualizaciones: vaya al final del archivo y suba hasta su titulo (el
+--   que tiene lineas de =====) y copie desde ahi hasta el final. Se puede ejecutar mas de una vez. Antes conviene
+--   hacer un respaldo.
+-- Todo cambio nuevo de la base se agrega al final de ese bloque, con ADD COLUMN IF NOT EXISTS y similares.
+--
+-- Una base nueva crea 24 tablas, tipos, 24 habitaciones, catalogo de tienda y dos cuentas.
 -- No contiene personas, reservas ni pagos inventados.
 -- Las habitaciones se inician DISPONIBLES para evitar ocupaciones ficticias.
 -- Las claves temporales figuran en ACCESOS_INICIALES.txt y deben cambiarse.
@@ -347,7 +354,7 @@ CREATE TABLE recuperacion_contrasena (
     INDEX idx_recuperacion_usuario (id_usuario, expira)
 );
 
--- Operación de almacén y caja. En una base existente use la migración 002.
+-- Operación de almacén y caja.
 CREATE TABLE movimiento_stock (
     id_movimiento INT AUTO_INCREMENT PRIMARY KEY,
     id_producto INT NOT NULL,
@@ -447,11 +454,20 @@ VALUES
 COMMIT;
 
 
+-- =====================================================================
+-- ACTUALIZACIONES PARA UNA BASE QUE YA EXISTE
+-- Ejecutar SOLO desde esta linea hasta el final (en phpMyAdmin: pestana SQL, pegar desde aqui hasta el final).
+-- Se puede ejecutar mas de una vez: lo que ya esta hecho no se repite. Una base nueva tambien pasa por aqui
+-- al ejecutar el archivo completo, sin problema. Cada cambio nuevo se agrega abajo, con su fecha.
+-- =====================================================================
+
+USE hotel_san_antonio;
+
 -- ---------------------------------------------------------------------
--- ACTUALIZACION 12/10/2026 (es la misma de sql/ACTUALIZAR_BD_2026-10-12.sql, para las bases que ya existian)
+-- 12/10/2026
 -- ---------------------------------------------------------------------
 
--- COMPROBANTE: cliente, subtotal e IGV, para poder reimprimirlo igual que se emitio.
+-- 1) COMPROBANTE: cliente, subtotal e IGV, para poder reimprimirlo igual que se emitio.
 ALTER TABLE comprobante
     ADD COLUMN IF NOT EXISTS cliente_tipo_doc  VARCHAR(10)  NULL,
     ADD COLUMN IF NOT EXISTS cliente_documento VARCHAR(20)  NULL,
