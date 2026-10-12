@@ -104,18 +104,70 @@ public class CajaDAO {
      * @param origen Alojamiento, Carrito, Manual, Gasto o null (todos)
      * @param texto  se busca en el concepto, el cliente, el responsable y el documento
      */
+    /** Cuantos renglones trae como maximo la lista; si hay mas, la pantalla avisa y los totales siguen completos. */
+    public static final int LIMITE = 5000;
+
+    /** Ingresos, egresos y efectivo en caja (ingresos menos egresos en efectivo) de todo lo que cumple los filtros. */
+    public record Totales(BigDecimal ingresos, BigDecimal egresos, BigDecimal efectivo) { }
+
     public List<Movimiento> listar(LocalDate desde, LocalDate hasta, String tipo, String metodo,
                                    String origen, String texto) throws SQLException {
         Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
-        StringBuilder sql = new StringBuilder("SELECT * FROM (").append(TODOS).append(") t WHERE 1 = 1 ");
         List<Object> valores = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM (").append(TODOS).append(") t WHERE 1 = 1 ")
+                .append(filtros(desde, hasta, tipo, metodo, origen, texto, valores))
+                .append("ORDER BY t.fecha DESC LIMIT ").append(LIMITE + 1);   // uno de mas, para saber si hay mas
+
+        List<Movimiento> lista = new ArrayList<>();
+        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < valores.size(); i++) {
+                ps.setObject(i + 1, valores.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new Movimiento(rs.getTimestamp("fecha").toLocalDateTime(), rs.getString("tipo"),
+                            rs.getString("concepto"), rs.getBigDecimal("monto"), rs.getString("metodo"),
+                            rs.getString("documento"), rs.getString("cliente"), rs.getString("responsable"),
+                            rs.getString("origen"), rs.getInt("id_origen")));
+                }
+            }
+        }
+        return lista;
+    }
+
+    /** Los totales de todo lo que cumple los filtros, sin el corte de la lista. */
+    public Totales totales(LocalDate desde, LocalDate hasta, String tipo, String metodo,
+                           String origen, String texto) throws SQLException {
+        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
+        List<Object> valores = new ArrayList<>();
+        String sql = "SELECT COALESCE(SUM(CASE WHEN t.tipo = 'INGRESO' THEN t.monto END), 0), "
+                + "COALESCE(SUM(CASE WHEN t.tipo = 'EGRESO' THEN t.monto END), 0), "
+                + "COALESCE(SUM(CASE WHEN t.metodo = 'EFECTIVO' AND t.tipo = 'INGRESO' THEN t.monto "
+                + "WHEN t.metodo = 'EFECTIVO' AND t.tipo = 'EGRESO' THEN -t.monto END), 0) "
+                + "FROM (" + TODOS + ") t WHERE 1 = 1 "
+                + filtros(desde, hasta, tipo, metodo, origen, texto, valores);
+        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql)) {
+            for (int i = 0; i < valores.size(); i++) {
+                ps.setObject(i + 1, valores.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return new Totales(rs.getBigDecimal(1), rs.getBigDecimal(2), rs.getBigDecimal(3));
+            }
+        }
+    }
+
+    /** Las condiciones de los filtros (cada una termina con un espacio) y sus valores, en orden. */
+    private String filtros(LocalDate desde, LocalDate hasta, String tipo, String metodo, String origen,
+                           String texto, List<Object> valores) {
+        StringBuilder sql = new StringBuilder();
         if (desde != null) {
-            sql.append("AND DATE(t.fecha) >= ? ");
-            valores.add(Date.valueOf(desde));
+            sql.append("AND t.fecha >= ? ");
+            valores.add(java.sql.Timestamp.valueOf(desde.atStartOfDay()));
         }
         if (hasta != null) {
-            sql.append("AND DATE(t.fecha) <= ? ");
-            valores.add(Date.valueOf(hasta));
+            sql.append("AND t.fecha < ? ");
+            valores.add(java.sql.Timestamp.valueOf(hasta.plusDays(1).atStartOfDay()));
         }
         if (tipo != null) {
             sql.append("AND t.tipo = ? ");
@@ -136,22 +188,6 @@ public class CajaDAO {
                 valores.add(patron);
             }
         }
-        sql.append("ORDER BY t.fecha DESC LIMIT 5000");
-
-        List<Movimiento> lista = new ArrayList<>();
-        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
-            for (int i = 0; i < valores.size(); i++) {
-                ps.setObject(i + 1, valores.get(i));
-            }
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    lista.add(new Movimiento(rs.getTimestamp("fecha").toLocalDateTime(), rs.getString("tipo"),
-                            rs.getString("concepto"), rs.getBigDecimal("monto"), rs.getString("metodo"),
-                            rs.getString("documento"), rs.getString("cliente"), rs.getString("responsable"),
-                            rs.getString("origen"), rs.getInt("id_origen")));
-                }
-            }
-        }
-        return lista;
+        return sql.toString();
     }
 }

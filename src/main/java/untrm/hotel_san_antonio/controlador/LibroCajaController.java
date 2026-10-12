@@ -70,6 +70,7 @@ public class LibroCajaController {
     @FXML private TableColumn<Movimiento, String> colCliente;
     @FXML private TableColumn<Movimiento, String> colResponsable;
     @FXML private Label lblCantidad;
+    @FXML private Label lblAviso;
     @FXML private Label lblPagina;
     @FXML private Button btnAnterior;
     @FXML private Button btnSiguiente;
@@ -77,6 +78,8 @@ public class LibroCajaController {
     private final CajaDAO cajaDAO = new CajaDAO();
     private final VentaService ventaService = new VentaService();
     private List<Movimiento> resultado = List.of();
+    private CajaDAO.Totales totalesActuales = new CajaDAO.Totales(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+    private boolean recortado;
     private int pagina = 1;
 
     @FXML
@@ -121,12 +124,20 @@ public class LibroCajaController {
         try {
             resultado = cajaDAO.listar(dpDesde.getValue(), dpHasta.getValue(), tipoElegido(), metodoElegido(),
                     origenElegido(), txtBuscar.getText());
+            totalesActuales = cajaDAO.totales(dpDesde.getValue(), dpHasta.getValue(), tipoElegido(), metodoElegido(),
+                    origenElegido(), txtBuscar.getText());
         } catch (SQLException error) {
             resultado = List.of();
+            totalesActuales = new CajaDAO.Totales(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
             Alertas.mostrarError("Error de base de datos", "No se pudo cargar la caja.\n\n" + error.getMessage());
         } catch (SecurityException error) {
             resultado = List.of();
             Alertas.mostrarError("Caja", error.getMessage());
+        }
+        // la lista trae uno de mas que el limite: asi se sabe que hay mas y no se muestra en silencio un corte
+        recortado = resultado.size() > CajaDAO.LIMITE;
+        if (recortado) {
+            resultado = List.copyOf(resultado.subList(0, CajaDAO.LIMITE));
         }
         pagina = 1;
         mostrar();
@@ -230,20 +241,7 @@ public class LibroCajaController {
 
     /** Ingresos, egresos y efectivo en caja de todo lo que se esta viendo (no solo de la pagina). */
     private BigDecimal[] totales() {
-        BigDecimal ingresos = BigDecimal.ZERO;
-        BigDecimal egresos = BigDecimal.ZERO;
-        BigDecimal efectivo = BigDecimal.ZERO;
-        for (Movimiento m : resultado) {
-            boolean enEfectivo = "EFECTIVO".equals(m.metodo());
-            if ("INGRESO".equals(m.tipo())) {
-                ingresos = ingresos.add(m.monto());
-                efectivo = enEfectivo ? efectivo.add(m.monto()) : efectivo;
-            } else if ("EGRESO".equals(m.tipo())) {
-                egresos = egresos.add(m.monto());
-                efectivo = enEfectivo ? efectivo.subtract(m.monto()) : efectivo;
-            }
-        }
-        return new BigDecimal[] {ingresos, egresos, efectivo};
+        return new BigDecimal[] {totalesActuales.ingresos(), totalesActuales.egresos(), totalesActuales.efectivo()};
     }
 
     private void mostrar() {
@@ -317,7 +315,11 @@ public class LibroCajaController {
         lblPagina.setText(pagina + " / " + total);
         btnAnterior.setDisable(pagina <= 1);
         btnSiguiente.setDisable(pagina >= total);
-        lblCantidad.setText("TOTAL DE REGISTROS: " + resultado.size());
+        lblCantidad.setText("TOTAL DE REGISTROS: " + resultado.size() + (recortado ? " (hay más)" : ""));
+        lblAviso.setText("Hay más de " + CajaDAO.LIMITE + " movimientos con estos filtros: la lista muestra solo los "
+                + CajaDAO.LIMITE + " más recientes. Los totales de arriba sí incluyen todos. Acota las fechas para ver el resto.");
+        lblAviso.setVisible(recortado);
+        lblAviso.setManaged(recortado);
     }
 
     private int totalPaginas() {

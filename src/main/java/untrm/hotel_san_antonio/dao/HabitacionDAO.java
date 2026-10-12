@@ -126,7 +126,7 @@ public class HabitacionDAO {
                 + "FROM habitacion h JOIN tipo_habitacion t ON t.id_tipo = h.id_tipo "
                 + "WHERE h.estado <> 'MANTENIMIENTO' "
                 + "AND NOT EXISTS (SELECT 1 FROM reserva r WHERE r.id_habitacion = h.id_habitacion "
-                + "  AND r.estado IN ('PENDIENTE','CONFIRMADA','CHECKIN') "
+                + "  AND r.estado IN ('CONFIRMADA','CHECKIN') "
                 + "  AND r.fecha_checkin < ? AND r.fecha_checkout > ?) ");
         List<Object> parametros = new ArrayList<>();
         parametros.add(java.sql.Date.valueOf(salida));

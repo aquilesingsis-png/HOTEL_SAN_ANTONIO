@@ -229,10 +229,9 @@ public class ReservaService {
                 if (reservaDAO.existeCruceHistorico(con, reserva.getIdHabitacion(),
                         reserva.getFechaCheckin(), reserva.getFechaCheckout()))
                     throw new ConflictoFechasException("Ya existe una estadía para esa habitación y fechas.");
-                reserva.setIdHuesped(obtenerOCrearHuesped(con, huespedes.get(0)));
+                reserva.setIdHuesped(obtenerOCrearHuesped(con, huespedes.get(0), true));
                 reserva.setIdUsuario(usuario);
                 reserva.setEstado("FINALIZADA");
-                reserva.setAdelanto(pago.getMonto());
                 reserva.setIdEmpresa(empresa == null ? null : empresaDAO.guardar(con, empresa));
                 int idReserva = reservaDAO.insertar(con, reserva);
                 asociarHuespedes(con, idReserva, reserva.getIdHuesped(), huespedes);
@@ -343,7 +342,7 @@ public class ReservaService {
                          boolean checkinInmediato) throws SQLException {
         validarHuespedes(huespedes, reserva);
         validarEmpresa(empresa);
-        validarReserva(reserva, checkinInmediato, false);
+        validarReserva(reserva, checkinInmediato);
         BigDecimal sumaPagos = validarPagos(pagos, reserva.getMontoTotal(), checkinInmediato);
         int idUsuario = obtenerIdUsuarioAutenticado();
 
@@ -351,10 +350,9 @@ public class ReservaService {
             conexion.setAutoCommit(false);
             try {
                 prepararReservaDentroDeTransaccion(conexion, reserva, checkinInmediato);
-                reserva.setIdHuesped(obtenerOCrearHuesped(conexion, huespedes.get(0)));
+                reserva.setIdHuesped(obtenerOCrearHuesped(conexion, huespedes.get(0), true));
                 reserva.setIdUsuario(idUsuario);
                 reserva.setEstado(checkinInmediato ? "CHECKIN" : "CONFIRMADA");
-                reserva.setAdelanto(sumaPagos);
                 reserva.setIdEmpresa(empresa == null ? null : empresaDAO.guardar(conexion, empresa));
 
                 int idReserva = reservaDAO.insertar(conexion, reserva);
@@ -437,7 +435,7 @@ public class ReservaService {
         }
     }
 
-    /** Cancela solo si el estado persistido continúa siendo PENDIENTE o CONFIRMADA. */
+    /** Cancela solo si el estado persistido continúa siendo CONFIRMADA. */
     public void cancelar(int idReserva, String motivo, String detalle) throws SQLException {
         int idUsuario = obtenerIdUsuarioAutenticado();
         if (motivo == null || motivo.isBlank()) {
@@ -585,6 +583,17 @@ public class ReservaService {
         if (reserva.getNumHuespedes() > capacidad) {
             throw new IllegalArgumentException("La habitación admite como máximo " + capacidad + " huésped(es).");
         }
+        // el total sale de la tarifa de la base, no de lo que mande la pantalla
+        Habitacion habitacion = habitacionDAO.buscarPorId(conexion, reserva.getIdHabitacion());
+        long noches = ChronoUnit.DAYS.between(reserva.getFechaCheckin(), reserva.getFechaCheckout());
+        BigDecimal esperado = habitacion.getTipo().getPrecioBase().multiply(BigDecimal.valueOf(noches))
+                .setScale(2, RoundingMode.HALF_UP);
+        if (reserva.getMontoTotal().compareTo(esperado) != 0) {
+            throw new IllegalArgumentException("El total (S/ " + reserva.getMontoTotal().setScale(2, RoundingMode.HALF_UP)
+                    + ") no coincide con la tarifa de la habitación: " + noches + (noches == 1 ? " noche" : " noches")
+                    + " × S/ " + habitacion.getTipo().getPrecioBase() + " = S/ " + esperado
+                    + ". Actualice la pantalla y vuelva a intentarlo.");
+        }
         if (checkinInmediato
                 && !"DISPONIBLE".equals(habitacionDAO.obtenerEstado(conexion, reserva.getIdHabitacion()))) {
             throw new IllegalStateException("La habitación ya no está disponible. Actualice la lista.");
@@ -595,14 +604,18 @@ public class ReservaService {
         }
     }
 
-    private int obtenerOCrearHuesped(Connection conexion, Huesped huesped) throws SQLException {
+    /**
+     * @param titular quien reserva: su telefono y correo se guardan tal como se escribieron (dejarlos en blanco
+     *                los borra). En un acompañante, lo que no se escribe se conserva.
+     */
+    private int obtenerOCrearHuesped(Connection conexion, Huesped huesped, boolean titular) throws SQLException {
         Huesped existente = huespedDAO.buscarPorDocumento(
                 conexion, huesped.getTipoDocumento(), huesped.getNumDocumento());
         if (existente != null) {
             // el nombre lo manda RENIEC; el pais, telefono y correo los puede corregir el recepcionista
             huespedDAO.actualizarContacto(conexion, existente.getIdHuesped(),
                     textoOpcional(huesped.getPaisProcedencia()), textoOpcional(huesped.getTelefono()),
-                    textoOpcional(huesped.getEmail()));
+                    textoOpcional(huesped.getEmail()), titular);
             return existente.getIdHuesped();
         }
         try {
@@ -621,7 +634,7 @@ public class ReservaService {
                                   List<Huesped> huespedes) throws SQLException {
         reservaHuespedDAO.asociar(con, idReserva, idTitular, true);
         for (int i = 1; i < huespedes.size(); i++) {
-            int id = obtenerOCrearHuesped(con, huespedes.get(i));
+            int id = obtenerOCrearHuesped(con, huespedes.get(i), false);
             reservaHuespedDAO.asociar(con, idReserva, id, false);
         }
     }
@@ -685,7 +698,7 @@ public class ReservaService {
         }
     }
 
-    private void validarReserva(Reserva reserva, boolean checkinInmediato, boolean pendiente) {
+    private void validarReserva(Reserva reserva, boolean checkinInmediato) {
         if (reserva == null || reserva.getIdHabitacion() <= 0) {
             throw new IllegalArgumentException("Seleccione una habitación.");
         }
@@ -695,9 +708,6 @@ public class ReservaService {
         validarRangoConsulta(ingreso, salida);
         if (ingreso.isBefore(hoy)) {
             throw new IllegalArgumentException("La fecha de ingreso no puede ser anterior a hoy.");
-        }
-        if (pendiente && !ingreso.isAfter(hoy)) {
-            throw new IllegalArgumentException("Una reserva pendiente debe tener ingreso a partir de mañana.");
         }
         if (ingreso.isAfter(hoy.plusDays(MAX_DIAS_ANTICIPACION))) {
             throw new IllegalArgumentException("Solo se puede reservar con hasta "

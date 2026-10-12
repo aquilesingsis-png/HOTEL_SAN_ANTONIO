@@ -13,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleButton;
+import untrm.hotel_san_antonio.dao.ReservaDAO;
 import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
@@ -167,7 +168,8 @@ public class ReservasProgramadasController {
         btnSiguiente.setDisable(paginaActual >= totalPaginas);
         btnVerDetalle.setDisable(tablaReservas.getSelectionModel().getSelectedItem() == null);
         int cantidad = resultadoCompleto.size();
-        lblCantidad.setText(cantidad + (cantidad == 1 ? " reserva" : " reservas"));
+        lblCantidad.setText(cantidad + (cantidad == 1 ? " reserva" : " reservas")
+                + (cantidad >= ReservaDAO.LIMITE_LISTA ? " (las más recientes: afina el filtro para ver otras)" : ""));
     }
 
     private int totalPaginas() {
@@ -184,7 +186,6 @@ public class ReservasProgramadasController {
 
     private String textoEstado(String estado) {
         return switch (estado) {
-            case "PENDIENTE" -> "Pendiente";
             case "CONFIRMADA" -> "Confirmada";
             case "CHECKIN" -> "Con check-in";
             case "FINALIZADA" -> "Finalizada";

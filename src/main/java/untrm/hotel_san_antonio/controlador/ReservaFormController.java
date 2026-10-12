@@ -409,7 +409,6 @@ public class ReservaFormController {
         reserva.setIdHabitacion(habitacion.getIdHabitacion());
         reserva.setFechaCheckin(ingreso);
         reserva.setFechaCheckout(dpSalida.getValue());
-        reserva.setAdelanto(adelanto);
         reserva.setMontoTotal(total);
         reserva.setCanal("PRESENCIAL"); // desde Habitaciones el huesped esta en recepcion
         reserva.setNumHuespedes(spHuespedes.getValue());

@@ -73,7 +73,7 @@ public class ModulosDAO {
             String sql = "SELECT r.fecha_checkin,r.fecha_checkout,r.num_huespedes,h.id_habitacion,t.nombre "
                     + "FROM reserva r JOIN habitacion h ON h.id_habitacion=r.id_habitacion "
                     + "JOIN tipo_habitacion t ON t.id_tipo=h.id_tipo "
-                    + "WHERE r.estado NOT IN ('CANCELADA','PENDIENTE') "
+                    + "WHERE r.estado <> 'CANCELADA' "
                     + "AND r.fecha_checkin<=? AND r.fecha_checkout>?";
             try (PreparedStatement ps = con.prepareStatement(sql)) {
                 ps.setDate(1, Date.valueOf(fin));

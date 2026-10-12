@@ -1,11 +1,8 @@
 package untrm.hotel_san_antonio.controlador;
 
 import javafx.concurrent.Task;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressIndicator;
@@ -23,7 +20,6 @@ import untrm.hotel_san_antonio.servicio.CuentaBloqueadaException;
 import untrm.hotel_san_antonio.servicio.UsuarioService;
 import untrm.hotel_san_antonio.modelo.Usuario;
 import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.EstiloUtil;
 import untrm.hotel_san_antonio.util.Navegacion;
 import untrm.hotel_san_antonio.util.SesionActual;
 
@@ -45,7 +41,7 @@ public class LoginController {
     private static final String ROL_RECEPCIONISTA = "RECEPCIONISTA";
     private static final String ROL_LIMPIEZA = "LIMPIEZA";
 
-    // "campo" (los contenedores de rol/usuario/contraseña)
+    // "campo" (los contenedores de usuario/contraseña)
     private static final String CAMPO_BASE = "-fx-border-width: 1.2px; -fx-border-radius: 11px; "
             + "-fx-background-radius: 11px; -fx-padding: 6px 12px; -fx-min-height: 54px;";
     private static final String CAMPO_NORMAL = "-fx-background-color: #FBFBFB; -fx-border-color: #D9D9D9; " + CAMPO_BASE;
@@ -69,7 +65,6 @@ public class LoginController {
 
     @FXML private StackPane rootLogin;
     @FXML private TextField txtUsuario;
-    @FXML private ComboBox<String> cmbRol;
     @FXML private PasswordField txtContrasena;
     @FXML private TextField txtContrasenaVisible;
     @FXML private Label lblError;
@@ -78,21 +73,18 @@ public class LoginController {
     @FXML private ProgressIndicator progresoLogin;
     @FXML private HBox contenedorUsuario;
     @FXML private HBox contenedorContrasena;
-    @FXML private HBox contenedorRol;
 
     private final UsuarioService usuarioService = new UsuarioService();
 
     // se necesita recordar el error de cada campo para no perderlo cuando solo cambia el foco
-    private boolean errorUsuario, errorContrasena, errorRol;
+    private boolean errorUsuario, errorContrasena;
 
     @FXML
     private void initialize() {
         aplicarFondo();
 
-        cmbRol.setItems(FXCollections.observableArrayList("Administrador", "Recepcionista", "Limpieza"));
         txtContrasenaVisible.textProperty().bindBidirectional(txtContrasena.textProperty());
 
-        cmbRol.valueProperty().addListener((observable, anterior, actual) -> ocultarError());
         txtUsuario.textProperty().addListener((observable, anterior, actual) -> ocultarError());
         txtContrasena.textProperty().addListener((observable, anterior, actual) -> ocultarError());
         txtUsuario.focusedProperty().addListener((observable, anterior, actual) ->
@@ -104,8 +96,6 @@ public class LoginController {
 
         actualizarEstiloCampo(contenedorUsuario, false, false);
         actualizarEstiloCampo(contenedorContrasena, false, false);
-        actualizarEstiloCampo(contenedorRol, false, false);
-
         btnMostrarContrasena.setStyle(BTN_VER);
         btnMostrarContrasena.setOnMouseEntered(e -> btnMostrarContrasena.setStyle(BTN_VER_ACTIVO));
         btnMostrarContrasena.setOnMouseExited(e ->
@@ -119,14 +109,6 @@ public class LoginController {
         btnIngresar.setOnMousePressed(e -> btnIngresar.setTranslateY(1));
         btnIngresar.setOnMouseReleased(e -> btnIngresar.setTranslateY(0));
 
-        // el color de la flechita del combo y el fondo de su lista desplegable son piezas
-        // internas del control: solo se pueden tocar una vez que el combo arma su piel
-        EstiloUtil.alArmarPiel(cmbRol, () -> {
-            Node flecha = cmbRol.lookup(".arrow");
-            if (flecha != null) {
-                flecha.setStyle("-fx-background-color: #B8862D;");
-            }
-        });
     }
 
     private void aplicarFondo() {
@@ -142,22 +124,14 @@ public class LoginController {
 
         String usuario = txtUsuario.getText().trim();
         String contrasena = txtContrasena.getText();
-        String rolSeleccionado = obtenerRolSeleccionado();
-
-        if (rolSeleccionado == null) {
-            mostrarError("Selecciona el tipo de usuario.", false, false, true);
-            cmbRol.requestFocus();
-            return;
-        }
-
         if (usuario.isEmpty()) {
-            mostrarError("Ingresa tu usuario.", true, false, false);
+            mostrarError("Ingresa tu usuario.", true, false);
             txtUsuario.requestFocus();
             return;
         }
 
         if (contrasena.isEmpty()) {
-            mostrarError("Ingresa tu contraseña.", false, true, false);
+            mostrarError("Ingresa tu contraseña.", false, true);
             campoContrasenaActivo().requestFocus();
             return;
         }
@@ -177,7 +151,7 @@ public class LoginController {
 
             if (encontrado == null) {
                 txtContrasena.clear();
-                mostrarError("Usuario o contraseña incorrectos.", true, true, false);
+                mostrarError("Usuario o contraseña incorrectos.", true, true);
                 campoContrasenaActivo().requestFocus();
                 return;
             }
@@ -188,15 +162,7 @@ public class LoginController {
             if (!ROL_ADMINISTRADOR.equals(rolRegistrado)
                     && !ROL_RECEPCIONISTA.equals(rolRegistrado)
                     && !ROL_LIMPIEZA.equals(rolRegistrado)) {
-                mostrarError("El usuario no tiene un rol autorizado.", true, true, true);
-                return;
-            }
-
-            if (!rolSeleccionado.equals(rolRegistrado)) {
-                txtContrasena.clear();
-                mostrarError("Las credenciales no corresponden al rol seleccionado.",
-                        true, true, true);
-                campoContrasenaActivo().requestFocus();
+                mostrarError("El usuario no tiene un rol autorizado.", true, true);
                 return;
             }
 
@@ -217,7 +183,7 @@ public class LoginController {
                 txtContrasena.clear();
                 mostrarError("Cuenta bloqueada por demasiados intentos. Intente de nuevo en "
                         + bloqueada.getMinutos() + " minuto(s) o pida al administrador que la desbloquee.",
-                        true, true, false);
+                        true, true);
                 return;
             }
             LOG.log(Level.SEVERE, "Falló la autenticación", error);
@@ -233,7 +199,7 @@ public class LoginController {
         if (error instanceof SQLException sql) {
             String estado = sql.getSQLState();
             if (estado != null && estado.startsWith("08")) {
-                return "No se pudo comunicar con MySQL. Encienda MySQL en XAMPP y compruebe el puerto 3306.";
+                return "No se pudo comunicar con MySQL. Encienda MySQL en XAMPP y compruebe el puerto de db.url en config.properties.";
             }
             if (estado != null && estado.startsWith("28")) {
                 return "MySQL rechazó el usuario o la contraseña configurados en config.properties.";
@@ -276,11 +242,6 @@ public class LoginController {
         return btnMostrarContrasena.isSelected() ? txtContrasenaVisible : txtContrasena;
     }
 
-    private String obtenerRolSeleccionado() {
-        String rol = cmbRol.getValue();
-        return rol == null ? null : rol.trim().toUpperCase();
-    }
-
     private String rutaSegunRol(String rol) {
         return PrincipalController.rutaMarco(rol);
     }
@@ -295,18 +256,15 @@ public class LoginController {
         contenedor.setStyle(error ? CAMPO_ERROR : foco ? CAMPO_FOCO : CAMPO_NORMAL);
     }
 
-    private void mostrarError(String mensaje, boolean nuevoErrorUsuario,
-            boolean nuevoErrorContrasena, boolean nuevoErrorRol) {
+    private void mostrarError(String mensaje, boolean nuevoErrorUsuario, boolean nuevoErrorContrasena) {
         lblError.setText(mensaje);
         lblError.setVisible(true);
         lblError.setManaged(true);
         errorUsuario = nuevoErrorUsuario;
         errorContrasena = nuevoErrorContrasena;
-        errorRol = nuevoErrorRol;
         actualizarEstiloCampo(contenedorUsuario, errorUsuario, txtUsuario.isFocused());
         actualizarEstiloCampo(contenedorContrasena, errorContrasena,
                 txtContrasena.isFocused() || txtContrasenaVisible.isFocused());
-        actualizarEstiloCampo(contenedorRol, errorRol, false);
     }
 
     private void ocultarError() {
@@ -314,11 +272,9 @@ public class LoginController {
         lblError.setManaged(false);
         errorUsuario = false;
         errorContrasena = false;
-        errorRol = false;
         actualizarEstiloCampo(contenedorUsuario, false, txtUsuario.isFocused());
         actualizarEstiloCampo(contenedorContrasena, false,
                 txtContrasena.isFocused() || txtContrasenaVisible.isFocused());
-        actualizarEstiloCampo(contenedorRol, false, false);
     }
 
     private void cambiarEstadoCarga(boolean cargando) {
@@ -331,6 +287,5 @@ public class LoginController {
         txtContrasena.setDisable(cargando);
         txtContrasenaVisible.setDisable(cargando);
         btnMostrarContrasena.setDisable(cargando);
-        cmbRol.setDisable(cargando);
     }
 }

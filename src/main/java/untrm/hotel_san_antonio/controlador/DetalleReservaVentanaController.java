@@ -79,7 +79,7 @@ public class DetalleReservaVentanaController {
             // se muestra con los datos que ya se tenian
         }
         detalleReservaController.mostrar(reserva);
-        btnCancelar.setDisable(!("PENDIENTE".equals(reserva.getEstado()) || "CONFIRMADA".equals(reserva.getEstado())));
+        btnCancelar.setDisable(!"CONFIRMADA".equals(reserva.getEstado()));
         btnCambiar.setDisable(!("CONFIRMADA".equals(reserva.getEstado()) || "CHECKIN".equals(reserva.getEstado())));
         cargarHuespedes();
         cargarPagos();

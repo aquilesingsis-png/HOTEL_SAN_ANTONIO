@@ -262,11 +262,14 @@ public class CalendarioOcupacionController {
     private EstadoDia estadoParaDia(Habitacion habitacion, List<Reserva> reservas, LocalDate fecha) {
         for (Reserva reserva : reservas) {
             if (!fecha.isBefore(reserva.getFechaCheckin()) && fecha.isBefore(reserva.getFechaCheckout())) {
-                return switch (reserva.getEstado()) {
-                    case "PENDIENTE" -> EstadoDia.PENDIENTE;
-                    case "CHECKIN" -> EstadoDia.OCUPADA;
-                    default -> EstadoDia.RESERVADA;
-                };
+                if ("FINALIZADA".equals(reserva.getEstado())) {
+                    // si el huesped se fue antes de lo previsto, las noches que no uso quedan libres
+                    if (fecha.isBefore(LocalDate.now())) {
+                        return EstadoDia.FINALIZADA;
+                    }
+                    continue;
+                }
+                return "CHECKIN".equals(reserva.getEstado()) ? EstadoDia.OCUPADA : EstadoDia.RESERVADA;
             }
         }
         if ("MANTENIMIENTO".equals(habitacion.getEstado())) {
@@ -293,9 +296,9 @@ public class CalendarioOcupacionController {
 
     private enum EstadoDia {
         DISPONIBLE("Libre", "Disponible", "#2cb95f"),
-        PENDIENTE("Pend.", "Reserva pendiente", "#c98a1b"),
         RESERVADA("Res.", "Reserva confirmada", "#2e88dd"),
         OCUPADA("Ocup.", "Ocupada / check-in", "#ef4141"),
+        FINALIZADA("Fin.", "Estadía finalizada", "#a8825a"),
         LIMPIEZA("Limp.", "En limpieza", "#eab851"),
         MANTENIMIENTO("Mant.", "Mantenimiento", "#8f887f");
 

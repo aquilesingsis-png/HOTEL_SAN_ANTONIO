@@ -105,9 +105,8 @@ CREATE TABLE reserva (
     fecha_checkout      DATE NOT NULL,
     num_huespedes       INT NOT NULL DEFAULT 1,
     hora_checkin        TIME NULL,
-    adelanto            DECIMAL(8,2) NOT NULL DEFAULT 0,
     monto_total         DECIMAL(8,2) NOT NULL,
-    estado              ENUM('PENDIENTE','CONFIRMADA','CHECKIN','FINALIZADA','CANCELADA') NOT NULL DEFAULT 'PENDIENTE',
+    estado              ENUM('CONFIRMADA','CHECKIN','FINALIZADA','CANCELADA') NOT NULL DEFAULT 'CONFIRMADA',
     canal               ENUM('TELEFONO','WHATSAPP','BOOKING','PRESENCIAL') NOT NULL,
     id_empresa          INT NULL,
     motivo_cancelacion  VARCHAR(60)  NULL,
@@ -505,3 +504,25 @@ ALTER TABLE comprobante
 ALTER TABLE comprobante
     ADD CONSTRAINT IF NOT EXISTS chk_comprobante_anulado CHECK (estado = 'EMITIDO' OR (fecha_anulacion IS NOT NULL
         AND id_usuario_anula IS NOT NULL AND motivo_anulacion IS NOT NULL));
+
+-- 4) RESERVA: ya no existe el estado PENDIENTE (toda reserva nace CONFIRMADA) ni la columna adelanto (el adelanto
+--    y los saldos se ven en la tabla pago).
+UPDATE reserva SET estado = 'CONFIRMADA' WHERE estado = 'PENDIENTE';
+ALTER TABLE reserva
+    MODIFY COLUMN estado ENUM('CONFIRMADA','CHECKIN','FINALIZADA','CANCELADA') NOT NULL DEFAULT 'CONFIRMADA',
+    DROP COLUMN IF EXISTS adelanto;
+
+-- 5) La base tambien rechaza datos que no tienen sentido (montos, cantidades y stock negativos o en cero).
+ALTER TABLE pago           ADD CONSTRAINT IF NOT EXISTS chk_pago_monto        CHECK (monto > 0);
+ALTER TABLE venta_tienda   ADD CONSTRAINT IF NOT EXISTS chk_venta_total       CHECK (total > 0);
+ALTER TABLE detalle_venta  ADD CONSTRAINT IF NOT EXISTS chk_detalle_cantidad  CHECK (cantidad > 0);
+ALTER TABLE producto       ADD CONSTRAINT IF NOT EXISTS chk_producto_precio   CHECK (precio >= 0);
+ALTER TABLE producto       ADD CONSTRAINT IF NOT EXISTS chk_producto_stock    CHECK (stock >= 0);
+ALTER TABLE reserva        ADD CONSTRAINT IF NOT EXISTS chk_reserva_monto     CHECK (monto_total > 0);
+ALTER TABLE tipo_habitacion ADD CONSTRAINT IF NOT EXISTS chk_tipo_capacidad   CHECK (capacidad > 0);
+ALTER TABLE tipo_habitacion ADD CONSTRAINT IF NOT EXISTS chk_tipo_precio      CHECK (precio_base > 0);
+
+-- 6) Indices por fecha para los reportes y el libro de caja.
+CREATE INDEX IF NOT EXISTS idx_pago_fecha        ON pago (fecha_pago);
+CREATE INDEX IF NOT EXISTS idx_venta_fecha       ON venta_tienda (fecha_venta);
+CREATE INDEX IF NOT EXISTS idx_movcaja_fecha     ON movimiento_caja (fecha);

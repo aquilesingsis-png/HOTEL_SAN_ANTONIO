@@ -60,7 +60,6 @@ public class DetalleReservaController {
 
     private String textoEstado(String estado) {
         return switch (estado) {
-            case "PENDIENTE" -> "Reserva pendiente";
             case "CONFIRMADA" -> "Reserva confirmada";
             case "CHECKIN" -> "Reserva con check-in";
             case "FINALIZADA" -> "Reserva finalizada";
