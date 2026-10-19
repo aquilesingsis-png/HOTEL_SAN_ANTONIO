@@ -2,3 +2,6 @@
 .idea/
 config.properties
 target/
+
+# credenciales de los respaldos (cada quien tiene las suyas)
+respaldo.cnf
