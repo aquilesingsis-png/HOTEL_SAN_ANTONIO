@@ -17,7 +17,7 @@ Este resumen describe cómo está el proyecto hoy. Las instrucciones para inicia
 
 ## Seguridad
 
-- Contraseñas con PBKDF2, bloqueo temporal por intentos fallidos y recuperación con código de un solo uso.
+- Contraseñas con bcrypt (costo 12; las cuentas antiguas se convierten al ingresar), bloqueo temporal por intentos fallidos y recuperación con código de un solo uso.
 - Los tokens de las APIs y la clave de MySQL van en `config.properties`, que no se sube a Git.
 - Las claves de las cuentas iniciales son de prueba y deben cambiarse antes de entregar.
 

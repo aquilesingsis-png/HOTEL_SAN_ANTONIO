@@ -53,7 +53,7 @@ public class UsuarioFormController {
         this.alGuardar = alGuardar;
         if (usuario == null) {
             lblTitulo.setText("Nuevo usuario");
-            lblNota.setText("La contraseña debe tener 12 a 128 caracteres, con letras y números.");
+            lblNota.setText("La contraseña debe tener 12 a 72 caracteres, con letras y números.");
             return;
         }
         lblTitulo.setText("Editar usuario U" + String.format("%03d", usuario.getIdUsuario()));

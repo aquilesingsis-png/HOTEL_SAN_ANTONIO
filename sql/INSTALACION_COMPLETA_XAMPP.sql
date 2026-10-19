@@ -444,7 +444,7 @@ INSERT INTO producto (codigo_barra, nombre, marca, id_categoria, precio, stock) 
 ('7751148000208', 'Papitas Lays',         'Lays',     2, 2.50, 25),
 ('7750070032001', 'Chocolate Sublime',    'Nestle',   3, 2.00, 35);
 
--- CUENTAS INICIALES CON PBKDF2
+-- CUENTAS INICIALES (su clave se convierte a bcrypt la primera vez que ingresan)
 START TRANSACTION;
 INSERT INTO usuario (nombre, apellido, usuario, contrasena_hash, rol, activo)
 VALUES

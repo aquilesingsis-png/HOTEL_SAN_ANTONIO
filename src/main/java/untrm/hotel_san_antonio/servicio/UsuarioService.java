@@ -58,7 +58,7 @@ public class UsuarioService {
             }
         }
         if (bloqueoNuevo > 0) throw new CuentaBloqueadaException(bloqueoNuevo);
-        if (encontrado != null && PasswordUtil.esLegacy(encontrado.getContrasenaHash())) {
+        if (encontrado != null && PasswordUtil.necesitaActualizar(encontrado.getContrasenaHash())) {
             usuarios.actualizarHashLegacy(encontrado.getIdUsuario(), encontrado.getContrasenaHash(),
                     PasswordUtil.hash(contrasena));
         }
