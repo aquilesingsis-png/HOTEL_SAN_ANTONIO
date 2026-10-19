@@ -10,7 +10,8 @@ Aplicación de escritorio para la gestión de un hotel y su tiendita: habitacion
    - `reniec.token`, `sunat.ruc.token` y `decolecta.token`: los tokens de las consultas de DNI, RUC y tipo de cambio. Pídalos al equipo; no los suba a Git.
 3. La base de datos se arma con **un solo archivo**: `sql/INSTALACION_COMPLETA_XAMPP.sql`.
    - **Base nueva y vacía:** importe el archivo completo en phpMyAdmin. Crea las 24 tablas, los tipos y 24 habitaciones, el catálogo de la tienda y las cuentas `admin` y `recepcion` (claves de prueba: cámbielas antes de entregar).
-   - **Base que ya existe, con datos:** no importe el archivo completo. Haga un respaldo y ejecute solo el bloque final «ACTUALIZACIONES PARA UNA BASE QUE YA EXISTE» (desde su título hasta el final del archivo). Se puede ejecutar más de una vez.
+   - **Base que ya existe:** lo más simple es **borrarla** (phpMyAdmin → `hotel_san_antonio` → Operaciones → Eliminar la base de datos) e importar de nuevo el archivo completo. Se pierden sus datos: haga antes un respaldo si le importan.
+   - **Base con datos que no quiere perder:** no la borre; ejecute solo el bloque final «ACTUALIZACIONES PARA UNA BASE QUE YA EXISTE» (desde su título hasta el final del archivo). Se puede ejecutar más de una vez.
    - Todo cambio nuevo de la base se agrega al final de ese bloque; no se crean otros archivos `.sql`.
 4. Abra `pom.xml` en NetBeans o ejecute `mvn clean javafx:run` con Java 21 o superior.
 

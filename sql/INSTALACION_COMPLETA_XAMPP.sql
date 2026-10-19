@@ -1,10 +1,10 @@
 -- HOTEL SAN ANTONIO: SCRIPT UNICO DE LA BASE DE DATOS PARA XAMPP/MARIADB (es el unico .sql del proyecto)
 --
 -- BASE NUEVA (sin tablas): ejecute el archivo completo.
--- BASE QUE YA EXISTE (con datos): NO ejecute el archivo completo (fallaria: las tablas ya existen). Ejecute SOLO
---   el ultimo bloque del archivo, el de las actualizaciones: vaya al final del archivo y suba hasta su titulo (el
---   que tiene lineas de =====) y copie desde ahi hasta el final. Se puede ejecutar mas de una vez. Antes conviene
---   hacer un respaldo.
+-- BASE QUE YA EXISTE: lo mas simple es borrarla (phpMyAdmin > hotel_san_antonio > Operaciones > Eliminar la base de
+--   datos) y ejecutar de nuevo el archivo completo. OJO: se pierden sus datos; haga antes un respaldo si le importan.
+--   Si tiene datos que NO quiere perder, no la borre: ejecute SOLO el ultimo bloque del archivo, el de las
+--   actualizaciones (esta al final, bajo un titulo con lineas de =====). Se puede ejecutar mas de una vez.
 -- Todo cambio nuevo de la base se agrega al final de ese bloque, con ADD COLUMN IF NOT EXISTS y similares.
 --
 -- Una base nueva crea 24 tablas, tipos, 24 habitaciones, catalogo de tienda y dos cuentas.
