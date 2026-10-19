@@ -13,15 +13,19 @@ import untrm.hotel_san_antonio.dao.EmpresaDAO;
 import untrm.hotel_san_antonio.dao.HuespedDAO;
 import untrm.hotel_san_antonio.dao.ProductoDAO;
 import untrm.hotel_san_antonio.modelo.Categoria;
+import untrm.hotel_san_antonio.modelo.Comprobante;
+import untrm.hotel_san_antonio.modelo.ComprobanteDocumento;
 import untrm.hotel_san_antonio.modelo.DetalleVenta;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Huesped;
 import untrm.hotel_san_antonio.modelo.Producto;
 import untrm.hotel_san_antonio.modelo.VentaTienda;
+import untrm.hotel_san_antonio.servicio.ComprobanteService;
 import untrm.hotel_san_antonio.servicio.VentaService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.ConsultaApi;
 import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.util.Registro;
 import untrm.hotel_san_antonio.util.SesionActual;
 import untrm.hotel_san_antonio.util.Validador;
 
@@ -53,7 +57,7 @@ public class CarritoTiendaController {
             + "-fx-background-radius: 6; -fx-font-weight: bold; -fx-min-height: 44;";
     private static final String FILA_SELECCIONADA = "-fx-background-color: #704313; -fx-text-background-color: white;";
     @FXML 
-    private TextField txtBuscar, txtBuscarDni, txtNombreCliente, txtDireccion, txtTelefono, txtMontoRecibido;
+    private TextField txtBuscar, txtBuscarDni, txtNombreCliente, txtDireccion, txtMontoRecibido;
     @FXML 
     private TextArea txtObservaciones;
     @FXML 
@@ -61,13 +65,13 @@ public class CarritoTiendaController {
     @FXML 
     private ComboBox<EstadiaActiva> cmbHabitacion;
     @FXML 
-    private ToggleButton btnBoleta, btnFactura, btnEfectivo, btnTarjeta, btnYape, btnTransferencia;
+    private ToggleButton btnSinComprobante, btnBoleta, btnFactura, btnEfectivo, btnTarjeta, btnYape, btnTransferencia;
     @FXML 
     private ToggleGroup tipoComprobante, formaPago;
     @FXML
     private Label lblDatosCliente, lblSubtotal, lblIgv, lblTotal, lblVuelto, lblMostrando;
     @FXML
-    private Label lblEtiquetaDocumento, lblEtiquetaNombre;
+    private Label lblEtiquetaDocumento, lblEtiquetaNombre, lblEtiquetaDireccion;
 
     @FXML
     private Button btnBuscarCliente, btnBuscarProducto, btnEmitir;
@@ -97,6 +101,7 @@ public class CarritoTiendaController {
     private final HuespedDAO huespedDAO = new HuespedDAO();
     private final EmpresaDAO empresaDAO = new EmpresaDAO();
     private final VentaService ventaService = new VentaService();
+    private final ComprobanteService comprobanteService = new ComprobanteService();
     private final ObservableList<Producto> productos = FXCollections.observableArrayList();
     private final ObservableList<DetalleVenta> carrito = FXCollections.observableArrayList();
 
@@ -120,12 +125,14 @@ public class CarritoTiendaController {
             if (n == null && a != null) a.setSelected(true);
             actualizarFormaPago();
         });
+        cmbHabitacion.valueProperty().addListener((o,a,n) -> actualizarModoHabitacion());
         actualizarTipoComprobante();
         actualizarFormaPago();
     }
 
     /** Resalta al pasar el mouse los botones marrones (eso no se puede fijar en el FXML). */
     private void aplicarEstiloBotones() {
+        aplicarOpcion(btnSinComprobante, BTN_OPCION, BTN_OPCION_HOVER);
         aplicarOpcion(btnBoleta, BTN_OPCION, BTN_OPCION_HOVER);
         aplicarOpcion(btnFactura, BTN_OPCION, BTN_OPCION_HOVER);
         aplicarOpcion(btnEfectivo, BTN_PAGO, BTN_PAGO_HOVER);
@@ -269,11 +276,11 @@ public class CarritoTiendaController {
         try {
             Huesped local = huespedDAO.buscarPorDocumento("DNI", dni);
             if (local != null) {
-                aplicarDatosPersona(dni, (local.getNombres() + " " + local.getApellidos()).trim(), local.getTelefono());
+                aplicarDatosPersona(dni, (local.getNombres() + " " + local.getApellidos()).trim());
                 // si el nombre cambio en RENIEC, se corrige en la base y aqui
                 ConsultaApi.actualizarIdentidadLocal(dni, h -> {
                     if (dni.equals(txtBuscarDni.getText().trim())) {
-                        aplicarDatosPersona(dni, (h.getNombres() + " " + h.getApellidos()).trim(), null);
+                        aplicarDatosPersona(dni, (h.getNombres() + " " + h.getApellidos()).trim());
                     }
                 });
                 return;
@@ -284,7 +291,7 @@ public class CarritoTiendaController {
         }
 
         ConsultaApi.dni(dni, btnBuscarCliente,
-                h -> aplicarDatosPersona(dni, (h.getNombres() + " " + h.getApellidos()).trim(), null),
+                h -> aplicarDatosPersona(dni, (h.getNombres() + " " + h.getApellidos()).trim()),
                 () -> Alertas.mostrarInfo("Cliente no encontrado",
                         "No se encontraron datos para ese DNI en RENIEC.\nPuedes ingresarlos manualmente o continuar sin ellos."),
                 motivo -> Alertas.mostrarInfo("RENIEC", "No se pudo consultar RENIEC (" + motivo + ")."));
@@ -314,12 +321,9 @@ public class CarritoTiendaController {
                 motivo -> Alertas.mostrarInfo("SUNAT", "No se pudo consultar la SUNAT (" + motivo + ")."));
     }
 
-    private void aplicarDatosPersona(String dni, String nombre, String telefono) {
+    private void aplicarDatosPersona(String dni, String nombre) {
         txtBuscarDni.setText(dni);
         txtNombreCliente.setText(nombre);
-        if (telefono != null) {
-            txtTelefono.setText(telefono);
-        }
     }
 
     private void aplicarDatosEmpresa(String ruc, String razonSocial, String direccion) {
@@ -330,20 +334,55 @@ public class CarritoTiendaController {
         }
     }
 
-    private void actualizarTipoComprobante(){
+    private void actualizarTipoComprobante() {
         boolean factura = btnFactura.isSelected();
-        lblDatosCliente.setText(factura ? "Datos del cliente (Factura)" : "Datos del cliente (Boleta)");
-        lblEtiquetaDocumento.setText(factura ? "RUC de la empresa *" : "DNI");
-        lblEtiquetaNombre.setText(factura ? "Razón social *" : "Nombre completo");
+        boolean boleta = btnBoleta.isSelected();
+        boolean sin = !factura && !boleta;
+        lblDatosCliente.setText(sin ? "Cliente (opcional)" : factura ? "Datos del cliente (Factura)" : "Datos del cliente (Boleta)");
+        lblEtiquetaDocumento.setText(factura ? "RUC de la empresa *" : "DNI (opcional)");
+        lblEtiquetaNombre.setText(factura ? "Razón social *" : sin ? "Nombre (opcional)" : "Nombre completo (opcional)");
         txtBuscarDni.setPromptText(factura ? "Ingrese RUC" : "Ingrese DNI");
         txtNombreCliente.setPromptText(factura ? "Razón social" : "Nombres y apellidos");
 
-        // Los datos de una persona (telefono) y de una empresa (direccion) no se mezclan entre modos.
+        // Sin comprobante solo se anota, si se quiere, el nombre; la dirección es solo de la factura.
+        mostrar(!sin, lblEtiquetaDocumento, txtBuscarDni.getParent());
+        mostrar(factura, lblEtiquetaDireccion, txtDireccion);
+
+        // Los datos de una persona y de una empresa no se mezclan entre modos.
         txtBuscarDni.clear();
         txtNombreCliente.clear();
         txtDireccion.clear();
-        txtTelefono.clear();
+        actualizarTextoBoton();
     }
+
+    /** Una venta cargada a una habitación se cobra con su estadía: no lleva comprobante ni medio de pago ahora. */
+    private void actualizarModoHabitacion() {
+        boolean aHabitacion = cmbHabitacion.getValue() != null;
+        for (ToggleButton boton : new ToggleButton[] {btnSinComprobante, btnBoleta, btnFactura,
+                btnEfectivo, btnTarjeta, btnYape, btnTransferencia}) {
+            boton.setDisable(aHabitacion);
+        }
+        if (aHabitacion) {
+            btnSinComprobante.setSelected(true);
+            txtMontoRecibido.clear();
+        }
+        txtMontoRecibido.setDisable(aHabitacion || !btnEfectivo.isSelected());
+        actualizarTextoBoton();
+    }
+
+    private void actualizarTextoBoton() {
+        btnEmitir.setText(cmbHabitacion.getValue() != null ? "Cargar a la habitación"
+                : btnFactura.isSelected() ? "Vender y emitir factura"
+                : btnBoleta.isSelected() ? "Vender y emitir boleta" : "Registrar venta");
+    }
+
+    private void mostrar(boolean visible, javafx.scene.Node... nodos) {
+        for (javafx.scene.Node nodo : nodos) {
+            nodo.setVisible(visible);
+            nodo.setManaged(visible);
+        }
+    }
+
     private void actualizarFormaPago(){
         boolean efectivo=btnEfectivo.isSelected();
         txtMontoRecibido.setDisable(!efectivo);
@@ -351,19 +390,38 @@ public class CarritoTiendaController {
     }
 
     private void agregarProducto(Producto p) {
-        if(p.getStock()<=0){ Alertas.mostrarInfo("Stock", "Este producto no tiene stock disponible."); return; }
-        DetalleVenta d=buscarDetalle(p.getIdProducto());
-        if(d==null){ 
-            d=new DetalleVenta(); d.setIdProducto(p.getIdProducto()); d.setNombreProducto(p.getNombre()); d.setCantidad(1); d.setPrecioUnitario(p.getPrecio()); d.setSubtotal(p.getPrecio()); carrito.add(d); }
-        else { 
-            if(d.getCantidad()>=p.getStock()){Alertas.mostrarInfo("Stock","No hay más unidades disponibles.");return;} d.setCantidad(d.getCantidad()+1); recalcular(d); tablaCarrito.refresh(); }
+        if (p.getStock() <= 0) {
+            Alertas.mostrarInfo("Stock", "Este producto no tiene stock disponible.");
+            return;
+        }
+        DetalleVenta d = buscarDetalle(p.getIdProducto());
+        if (d == null) {
+            d = new DetalleVenta();
+            d.setIdProducto(p.getIdProducto());
+            d.setNombreProducto(p.getNombre());
+            d.setCantidad(1);
+            d.setPrecioUnitario(p.getPrecio());
+            d.setSubtotal(p.getPrecio());
+            carrito.add(d);
+        } else {
+            if (d.getCantidad() >= p.getStock()) {
+                Alertas.mostrarInfo("Stock", "No hay más unidades disponibles.");
+                return;
+            }
+            d.setCantidad(d.getCantidad() + 1);
+            recalcular(d);
+            tablaCarrito.refresh();
+        }
         actualizarTotales();
     }
 
-    @FXML 
-    private void onSumarCantidad(){
-        DetalleVenta d=tablaCarrito.getSelectionModel().getSelectedItem();
-        if(d==null){ Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito."); return; }
+    @FXML
+    private void onSumarCantidad() {
+        DetalleVenta d = tablaCarrito.getSelectionModel().getSelectedItem();
+        if (d == null) {
+            Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito.");
+            return;
+        }
         Producto p;
         try {
             p = productoDAO.buscarActivoPorId(d.getIdProducto());
@@ -371,49 +429,93 @@ public class CarritoTiendaController {
             Alertas.mostrarError("Producto", "No se pudo comprobar el stock.\n" + ex.getMessage());
             return;
         }
-        if(p==null){ Alertas.mostrarInfo("Producto", "El producto ya no está disponible."); return; }
+        if (p == null) {
+            Alertas.mostrarInfo("Producto", "El producto ya no está disponible.");
+            return;
+        }
         if (p.getPrecio().compareTo(d.getPrecioUnitario()) != 0) {
             Alertas.mostrarInfo("Precio actualizado", "El precio cambió. Retire el producto y agréguelo de nuevo.");
             return;
         }
-        if(d.getCantidad()>=p.getStock()){ Alertas.mostrarInfo("Stock", "No hay más unidades disponibles."); return; }
-        d.setCantidad(d.getCantidad()+1); recalcular(d); tablaCarrito.refresh(); actualizarTotales();
-    }
-    @FXML 
-    private void onRestarCantidad(){
-        DetalleVenta d=tablaCarrito.getSelectionModel().getSelectedItem();
-        if(d==null){ Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito."); return; }
-        if(d.getCantidad()<=1)carrito.remove(d); else {d.setCantidad(d.getCantidad()-1);recalcular(d);}
-        tablaCarrito.refresh();actualizarTotales();
-    }
-    @FXML 
-    private void onQuitarProducto(){
-        DetalleVenta d=tablaCarrito.getSelectionModel().getSelectedItem();
-        if(d==null){ Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito."); return; }
-        carrito.remove(d);actualizarTotales();
-    }
-    @FXML 
-    private void onVaciarCarrito(){
-        if (carrito.isEmpty()) { Alertas.mostrarInfo("Carrito", "El carrito ya está vacío."); return; }
-        if (Alertas.confirmar("Vaciar carrito","¿Deseas retirar todos los productos?")) {
-            carrito.clear(); actualizarTotales();
-        }
-    }
-    @FXML 
-    private void onCancelar(){ if(carrito.isEmpty() || Alertas.confirmar("Cancelar","¿Deseas cancelar la venta actual?")){carrito.clear();limpiarCliente();actualizarTotales();} }
-
-    @FXML 
-    private void onConfirmarVenta(){
-        String dni = txtBuscarDni.getText() == null ? "" : txtBuscarDni.getText().trim();
-        String nombre = txtNombreCliente.getText() == null ? "" : txtNombreCliente.getText().trim();
-
-        if (tipoComprobante.getSelectedToggle() == null) {
-            Alertas.mostrarInfo("Comprobante", "Seleccione boleta o factura.");
+        if (d.getCantidad() >= p.getStock()) {
+            Alertas.mostrarInfo("Stock", "No hay más unidades disponibles.");
             return;
         }
-        if (btnFactura.isSelected()) {
+        d.setCantidad(d.getCantidad() + 1);
+        recalcular(d);
+        tablaCarrito.refresh();
+        actualizarTotales();
+    }
+
+    @FXML
+    private void onRestarCantidad() {
+        DetalleVenta d = tablaCarrito.getSelectionModel().getSelectedItem();
+        if (d == null) {
+            Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito.");
+            return;
+        }
+        if (d.getCantidad() <= 1) {
+            carrito.remove(d);
+        } else {
+            d.setCantidad(d.getCantidad() - 1);
+            recalcular(d);
+        }
+        tablaCarrito.refresh();
+        actualizarTotales();
+    }
+
+    @FXML
+    private void onQuitarProducto() {
+        DetalleVenta d = tablaCarrito.getSelectionModel().getSelectedItem();
+        if (d == null) {
+            Alertas.mostrarInfo("Carrito", "Seleccione un producto del carrito.");
+            return;
+        }
+        carrito.remove(d);
+        actualizarTotales();
+    }
+
+    @FXML
+    private void onVaciarCarrito() {
+        if (carrito.isEmpty()) {
+            Alertas.mostrarInfo("Carrito", "El carrito ya está vacío.");
+            return;
+        }
+        if (Alertas.confirmar("Vaciar carrito", "¿Deseas retirar todos los productos?")) {
+            carrito.clear();
+            actualizarTotales();
+        }
+    }
+
+    @FXML
+    private void onCancelar() {
+        if (carrito.isEmpty() || Alertas.confirmar("Cancelar", "¿Deseas cancelar la venta actual?")) {
+            carrito.clear();
+            limpiarCliente();
+            actualizarTotales();
+        }
+    }
+
+    @FXML
+    private void onConfirmarVenta() {
+        EstadiaActiva habitacion = cmbHabitacion.getValue();
+        // Lo cargado a una habitación se cobra y se factura con su estadía: ahí no se emite comprobante.
+        String tipo = habitacion != null ? null : btnFactura.isSelected() ? "FACTURA" : btnBoleta.isSelected() ? "BOLETA" : null;
+        String documento = texto(txtBuscarDni);
+        String nombre = texto(txtNombreCliente);
+        String direccion = texto(txtDireccion);
+
+        if (carrito.isEmpty()) {
+            Alertas.mostrarInfo("Carrito vacío", "Agrega al menos un producto antes de registrar la venta.");
+            return;
+        }
+        if (SesionActual.getUsuario() == null) {
+            Alertas.mostrarError("Sesión", "No existe un usuario autenticado.");
+            return;
+        }
+        if ("FACTURA".equals(tipo)) {
             // Una factura siempre identifica a quien se le factura: el RUC no es opcional.
-            if (!Validador.esRucValido(dni)) {
+            if (!Validador.esRucValido(documento)) {
                 Alertas.mostrarInfo("RUC requerido", "Para una factura, ingrese un RUC válido de 11 dígitos.");
                 txtBuscarDni.requestFocus();
                 return;
@@ -423,110 +525,194 @@ public class CarritoTiendaController {
                 txtNombreCliente.requestFocus();
                 return;
             }
-            if (nombre.length() > 150 || txtDireccion.getText() == null
-                    || txtDireccion.getText().isBlank() || txtDireccion.getText().length() > 200) {
+            if (nombre.length() > 150 || direccion.isEmpty() || direccion.length() > 200) {
                 Alertas.mostrarInfo("Datos incompletos", "Revise la razón social y la dirección de facturación.");
                 return;
             }
-        } else if (!dni.isEmpty() && !Validador.esDniValido(dni)) {
-            // En una boleta, el cliente puede preferir no dar sus datos: solo se valida si escribio algo.
+        } else if ("BOLETA".equals(tipo) && !documento.isEmpty() && !Validador.esDniValido(documento)) {
+            // En una boleta, el cliente puede preferir no dar sus datos: solo se valida si escribió algo.
             Alertas.mostrarInfo("DNI inválido", "El DNI debe contener exactamente 8 dígitos.");
             txtBuscarDni.requestFocus();
             return;
         }
-        if(carrito.isEmpty()){
-            Alertas.mostrarInfo("Carrito vacío","Agrega al menos un producto antes de emitir el comprobante.");
+        if (habitacion == null && !pagoValido()) {
             return;
         }
-        String telefono = txtTelefono.getText() == null ? "" : txtTelefono.getText().trim();
-        if (!telefono.isEmpty() && !Validador.esTelefonoValido(telefono)) {
-            Alertas.mostrarInfo("Teléfono inválido", "Ingrese un celular válido de 9 dígitos o deje el campo vacío.");
-            txtTelefono.requestFocus();
+
+        VentaTienda venta = new VentaTienda();
+        venta.setIdUsuario(SesionActual.getUsuario().getIdUsuario());
+        venta.setIdComprobante(null);
+        if (habitacion != null) {
+            venta.setIdHuesped(habitacion.idHuesped);
+            venta.setIdHabitacion(habitacion.idHabitacion);
+            venta.setClienteExterno(null);
+        } else {
+            venta.setIdHuesped(null);
+            venta.setIdHabitacion(null);
+            venta.setMetodoPago(btnTarjeta.isSelected() ? "TARJETA" : btnYape.isSelected() ? "YAPE"
+                    : btnTransferencia.isSelected() ? "TRANSFERENCIA" : "EFECTIVO");
+            venta.setClienteExterno(nombre.isEmpty() ? "Cliente varios" : nombre);
+        }
+        String detalle = habitacion != null ? "\nSe carga a la habitación " + habitacion.numero + " y se cobra con su cuenta."
+                : tipo != null ? "\nSe emitirá " + ("FACTURA".equals(tipo) ? "una factura." : "una boleta.") : "";
+        if (!Alertas.confirmar("Registrar venta", "Total: " + lblTotal.getText() + detalle + "\n¿Registrar la venta?")) {
             return;
         }
-        if(SesionActual.getUsuario()==null){
-            Alertas.mostrarError("Sesión","No existe un usuario autenticado.");
-            return;
+        try {
+            int id = ventaService.registrarVenta(venta, new ArrayList<>(carrito));
+            venta.setIdVenta(id);
+            ComprobanteDocumento emitido = null;
+            String problema = null;
+            if (tipo != null) {
+                try {
+                    Comprobante c = comprobanteService.generarParaVenta(venta, tipo, new ComprobanteService.DatosCliente(
+                            "FACTURA".equals(tipo) ? "RUC" : "DNI", documento, nombre, direccion));
+                    emitido = comprobanteService.documento(c.getIdComprobante());
+                } catch (Exception ex) {
+                    Registro.fallo("CarritoTiendaController.onConfirmarVenta (comprobante de la venta " + id + ")", ex);
+                    problema = ex.getMessage();
+                }
+            }
+            carrito.clear();
+            limpiarCliente();
+            actualizarTotales();
+            cargarProductos();
+            if (problema != null) {
+                Alertas.mostrarAdvertencia("Venta registrada sin comprobante", "La venta N.º " + id
+                        + " quedó registrada, pero no se pudo emitir el comprobante: " + problema
+                        + "\nPuedes emitirlo desde Comprobantes (origen «Venta de tienda») con el número de venta.");
+            } else if (emitido != null) {
+                if (Alertas.confirmar("Comprobante emitido", "Venta N.º " + id + " registrada. Se emitió el comprobante "
+                        + emitido.getComprobante().getNumero() + ".\n\n¿Guardarlo en PDF ahora?")) {
+                    ImpresionComprobante.guardarPdf(tablaCarrito.getScene().getWindow(), emitido);
+                }
+            } else {
+                Alertas.mostrarInfo("Venta registrada", "Venta N.º " + id + " registrada correctamente.");
+            }
+        } catch (Exception ex) {
+            Alertas.mostrarError("Venta", ex.getMessage());
         }
+    }
+
+    /** El medio de pago y, si es efectivo, el monto recibido (que no puede ser menor al total). */
+    private boolean pagoValido() {
         if (formaPago.getSelectedToggle() == null) {
             Alertas.mostrarInfo("Forma de pago", "Seleccione una forma de pago.");
-            return;
+            return false;
         }
-        if(btnEfectivo.isSelected()) {
+        if (btnEfectivo.isSelected()) {
             String montoTexto = txtMontoRecibido.getText() == null ? "" : txtMontoRecibido.getText().replace("S/", "").trim();
             if (montoTexto.isEmpty()) {
                 Alertas.mostrarInfo("Pago incompleto", "Ingrese el monto recibido.");
                 txtMontoRecibido.requestFocus();
-                return;
+                return false;
             }
             try {
                 BigDecimal monto = new BigDecimal(montoTexto);
                 if (monto.scale() > 2 || monto.signum() <= 0) {
                     Alertas.mostrarInfo("Monto inválido", "Use un importe positivo con hasta dos decimales.");
                     txtMontoRecibido.requestFocus();
-                    return;
+                    return false;
                 }
                 if (monto.compareTo(totalCarrito()) < 0) {
                     Alertas.mostrarInfo("Pago insuficiente", "El monto recibido es menor al total de la venta.");
                     txtMontoRecibido.requestFocus();
-                    return;
+                    return false;
                 }
             } catch (NumberFormatException ex) {
                 Alertas.mostrarInfo("Monto inválido", "Ingrese un monto recibido válido, por ejemplo: 20.00");
                 txtMontoRecibido.requestFocus();
-                return;
+                return false;
             }
         }
-        VentaTienda venta=new VentaTienda(); 
-        venta.setIdUsuario(SesionActual.getUsuario().getIdUsuario()); 
-        venta.setIdComprobante(null);
-        EstadiaActiva e=cmbHabitacion.getValue();
-        if(e!=null){
-            venta.setIdHuesped(e.idHuesped);
-            venta.setIdHabitacion(e.idHabitacion);
-            venta.setClienteExterno(null);
-        } else {
-            venta.setIdHuesped(null);
-            venta.setIdHabitacion(null);
-            venta.setMetodoPago(btnTarjeta.isSelected() ? "TARJETA" : btnYape.isSelected() ? "YAPE"
-                    : btnTransferencia.isSelected() ? "TRANSFERENCIA" : "EFECTIVO");String n=txtNombreCliente.getText()==null?"":txtNombreCliente.getText().trim();
-            venta.setClienteExterno(n.isEmpty()?"Cliente varios":n);}
-        if(!Alertas.confirmar("Emitir comprobante","Total: "+lblTotal.getText()+"\n¿Registrar la venta?"))return;
+        return true;
+    }
+
+    private String texto(TextField campo) {
+        return campo.getText() == null ? "" : campo.getText().trim();
+    }
+
+    private void actualizarTotales() {
+        BigDecimal total = totalCarrito();
+        BigDecimal subtotal = total.divide(new BigDecimal("1.18"), 2, RoundingMode.HALF_UP);
+        BigDecimal igv = total.subtract(subtotal);
+        lblSubtotal.setText(moneda(subtotal));
+        lblIgv.setText(moneda(igv));
+        lblTotal.setText(moneda(total));
+        actualizarVuelto();
+    }
+
+    private void actualizarVuelto() {
+        BigDecimal vuelto = obtenerMontoRecibido().subtract(totalCarrito());
+        if (vuelto.signum() < 0) {
+            vuelto = BigDecimal.ZERO;
+        }
+        lblVuelto.setText(moneda(vuelto));
+    }
+
+    private BigDecimal obtenerMontoRecibido() {
         try {
-            int id=ventaService.registrarVenta(venta,new ArrayList<>(carrito));
-            Alertas.mostrarInfo("Venta registrada","Venta N.º "+id+" registrada correctamente.");carrito.clear();limpiarCliente();actualizarTotales();cargarProductos();}
-        catch(Exception ex){
-            Alertas.mostrarError("Venta",ex.getMessage());}
+            return new BigDecimal(txtMontoRecibido.getText().replace("S/", "").trim());
+        } catch (Exception e) {
+            return BigDecimal.ZERO;
+        }
     }
 
-    private void actualizarTotales(){
-        BigDecimal total=totalCarrito();
-        BigDecimal subtotal=total.divide(new BigDecimal("1.18"),2,RoundingMode.HALF_UP);
-        BigDecimal igv=total.subtract(subtotal);
-        lblSubtotal.setText(moneda(subtotal)); lblIgv.setText(moneda(igv)); lblTotal.setText(moneda(total)); actualizarVuelto();
+    private BigDecimal totalCarrito() {
+        BigDecimal total = BigDecimal.ZERO;
+        for (DetalleVenta d : carrito) {
+            if (d.getSubtotal() != null) {
+                total = total.add(d.getSubtotal());
+            }
+        }
+        return total.setScale(2, RoundingMode.HALF_UP);
     }
-    private void actualizarVuelto(){ BigDecimal vuelto=obtenerMontoRecibido().subtract(totalCarrito()); 
-    if(vuelto.signum()<0)vuelto=BigDecimal.ZERO; lblVuelto.setText(moneda(vuelto)); }
-    private BigDecimal obtenerMontoRecibido(){ 
-        try{return new BigDecimal(txtMontoRecibido.getText().replace("S/","").trim());
-        }catch(Exception e){
-            return BigDecimal.ZERO;} }
-    private BigDecimal totalCarrito(){ BigDecimal t=BigDecimal.ZERO; 
-    for(DetalleVenta d:carrito)
-        if(d.getSubtotal()!=null)t=t.add(d.getSubtotal()); 
-    return t.setScale(2,RoundingMode.HALF_UP); }
-    private String moneda(BigDecimal v){
-        return "S/ "+v.setScale(2,RoundingMode.HALF_UP);}
-    private void recalcular(DetalleVenta d){d.setSubtotal(d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad())));}
-    private DetalleVenta buscarDetalle(int id){
-        for(DetalleVenta d:carrito)
-            if(d.getIdProducto()==id)
+
+    private String moneda(BigDecimal v) {
+        return "S/ " + v.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private void recalcular(DetalleVenta d) {
+        d.setSubtotal(d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad())));
+    }
+
+    private DetalleVenta buscarDetalle(int id) {
+        for (DetalleVenta d : carrito) {
+            if (d.getIdProducto() == id) {
                 return d;
-        return null;}
-    private void limpiarCliente(){txtBuscarDni.clear();txtNombreCliente.clear();txtDireccion.clear();txtTelefono.clear();txtObservaciones.clear();txtMontoRecibido.clear();cmbHabitacion.getSelectionModel().clearSelection();}
-    @FXML 
-    private void onCerrar(){((Stage)tablaCarrito.getScene().getWindow()).close();}
+            }
+        }
+        return null;
+    }
 
-    private static class EstadiaActiva { final int idHuesped,idHabitacion; final String numero,huesped; EstadiaActiva(int h,int hab,String n,String hu){idHuesped=h;idHabitacion=hab;numero=n;huesped=hu;} public String toString(){return "Hab. "+numero+" — "+huesped;} }
+    private void limpiarCliente() {
+        txtBuscarDni.clear();
+        txtNombreCliente.clear();
+        txtDireccion.clear();
+        txtMontoRecibido.clear();
+        cmbHabitacion.getSelectionModel().clearSelection();
+        btnSinComprobante.setSelected(true);
+    }
+
+    @FXML
+    private void onCerrar() {
+        ((Stage) tablaCarrito.getScene().getWindow()).close();
+    }
+
+    private static class EstadiaActiva {
+        final int idHuesped, idHabitacion;
+        final String numero, huesped;
+
+        EstadiaActiva(int idHuesped, int idHabitacion, String numero, String huesped) {
+            this.idHuesped = idHuesped;
+            this.idHabitacion = idHabitacion;
+            this.numero = numero;
+            this.huesped = huesped;
+        }
+
+        @Override
+        public String toString() {
+            return "Hab. " + numero + " — " + huesped;
+        }
+    }
 }
-

@@ -63,6 +63,8 @@
                                   userData="/untrm/hotel_san_antonio/fxml/nuevos/dias/dias_pasados.fxml" onAction="#onMenu"/>
                     <ToggleButton text="Movimientos de caja" toggleGroup="$grupoMenu"
                                   userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/libro_caja.fxml" onAction="#onMenu"/>
+                    <ToggleButton text="Cierre de turno" toggleGroup="$grupoMenu"
+                                  userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/cierre_arqueo.fxml" onAction="#onMenu"/>
                 </VBox>
             </ScrollPane>
 

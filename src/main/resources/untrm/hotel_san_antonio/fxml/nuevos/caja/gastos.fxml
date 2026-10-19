@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
@@ -19,11 +20,11 @@
             <Label text="Concepto" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
             <TextField fx:id="txtConcepto" promptText="Concepto *" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
             <Label text="Categoría" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-            <TextField fx:id="txtCategoria" promptText="Categoría *" GridPane.columnIndex="2" GridPane.rowIndex="1" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+            <ChoiceBox fx:id="cmbCategoria" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="1" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
             <Label text="Monto S/" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
             <TextField fx:id="txtMonto" promptText="0.00" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
             <Label text="Método de pago" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <TextField fx:id="txtMetodo" promptText="Método *" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+            <ChoiceBox fx:id="cmbMetodo" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
             <Label text="Observación" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
             <TextField fx:id="txtObservacion" GridPane.columnIndex="2" GridPane.rowIndex="3" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
         </GridPane>

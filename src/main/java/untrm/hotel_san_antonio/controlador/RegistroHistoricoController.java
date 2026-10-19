@@ -1,7 +1,6 @@
 package untrm.hotel_san_antonio.controlador;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -22,20 +21,20 @@ import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Huesped;
 import untrm.hotel_san_antonio.modelo.Pago;
 import untrm.hotel_san_antonio.modelo.Reserva;
-import untrm.hotel_san_antonio.servicio.ConflictoFechasException;
 import untrm.hotel_san_antonio.servicio.ReniecService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.ConsultaApi;
 import untrm.hotel_san_antonio.util.SoloLectura;
 import untrm.hotel_san_antonio.util.Validador;
+import untrm.hotel_san_antonio.util.Registro;
 
 /** Captura administrativa de una estadía pasada, con fechas del hecho y de captura separadas. */
 public class RegistroHistoricoController {
-    @FXML private ComboBox<String> cmbHabitacion, cmbMetodo;
+    @FXML private ComboBox<String> cmbHabitacion, cmbMetodo, cmbTipoDocumento;
     @FXML private DatePicker dpIngreso, dpSalida, dpEvento, dpPago;
     @FXML private Spinner<Integer> spPersonas;
     @FXML private VBox contenedorAcompanantes;
-    @FXML private TextField txtDni, txtNombres, txtApellidos, txtTotal;
+    @FXML private TextField txtDni, txtNombres, txtApellidos, txtPais, txtTotal;
     @FXML private TextArea txtMotivo;
     @FXML private Label lblEstado;
     @FXML private Button btnGuardar;
@@ -52,6 +51,17 @@ public class RegistroHistoricoController {
         acompanantes.actualizar(1);
         cmbMetodo.getItems().setAll("EFECTIVO", "YAPE", "TRANSFERENCIA", "TARJETA");
         cmbMetodo.setValue("EFECTIVO");
+        cmbTipoDocumento.getItems().setAll("DNI", "Pasaporte");
+        cmbTipoDocumento.setValue("DNI");
+        cmbTipoDocumento.valueProperty().addListener((obs, antes, ahora) -> {
+            boolean pasaporte = "Pasaporte".equals(ahora);
+            txtDni.setPromptText(pasaporte ? "Pasaporte titular" : "DNI titular");
+            txtPais.setVisible(pasaporte);
+            txtPais.setManaged(pasaporte);
+            txtDni.clear();
+            dniBuscado = null;
+            bloquearIdentidad(false);
+        });
         cmbHabitacion.valueProperty().addListener((obs, antes, ahora) -> {
             Habitacion h = habitaciones.get(ahora);
             if (h != null) {
@@ -97,27 +107,45 @@ public class RegistroHistoricoController {
                 habitaciones.put(nombre, h); cmbHabitacion.getItems().add(nombre);
             }
         });
-        tarea.setOnFailed(e -> lblEstado.setText("No se pudieron cargar las habitaciones."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("RegistroHistoricoController.cargarHabitaciones", tarea.getException());
+            lblEstado.setText("No se pudieron cargar las habitaciones.");
+        });
         ejecutar(tarea, "historico-habitaciones");
     }
 
     @FXML private void buscarDni() {
         String dni = txtDni.getText().trim();
-        if (!Validador.esDniValido(dni)) { lblEstado.setText("Ingrese un DNI válido."); return; }
+        boolean pasaporte = esPasaporte();
+        if (!(pasaporte ? Validador.esPasaporteValido(dni) : Validador.esDniValido(dni))) {
+            lblEstado.setText(pasaporte ? "Ingrese un pasaporte válido (6 a 20 letras o números)." : "Ingrese un DNI válido.");
+            return;
+        }
+        String tipo = tipoDocumento();
         Task<Huesped> local = new Task<>() {
-            @Override protected Huesped call() throws Exception { return servicio.buscarHuespedLocal("DNI", dni); }
+            @Override protected Huesped call() throws Exception { return servicio.buscarHuespedLocal(tipo, dni); }
         };
         local.setOnSucceeded(e -> {
             if (!dni.equals(txtDni.getText().trim())) return;
             if (local.getValue() != null) {
                 cargar(local.getValue()); dniBuscado = dni;
                 bloquearIdentidad(true);
+                if (pasaporte) {
+                    lblEstado.setText("Huésped local cargado.");
+                    return;
+                }
                 lblEstado.setText("Huésped local cargado. Verificando identidad...");
                 ConsultaApi.actualizarIdentidadLocal(dni, actualizado -> {
                     if (!dni.equals(txtDni.getText().trim())) return;
                     cargar(actualizado);
                     lblEstado.setText("Identidad verificada con RENIEC.");
                 });
+            } else if (pasaporte) {
+                // RENIEC solo conoce DNI: el extranjero se escribe a mano, con su país
+                dniBuscado = dni;
+                txtPais.clear();
+                bloquearIdentidad(false);
+                lblEstado.setText("Pasaporte nuevo: complete los nombres y el país.");
             } else {
                 Task<Huesped> reniec = ReniecService.consultarDni(dni);
                 reniec.setOnSucceeded(ev -> {
@@ -129,13 +157,17 @@ public class RegistroHistoricoController {
                             ? "Complete los nombres manualmente." : "Identidad autocompletada.");
                 });
                 reniec.setOnFailed(ev -> {
+                    Registro.fallo("RegistroHistoricoController.buscarDni", reniec.getException());
                     dniBuscado = dni;
                     lblEstado.setText("RENIEC no disponible. Complete los nombres manualmente.");
                 });
                 ejecutar(reniec, "historico-reniec");
             }
         });
-        local.setOnFailed(e -> lblEstado.setText("No se pudo buscar el huésped local."));
+        local.setOnFailed(e -> {
+            Registro.fallo("RegistroHistoricoController.buscarDni", local.getException());
+            lblEstado.setText("No se pudo buscar el huésped local.");
+        });
         ejecutar(local, "historico-dni");
     }
 
@@ -145,8 +177,20 @@ public class RegistroHistoricoController {
         SoloLectura.aplicar(txtApellidos, bloqueada);
     }
 
+    private boolean esPasaporte() {
+        return "Pasaporte".equals(cmbTipoDocumento.getValue());
+    }
+
+    /** "DNI" o "PASAPORTE", como se guarda en la base. */
+    private String tipoDocumento() {
+        return esPasaporte() ? "PASAPORTE" : "DNI";
+    }
+
     private void cargar(Huesped h) {
         txtNombres.setText(h.getNombres()); txtApellidos.setText(h.getApellidos());
+        if (esPasaporte()) {
+            txtPais.setText(h.getPaisProcedencia() == null ? "" : h.getPaisProcedencia());
+        }
     }
 
     private void recalcular() {
@@ -162,12 +206,17 @@ public class RegistroHistoricoController {
     @FXML private void guardar() {
         Habitacion h = habitaciones.get(cmbHabitacion.getValue());
         if (h == null || !txtDni.getText().trim().equals(dniBuscado)) {
-            lblEstado.setText("Seleccione una habitación y busque el DNI titular."); return;
+            lblEstado.setText("Seleccione una habitación y busque el documento del titular."); return;
+        }
+        String pais = esPasaporte() ? txtPais.getText().trim() : "Perú";
+        if (esPasaporte() && !Validador.esPaisValido(pais)) {
+            lblEstado.setText("Indique el país del titular (solo letras).");
+            return;
         }
         List<Huesped> personas;
         try {
-            personas = acompanantes.obtener(new Huesped("DNI", dniBuscado,
-                    txtNombres.getText().trim(), txtApellidos.getText().trim(), "Perú", null, null));
+            personas = acompanantes.obtener(new Huesped(tipoDocumento(), dniBuscado,
+                    txtNombres.getText().trim(), txtApellidos.getText().trim(), pais, null, null));
         } catch (RuntimeException error) { lblEstado.setText(error.getMessage()); return; }
         Reserva r = new Reserva();
         r.setIdHabitacion(h.getIdHabitacion()); r.setFechaCheckin(dpIngreso.getValue());

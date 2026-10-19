@@ -17,6 +17,7 @@ public final class Permisos {
             BASE + "carrito/carrito_tienda.fxml",
             BASE + "comprobante/comprobante.fxml",
             BASE + "nuevos/caja/libro_caja.fxml",
+            BASE + "nuevos/caja/cierre_arqueo.fxml",
             BASE + "nuevos/dias/dias_pasados.fxml",
             BASE + "nuevos/dias/venta_pasada_form.fxml");
 

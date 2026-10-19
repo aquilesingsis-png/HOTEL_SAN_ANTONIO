@@ -6,12 +6,14 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import untrm.hotel_san_antonio.util.ConexionBD;
 import untrm.hotel_san_antonio.util.Permisos;
+import untrm.hotel_san_antonio.util.SesionActual;
 
 /**
  * Libro de caja: una sola lista con todo el dinero que entra y sale, venga de donde venga
@@ -19,14 +21,17 @@ import untrm.hotel_san_antonio.util.Permisos;
  */
 public class CajaDAO {
 
-    /** Un renglon del libro de caja. tipo: INGRESO, EGRESO o CARGO (venta cargada a una habitacion). */
+    /**
+     * Un renglon del libro de caja. tipo: INGRESO, EGRESO, CARGO (venta cargada a una habitacion) o ANULADA
+     * (venta anulada: se ve pero no suma). idOrigen es el numero de la reserva, venta, movimiento o gasto.
+     */
     public record Movimiento(LocalDateTime fecha, String tipo, String concepto, BigDecimal monto,
                              String metodo, String documento, String cliente, String responsable,
-                             String origen) { }
+                             String origen, int idOrigen) { }
 
-    /** Un cierre de caja ya guardado (borrador o confirmado). */
+    /** Un cierre de caja ya guardado (borrador o confirmado); confirmado es la hora en que se confirmo. */
     public record Cierre(int id, LocalDate fecha, String turno, String responsable, BigDecimal esperado,
-                         BigDecimal contado, BigDecimal diferencia, String estado) { }
+                         BigDecimal contado, BigDecimal diferencia, String estado, LocalDateTime confirmado) { }
 
     /** Los cuatro origenes del dinero, unidos en una misma tabla virtual. */
     private static final String TODOS = ""
@@ -36,56 +41,72 @@ public class CajaDAO {
             + "' - Habitación ', hab.numero, ' (R-', LPAD(r.id_reserva, 4, '0'), ')', "
             + "IF(p.fecha_evento IS NULL, '', ' · registro tardío')) AS concepto, "
             + "p.monto AS monto, p.metodo_pago AS metodo, "
-            + "(SELECT MIN(c.numero) FROM comprobante c WHERE c.id_reserva = r.id_reserva) AS documento, "
+            + "(SELECT MIN(c.numero) FROM comprobante c WHERE c.id_reserva = r.id_reserva AND c.estado = 'EMITIDO') AS documento, "
             + "CONCAT(h.nombres, ' ', h.apellidos) AS cliente, CONCAT(u.nombre, ' ', u.apellido) AS responsable, "
-            + "'Alojamiento' AS origen "
+            + "'Alojamiento' AS origen, r.id_reserva AS id_origen "
             + "FROM pago p JOIN reserva r ON r.id_reserva = p.id_reserva "
             + "JOIN huesped h ON h.id_huesped = r.id_huesped JOIN habitacion hab ON hab.id_habitacion = r.id_habitacion "
             + "JOIN usuario u ON u.id_usuario = p.id_usuario "
             + "UNION ALL "
             + "SELECT COALESCE(TIMESTAMP(v.fecha_evento, TIME(v.fecha_venta)), v.fecha_venta), "
-            + "IF(v.id_habitacion IS NULL, 'INGRESO', 'CARGO'), "
+            + "IF(v.estado = 'ANULADA', 'ANULADA', IF(v.id_habitacion IS NULL, 'INGRESO', 'CARGO')), "
             + "CONCAT('Venta de tienda', IF(v.fecha_evento IS NULL, '', ' (registro tardío)'), ' - ', COALESCE((SELECT GROUP_CONCAT(CONCAT(d.cantidad, ' x ', pr.nombre) SEPARATOR ', ') "
             + "FROM detalle_venta d JOIN producto pr ON pr.id_producto = d.id_producto WHERE d.id_venta = v.id_venta), "
-            + "'sin detalle'), IF(v.id_habitacion IS NULL, '', CONCAT(' (a la habitación ', hb.numero, ')'))), "
+            + "'sin detalle'), IF(v.id_habitacion IS NULL, '', CONCAT(' (a la habitación ', hb.numero, ')')), "
+            + "IF(v.estado = 'ANULADA', CONCAT(' · ANULADA: ', v.motivo_anulacion), '')), "
             + "v.total, IF(v.id_habitacion IS NULL, COALESCE(v.metodo_pago, 'NO REGISTRADO'), 'CARGO A HABITACION'), "
             + "(SELECT c.numero FROM comprobante c WHERE c.id_comprobante = v.id_comprobante), "
             + "COALESCE(v.cliente_externo, (SELECT CONCAT(h2.nombres, ' ', h2.apellidos) FROM huesped h2 "
             + "WHERE h2.id_huesped = v.id_huesped), 'Cliente varios'), "
-            + "CONCAT(u.nombre, ' ', u.apellido), 'Carrito' "
+            + "CONCAT(u.nombre, ' ', u.apellido), 'Carrito', v.id_venta "
             + "FROM venta_tienda v JOIN usuario u ON u.id_usuario = v.id_usuario "
             + "LEFT JOIN habitacion hb ON hb.id_habitacion = v.id_habitacion "
             + "UNION ALL "
             + "SELECT m.fecha, m.tipo, CONCAT('Movimiento de caja - ', m.concepto, "
             + "IF(m.referencia IS NULL OR m.referencia = '', '', CONCAT(' (', m.referencia, ')'))), "
-            + "m.monto, m.metodo_pago, NULL, '', CONCAT(u.nombre, ' ', u.apellido), 'Manual' "
+            + "m.monto, m.metodo_pago, NULL, '', CONCAT(u.nombre, ' ', u.apellido), 'Manual', m.id_movimiento "
             + "FROM movimiento_caja m JOIN usuario u ON u.id_usuario = m.id_usuario "
             + "UNION ALL "
             + "SELECT TIMESTAMP(g.fecha, TIME(g.fecha_registro)), 'EGRESO', "
             + "CONCAT('Gasto - ', g.concepto, ' (', g.categoria, ')'), g.monto, UPPER(g.metodo_pago), NULL, '', "
-            + "CONCAT(u.nombre, ' ', u.apellido), 'Gasto' "
+            + "CONCAT(u.nombre, ' ', u.apellido), 'Gasto', g.id_gasto "
             + "FROM gasto g JOIN usuario u ON u.id_usuario = g.id_usuario WHERE g.activo = TRUE";
 
-    /** Los ultimos cierres de caja, del mas reciente al mas antiguo (solo el Administrador). */
+    /** Los ultimos cierres de caja, del mas reciente al mas antiguo: el Administrador ve todos; recepcion, los suyos. */
     public List<Cierre> listarCierres() throws SQLException {
-        Permisos.requerir("ADMINISTRADOR");
+        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
+        boolean todos = SesionActual.esAdministrador();
         String sql = "SELECT c.id_cierre, c.fecha, c.turno, CONCAT(u.nombre, ' ', u.apellido) AS responsable, "
-                + "c.efectivo_esperado, c.efectivo_contado, c.diferencia, c.estado FROM cierre_caja c "
-                + "JOIN usuario u ON u.id_usuario = c.id_usuario ORDER BY c.fecha DESC, c.id_cierre DESC LIMIT 40";
+                + "c.efectivo_esperado, c.efectivo_contado, c.diferencia, c.estado, c.fecha_confirmacion "
+                + "FROM cierre_caja c JOIN usuario u ON u.id_usuario = c.id_usuario "
+                + (todos ? "" : "WHERE c.id_usuario = ? ")
+                + "ORDER BY c.fecha DESC, c.id_cierre DESC LIMIT 40";
         List<Cierre> lista = new ArrayList<>();
-        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                lista.add(new Cierre(rs.getInt("id_cierre"), rs.getDate("fecha").toLocalDate(), rs.getString("turno"),
-                        rs.getString("responsable"), rs.getBigDecimal("efectivo_esperado"),
-                        rs.getBigDecimal("efectivo_contado"), rs.getBigDecimal("diferencia"), rs.getString("estado")));
+        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql)) {
+            if (!todos) {
+                ps.setInt(1, SesionActual.getUsuario().getIdUsuario());
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.sql.Timestamp confirmado = rs.getTimestamp("fecha_confirmacion");
+                    lista.add(new Cierre(rs.getInt("id_cierre"), rs.getDate("fecha").toLocalDate(), rs.getString("turno"),
+                            rs.getString("responsable"), rs.getBigDecimal("efectivo_esperado"),
+                            rs.getBigDecimal("efectivo_contado"), rs.getBigDecimal("diferencia"), rs.getString("estado"),
+                            confirmado == null ? null : confirmado.toLocalDateTime()));
+                }
             }
         }
         return lista;
     }
 
+    /** Cuantos renglones trae como maximo la lista; si hay mas, la pantalla avisa y los totales siguen completos. */
+    public static final int LIMITE = 5000;
+
+    /** Ingresos, egresos y efectivo en caja (ingresos menos egresos en efectivo) de todo lo que cumple los filtros. */
+    public record Totales(BigDecimal ingresos, BigDecimal egresos, BigDecimal efectivo) { }
+
     /**
-     * @param tipo   INGRESO, EGRESO, CARGO o null (todos)
+     * @param tipo   INGRESO, EGRESO, CARGO, ANULADA o null (todos)
      * @param metodo EFECTIVO, YAPE, TRANSFERENCIA, TARJETA o null (todos)
      * @param origen Alojamiento, Carrito, Manual, Gasto o null (todos)
      * @param texto  se busca en el concepto, el cliente, el responsable y el documento
@@ -93,15 +114,61 @@ public class CajaDAO {
     public List<Movimiento> listar(LocalDate desde, LocalDate hasta, String tipo, String metodo,
                                    String origen, String texto) throws SQLException {
         Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
-        StringBuilder sql = new StringBuilder("SELECT * FROM (").append(TODOS).append(") t WHERE 1 = 1 ");
         List<Object> valores = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM (").append(TODOS).append(") t WHERE 1 = 1 ")
+                .append(filtros(desde, hasta, tipo, metodo, origen, texto, valores))
+                .append("ORDER BY t.fecha DESC LIMIT ").append(LIMITE + 1);   // uno de mas, para saber si hay mas
+
+        List<Movimiento> lista = new ArrayList<>();
+        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < valores.size(); i++) {
+                ps.setObject(i + 1, valores.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new Movimiento(rs.getTimestamp("fecha").toLocalDateTime(), rs.getString("tipo"),
+                            rs.getString("concepto"), rs.getBigDecimal("monto"), rs.getString("metodo"),
+                            rs.getString("documento"), rs.getString("cliente"), rs.getString("responsable"),
+                            rs.getString("origen"), rs.getInt("id_origen")));
+                }
+            }
+        }
+        return lista;
+    }
+
+    /** Los totales de todo lo que cumple los filtros, sin el corte de la lista. */
+    public Totales totales(LocalDate desde, LocalDate hasta, String tipo, String metodo,
+                           String origen, String texto) throws SQLException {
+        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
+        List<Object> valores = new ArrayList<>();
+        String sql = "SELECT COALESCE(SUM(CASE WHEN t.tipo = 'INGRESO' THEN t.monto END), 0), "
+                + "COALESCE(SUM(CASE WHEN t.tipo = 'EGRESO' THEN t.monto END), 0), "
+                + "COALESCE(SUM(CASE WHEN t.metodo = 'EFECTIVO' AND t.tipo = 'INGRESO' THEN t.monto "
+                + "WHEN t.metodo = 'EFECTIVO' AND t.tipo = 'EGRESO' THEN -t.monto END), 0) "
+                + "FROM (" + TODOS + ") t WHERE 1 = 1 "
+                + filtros(desde, hasta, tipo, metodo, origen, texto, valores);
+        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql)) {
+            for (int i = 0; i < valores.size(); i++) {
+                ps.setObject(i + 1, valores.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return new Totales(rs.getBigDecimal(1), rs.getBigDecimal(2), rs.getBigDecimal(3));
+            }
+        }
+    }
+
+    /** Las condiciones de los filtros (cada una termina con un espacio) y sus valores, en orden. */
+    private String filtros(LocalDate desde, LocalDate hasta, String tipo, String metodo, String origen,
+                           String texto, List<Object> valores) {
+        StringBuilder sql = new StringBuilder();
         if (desde != null) {
-            sql.append("AND DATE(t.fecha) >= ? ");
-            valores.add(Date.valueOf(desde));
+            sql.append("AND t.fecha >= ? ");
+            valores.add(java.sql.Timestamp.valueOf(desde.atStartOfDay()));
         }
         if (hasta != null) {
-            sql.append("AND DATE(t.fecha) <= ? ");
-            valores.add(Date.valueOf(hasta));
+            sql.append("AND t.fecha < ? ");
+            valores.add(java.sql.Timestamp.valueOf(hasta.plusDays(1).atStartOfDay()));
         }
         if (tipo != null) {
             sql.append("AND t.tipo = ? ");
@@ -122,22 +189,51 @@ public class CajaDAO {
                 valores.add(patron);
             }
         }
-        sql.append("ORDER BY t.fecha DESC LIMIT 5000");
+        return sql.toString();
+    }
 
-        List<Movimiento> lista = new ArrayList<>();
-        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
-            for (int i = 0; i < valores.size(); i++) {
-                ps.setObject(i + 1, valores.get(i));
-            }
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    lista.add(new Movimiento(rs.getTimestamp("fecha").toLocalDateTime(), rs.getString("tipo"),
-                            rs.getString("concepto"), rs.getBigDecimal("monto"), rs.getString("metodo"),
-                            rs.getString("documento"), rs.getString("cliente"), rs.getString("responsable"),
-                            rs.getString("origen")));
-                }
-            }
+    private final AuditoriaDAO auditoria = new AuditoriaDAO();
+
+    private int claveGenerada(PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.getGeneratedKeys()) {
+            if (!rs.next()) throw new SQLException("No se obtuvo el identificador generado.");
+            return rs.getInt(1);
         }
-        return lista;
+    }
+
+    /** Un ingreso o egreso de caja escrito a mano (solo el Administrador). */
+    public void guardarMovimientoCaja(String tipo, String concepto, String metodo,
+                                      BigDecimal monto, String referencia, String observacion,
+                                      String turno) throws SQLException {
+        Permisos.requerir("ADMINISTRADOR");
+        if (!List.of("INGRESO", "EGRESO").contains(tipo))
+            throw new IllegalArgumentException("Seleccione ingreso o egreso.");
+        if (concepto == null || concepto.isBlank() || concepto.length() > 150)
+            throw new IllegalArgumentException("Indique un concepto de hasta 150 caracteres.");
+        if (!List.of("EFECTIVO", "TARJETA", "TRANSFERENCIA", "YAPE").contains(metodo))
+            throw new IllegalArgumentException("Seleccione un método de pago válido.");
+        if (monto == null || monto.signum() <= 0 || monto.scale() > 2
+                || monto.compareTo(new BigDecimal("99999999.99")) > 0) {
+            throw new IllegalArgumentException("El monto debe ser mayor que cero, con hasta dos decimales.");
+        }
+        if (turno == null || turno.isBlank() || turno.length() > 50)
+            throw new IllegalArgumentException("Indique el turno o caja (hasta 50 caracteres).");
+        String nota = "Turno/caja: " + turno.trim()
+                + (observacion == null || observacion.isBlank() ? "" : "\n" + observacion.trim());
+        if (nota.length() > 500) throw new IllegalArgumentException("La observación supera 500 caracteres.");
+        try (Connection con = ConexionBD.conectar()) {
+            con.setAutoCommit(false);
+            try (PreparedStatement ps = con.prepareStatement(
+                    "INSERT INTO movimiento_caja(id_usuario,tipo,concepto,metodo_pago,monto,referencia,observacion) "
+                    + "VALUES (?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
+                ps.setInt(1, SesionActual.getUsuario().getIdUsuario()); ps.setString(2, tipo); ps.setString(3, concepto.trim());
+                ps.setString(4, metodo); ps.setBigDecimal(5, monto);
+                ps.setString(6, referencia); ps.setString(7, nota);
+                ps.executeUpdate();
+                auditoria.registrar(con, SesionActual.getUsuario().getIdUsuario(), "CAJA_MOVIMIENTO", "movimiento_caja",
+                        claveGenerada(ps), tipo + " " + monto + " " + concepto.trim());
+                con.commit();
+            } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
+        }
     }
 }

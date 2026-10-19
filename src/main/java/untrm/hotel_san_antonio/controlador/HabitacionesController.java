@@ -8,8 +8,10 @@ import untrm.hotel_san_antonio.dao.HabitacionDAO;
 import untrm.hotel_san_antonio.modelo.CuentaHabitacion;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.servicio.CuentaService;
+import untrm.hotel_san_antonio.servicio.HabitacionService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Consulta;
 import untrm.hotel_san_antonio.util.Navegacion;
 
 import java.io.IOException;
@@ -33,9 +35,11 @@ public class HabitacionesController {
 
     private final HabitacionDAO habitacionDAO = new HabitacionDAO();
     private final CuentaService cuentaService = new CuentaService();
+    private final HabitacionService habitacionService = new HabitacionService();
     private final ReservaService reservaService = new ReservaService();
 
     private List<Habitacion> habitaciones = new ArrayList<>();
+    private final Consulta<List<Habitacion>> consulta = new Consulta<>();
     private String estadoSeleccionado = null; // null = todos los estados
     private String tipoSeleccionado = null;   // null = todos los tipos
 
@@ -63,14 +67,14 @@ public class HabitacionesController {
     }
 
     private void cargarHabitaciones() {
-        try {
-            habitaciones = habitacionDAO.listar();
-        } catch (SQLException e) {
-            Alertas.mostrarError("Error de conexión",
-                    "No se pudieron cargar las habitaciones. Verifica que MySQL/XAMPP esté encendido.\n\n" + e.getMessage());
-            return;
-        }
-        construirTarjetas();
+        consulta.lanzar(contenedorPisos, () -> habitacionDAO.listar(),
+                lista -> {
+                    habitaciones = lista;
+                    construirTarjetas();
+                },
+                error -> Alertas.mostrarError("Error de conexión",
+                        "No se pudieron cargar las habitaciones. Verifica que MySQL/XAMPP esté encendido.\n\n"
+                        + error.getMessage()));
     }
 
     private void construirTarjetas() {
@@ -154,7 +158,7 @@ public class HabitacionesController {
             if (cuenta == null) {
                 // Figura ocupada pero no hay reserva en check-in (dato inconsistente)
                 if (Alertas.confirmar("Habitación " + h.getNumero(), "La habitación figura como ocupada, pero no tiene una estadía activa registrada.\n\n¿Pasarla a Limpieza?")) {
-                    if (!habitacionDAO.cambiarEstadoSiEs(h.getIdHabitacion(), "OCUPADA", "LIMPIEZA")) {
+                    if (!habitacionService.cambiarEstado(h.getIdHabitacion(), "OCUPADA", "LIMPIEZA", null)) {
                         Alertas.mostrarInfo("Habitación " + h.getNumero(), "El estado de la habitación cambió mientras tanto.");
                     }
                     cargarHabitaciones();
@@ -165,6 +169,9 @@ public class HabitacionesController {
                     RUTA_FXML + "cuenta_habitacion.fxml",
                     "Cuenta de la habitación",
                     controlador -> controlador.iniciar(h, cuenta, this::cargarHabitaciones));
+        } catch (IllegalStateException | IllegalArgumentException | SecurityException e) {
+            Alertas.mostrarInfo("Habitación " + h.getNumero(), e.getMessage());
+            cargarHabitaciones();
         } catch (SQLException | IOException e) {
             Alertas.mostrarError("Error", "No se pudo abrir la cuenta.\n\n" + e.getMessage());
         }
@@ -186,9 +193,12 @@ public class HabitacionesController {
             return;
         }
         try {
-            if (!habitacionDAO.cambiarEstadoSiEs(h.getIdHabitacion(), h.getEstado(), "DISPONIBLE")) {
+            if (!habitacionService.cambiarEstado(h.getIdHabitacion(), h.getEstado(), "DISPONIBLE", null)) {
                 Alertas.mostrarInfo("Habitación " + h.getNumero(), "El estado de la habitación cambió mientras tanto. Se actualizó la lista.");
             }
+            cargarHabitaciones();
+        } catch (IllegalStateException | IllegalArgumentException | SecurityException e) {
+            Alertas.mostrarInfo("Habitación " + h.getNumero(), e.getMessage());
             cargarHabitaciones();
         } catch (SQLException e) {
             Alertas.mostrarError("Error", "No se pudo actualizar el estado.\n\n" + e.getMessage());

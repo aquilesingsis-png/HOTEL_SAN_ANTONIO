@@ -6,8 +6,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import untrm.hotel_san_antonio.modelo.Gasto;
+import untrm.hotel_san_antonio.servicio.GastoService;
 import untrm.hotel_san_antonio.util.ConexionBD;
 import untrm.hotel_san_antonio.util.Permisos;
 import untrm.hotel_san_antonio.util.SesionActual;
@@ -200,12 +203,22 @@ public class AlmacenDAO {
 
     // ------------------------------------------------------------------- existencias
 
+    /** Motivo de una entrada que es una compra: pide el costo y puede registrarse como gasto. */
+    public static final String MOTIVO_COMPRA = "Compra";
+
     /**
      * Entrada y salida mueven unidades; ajuste fija el stock contado físicamente.
      * Queda un registro en movimiento_stock con el stock antes y después.
+     * En una entrada por compra se indica el costo por unidad (queda en el movimiento) y, si se da el medio de
+     * pago, la compra se anota también como gasto «Reposición de tienda» por unidades × costo, en la misma
+     * operación: o se guardan las dos cosas o ninguna.
+     *
+     * @param costoUnitario costo por unidad de la compra (obligatorio en una compra; se ignora en lo demás)
+     * @param metodoGasto   medio con el que se pagó la compra, o null para no registrar el gasto
      */
     public void moverStock(int idProducto, String tipo, int cantidad, String motivo,
-                           String referencia, String observacion) throws SQLException {
+                           String referencia, String observacion, BigDecimal costoUnitario,
+                           String metodoGasto) throws SQLException {
         admin();
         if (!List.of("ENTRADA", "SALIDA", "AJUSTE").contains(tipo))
             throw new IllegalArgumentException("Seleccione el tipo de movimiento.");
@@ -213,16 +226,32 @@ public class AlmacenDAO {
             throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
         if (motivo == null || motivo.isBlank() || motivo.length() > 100)
             throw new IllegalArgumentException("Indique un motivo válido.");
+        boolean compra = "ENTRADA".equals(tipo) && MOTIVO_COMPRA.equals(motivo.trim());
+        BigDecimal costo = null;
+        BigDecimal totalCompra = null;
+        if (compra) {
+            if (costoUnitario == null || costoUnitario.signum() <= 0 || costoUnitario.scale() > 2
+                    || costoUnitario.compareTo(PRECIO_MAXIMO) > 0)
+                throw new IllegalArgumentException("Indique el costo por unidad de la compra (S/ 0.01 a S/ 9999.99, con hasta dos decimales).");
+            costo = costoUnitario;
+            totalCompra = costo.multiply(BigDecimal.valueOf(cantidad));
+            if (totalCompra.compareTo(new BigDecimal("99999999.99")) > 0)
+                throw new IllegalArgumentException("El total de la compra es demasiado grande.");
+            if (metodoGasto != null && !GastoService.METODOS.contains(metodoGasto))
+                throw new IllegalArgumentException("Seleccione con qué se pagó la compra.");
+        }
         try (Connection con = ConexionBD.conectar()) {
             con.setAutoCommit(false);
             try {
                 int anterior;
+                String nombre;
                 try (PreparedStatement ps = con.prepareStatement(
-                        "SELECT stock FROM producto WHERE id_producto=? AND activo=1 FOR UPDATE")) {
+                        "SELECT stock, nombre FROM producto WHERE id_producto=? AND activo=1 FOR UPDATE")) {
                     ps.setInt(1, idProducto);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) throw new IllegalStateException("El producto no existe o está inactivo.");
                         anterior = rs.getInt(1);
+                        nombre = rs.getString(2);
                     }
                 }
                 int nuevo = "AJUSTE".equals(tipo) ? cantidad : "ENTRADA".equals(tipo)
@@ -233,9 +262,25 @@ public class AlmacenDAO {
                     ps.setInt(2, idProducto);
                     ps.executeUpdate();
                 }
+                Integer idGasto = null;
+                if (compra && metodoGasto != null) {
+                    Gasto gasto = new Gasto();
+                    gasto.setFecha(LocalDate.now());
+                    String concepto = "Compra de " + cantidad + " x " + nombre;
+                    gasto.setConcepto(concepto.length() > 150 ? concepto.substring(0, 150) : concepto);
+                    gasto.setCategoria("Reposición de tienda");
+                    gasto.setMonto(totalCompra);
+                    gasto.setMetodoPago(metodoGasto);
+                    gasto.setObservacion("Entrada de almacén · S/ " + costo + " por unidad");
+                    idGasto = new GastoDAO().insertar(con, gasto, usuario());
+                    auditoria.registrar(con, usuario(), "GASTO_CREAR", "gasto", idGasto,
+                            gasto.getFecha() + " · " + gasto.getConcepto() + " · " + gasto.getCategoria() + " · S/ "
+                            + totalCompra + " · " + metodoGasto + " · desde almacén");
+                }
                 try (PreparedStatement ps = con.prepareStatement(
                         "INSERT INTO movimiento_stock(id_producto,id_usuario,tipo,cantidad,stock_anterior,"
-                        + "stock_resultante,motivo,referencia,observacion) VALUES (?,?,?,?,?,?,?,?,?)")) {
+                        + "stock_resultante,motivo,referencia,observacion,costo_unitario,id_gasto) "
+                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?)")) {
                     ps.setInt(1, idProducto);
                     ps.setInt(2, usuario());
                     ps.setString(3, tipo);
@@ -245,10 +290,18 @@ public class AlmacenDAO {
                     ps.setString(7, motivo.trim());
                     ps.setString(8, referencia == null || referencia.isBlank() ? null : referencia.trim());
                     ps.setString(9, observacion == null || observacion.isBlank() ? null : observacion.trim());
+                    ps.setBigDecimal(10, costo);
+                    if (idGasto == null) {
+                        ps.setNull(11, java.sql.Types.INTEGER);
+                    } else {
+                        ps.setInt(11, idGasto);
+                    }
                     ps.executeUpdate();
                 }
                 auditoria.registrar(con, usuario(), "PRODUCTO_STOCK", "producto", idProducto,
-                        anterior + " → " + nuevo + " (" + tipo + ")");
+                        anterior + " → " + nuevo + " (" + tipo + ")"
+                        + (costo == null ? "" : " · costo S/ " + costo + " por unidad")
+                        + (idGasto == null ? "" : " · gasto " + idGasto));
                 con.commit();
             } catch (SQLException | RuntimeException ex) {
                 con.rollback();

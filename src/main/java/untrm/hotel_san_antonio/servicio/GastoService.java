@@ -13,6 +13,12 @@ import untrm.hotel_san_antonio.util.Permisos;
 import untrm.hotel_san_antonio.util.SesionActual;
 
 public class GastoService {
+    /** Categorias de gasto: lista cerrada, para que los totales por categoria no se dispersen en variantes. */
+    public static final List<String> CATEGORIAS = List.of("Servicios", "Insumos de limpieza", "Mantenimiento",
+            "Sueldos", "Reposición de tienda", "Otros");
+    /** Medios de pago: los mismos que usan los cobros; solo EFECTIVO descuenta de la caja. */
+    public static final List<String> METODOS = List.of("EFECTIVO", "YAPE", "TRANSFERENCIA", "TARJETA");
+
     private final GastoDAO gastos = new GastoDAO();
     private final AuditoriaDAO auditoria = new AuditoriaDAO();
 
@@ -35,13 +41,19 @@ public class GastoService {
                 int usuario = SesionActual.getUsuario().getIdUsuario();
                 boolean nuevo = gasto.getIdGasto() == 0;
                 int id;
-                if (nuevo) id = gastos.insertar(con, gasto, usuario);
-                else {
+                String detalle;
+                if (nuevo) {
+                    id = gastos.insertar(con, gasto, usuario);
+                    detalle = describir(gasto) + (esTardio(gasto) ? " · registro tardío: " + gasto.getMotivoRegistroTardio() : "");
+                } else {
                     id = gasto.getIdGasto();
-                    if (!gastos.actualizar(con, gasto)) throw new IllegalStateException("El gasto ya no está activo.");
+                    Gasto antes = gastos.obtener(con, id);
+                    if (antes == null || !gastos.actualizar(con, gasto)) {
+                        throw new IllegalStateException("El gasto ya no está activo.");
+                    }
+                    detalle = "antes: " + describir(antes) + " → después: " + describir(gasto);
                 }
-                auditoria.registrar(con, usuario, nuevo ? "GASTO_CREAR" : "GASTO_EDITAR", "gasto", id,
-                        gasto.getMotivoRegistroTardio());
+                auditoria.registrar(con, usuario, nuevo ? "GASTO_CREAR" : "GASTO_EDITAR", "gasto", id, detalle);
                 con.commit();
                 return id;
             } catch (SQLException | RuntimeException error) {
@@ -56,9 +68,12 @@ public class GastoService {
         try (Connection con = ConexionBD.conectar()) {
             con.setAutoCommit(false);
             try {
-                if (!gastos.desactivar(con, idGasto)) throw new IllegalStateException("El gasto ya no está activo.");
+                Gasto antes = gastos.obtener(con, idGasto);
+                if (antes == null || !gastos.desactivar(con, idGasto)) {
+                    throw new IllegalStateException("El gasto ya no está activo.");
+                }
                 auditoria.registrar(con, SesionActual.getUsuario().getIdUsuario(),
-                        "GASTO_DESACTIVAR", "gasto", idGasto, null);
+                        "GASTO_DESACTIVAR", "gasto", idGasto, describir(antes));
                 con.commit();
             } catch (SQLException | RuntimeException error) {
                 con.rollback();
@@ -67,18 +82,28 @@ public class GastoService {
         }
     }
 
+    /** Una linea con lo que importa de un gasto, para dejarla en la auditoria. */
+    private String describir(Gasto g) {
+        return g.getFecha() + " · " + g.getConcepto() + " · " + g.getCategoria() + " · S/ "
+                + g.getMonto().setScale(2, java.math.RoundingMode.HALF_UP) + " · " + g.getMetodoPago();
+    }
+
+    private boolean esTardio(Gasto g) {
+        return g.getMotivoRegistroTardio() != null && !g.getMotivoRegistroTardio().isBlank();
+    }
+
     private void validar(Gasto g) {
         if (g == null || g.getFecha() == null || g.getFecha().isAfter(LocalDate.now()))
             throw new IllegalArgumentException("Seleccione una fecha válida, no futura.");
         if (g.getConcepto() == null || g.getConcepto().isBlank() || g.getConcepto().length() > 150)
             throw new IllegalArgumentException("Ingrese un concepto de hasta 150 caracteres.");
-        if (g.getCategoria() == null || g.getCategoria().isBlank() || g.getCategoria().length() > 60)
-            throw new IllegalArgumentException("Ingrese una categoría de hasta 60 caracteres.");
+        if (g.getCategoria() == null || !CATEGORIAS.contains(g.getCategoria()))
+            throw new IllegalArgumentException("Seleccione la categoría del gasto.");
         if (g.getMonto() == null || g.getMonto().compareTo(BigDecimal.ZERO) <= 0 || g.getMonto().scale() > 2
                 || g.getMonto().compareTo(new BigDecimal("99999999.99")) > 0)
             throw new IllegalArgumentException("Ingrese un monto positivo con dos decimales como máximo.");
-        if (g.getMetodoPago() == null || g.getMetodoPago().isBlank() || g.getMetodoPago().length() > 30)
-            throw new IllegalArgumentException("Ingrese un método de pago.");
+        if (g.getMetodoPago() == null || !METODOS.contains(g.getMetodoPago()))
+            throw new IllegalArgumentException("Seleccione el método de pago.");
         if (g.getObservacion() != null && g.getObservacion().length() > 500)
             throw new IllegalArgumentException("La observación supera 500 caracteres.");
         if (g.getFecha().isBefore(LocalDate.now())

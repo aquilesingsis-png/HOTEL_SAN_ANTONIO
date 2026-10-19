@@ -29,14 +29,19 @@ public class EmpresaDAO {
         return null;
     }
 
-    /** Devuelve el id de la empresa con ese RUC; si no existe, la registra. */
+    /**
+     * Devuelve el id de la empresa con ese RUC; si no existe, la registra. Si ya existe, la razon social y la
+     * direccion que se escribieron ahora la actualizan (lo que venga en blanco no se toca).
+     */
     public int guardar(Connection con, Empresa e) throws SQLException {
         String buscar = "SELECT id_empresa FROM empresa WHERE ruc = ?";
         try (PreparedStatement ps = con.prepareStatement(buscar)) {
             ps.setString(1, e.getRuc());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1);
+                    int id = rs.getInt(1);
+                    actualizarDatos(con, id, e);
+                    return id;
                 }
             }
         }
@@ -51,6 +56,21 @@ public class EmpresaDAO {
                 rs.next();
                 return rs.getInt(1);
             }
+        }
+    }
+
+    private void actualizarDatos(Connection con, int idEmpresa, Empresa e) throws SQLException {
+        String razon = e.getRazonSocial() == null || e.getRazonSocial().isBlank() ? null : e.getRazonSocial().trim();
+        String direccion = e.getDireccion() == null || e.getDireccion().isBlank() ? null : e.getDireccion().trim();
+        if (razon == null && direccion == null) {
+            return;
+        }
+        try (PreparedStatement ps = con.prepareStatement("UPDATE empresa SET razon_social = COALESCE(?, razon_social), "
+                + "direccion_fiscal = COALESCE(?, direccion_fiscal) WHERE id_empresa = ?")) {
+            ps.setString(1, razon);
+            ps.setString(2, direccion);
+            ps.setInt(3, idEmpresa);
+            ps.executeUpdate();
         }
     }
 }

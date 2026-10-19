@@ -11,6 +11,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import untrm.hotel_san_antonio.modelo.TipoHabitacion;
 import untrm.hotel_san_antonio.servicio.CategoriaHabitacionService;
+import untrm.hotel_san_antonio.util.Registro;
 
 public class CategoriasHabitacionController {
     @FXML private TableView<TipoHabitacion> tabla;
@@ -40,7 +41,10 @@ public class CategoriasHabitacionController {
             @Override protected java.util.List<TipoHabitacion> call() throws Exception { return servicio.listar(); }
         };
         tarea.setOnSucceeded(e -> tabla.getItems().setAll(tarea.getValue()));
-        tarea.setOnFailed(e -> lblEstado.setText("No se pudieron cargar los tipos de habitación."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("CategoriasHabitacionController.actualizar", tarea.getException());
+            lblEstado.setText("No se pudieron cargar los tipos de habitación.");
+        });
         ejecutar(tarea);
     }
 
@@ -60,7 +64,10 @@ public class CategoriasHabitacionController {
             lblEstado.setText("Nivel guardado. Los nuevos cambios de habitación usarán este orden.");
             actualizar();
         });
-        tarea.setOnFailed(e -> lblEstado.setText("No se pudo guardar el nivel."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("CategoriasHabitacionController.guardar", tarea.getException());
+            lblEstado.setText("No se pudo guardar el nivel.");
+        });
         ejecutar(tarea);
     }
 

@@ -128,7 +128,7 @@ public class DiasSinUsoDAO {
         BigDecimal totalVentas = BigDecimal.ZERO;
         BigDecimal totalPagos = BigDecimal.ZERO;
         try (PreparedStatement ps = con.prepareStatement(
-                "SELECT COUNT(*), COALESCE(SUM(total), 0) FROM venta_tienda WHERE fecha_evento = ?")) {
+                "SELECT COUNT(*), COALESCE(SUM(total), 0) FROM venta_tienda WHERE fecha_evento = ? AND estado = 'ACTIVA'")) {
             ps.setDate(1, Date.valueOf(dia));
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();

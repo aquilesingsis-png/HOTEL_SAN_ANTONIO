@@ -23,6 +23,18 @@ public class DashboardDAO {
         return numeros;
     }
 
+    /** Habitaciones con una estadia en curso cuya fecha de salida ya paso, con ese dia (ej. "101 (salía el 10/10)"). */
+    public List<String> estadiasVencidas(Connection con) throws SQLException {
+        List<String> lista = new ArrayList<>();
+        String sql = "SELECT h.numero, DATE_FORMAT(r.fecha_checkout, '%d/%m') FROM reserva r "
+                + "JOIN habitacion h ON h.id_habitacion = r.id_habitacion "
+                + "WHERE r.estado = 'CHECKIN' AND r.fecha_checkout < CURDATE() ORDER BY r.fecha_checkout, h.numero";
+        try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) lista.add(rs.getString(1) + " (salía el " + rs.getString(2) + ")");
+        }
+        return lista;
+    }
+
     /** Productos activos sin stock. */
     public int productosAgotados(Connection con) throws SQLException {
         return contar(con, "SELECT COUNT(*) FROM producto WHERE activo = 1 AND stock = 0");
@@ -60,7 +72,8 @@ public class DashboardDAO {
         String sql = "SELECT h, COUNT(*) FROM ("
                 + "SELECT HOUR(fecha_pago) AS h, DATE(fecha_pago) AS d FROM pago WHERE fecha_evento IS NULL "
                 + "UNION ALL "
-                + "SELECT HOUR(fecha_venta), DATE(fecha_venta) FROM venta_tienda WHERE fecha_evento IS NULL"
+                + "SELECT HOUR(fecha_venta), DATE(fecha_venta) FROM venta_tienda WHERE fecha_evento IS NULL "
+                + "AND estado = 'ACTIVA'"
                 + ") t WHERE d >= " + desde + " GROUP BY h";
         Map<Integer, Integer> porHora = new TreeMap<>();
         try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {

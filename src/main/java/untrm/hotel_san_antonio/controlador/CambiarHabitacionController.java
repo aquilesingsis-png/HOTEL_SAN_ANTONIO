@@ -13,6 +13,7 @@ import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Registro;
 
 public class CambiarHabitacionController {
     @FXML private Label lblActual, lblMensaje;
@@ -46,7 +47,10 @@ public class CambiarHabitacionController {
             lblMensaje.setText(opciones.isEmpty() ? "No hay habitaciones aptas para estas fechas."
                     : "Seleccione la habitación destino.");
         });
-        tarea.setOnFailed(e -> lblMensaje.setText("No se pudieron consultar las habitaciones."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("CambiarHabitacionController.iniciar", tarea.getException());
+            lblMensaje.setText("No se pudieron consultar las habitaciones.");
+        });
         ejecutar(tarea);
     }
 

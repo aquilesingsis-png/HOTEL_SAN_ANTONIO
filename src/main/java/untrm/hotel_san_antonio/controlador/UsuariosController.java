@@ -19,6 +19,7 @@ import javafx.scene.input.MouseButton;
 import untrm.hotel_san_antonio.modelo.Usuario;
 import untrm.hotel_san_antonio.servicio.UsuarioService;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Consulta;
 import untrm.hotel_san_antonio.util.EstiloGlobal;
 import untrm.hotel_san_antonio.util.Navegacion;
 
@@ -55,6 +56,7 @@ public class UsuariosController {
 
     private final UsuarioService servicio = new UsuarioService();
     private List<Usuario> todos = List.of();
+    private final Consulta<List<Usuario>> consulta = new Consulta<>();
     private boolean cargando;
 
     @FXML
@@ -103,13 +105,16 @@ public class UsuariosController {
 
     @FXML
     private void cargar() {
-        try {
-            todos = servicio.listarUsuarios();
-        } catch (SQLException | SecurityException error) {
-            todos = List.of();
-            Alertas.mostrarError("Usuarios", "No se pudo cargar la lista.\n\n" + error.getMessage());
-        }
-        filtrar();
+        consulta.lanzar(tabla, () -> servicio.listarUsuarios(),
+                lista -> {
+                    todos = lista;
+                    filtrar();
+                },
+                error -> {
+                    todos = List.of();
+                    Alertas.mostrarError("Usuarios", "No se pudo cargar la lista.\n\n" + error.getMessage());
+                    filtrar();
+                });
     }
 
     @FXML

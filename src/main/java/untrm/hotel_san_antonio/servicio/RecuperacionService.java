@@ -80,6 +80,7 @@ public class RecuperacionService {
                 }
                 usuarios.limpiarIntentosRecuperacion(con, usuario.getIdUsuario());
                 usuarios.actualizarContrasena(con, usuario.getIdUsuario(), PasswordUtil.hash(nueva));
+                usuarios.limpiarIntentos(con, usuario.getIdUsuario()); // con la clave nueva ya no hay bloqueo
                 tokens.usar(con, valido.id());
                 auditoria.registrar(con, usuario.getIdUsuario(), "CONTRASENA_RESTABLECIDA",
                         "usuario", usuario.getIdUsuario(), "Mediante token temporal de administrador");

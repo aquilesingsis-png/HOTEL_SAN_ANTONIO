@@ -56,6 +56,7 @@ public class DashboardService {
             r.llegadasHoy = reservaDAO.listarLlegadasHoy(con);
             r.reservasHoy = r.llegadasHoy.size();
             r.salidasHoy = dashboardDAO.salidasHoy(con);
+            r.estadiasVencidas = dashboardDAO.estadiasVencidas(con);
 
             r.ingresosHabitacionesHoy = pagoDAO.sumarHoy(con);
             r.ingresosTiendaHoy = ventaTiendaDAO.sumarHoy(con);
@@ -113,6 +114,8 @@ public class DashboardService {
         public int huespedes;
         public int reservasHoy;
         public List<String> salidasHoy = new ArrayList<>();
+        /** Estadias en curso cuya fecha de salida ya paso (el huesped sigue en la habitacion). */
+        public List<String> estadiasVencidas = new ArrayList<>();
         public int productosAgotados;
         public int productosStockBajo;
         public int cuentasBloqueadas;

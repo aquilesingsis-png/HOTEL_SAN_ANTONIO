@@ -66,12 +66,18 @@ public class HuespedDAO {
         }
     }
 
-    /** Solo datos de identidad devueltos por el proveedor; preserva teléfono, correo y país. */
-    /** Actualiza pais, telefono y correo de un huesped ya registrado; los datos en blanco (null) no se tocan. */
-    public void actualizarContacto(Connection con, int idHuesped, String pais, String telefono, String email)
-            throws SQLException {
-        String sql = "UPDATE huesped SET pais_procedencia = COALESCE(?, pais_procedencia), "
-                + "telefono = COALESCE(?, telefono), email = COALESCE(?, email) WHERE id_huesped = ?";
+    /**
+     * Actualiza pais, telefono y correo de un huesped ya registrado. El pais en blanco (null) no se toca. Con
+     * reemplazarContacto, el telefono y el correo quedan como se escribieron (en blanco = se borran); si no,
+     * lo que viene en blanco se conserva.
+     */
+    public void actualizarContacto(Connection con, int idHuesped, String pais, String telefono, String email,
+                                   boolean reemplazarContacto) throws SQLException {
+        String sql = reemplazarContacto
+                ? "UPDATE huesped SET pais_procedencia = COALESCE(?, pais_procedencia), telefono = ?, email = ? "
+                  + "WHERE id_huesped = ?"
+                : "UPDATE huesped SET pais_procedencia = COALESCE(?, pais_procedencia), "
+                  + "telefono = COALESCE(?, telefono), email = COALESCE(?, email) WHERE id_huesped = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, pais);
             ps.setString(2, telefono);

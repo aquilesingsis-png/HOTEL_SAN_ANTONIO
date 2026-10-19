@@ -1,6 +1,7 @@
 package untrm.hotel_san_antonio.modelo;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class VentaTienda {
@@ -12,7 +13,9 @@ public class VentaTienda {
     private String clienteExterno;
     private String metodoPago;      // EFECTIVO, YAPE, TRANSFERENCIA o TARJETA; null si se carga a una habitacion
     private LocalDateTime fechaVenta;
+    private LocalDate fechaEvento;  // solo si se registro tarde: el dia en que de verdad ocurrio
     private BigDecimal total;
+    private String estado = "ACTIVA"; // ACTIVA o ANULADA
 
     public VentaTienda() {}
 
@@ -40,6 +43,13 @@ public class VentaTienda {
     public LocalDateTime getFechaVenta() { return fechaVenta; }
     public void setFechaVenta(LocalDateTime fechaVenta) { this.fechaVenta = fechaVenta; }
 
+    public LocalDate getFechaEvento() { return fechaEvento; }
+    public void setFechaEvento(LocalDate fechaEvento) { this.fechaEvento = fechaEvento; }
+
     public BigDecimal getTotal() { return total; }
     public void setTotal(BigDecimal total) { this.total = total; }
+
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
+    public boolean isAnulada() { return "ANULADA".equals(estado); }
 }

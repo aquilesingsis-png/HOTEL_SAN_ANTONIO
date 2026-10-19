@@ -29,10 +29,12 @@
             <ComboBox fx:id="cmbMetodo" GridPane.columnIndex="2" GridPane.rowIndex="3" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
         </GridPane>
         <HBox spacing="8">
+            <ComboBox fx:id="cmbTipoDocumento" prefWidth="115" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
             <TextField fx:id="txtDni" promptText="DNI titular" prefWidth="160" onAction="#buscarDni" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
-            <Button text="Buscar DNI" onAction="#buscarDni" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+            <Button text="Buscar" onAction="#buscarDni" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
             <TextField fx:id="txtNombres" promptText="Nombres titular" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
             <TextField fx:id="txtApellidos" promptText="Apellidos titular" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
+            <TextField fx:id="txtPais" promptText="País *" prefWidth="130" visible="false" managed="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px;"/>
         </HBox>
         <HBox spacing="8">
             <Label text="Personas que ingresaron"/>

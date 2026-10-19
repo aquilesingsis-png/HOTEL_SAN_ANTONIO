@@ -126,7 +126,7 @@ public class HabitacionDAO {
                 + "FROM habitacion h JOIN tipo_habitacion t ON t.id_tipo = h.id_tipo "
                 + "WHERE h.estado <> 'MANTENIMIENTO' "
                 + "AND NOT EXISTS (SELECT 1 FROM reserva r WHERE r.id_habitacion = h.id_habitacion "
-                + "  AND r.estado IN ('PENDIENTE','CONFIRMADA','CHECKIN') "
+                + "  AND r.estado IN ('CONFIRMADA','CHECKIN') "
                 + "  AND r.fecha_checkin < ? AND r.fecha_checkout > ?) ");
         List<Object> parametros = new ArrayList<>();
         parametros.add(java.sql.Date.valueOf(salida));
@@ -276,6 +276,18 @@ public class HabitacionDAO {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, nuevoEstado);
             ps.setInt(2, idHabitacion);
+            ps.executeUpdate();
+        }
+    }
+
+    /** Igual, dejando registrado el motivo del mantenimiento (null lo borra: al salir de MANTENIMIENTO). */
+    public void cambiarEstado(Connection con, int idHabitacion, String nuevoEstado, String motivoMantenimiento)
+            throws SQLException {
+        String sql = "UPDATE habitacion SET estado = ?, motivo_mantenimiento = ? WHERE id_habitacion = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, nuevoEstado);
+            ps.setString(2, motivoMantenimiento);
+            ps.setInt(3, idHabitacion);
             ps.executeUpdate();
         }
     }

@@ -23,7 +23,7 @@
    <Label text="Carrito"/>
    <VBox spacing="1">
     <Label text="Carrito de venta" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #151515;"/>
-    <Label text="Registra los productos y emite el comprobante" style="-fx-font-size: 12px; -fx-text-fill: #53647A;"/>
+    <Label text="Registra los productos y, si el cliente lo pide, emite el comprobante" style="-fx-font-size: 12px; -fx-text-fill: #53647A;"/>
    </VBox>
    <Region HBox.hgrow="ALWAYS"/>
    <Button text="X" onAction="#onCerrar" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: transparent;"/>
@@ -38,9 +38,10 @@
 
      <VBox spacing="10" prefWidth="310" minWidth="285"
            style="-fx-background-color: white; -fx-background-radius: 7; -fx-border-color: #E6E2DC; -fx-border-radius: 7; -fx-padding: 13;">
-      <Label text="Tipo de comprobante" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #171717;"/>
+      <Label text="Comprobante (solo si el cliente lo pide)" wrapText="true" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #171717;"/>
+      <ToggleButton fx:id="btnSinComprobante" text="Sin comprobante" selected="true" toggleGroup="$tipoComprobante" maxWidth="Infinity"/>
       <HBox spacing="8">
-       <ToggleButton fx:id="btnBoleta" text="Boleta" selected="true" toggleGroup="$tipoComprobante" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+       <ToggleButton fx:id="btnBoleta" text="Boleta" toggleGroup="$tipoComprobante" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
        <ToggleButton fx:id="btnFactura" text="Factura" toggleGroup="$tipoComprobante" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
       </HBox>
       <Label fx:id="lblDatosCliente" text="Datos del cliente (Boleta)" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 6 0 0 0;"/>
@@ -51,16 +52,12 @@
       </HBox>
       <Label fx:id="lblEtiquetaNombre" text="Nombre completo" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
       <TextField fx:id="txtNombreCliente" promptText="Nombres y apellidos" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
-      <Label text="Dirección" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+      <Label fx:id="lblEtiquetaDireccion" text="Dirección" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
       <TextField fx:id="txtDireccion" promptText="Dirección del cliente" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
-      <Label text="Teléfono" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
-      <TextField fx:id="txtTelefono" promptText="Teléfono" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
       <Separator/>
       <Label text="Datos adicionales" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #171717;"/>
       <Label text="Habitación" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
       <ComboBox fx:id="cmbHabitacion" maxWidth="Infinity" promptText="Seleccione habitación" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 34;"/>
-      <Label text="Observaciones" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
-      <TextArea fx:id="txtObservaciones" promptText="Ingrese observaciones..." prefRowCount="3" wrapText="true" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-background-color: white; -fx-border-color: #CFD6DF; -fx-border-radius: 6; -fx-background-radius: 6;"/>
      </VBox>
 
      <VBox spacing="9" HBox.hgrow="ALWAYS" minWidth="480"
@@ -136,7 +133,7 @@
       <Region VBox.vgrow="ALWAYS"/>
       <HBox spacing="10">
        <Button text="Cancelar" onAction="#onCancelar" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 44; -fx-font-weight: bold;"/>
-       <Button fx:id="btnEmitir" text="Emitir comprobante" onAction="#onConfirmarVenta" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #8B571C; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-min-height: 44;"/>
+       <Button fx:id="btnEmitir" text="Registrar venta" onAction="#onConfirmarVenta" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #8B571C; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-min-height: 44;"/>
       </HBox>
      </VBox>
     </HBox>

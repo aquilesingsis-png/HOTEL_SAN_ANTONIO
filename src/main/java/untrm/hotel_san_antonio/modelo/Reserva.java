@@ -13,9 +13,8 @@ public class Reserva {
     private LocalDateTime fechaReserva;
     private LocalDate fechaCheckin;
     private LocalDate fechaCheckout;
-    private BigDecimal adelanto;
     private BigDecimal montoTotal;
-    private String estado; // PENDIENTE, CONFIRMADA, CHECKIN, FINALIZADA, CANCELADA
+    private String estado; // CONFIRMADA, CHECKIN, FINALIZADA, CANCELADA
     private String canal;  // TELEFONO, WHATSAPP, BOOKING, PRESENCIAL
     private Integer idEmpresa; // null si no se factura a una empresa
     private int numHuespedes;
@@ -61,8 +60,6 @@ public class Reserva {
     public LocalDate getFechaCheckout() { return fechaCheckout; }
     public void setFechaCheckout(LocalDate fechaCheckout) { this.fechaCheckout = fechaCheckout; }
 
-    public BigDecimal getAdelanto() { return adelanto; }
-    public void setAdelanto(BigDecimal adelanto) { this.adelanto = adelanto; }
 
     public BigDecimal getMontoTotal() { return montoTotal; }
     public void setMontoTotal(BigDecimal montoTotal) { this.montoTotal = montoTotal; }

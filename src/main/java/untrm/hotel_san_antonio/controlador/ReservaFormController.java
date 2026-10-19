@@ -18,7 +18,6 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import untrm.hotel_san_antonio.dao.HabitacionDAO;
 import untrm.hotel_san_antonio.dao.HuespedDAO;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Habitacion;
@@ -27,6 +26,7 @@ import untrm.hotel_san_antonio.modelo.Pago;
 import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.servicio.ConflictoFechasException;
 import untrm.hotel_san_antonio.servicio.ReniecService;
+import untrm.hotel_san_antonio.servicio.HabitacionService;
 import untrm.hotel_san_antonio.servicio.ReservaService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.CampoValidacion;
@@ -42,6 +42,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import untrm.hotel_san_antonio.util.Registro;
 
 /**
  * Ventana "Registrar huesped y reserva": se abre al hacer clic en una habitacion
@@ -83,7 +84,7 @@ public class ReservaFormController {
 
     private final HuespedDAO huespedDAO = new HuespedDAO();
     private final ReservaService reservaService = new ReservaService();
-    private final HabitacionDAO habitacionDAO = new HabitacionDAO();
+    private final HabitacionService habitacionService = new HabitacionService();
     private HuespedesAdicionales acompanantes;
 
     private Habitacion habitacion;
@@ -147,7 +148,7 @@ public class ReservaFormController {
             txtDocumento.clear();
             btnBuscarDoc.setDisable(!"DNI".equals(ahora));
         });
-        txtTelefono.setTextFormatter(new TextFormatter<String>(c -> c.getControlNewText().matches("\\d{0,9}") ? c : null));
+        txtTelefono.setTextFormatter(new TextFormatter<String>(c -> c.getControlNewText().matches("\\d{0,9}|\\+\\d{0,15}") ? c : null));
         txtRuc.setTextFormatter(new TextFormatter<String>(c -> c.getControlNewText().matches("\\d{0,11}") ? c : null));
         txtAdelanto.setTextFormatter(new TextFormatter<String>(c -> c.getControlNewText().matches("\\d{0,6}(\\.\\d{0,2})?") ? c : null));
 
@@ -348,8 +349,11 @@ public class ReservaFormController {
                 txtNombres.setText(actualizar.getValue().getNombres());
                 txtApellidos.setText(actualizar.getValue().getApellidos());
             });
-            actualizar.setOnFailed(ev -> Alertas.mostrarAdvertencia("RENIEC",
-                    "Se conservaron los datos locales; no se pudo actualizar la identidad."));
+            actualizar.setOnFailed(ev -> {
+                Registro.fallo("ReservaFormController.verificarIdentidadExistente", actualizar.getException());
+                Alertas.mostrarAdvertencia("RENIEC",
+                    "Se conservaron los datos locales; no se pudo actualizar la identidad.");
+            });
             ConsultaApi.iniciar(actualizar);
         });
         ConsultaApi.iniciar(consulta);
@@ -405,7 +409,6 @@ public class ReservaFormController {
         reserva.setIdHabitacion(habitacion.getIdHabitacion());
         reserva.setFechaCheckin(ingreso);
         reserva.setFechaCheckout(dpSalida.getValue());
-        reserva.setAdelanto(adelanto);
         reserva.setMontoTotal(total);
         reserva.setCanal("PRESENCIAL"); // desde Habitaciones el huesped esta en recepcion
         reserva.setNumHuespedes(spHuespedes.getValue());
@@ -496,7 +499,7 @@ public class ReservaFormController {
         }
         String telefono = txtTelefono.getText().trim();
         if (!telefono.isEmpty() && !Validador.esTelefonoValido(telefono)) {
-            invalido(txtTelefono, "El teléfono debe tener 9 dígitos y empezar con 9.");
+            invalido(txtTelefono, Validador.ERROR_TELEFONO);
         }
         String email = txtEmail.getText().trim();
         if (!email.isEmpty() && !Validador.esEmailValido(email)) {
@@ -591,7 +594,7 @@ public class ReservaFormController {
                     + " en mantenimiento por \"" + motivo + "\"? No se podrán registrar huéspedes hasta que termine." + aviso)) {
                 return;
             }
-            if (!habitacionDAO.cambiarEstadoSiEs(habitacion.getIdHabitacion(), "DISPONIBLE", "MANTENIMIENTO", motivo)) {
+            if (!habitacionService.cambiarEstado(habitacion.getIdHabitacion(), "DISPONIBLE", "MANTENIMIENTO", motivo)) {
                 Alertas.mostrarInfo("Mantenimiento", "La habitación ya no está disponible (cambió mientras tenías esta ventana abierta).");
                 if (alGuardar != null) {
                     alGuardar.run();
@@ -603,6 +606,8 @@ public class ReservaFormController {
                 alGuardar.run();
             }
             cerrar();
+        } catch (IllegalStateException | IllegalArgumentException | SecurityException e) {
+            Alertas.mostrarInfo("Mantenimiento", e.getMessage());
         } catch (SQLException e) {
             Alertas.mostrarError("Error", "No se pudo cambiar el estado.\n\n" + e.getMessage());
         }

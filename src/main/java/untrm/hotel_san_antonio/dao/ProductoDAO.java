@@ -59,19 +59,6 @@ public class ProductoDAO {
         return productos;
     }
 
-    public int obtenerStockParaActualizar(Connection cn, int idProducto) throws SQLException {
-        String sql = "SELECT stock FROM producto WHERE id_producto = ? AND activo = 1 FOR UPDATE";
-        try (PreparedStatement ps = cn.prepareStatement(sql)) {
-            ps.setInt(1, idProducto);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    throw new SQLException("El producto ya no está disponible.");
-                }
-                return rs.getInt("stock");
-            }
-        }
-    }
-
     /** Consulta el producto actual sin depender del filtro visible en la tienda. */
     public Producto buscarActivoPorId(int idProducto) throws SQLException {
         String sql = "SELECT id_producto, nombre, precio, stock FROM producto "
@@ -114,6 +101,17 @@ public class ProductoDAO {
             ps.setInt(3, cantidad);
             if (ps.executeUpdate() != 1) {
                 throw new SQLException("No se pudo actualizar el stock del producto.");
+            }
+        }
+    }
+
+    /** Devuelve al stock lo que una venta anulada se habia llevado (aunque el producto ya este desactivado). */
+    public void reponerStock(Connection cn, int idProducto, int cantidad) throws SQLException {
+        try (PreparedStatement ps = cn.prepareStatement("UPDATE producto SET stock = stock + ? WHERE id_producto = ?")) {
+            ps.setInt(1, cantidad);
+            ps.setInt(2, idProducto);
+            if (ps.executeUpdate() != 1) {
+                throw new SQLException("No se pudo devolver el stock del producto.");
             }
         }
     }

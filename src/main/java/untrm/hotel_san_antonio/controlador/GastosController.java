@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -14,10 +15,12 @@ import javafx.scene.control.TextField;
 import untrm.hotel_san_antonio.modelo.Gasto;
 import untrm.hotel_san_antonio.servicio.GastoService;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Registro;
 
 public class GastosController {
     @FXML private DatePicker dpFecha, dpDesde, dpHasta;
-    @FXML private TextField txtConcepto, txtCategoria, txtMonto, txtMetodo, txtObservacion;
+    @FXML private TextField txtConcepto, txtMonto, txtObservacion;
+    @FXML private ChoiceBox<String> cmbCategoria, cmbMetodo;
     @FXML private TextField txtMotivo, txtFiltro;
     @FXML private TableView<Gasto> tabla;
     @FXML private TableColumn<Gasto, String> colFecha, colConcepto, colCategoria, colMonto, colMetodo;
@@ -28,11 +31,15 @@ public class GastosController {
 
     @FXML private void initialize() {
         dpFecha.setValue(LocalDate.now());
+        cmbCategoria.getItems().setAll(GastoService.CATEGORIAS);
+        for (String metodo : GastoService.METODOS) {
+            cmbMetodo.getItems().add(nombreMetodo(metodo));
+        }
         colFecha.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getFecha().toString()));
         colConcepto.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getConcepto()));
         colCategoria.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getCategoria()));
         colMonto.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getMonto().toPlainString()));
-        colMetodo.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getMetodoPago()));
+        colMetodo.setCellValueFactory(d -> new SimpleStringProperty(nombreMetodo(d.getValue().getMetodoPago())));
         tabla.getSelectionModel().selectedItemProperty().addListener((obs, antes, ahora) -> {
             btnDesactivar.setDisable(ahora == null);
             if (ahora != null) cargarFormulario(ahora);
@@ -53,7 +60,10 @@ public class GastosController {
             lblTotal.setText("Total filtrado: S/ " + total);
             lblMensaje.setText(tarea.getValue().size() + " gasto(s) encontrado(s).");
         });
-        tarea.setOnFailed(e -> lblMensaje.setText("No se pudieron cargar los gastos."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("GastosController.filtrar", tarea.getException());
+            lblMensaje.setText("No se pudieron cargar los gastos.");
+        });
         ejecutar(tarea);
     }
 
@@ -91,7 +101,10 @@ public class GastosController {
             }
         };
         tarea.setOnSucceeded(e -> { limpiar(); filtrar(); });
-        tarea.setOnFailed(e -> lblMensaje.setText("No se pudo desactivar el gasto."));
+        tarea.setOnFailed(e -> {
+            Registro.fallo("GastosController.desactivar", tarea.getException());
+            lblMensaje.setText("No se pudo desactivar el gasto.");
+        });
         ejecutar(tarea);
     }
 
@@ -99,7 +112,8 @@ public class GastosController {
         editando = 0;
         tabla.getSelectionModel().clearSelection();
         dpFecha.setValue(LocalDate.now());
-        txtConcepto.clear(); txtCategoria.clear(); txtMonto.clear(); txtMetodo.clear();
+        txtConcepto.clear(); txtMonto.clear();
+        cmbCategoria.setValue(null); cmbMetodo.setValue(null);
         txtObservacion.clear(); txtMotivo.clear();
     }
 
@@ -107,9 +121,10 @@ public class GastosController {
         editando = g.getIdGasto();
         dpFecha.setValue(g.getFecha());
         txtConcepto.setText(g.getConcepto());
-        txtCategoria.setText(g.getCategoria());
+        cmbCategoria.setValue(GastoService.CATEGORIAS.contains(g.getCategoria()) ? g.getCategoria() : null);
         txtMonto.setText(g.getMonto().toPlainString());
-        txtMetodo.setText(g.getMetodoPago());
+        String metodo = nombreMetodo(g.getMetodoPago());
+        cmbMetodo.setValue(cmbMetodo.getItems().contains(metodo) ? metodo : null);
         txtObservacion.setText(g.getObservacion());
         txtMotivo.setText(g.getMotivoRegistroTardio());
     }
@@ -119,13 +134,22 @@ public class GastosController {
         g.setIdGasto(editando);
         g.setFecha(dpFecha.getValue());
         g.setConcepto(txtConcepto.getText().trim());
-        g.setCategoria(txtCategoria.getText().trim());
+        g.setCategoria(cmbCategoria.getValue());
         try { g.setMonto(new BigDecimal(txtMonto.getText().trim().replace(',', '.'))); }
         catch (NumberFormatException error) { throw new IllegalArgumentException("Ingrese un monto numérico válido."); }
-        g.setMetodoPago(txtMetodo.getText().trim());
+        g.setMetodoPago(cmbMetodo.getValue() == null ? null : cmbMetodo.getValue().toUpperCase(java.util.Locale.ROOT));
         g.setObservacion(txtObservacion.getText().trim());
         g.setMotivoRegistroTardio(txtMotivo.getText().trim());
         return g;
+    }
+
+    /** EFECTIVO -> Efectivo (como se ve en pantalla); lo que no es un medio conocido se deja tal cual. */
+    private String nombreMetodo(String metodo) {
+        if (metodo == null || metodo.isEmpty()) {
+            return "";
+        }
+        return metodo.substring(0, 1).toUpperCase(java.util.Locale.ROOT)
+                + metodo.substring(1).toLowerCase(java.util.Locale.ROOT);
     }
 
     private void ejecutar(Task<?> tarea) {

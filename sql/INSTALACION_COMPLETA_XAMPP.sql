@@ -1,6 +1,13 @@
--- HOTEL SAN ANTONIO: INSTALACION COMPLETA PARA XAMPP/MARIADB
--- SOLO para una base nueva sin tablas. NO ejecutar sobre la base existente.
--- Crea 21 tablas, tipos, 24 habitaciones, catalogo de tienda y dos cuentas.
+-- HOTEL SAN ANTONIO: SCRIPT UNICO DE LA BASE DE DATOS PARA XAMPP/MARIADB (es el unico .sql del proyecto)
+--
+-- BASE NUEVA (sin tablas): ejecute el archivo completo.
+-- BASE QUE YA EXISTE (con datos): NO ejecute el archivo completo (fallaria: las tablas ya existen). Ejecute SOLO
+--   el ultimo bloque del archivo, el de las actualizaciones: vaya al final del archivo y suba hasta su titulo (el
+--   que tiene lineas de =====) y copie desde ahi hasta el final. Se puede ejecutar mas de una vez. Antes conviene
+--   hacer un respaldo.
+-- Todo cambio nuevo de la base se agrega al final de ese bloque, con ADD COLUMN IF NOT EXISTS y similares.
+--
+-- Una base nueva crea 24 tablas, tipos, 24 habitaciones, catalogo de tienda y dos cuentas.
 -- No contiene personas, reservas ni pagos inventados.
 -- Las habitaciones se inician DISPONIBLES para evitar ocupaciones ficticias.
 -- Las claves temporales figuran en ACCESOS_INICIALES.txt y deben cambiarse.
@@ -98,9 +105,8 @@ CREATE TABLE reserva (
     fecha_checkout      DATE NOT NULL,
     num_huespedes       INT NOT NULL DEFAULT 1,
     hora_checkin        TIME NULL,
-    adelanto            DECIMAL(8,2) NOT NULL DEFAULT 0,
     monto_total         DECIMAL(8,2) NOT NULL,
-    estado              ENUM('PENDIENTE','CONFIRMADA','CHECKIN','FINALIZADA','CANCELADA') NOT NULL DEFAULT 'PENDIENTE',
+    estado              ENUM('CONFIRMADA','CHECKIN','FINALIZADA','CANCELADA') NOT NULL DEFAULT 'CONFIRMADA',
     canal               ENUM('TELEFONO','WHATSAPP','BOOKING','PRESENCIAL') NOT NULL,
     id_empresa          INT NULL,
     motivo_cancelacion  VARCHAR(60)  NULL,
@@ -347,7 +353,7 @@ CREATE TABLE recuperacion_contrasena (
     INDEX idx_recuperacion_usuario (id_usuario, expira)
 );
 
--- Operación de almacén y caja. En una base existente use la migración 002.
+-- Operación de almacén y caja.
 CREATE TABLE movimiento_stock (
     id_movimiento INT AUTO_INCREMENT PRIMARY KEY,
     id_producto INT NOT NULL,
@@ -438,10 +444,95 @@ INSERT INTO producto (codigo_barra, nombre, marca, id_categoria, precio, stock) 
 ('7751148000208', 'Papitas Lays',         'Lays',     2, 2.50, 25),
 ('7750070032001', 'Chocolate Sublime',    'Nestle',   3, 2.00, 35);
 
--- CUENTAS INICIALES CON PBKDF2
+-- CUENTAS INICIALES (su clave se convierte a bcrypt la primera vez que ingresan)
 START TRANSACTION;
 INSERT INTO usuario (nombre, apellido, usuario, contrasena_hash, rol, activo)
 VALUES
     ('Administrador', 'General', 'admin', 'pbkdf2$210000$FVo8kZDdc3y2STloxFeYyw==$xHoFg4lRwcaVryP+TNi/oX+u3u7qIccvPhDECFrK3nU=', 'ADMINISTRADOR', 1),
     ('Recepcionista', 'Hotel', 'recepcion', 'pbkdf2$210000$5sb/E5bxvBZDFTsjcJZOsQ==$yGorwxiscuwz/WW0hDG2c0nr8h0tVufaluYnIm9Fhyg=', 'RECEPCIONISTA', 1);
 COMMIT;
+
+
+-- =====================================================================
+-- ACTUALIZACIONES PARA UNA BASE QUE YA EXISTE
+-- Ejecutar SOLO desde esta linea hasta el final (en phpMyAdmin: pestana SQL, pegar desde aqui hasta el final).
+-- Se puede ejecutar mas de una vez: lo que ya esta hecho no se repite. Una base nueva tambien pasa por aqui
+-- al ejecutar el archivo completo, sin problema. Cada cambio nuevo se agrega abajo, con su fecha.
+-- =====================================================================
+
+USE hotel_san_antonio;
+
+-- ---------------------------------------------------------------------
+-- 12/10/2026
+-- ---------------------------------------------------------------------
+
+-- 1) COMPROBANTE: cliente, subtotal e IGV, para poder reimprimirlo igual que se emitio.
+ALTER TABLE comprobante
+    ADD COLUMN IF NOT EXISTS cliente_tipo_doc  VARCHAR(10)  NULL,
+    ADD COLUMN IF NOT EXISTS cliente_documento VARCHAR(20)  NULL,
+    ADD COLUMN IF NOT EXISTS cliente_nombre    VARCHAR(150) NULL,
+    ADD COLUMN IF NOT EXISTS cliente_direccion VARCHAR(200) NULL,
+    ADD COLUMN IF NOT EXISTS subtotal          DECIMAL(8,2) NULL,
+    ADD COLUMN IF NOT EXISTS igv               DECIMAL(8,2) NULL;
+
+-- 2) CIERRE DE CAJA: hora en que se confirma cada cierre. Un cierre cuenta lo cobrado y pagado desde la hora
+--    del cierre anterior, asi hay dos o tres turnos al dia (manana, tarde, noche) sin contar nada dos veces.
+ALTER TABLE cierre_caja
+    ADD COLUMN IF NOT EXISTS fecha_confirmacion DATETIME NULL;
+
+-- 3) ANULAR SIN BORRAR: una venta de tienda o un comprobante que se anula no se elimina, queda marcado como anulado
+--    con quien lo anulo, cuando y por que. Una venta anulada ya no suma en caja, cierres, reportes ni inicio
+--    (y devuelve su stock); un comprobante anulado conserva su numero, que no se vuelve a usar.
+ALTER TABLE venta_tienda
+    ADD COLUMN IF NOT EXISTS estado ENUM('ACTIVA','ANULADA') NOT NULL DEFAULT 'ACTIVA',
+    ADD COLUMN IF NOT EXISTS fecha_anulacion DATETIME NULL,
+    ADD COLUMN IF NOT EXISTS id_usuario_anula INT NULL,
+    ADD COLUMN IF NOT EXISTS motivo_anulacion VARCHAR(200) NULL;
+ALTER TABLE venta_tienda
+    ADD CONSTRAINT fk_venta_usuario_anula FOREIGN KEY IF NOT EXISTS (id_usuario_anula) REFERENCES usuario(id_usuario);
+ALTER TABLE venta_tienda
+    ADD CONSTRAINT IF NOT EXISTS chk_venta_anulada CHECK (estado = 'ACTIVA' OR (fecha_anulacion IS NOT NULL
+        AND id_usuario_anula IS NOT NULL AND motivo_anulacion IS NOT NULL));
+
+ALTER TABLE comprobante
+    ADD COLUMN IF NOT EXISTS estado ENUM('EMITIDO','ANULADO') NOT NULL DEFAULT 'EMITIDO',
+    ADD COLUMN IF NOT EXISTS fecha_anulacion DATETIME NULL,
+    ADD COLUMN IF NOT EXISTS id_usuario_anula INT NULL,
+    ADD COLUMN IF NOT EXISTS motivo_anulacion VARCHAR(200) NULL;
+ALTER TABLE comprobante
+    ADD CONSTRAINT fk_comprobante_usuario_anula FOREIGN KEY IF NOT EXISTS (id_usuario_anula) REFERENCES usuario(id_usuario);
+ALTER TABLE comprobante
+    ADD CONSTRAINT IF NOT EXISTS chk_comprobante_anulado CHECK (estado = 'EMITIDO' OR (fecha_anulacion IS NOT NULL
+        AND id_usuario_anula IS NOT NULL AND motivo_anulacion IS NOT NULL));
+
+-- 4) RESERVA: ya no existe el estado PENDIENTE (toda reserva nace CONFIRMADA) ni la columna adelanto (el adelanto
+--    y los saldos se ven en la tabla pago).
+UPDATE reserva SET estado = 'CONFIRMADA' WHERE estado = 'PENDIENTE';
+ALTER TABLE reserva
+    MODIFY COLUMN estado ENUM('CONFIRMADA','CHECKIN','FINALIZADA','CANCELADA') NOT NULL DEFAULT 'CONFIRMADA',
+    DROP COLUMN IF EXISTS adelanto;
+
+-- 5) La base tambien rechaza datos que no tienen sentido (montos, cantidades y stock negativos o en cero).
+ALTER TABLE pago           ADD CONSTRAINT IF NOT EXISTS chk_pago_monto        CHECK (monto > 0);
+ALTER TABLE venta_tienda   ADD CONSTRAINT IF NOT EXISTS chk_venta_total       CHECK (total > 0);
+ALTER TABLE detalle_venta  ADD CONSTRAINT IF NOT EXISTS chk_detalle_cantidad  CHECK (cantidad > 0);
+ALTER TABLE producto       ADD CONSTRAINT IF NOT EXISTS chk_producto_precio   CHECK (precio >= 0);
+ALTER TABLE producto       ADD CONSTRAINT IF NOT EXISTS chk_producto_stock    CHECK (stock >= 0);
+ALTER TABLE reserva        ADD CONSTRAINT IF NOT EXISTS chk_reserva_monto     CHECK (monto_total > 0);
+ALTER TABLE tipo_habitacion ADD CONSTRAINT IF NOT EXISTS chk_tipo_capacidad   CHECK (capacidad > 0);
+ALTER TABLE tipo_habitacion ADD CONSTRAINT IF NOT EXISTS chk_tipo_precio      CHECK (precio_base > 0);
+
+-- 6) Indices por fecha para los reportes y el libro de caja.
+CREATE INDEX IF NOT EXISTS idx_pago_fecha        ON pago (fecha_pago);
+CREATE INDEX IF NOT EXISTS idx_venta_fecha       ON venta_tienda (fecha_venta);
+CREATE INDEX IF NOT EXISTS idx_movcaja_fecha     ON movimiento_caja (fecha);
+
+-- 7) ALMACEN: una entrada por compra guarda el costo por unidad y, si se anota como gasto "Reposicion de tienda",
+--    el numero de ese gasto.
+ALTER TABLE movimiento_stock
+    ADD COLUMN IF NOT EXISTS costo_unitario DECIMAL(8,2) NULL,
+    ADD COLUMN IF NOT EXISTS id_gasto INT NULL;
+ALTER TABLE movimiento_stock
+    ADD CONSTRAINT fk_ms_gasto FOREIGN KEY IF NOT EXISTS (id_gasto) REFERENCES gasto(id_gasto);
+ALTER TABLE movimiento_stock
+    ADD CONSTRAINT IF NOT EXISTS chk_ms_costo CHECK (costo_unitario IS NULL OR costo_unitario > 0);

@@ -23,6 +23,7 @@ import javafx.scene.input.MouseButton;
 import untrm.hotel_san_antonio.dao.AlmacenDAO;
 import untrm.hotel_san_antonio.dao.AlmacenDAO.Item;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Consulta;
 import untrm.hotel_san_antonio.util.EstiloGlobal;
 import untrm.hotel_san_antonio.util.ExportarArchivo;
 import untrm.hotel_san_antonio.util.Navegacion;
@@ -75,6 +76,7 @@ public class AlmacenController {
 
     private final AlmacenDAO dao = new AlmacenDAO();
     private List<Item> inventario = List.of();
+    private final Consulta<Carga> consulta = new Consulta<>();
     private List<Item> visibles = List.of();
     private boolean cargando;
 
@@ -122,19 +124,36 @@ public class AlmacenController {
 
     // ------------------------------------------------------------------- acciones
 
+    /** Lo que trae una carga del almacen: el inventario y los nombres de las categorias. */
+    private record Carga(List<Item> inventario, List<String> categorias) { }
+
     @FXML
     private void cargar() {
-        try {
-            inventario = dao.listar();
-        } catch (SQLException error) {
-            inventario = List.of();
-            Alertas.mostrarError("Error de base de datos", "No se pudo cargar el almacén.\n\n" + error.getMessage());
-        } catch (SecurityException error) {
-            inventario = List.of();
-            Alertas.mostrarError("Almacén", error.getMessage());
-        }
-        recargarCategorias();
-        filtrar();
+        consulta.lanzar(tabla, () -> {
+                    List<Item> items = dao.listar();
+                    List<String> nombres = new ArrayList<>();
+                    try {
+                        for (AlmacenDAO.CategoriaFila fila : dao.categorias()) nombres.add(fila.nombre());
+                    } catch (SQLException error) {
+                        // el listado sigue funcionando sin el filtro de categorías
+                    }
+                    return new Carga(items, nombres);
+                },
+                carga -> {
+                    inventario = carga.inventario();
+                    recargarCategorias(carga.categorias());
+                    filtrar();
+                },
+                error -> {
+                    inventario = List.of();
+                    if (error instanceof SecurityException) {
+                        Alertas.mostrarError("Almacén", error.getMessage());
+                    } else {
+                        Alertas.mostrarError("Error de base de datos", "No se pudo cargar el almacén.\n\n" + error.getMessage());
+                    }
+                    recargarCategorias(List.of());
+                    filtrar();
+                });
     }
 
     @FXML
@@ -199,15 +218,11 @@ public class AlmacenController {
     }
 
     /** Vuelve a llenar el filtro de categorías conservando la que estaba elegida. */
-    private void recargarCategorias() {
+    private void recargarCategorias(List<String> categorias) {
         String elegida = cmbCategoria.getValue();
         List<String> nombres = new ArrayList<>();
         nombres.add(TODAS);
-        try {
-            for (AlmacenDAO.CategoriaFila fila : dao.categorias()) nombres.add(fila.nombre());
-        } catch (SQLException | SecurityException error) {
-            // el listado sigue funcionando sin el filtro de categorías
-        }
+        nombres.addAll(categorias);
         cargando = true;
         cmbCategoria.getItems().setAll(nombres);
         cmbCategoria.setValue(elegida != null && nombres.contains(elegida) ? elegida : TODAS);

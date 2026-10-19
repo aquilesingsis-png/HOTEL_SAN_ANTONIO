@@ -11,6 +11,18 @@ public class Comprobante {
     private String numero;
     private LocalDateTime fechaEmision;
     private BigDecimal montoTotal;
+    // a quien se le emitio (puede quedar vacio: "Cliente varios") y el desglose del total
+    private String clienteTipoDoc;   // DNI o RUC
+    private String clienteDocumento;
+    private String clienteNombre;
+    private String clienteDireccion;
+    private BigDecimal subtotal;
+    private BigDecimal igv;
+    private String emitidoPor;       // nombre de quien lo emitio (solo al leerlo de la base)
+    private String estado = "EMITIDO"; // EMITIDO o ANULADO (un comprobante anulado no se borra ni se reutiliza)
+    private LocalDateTime fechaAnulacion;
+    private String motivoAnulacion;
+    private String anuladoPor;       // nombre de quien lo anulo (solo al leerlo de la base)
 
     public Comprobante() {}
 
@@ -34,4 +46,38 @@ public class Comprobante {
 
     public BigDecimal getMontoTotal() { return montoTotal; }
     public void setMontoTotal(BigDecimal montoTotal) { this.montoTotal = montoTotal; }
+
+    public String getClienteTipoDoc() { return clienteTipoDoc; }
+    public void setClienteTipoDoc(String clienteTipoDoc) { this.clienteTipoDoc = clienteTipoDoc; }
+
+    public String getClienteDocumento() { return clienteDocumento; }
+    public void setClienteDocumento(String clienteDocumento) { this.clienteDocumento = clienteDocumento; }
+
+    public String getClienteNombre() { return clienteNombre; }
+    public void setClienteNombre(String clienteNombre) { this.clienteNombre = clienteNombre; }
+
+    public String getClienteDireccion() { return clienteDireccion; }
+    public void setClienteDireccion(String clienteDireccion) { this.clienteDireccion = clienteDireccion; }
+
+    public BigDecimal getSubtotal() { return subtotal; }
+    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
+
+    public BigDecimal getIgv() { return igv; }
+    public void setIgv(BigDecimal igv) { this.igv = igv; }
+
+    public String getEmitidoPor() { return emitidoPor; }
+    public void setEmitidoPor(String emitidoPor) { this.emitidoPor = emitidoPor; }
+
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
+    public boolean isAnulado() { return "ANULADO".equals(estado); }
+
+    public LocalDateTime getFechaAnulacion() { return fechaAnulacion; }
+    public void setFechaAnulacion(LocalDateTime fechaAnulacion) { this.fechaAnulacion = fechaAnulacion; }
+
+    public String getMotivoAnulacion() { return motivoAnulacion; }
+    public void setMotivoAnulacion(String motivoAnulacion) { this.motivoAnulacion = motivoAnulacion; }
+
+    public String getAnuladoPor() { return anuladoPor; }
+    public void setAnuladoPor(String anuladoPor) { this.anuladoPor = anuladoPor; }
 }

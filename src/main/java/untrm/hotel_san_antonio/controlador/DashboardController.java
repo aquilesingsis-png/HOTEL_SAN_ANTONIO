@@ -27,7 +27,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 
 import javafx.scene.layout.HBox;
@@ -44,6 +43,7 @@ import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.EstiloUtil;
 import untrm.hotel_san_antonio.util.Navegacion;
 import untrm.hotel_san_antonio.util.SesionActual;
+import untrm.hotel_san_antonio.util.Registro;
 
 public class DashboardController {
 
@@ -65,9 +65,6 @@ public class DashboardController {
 
     @FXML
     private VBox placeholderView;
-
-    @FXML
-    private TextField txtBuscar;
 
     @FXML
     private StackPane contenedorGraficoIngresos;
@@ -235,7 +232,7 @@ public class DashboardController {
             DateTimeFormatter formato =
                     DateTimeFormatter.ofPattern(
                             "EEEE, dd 'de' MMMM 'de' yyyy",
-                            new Locale("es", "ES")
+                            Locale.of("es", "ES")
                     );
 
             String fecha = LocalDate.now()
@@ -432,6 +429,11 @@ public class DashboardController {
                                 + ": " + String.join(", ", r.salidasHoy)));
             }
         }
+        if (!r.estadiasVencidas.isEmpty()) {
+            listaAlertas.getChildren().add(crearAlerta("#D9433A",
+                    plural(r.estadiasVencidas.size(), "estadía vencida", "estadías vencidas")
+                            + ": hab. " + String.join(", ", r.estadiasVencidas)));
+        }
         if (r.diasSinRegistrar > 0 && r.registroAbierto) {
             listaAlertas.getChildren().add(crearAlerta("#E3A12F", plural(r.diasSinRegistrar,
                     "día sin registrar (abra «Registro de días pasados»)",
@@ -497,6 +499,7 @@ public class DashboardController {
         javafx.concurrent.Task<TipoCambio> tarea = DecolectaTipoCambioService.consultarHoy();
         tarea.setOnSucceeded(e -> mostrarTipoCambio(tarea.getValue()));
         tarea.setOnFailed(e -> {
+            Registro.fallo("DashboardController.cargarTipoCambio", tarea.getException());
             TipoCambio anterior = DecolectaTipoCambioService.ultimoConocido();
             if (anterior != null) {
                 mostrarTipoCambio(anterior);
@@ -750,7 +753,7 @@ public class DashboardController {
 
         XYChart.Series<String, Number> serie = new XYChart.Series<>();
         for (Map.Entry<LocalDate, BigDecimal> dia : ingresosPorDia.entrySet()) {
-            String etiqueta = dia.getKey().getDayOfWeek().getDisplayName(TextStyle.SHORT, new Locale("es", "PE"));
+            String etiqueta = dia.getKey().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.of("es", "PE"));
             serie.getData().add(new XYChart.Data<>(etiqueta, dia.getValue()));
         }
         grafico.getData().add(serie);
@@ -800,122 +803,6 @@ public class DashboardController {
             }
         } catch (IOException | SecurityException error) {
             Alertas.mostrarError("Navegación", "No se pudo abrir la lista solicitada.");
-        }
-    }
-
-
-    // =========================================================
-    // NOTIFICACIONES
-    // =========================================================
-
-    @FXML
-    private void mostrarNotificaciones() {
-
-        Alertas.mostrarInfo(
-                "Notificaciones",
-                "No tienes nuevas notificaciones."
-        );
-    }
-
-
-    // =========================================================
-    // PERFIL
-    // =========================================================
-
-    @FXML
-    private void verPerfil() {
-
-        String mensaje = "Información del usuario";
-
-        if (SesionActual.getUsuario() != null) {
-
-            mensaje =
-                    "Usuario: "
-                    + SesionActual.getUsuario().getNombreCompleto()
-                    + "\nRol: "
-                    + SesionActual.getUsuario().getRol();
-        }
-
-        Alertas.mostrarInfo(
-                "Mi perfil",
-                mensaje
-        );
-    }
-
-
-    // =========================================================
-    // CONFIGURACIÓN
-    // =========================================================
-
-    @FXML
-    private void verConfiguracion() {
-
-        Alertas.mostrarInfo(
-                "Configuración",
-                "La configuración estará disponible próximamente."
-        );
-    }
-
-
-    // =========================================================
-    // BUSCADOR
-    // =========================================================
-
-    @FXML
-    private void filtrarLlegadas() {
-
-        if (txtBuscar == null) {
-            return;
-        }
-
-        String texto = txtBuscar.getText();
-
-        if (texto == null) {
-            texto = "";
-        }
-
-        texto = texto.trim().toLowerCase(Locale.ROOT);
-
-        if (texto.isEmpty()) {
-            cargarDatos();
-            return;
-        }
-
-        String filtro = texto;
-        tablaLlegadas.getItems().removeIf(r ->
-                !r.getNombreHuesped().toLowerCase(Locale.ROOT).contains(filtro)
-                && !r.getNumeroHabitacion().toLowerCase(Locale.ROOT).contains(filtro));
-    }
-
-
-    // =========================================================
-    // CERRAR SESIÓN
-    // =========================================================
-
-    @FXML
-    private void cerrarSesion() {
-
-        if (Alertas.confirmar(
-                "Cerrar sesión",
-                "¿Seguro que deseas cerrar sesión?"
-        )) {
-
-            SesionActual.cerrar();
-
-            try {
-
-                Navegacion.irA(
-                        "/untrm/hotel_san_antonio/fxml/login/login.fxml"
-                );
-
-            } catch (IOException e) {
-
-                Alertas.mostrarError(
-                        "Error",
-                        "No se pudo volver al Login.\n\n"
-                        + e.getMessage()
-                );
-            }
         }
     }
 }

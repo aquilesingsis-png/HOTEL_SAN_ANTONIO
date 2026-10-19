@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
@@ -34,12 +35,12 @@
                                 <DatePicker fx:id="dpFecha" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
                             </VBox>
                             <VBox spacing="6" prefWidth="230">
-                                <Label text="Turno / caja" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
-                                <TextField fx:id="txtTurno" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+                                <Label text="Turno" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <ChoiceBox fx:id="cmbTurno" maxWidth="Infinity" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37;"/>
                             </VBox>
                             <VBox spacing="6" prefWidth="150">
-                                <Label text="Hora de cierre (HH:mm)" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
-                                <TextField fx:id="txtHoraCierre" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+                                <Label text="Hora del cierre" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <TextField fx:id="txtHoraCierre" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                             </VBox>
                             <VBox spacing="6" prefWidth="260">
                                 <Label text="Responsable" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
@@ -49,23 +50,24 @@
                     </VBox>
 
                     <VBox spacing="14" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #E5E5E5; -fx-border-radius: 8; -fx-padding: 18;">
-                        <Label text="2. Efectivo esperado (se calcula solo con los cobros, ingresos y salidas del día)" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        <Label text="2. Efectivo esperado (lo calcula el sistema)" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
+                        <Label fx:id="lblPeriodo" wrapText="true" style="-fx-text-fill: #655C54;"/>
                         <FlowPane hgap="14" vgap="12">
                             <VBox spacing="6" prefWidth="190">
-                                <Label text="Fondo inicial (S/)" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <Label text="Caja chica inicial (S/)" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
                                 <TextField fx:id="txtFondoInicial" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                             </VBox>
                             <VBox spacing="6" prefWidth="190">
                                 <Label text="Cobros en efectivo (S/)" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
-                                <TextField fx:id="txtCobros" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+                                <TextField fx:id="txtCobros" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                             </VBox>
                             <VBox spacing="6" prefWidth="190">
                                 <Label text="Otros ingresos (S/)" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
-                                <TextField fx:id="txtOtros" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+                                <TextField fx:id="txtOtros" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                             </VBox>
                             <VBox spacing="6" prefWidth="190">
                                 <Label text="Salidas de efectivo (S/)" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
-                                <TextField fx:id="txtSalidas" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
+                                <TextField fx:id="txtSalidas" editable="false" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                             </VBox>
                             <VBox spacing="6" prefWidth="200">
                                 <Label text="Efectivo esperado" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
@@ -131,7 +133,7 @@
                         </FlowPane>
                         <FlowPane hgap="14" vgap="12">
                             <VBox spacing="6" prefWidth="260">
-                                <Label text="Fondo para el siguiente turno (S/)" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
+                                <Label text="Caja chica que queda para el siguiente turno (S/)" wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #4A3826; -fx-font-weight: bold;"/>
                                 <TextField fx:id="txtFondoSiguiente" style="-fx-background-color: white; -fx-border-color: #D9D1C5; -fx-border-radius: 5px; -fx-background-radius: 5px; -fx-pref-height: 37; -fx-min-height: 37; -fx-prompt-text-fill: #847B70;"/>
                             </VBox>
                             <VBox spacing="6" prefWidth="260">
@@ -160,6 +162,7 @@
                             <columns>
                                 <TableColumn fx:id="colNumero" text="N.º cierre" prefWidth="90"/>
                                 <TableColumn fx:id="colFecha" text="Fecha" prefWidth="110"/>
+                                <TableColumn fx:id="colHora" text="Hora de cierre" prefWidth="120"/>
                                 <TableColumn fx:id="colTurno" text="Turno" prefWidth="160"/>
                                 <TableColumn fx:id="colResponsable" text="Responsable" prefWidth="190"/>
                                 <TableColumn fx:id="colEsperado" text="Esperado" prefWidth="110"/>

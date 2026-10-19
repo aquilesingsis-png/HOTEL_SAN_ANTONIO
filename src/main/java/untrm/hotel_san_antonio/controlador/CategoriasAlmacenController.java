@@ -1,6 +1,7 @@
 package untrm.hotel_san_antonio.controlador;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -12,6 +13,7 @@ import javafx.stage.Stage;
 import untrm.hotel_san_antonio.dao.AlmacenDAO;
 import untrm.hotel_san_antonio.dao.AlmacenDAO.CategoriaFila;
 import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.util.Consulta;
 
 /** Ventana para crear, renombrar y eliminar las categorías de productos. */
 public class CategoriasAlmacenController {
@@ -23,6 +25,7 @@ public class CategoriasAlmacenController {
     @FXML private Label lblMensaje;
 
     private final AlmacenDAO dao = new AlmacenDAO();
+    private final Consulta<List<CategoriaFila>> consulta = new Consulta<>();
     private Runnable alCerrar;
     private boolean huboCambios;
 
@@ -46,11 +49,9 @@ public class CategoriasAlmacenController {
     }
 
     private void cargar() {
-        try {
-            tabla.getItems().setAll(dao.categorias());
-        } catch (SQLException | SecurityException error) {
-            lblMensaje.setText("No se pudieron cargar las categorías.");
-        }
+        consulta.lanzar(tabla, () -> dao.categorias(),
+                lista -> tabla.getItems().setAll(lista),
+                error -> lblMensaje.setText("No se pudieron cargar las categorías."));
     }
 
     @FXML

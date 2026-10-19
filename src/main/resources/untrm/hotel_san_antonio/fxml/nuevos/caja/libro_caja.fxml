@@ -82,12 +82,14 @@
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <Label fx:id="lblCantidad" text="TOTAL DE REGISTROS: 0" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #3B210F;"/>
                             <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="btnAnularVenta" text="Anular venta" onAction="#anularVenta" disable="true" userData="danger" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #B3261E; -fx-text-fill: #B3261E;"/>
                             <Button text="Exportar Excel" onAction="#exportarExcel" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
                             <Button text="Imprimir / PDF" onAction="#exportarPdf" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
                             <Button fx:id="btnAnterior" text="Anterior" onAction="#paginaAnterior" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
                             <Label fx:id="lblPagina" text="1 / 1" style="-fx-font-weight: bold;"/>
                             <Button fx:id="btnSiguiente" text="Siguiente" onAction="#paginaSiguiente" userData="secondary" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-padding: 9 17; -fx-background-radius: 4; -fx-border-radius: 4; -fx-font-size: 13px; -fx-min-height: 37; -fx-background-color: white; -fx-border-color: #BBA78E; -fx-text-fill: #5A3516;"/>
                         </HBox>
+                        <Label fx:id="lblAviso" managed="false" visible="false" wrapText="true" style="-fx-text-fill: #B3261E; -fx-font-size: 12px;"/>
                         <TableView fx:id="tabla" minHeight="320" prefHeight="520" VBox.vgrow="ALWAYS" userData="tabla-nuevos" style="-fx-background-color: white; -fx-border-color: #E8E2D9; -fx-border-color: #E7E1D8; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 0; -fx-fixed-cell-size: 40;">
                             <columns>
                                 <TableColumn fx:id="colFecha" text="Fecha" prefWidth="125" minWidth="90"/>
@@ -107,7 +109,7 @@
                                 </VBox>
                             </placeholder>
                         </TableView>
-                        <Label text="Importes en soles. Las ventas cargadas a una habitación se cobran con el saldo de la habitación y no suman en los totales."
+                        <Label text="Importes en soles. Las ventas cargadas a una habitación se cobran con el saldo de la habitación y no suman en los totales. Las ventas anuladas se ven en la lista pero tampoco suman; para anular una, selecciónala (origen Carrito) y pulsa «Anular venta»."
                                wrapText="true" style="-fx-text-fill: #777777; -fx-font-size: 12px;"/>
                     </VBox>
                 </VBox>

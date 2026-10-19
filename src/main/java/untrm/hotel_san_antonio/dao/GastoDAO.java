@@ -27,20 +27,36 @@ public class GastoDAO {
             ps.setString(6, texto == null ? null : "%" + texto + "%");
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Gasto g = new Gasto();
-                    g.setIdGasto(rs.getInt("id_gasto"));
-                    g.setFecha(rs.getDate("fecha").toLocalDate());
-                    g.setConcepto(rs.getString("concepto"));
-                    g.setCategoria(rs.getString("categoria"));
-                    g.setMonto(rs.getBigDecimal("monto"));
-                    g.setMetodoPago(rs.getString("metodo_pago"));
-                    g.setObservacion(rs.getString("observacion"));
-                    g.setMotivoRegistroTardio(rs.getString("motivo_registro_tardio"));
-                    lista.add(g);
+                    lista.add(mapear(rs));
                 }
             }
         }
         return lista;
+    }
+
+    /** Un gasto activo por su id, o null si no existe o ya se desactivo. */
+    public Gasto obtener(Connection con, int idGasto) throws SQLException {
+        String sql = "SELECT id_gasto, fecha, concepto, categoria, monto, metodo_pago, observacion, "
+                + "motivo_registro_tardio FROM gasto WHERE id_gasto = ? AND activo = TRUE FOR UPDATE";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idGasto);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapear(rs) : null;
+            }
+        }
+    }
+
+    private Gasto mapear(ResultSet rs) throws SQLException {
+        Gasto g = new Gasto();
+        g.setIdGasto(rs.getInt("id_gasto"));
+        g.setFecha(rs.getDate("fecha").toLocalDate());
+        g.setConcepto(rs.getString("concepto"));
+        g.setCategoria(rs.getString("categoria"));
+        g.setMonto(rs.getBigDecimal("monto"));
+        g.setMetodoPago(rs.getString("metodo_pago"));
+        g.setObservacion(rs.getString("observacion"));
+        g.setMotivoRegistroTardio(rs.getString("motivo_registro_tardio"));
+        return g;
     }
 
     public int insertar(Connection con, Gasto g, int usuario) throws SQLException {

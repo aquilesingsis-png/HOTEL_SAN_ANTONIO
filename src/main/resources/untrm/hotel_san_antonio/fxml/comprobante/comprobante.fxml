@@ -143,6 +143,7 @@
                         <Label text="Revisa la vista previa antes de generar." textFill="#666666" />
                         <Button fx:id="btnVistaPrevia" onAction="#onVistaPrevia" maxWidth="1.7976931348623157E308" text="Vista previa" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #b8862d; -fx-text-fill: #b8862d; -fx-border-radius: 3;" />
                         <Button fx:id="btnImprimir" onAction="#onImprimir" disable="true" maxWidth="1.7976931348623157E308" text="Guardar PDF" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #E5E5E5; -fx-text-fill: #999999; -fx-border-radius: 3;" />
+                        <Button fx:id="btnAnular" onAction="#onAnular" disable="true" userData="danger" maxWidth="1.7976931348623157E308" text="Anular comprobante" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #B3261E; -fx-text-fill: #B3261E; -fx-border-radius: 3;" />
                      </VBox>
                      
                   </VBox>
