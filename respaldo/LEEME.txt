@@ -1,0 +1,44 @@
+RESPALDO AUTOMATICO DE LA BASE DE DATOS (hotel_san_antonio)
+
+Dos scripts:
+  respaldo_completo.bat      copia completa de la base (se recomienda 1 vez por semana)
+  respaldo_incremental.bat   copia de los cambios desde el ultimo respaldo (se recomienda 1 vez al dia)
+
+Por defecto las copias se guardan en  C:\Users\SU_USUARIO\HotelSanAntonio\copias-seguridad-db
+y se borran las de mas de 28 dias. Lo que paso queda anotado en respaldo.log (en esa misma carpeta).
+
+PASOS (una sola vez en cada laptop)
+
+1. Registro binario de MySQL (solo para el incremental)
+   Abra C:\xampp\mysql\bin\my.ini y en la seccion [mysqld] compruebe que estas lineas NO empiecen con #:
+       log-bin=mysql-bin
+       server-id=1
+       expire_logs_days=14
+   Si las activa, reinicie MySQL desde el panel de XAMPP.
+
+2. Credenciales (NUNCA se suben a Git)
+   Cree la carpeta  C:\Users\SU_USUARIO\HotelSanAntonio  y dentro un archivo llamado  respaldo.cnf
+   copiando respaldo.cnf.example de esta carpeta. Escriba su clave y su puerto de MySQL.
+
+3. Rutas
+   Si su XAMPP no esta en C:\xampp, cambie MYSQL_BIN y CARPETA_DATOS al inicio de cada .bat.
+   Si quiere guardar las copias en otra carpeta, cambie DESTINO.
+
+4. Prueba
+   Con MySQL encendido, haga doble clic en cada .bat. Debe decir "Listo" y aparecer un archivo
+   nuevo en la carpeta de copias.
+
+5. Que corra solo (opcional)
+   Abra PowerShell y ejecute, cambiando la ruta de la carpeta donde estan los .bat:
+
+       $c = 'C:\RUTA\DE\ESTA\CARPETA'
+       $aj = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+       Register-ScheduledTask -TaskName 'Hotel San Antonio - Respaldo completo' -Action (New-ScheduledTaskAction -Execute "$c\respaldo_completo.bat" -WorkingDirectory $c) -Trigger (New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At 8:00PM) -Settings $aj
+       Register-ScheduledTask -TaskName 'Hotel San Antonio - Respaldo incremental' -Action (New-ScheduledTaskAction -Execute "$c\respaldo_incremental.bat" -WorkingDirectory $c) -Trigger (New-ScheduledTaskTrigger -Daily -At 8:30PM) -Settings $aj
+
+   Si la PC estaba apagada a esa hora, la tarea corre apenas se enciende.
+   Para pausarlas: Programador de tareas de Windows > buscar "Hotel San Antonio" > clic derecho > Deshabilitar.
+
+IMPORTANTE
+ - MySQL debe estar encendido cuando corra el respaldo. Si no, el error queda en respaldo.log.
+ - Para restaurar una copia completa:  mysql -u root -p -P PUERTO -h 127.0.0.1 < completo_AAAA-MM-DD_HH-MM.sql

@@ -15,3 +15,6 @@ reporte_*.pdf
 almacen_*.xlsx
 almacen_*.pdf
 comprobante_*.pdf
+
+# credenciales de los respaldos (cada quien tiene las suyas)
+respaldo.cnf
