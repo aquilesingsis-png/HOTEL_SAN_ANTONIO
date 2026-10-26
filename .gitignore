@@ -1,6 +1,5 @@
 *.iml
 .idea/
-config.properties
 target/
 
 # Archivos que genera la aplicacion y que llevan datos de huespedes o claves cifradas: no se suben
