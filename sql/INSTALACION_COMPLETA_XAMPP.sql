@@ -444,12 +444,12 @@ INSERT INTO producto (codigo_barra, nombre, marca, id_categoria, precio, stock) 
 ('7751148000208', 'Papitas Lays',         'Lays',     2, 2.50, 25),
 ('7750070032001', 'Chocolate Sublime',    'Nestle',   3, 2.00, 35);
 
--- CUENTAS INICIALES (su clave se convierte a bcrypt la primera vez que ingresan)
+-- CUENTAS INICIALES (clave de prueba: 123456; cambiela antes de entregar)
 START TRANSACTION;
 INSERT INTO usuario (nombre, apellido, usuario, contrasena_hash, rol, activo)
 VALUES
-    ('Administrador', 'General', 'admin', 'pbkdf2$210000$FVo8kZDdc3y2STloxFeYyw==$xHoFg4lRwcaVryP+TNi/oX+u3u7qIccvPhDECFrK3nU=', 'ADMINISTRADOR', 1),
-    ('Recepcionista', 'Hotel', 'recepcion', 'pbkdf2$210000$5sb/E5bxvBZDFTsjcJZOsQ==$yGorwxiscuwz/WW0hDG2c0nr8h0tVufaluYnIm9Fhyg=', 'RECEPCIONISTA', 1);
+    ('Administrador', 'General', 'admin', '$2a$12$ET1YhvtHTpUfKqn9a2IgK.C31dagjN48Wfislm6Cveof20tsuK0cu', 'ADMINISTRADOR', 1),
+    ('Recepcionista', 'Hotel', 'recepcion', '$2a$12$6z4YEdVPJwck30EsbE5BmO0waS860fXLzK9j2QMEO5ic1WsIxhGBy', 'RECEPCIONISTA', 1);
 COMMIT;
 
 
