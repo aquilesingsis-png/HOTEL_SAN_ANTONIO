@@ -62,6 +62,7 @@ public class AlmacenController {
 
     @FXML private Button btnEditar;
     @FXML private Button btnStock;
+    @FXML private Button btnEliminar;
     @FXML private TableView<Item> tabla;
     @FXML private TableColumn<Item, String> colCodigo;
     @FXML private TableColumn<Item, String> colBarras;
@@ -112,6 +113,7 @@ public class AlmacenController {
         tabla.getSelectionModel().selectedItemProperty().addListener((o, antes, ahora) -> {
             btnEditar.setDisable(ahora == null);
             btnStock.setDisable(ahora == null || !ahora.activo());
+            btnEliminar.setDisable(ahora == null);
         });
         tabla.setOnMouseClicked(evento -> {
             if (evento.getButton() == MouseButton.PRIMARY && evento.getClickCount() == 2) editar();
@@ -119,6 +121,7 @@ public class AlmacenController {
         btnEditar.setDisable(true);
         EstiloGlobal.restilizarEncabezados(tabla);
         btnStock.setDisable(true);
+        btnEliminar.setDisable(true);
         cargar();
     }
 
@@ -182,6 +185,24 @@ public class AlmacenController {
                     controlador -> controlador.iniciar(elegido, this::cargar));
         } catch (IOException | SecurityException error) {
             Alertas.mostrarError("Error", "No se pudo abrir el formulario.\n\n" + error.getMessage());
+        }
+    }
+
+    @FXML
+    private void eliminar() {
+        Item elegido = tabla.getSelectionModel().getSelectedItem();
+        if (elegido == null) return;
+        if (!Alertas.confirmar("Eliminar producto", "¿Eliminar «" + elegido.nombre()
+                + "»? Solo se puede si nunca se vendió ni tuvo movimientos de stock; si no, desactívelo al editarlo.")) {
+            return;
+        }
+        try {
+            dao.eliminarProducto(elegido.id());
+            cargar();
+        } catch (IllegalStateException | SecurityException error) {
+            Alertas.mostrarError("Eliminar producto", error.getMessage());
+        } catch (SQLException error) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo eliminar el producto.\n\n" + error.getMessage());
         }
     }
 

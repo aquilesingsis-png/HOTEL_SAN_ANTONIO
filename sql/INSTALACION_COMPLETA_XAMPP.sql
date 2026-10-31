@@ -7,15 +7,16 @@
 --   actualizaciones (esta al final, bajo un titulo con lineas de =====). Se puede ejecutar mas de una vez.
 -- Todo cambio nuevo de la base se agrega al final de ese bloque, con ADD COLUMN IF NOT EXISTS y similares.
 --
--- Una base nueva crea 24 tablas, tipos, 24 habitaciones, catalogo de tienda y dos cuentas.
+-- Una base nueva crea 24 tablas, tipos, 24 habitaciones, catalogo de tienda, dos cuentas y el usuario de MySQL
+-- hotel_app (el que usa el programa, con privilegios minimos; vea el punto 8 del bloque final).
 -- No contiene personas, reservas ni pagos inventados.
 -- Las habitaciones se inician DISPONIBLES para evitar ocupaciones ficticias.
--- Las claves temporales figuran en ACCESOS_INICIALES.txt y deben cambiarse.
+-- Las cuentas admin y recepcion tienen la clave de prueba 123456: deben cambiarse antes de entregar.
 
 -- =====================================================================
 -- Hotel San Antonio — Sistema de Gestion Hotelera y Tiendita
 -- Taller de Programacion II — Trabajo de Primera Unidad
--- Esquema completo DDL (MySQL / MariaDB); las migraciones ya están incluidas.
+-- Esquema completo DDL (MySQL / MariaDB).
 --
 -- Ejecutar sobre una BD nueva: crea la base, tablas, índices y datos iniciales.
 -- =====================================================================
@@ -220,7 +221,7 @@ CREATE INDEX idx_reserva_estado    ON reserva (estado);
 
 -- AMPLIACIONES DE OPERACION SEGURA
 -- Ejecutar una sola vez sobre hotel_san_antonio, despues de una copia de seguridad.
--- No elimina tablas ni filas. La instalacion nueva requiere primero hotel_san_antonio.sql.
+-- No elimina tablas ni filas.
 
 ALTER TABLE usuario MODIFY rol ENUM('ADMINISTRADOR','RECEPCIONISTA','LIMPIEZA') NOT NULL;
 
@@ -536,3 +537,12 @@ ALTER TABLE movimiento_stock
     ADD CONSTRAINT fk_ms_gasto FOREIGN KEY IF NOT EXISTS (id_gasto) REFERENCES gasto(id_gasto);
 ALTER TABLE movimiento_stock
     ADD CONSTRAINT IF NOT EXISTS chk_ms_costo CHECK (costo_unitario IS NULL OR costo_unitario > 0);
+
+-- 8) USUARIO DE MYSQL DE LA APLICACION, con privilegios minimos. El programa entra con el (ya no con root).
+--    Solo puede consultar, insertar, actualizar y borrar filas de hotel_san_antonio: no puede crear ni borrar tablas,
+--    ni tocar otras bases, ni crear usuarios. Hay que ejecutarlo con un usuario que pueda crear usuarios (root).
+--    Su clave es la misma en todas las laptops y esta en config.properties (db.user y db.password).
+CREATE USER IF NOT EXISTS 'hotel_app'@'localhost' IDENTIFIED BY 'z8ZaZMRXTD5rPgHclwK8';
+CREATE USER IF NOT EXISTS 'hotel_app'@'127.0.0.1' IDENTIFIED BY 'z8ZaZMRXTD5rPgHclwK8';
+GRANT SELECT, INSERT, UPDATE, DELETE ON hotel_san_antonio.* TO 'hotel_app'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON hotel_san_antonio.* TO 'hotel_app'@'127.0.0.1';

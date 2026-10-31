@@ -5,11 +5,11 @@ Aplicación de escritorio para la gestión de un hotel y su tiendita: habitacion
 ## Puesta en marcha
 
 1. En XAMPP, encienda **MySQL**.
-2. Copie `config.properties.example` como `config.properties` (junto a `pom.xml`; ese archivo **no se sube a Git**) y complete:
-   - `db.url`, `db.user` y `db.password`: la conexión a su MySQL. Si usa otro puerto que 3306, cámbielo en `db.url`. Si no existe `config.properties`, el programa usa `root` sin clave en `localhost:3306` y lo anota en el registro. También sirven las variables `HOTEL_DB_URL`, `HOTEL_DB_USER` y `HOTEL_DB_PASSWORD`, que tienen prioridad.
-   - `reniec.token`, `sunat.ruc.token` y `decolecta.token`: los tokens de las consultas de DNI, RUC y tipo de cambio. Pídalos al equipo; no los suba a Git.
+2. El archivo `config.properties` (junto a `pom.xml`) ya viene en el repositorio. Cambie en él lo que sea distinto en su PC:
+   - `db.url`: si su MySQL usa otro puerto que 3306, cámbielo aquí. `db.user` y `db.password` son los del usuario `hotel_app`, que crea el script SQL; no los cambie. También sirven las variables `HOTEL_DB_URL`, `HOTEL_DB_USER` y `HOTEL_DB_PASSWORD`, que tienen prioridad.
+   - `reniec.token`, `sunat.ruc.token` y `decolecta.token`: los tokens de las consultas de DNI, RUC y tipo de cambio. Ya vienen puestos.
 3. La base de datos se arma con **un solo archivo**: `sql/INSTALACION_COMPLETA_XAMPP.sql`.
-   - **Base nueva y vacía:** importe el archivo completo en phpMyAdmin. Crea las 24 tablas, los tipos y 24 habitaciones, el catálogo de la tienda y las cuentas `admin` y `recepcion` (claves de prueba: cámbielas antes de entregar).
+   - **Base nueva y vacía:** importe el archivo completo en phpMyAdmin. Crea las 24 tablas, los tipos y 24 habitaciones, el catálogo de la tienda y las cuentas `admin` y `recepcion` (clave de prueba 123456: cámbiela antes de entregar) y el usuario de MySQL `hotel_app` con privilegios mínimos, que es el que usa el programa. Importe el archivo con `root`, porque solo `root` puede crear usuarios.
    - **Base que ya existe:** lo más simple es **borrarla** (phpMyAdmin → `hotel_san_antonio` → Operaciones → Eliminar la base de datos) e importar de nuevo el archivo completo. Se pierden sus datos: haga antes un respaldo si le importan.
    - **Base con datos que no quiere perder:** no la borre; ejecute solo el bloque final «ACTUALIZACIONES PARA UNA BASE QUE YA EXISTE» (desde su título hasta el final del archivo). Se puede ejecutar más de una vez.
    - Todo cambio nuevo de la base se agrega al final de ese bloque; no se crean otros archivos `.sql`.

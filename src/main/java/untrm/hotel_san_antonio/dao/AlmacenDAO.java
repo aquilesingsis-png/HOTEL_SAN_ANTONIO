@@ -128,6 +128,51 @@ public class AlmacenDAO {
         }
     }
 
+    /**
+     * Borra de verdad un producto, solo si nunca se vendió ni tuvo movimientos de stock (por ejemplo, uno creado
+     * por error). Si ya tiene historial no se borra: se desactiva desde «Editar producto».
+     */
+    public void eliminarProducto(int id) throws SQLException {
+        admin();
+        try (Connection con = ConexionBD.conectar()) {
+            con.setAutoCommit(false);
+            try {
+                String nombre;
+                try (PreparedStatement ps = con.prepareStatement(
+                        "SELECT nombre FROM producto WHERE id_producto=? FOR UPDATE")) {
+                    ps.setInt(1, id);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) throw new IllegalStateException("El producto ya no existe.");
+                        nombre = rs.getString(1);
+                    }
+                }
+                try (PreparedStatement ps = con.prepareStatement(
+                        "SELECT (SELECT COUNT(*) FROM detalle_venta WHERE id_producto=?) "
+                                + "+ (SELECT COUNT(*) FROM movimiento_stock WHERE id_producto=?)")) {
+                    ps.setInt(1, id);
+                    ps.setInt(2, id);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        rs.next();
+                        if (rs.getInt(1) > 0) throw new IllegalStateException(
+                                "El producto tiene ventas o movimientos de stock y no se puede eliminar. "
+                                        + "Desactívelo desde «Editar producto».");
+                    }
+                }
+                try (PreparedStatement ps = con.prepareStatement("DELETE FROM producto WHERE id_producto=?")) {
+                    ps.setInt(1, id);
+                    if (ps.executeUpdate() != 1) throw new SQLException("El producto ya no existe.");
+                } catch (java.sql.SQLIntegrityConstraintViolationException enUso) {
+                    throw new IllegalStateException("El producto ya se usa en otros registros y no se puede eliminar.");
+                }
+                auditoria.registrar(con, usuario(), "PRODUCTO_ELIMINAR", "producto", id, nombre);
+                con.commit();
+            } catch (SQLException | RuntimeException ex) {
+                con.rollback();
+                throw ex;
+            }
+        }
+    }
+
     // ----------------------------------------------------------------- productos
 
     /**
