@@ -6,8 +6,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import untrm.hotel_san_antonio.modelo.Usuario;
+import untrm.hotel_san_antonio.servicio.UsuarioService;
 import untrm.hotel_san_antonio.util.Navegacion;
 import untrm.hotel_san_antonio.util.Registro;
+import untrm.hotel_san_antonio.util.SesionActual;
 import untrm.hotel_san_antonio.util.EstiloGlobal;
 
 /**
@@ -39,6 +42,16 @@ public class App extends Application {
         stage.setTitle("Hotel San Antonio - SIGEH");
         stage.centerOnScreen();
         stage.show();
+    }
+
+    /** Si se cierra la ventana con la sesión abierta, queda anotado el cierre de sesión. */
+    @Override
+    public void stop() {
+        Usuario activo = SesionActual.getUsuario();
+        if (activo != null) {
+            SesionActual.cerrar();
+            new UsuarioService().registrarCierreSesion(activo.getIdUsuario());
+        }
     }
 
     public static void main(String[] args) {

@@ -11,6 +11,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import untrm.hotel_san_antonio.modelo.Usuario;
+import untrm.hotel_san_antonio.servicio.UsuarioService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.Navegacion;
 import untrm.hotel_san_antonio.util.SesionActual;
@@ -436,7 +437,13 @@ public class PrincipalController {
             latido.stop();
         }
         instancia = null;
+        Usuario saliente = SesionActual.getUsuario();
         SesionActual.cerrar();
+        if (saliente != null) {
+            Thread anotar = new Thread(() -> new UsuarioService().registrarCierreSesion(saliente.getIdUsuario()));
+            anotar.setDaemon(true);
+            anotar.start();
+        }
         try {
             Navegacion.irA(RUTA_LOGIN);
         } catch (IOException e) {

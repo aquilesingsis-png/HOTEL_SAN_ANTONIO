@@ -3,6 +3,8 @@ package untrm.hotel_san_antonio.servicio;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import untrm.hotel_san_antonio.dao.AuditoriaDAO;
 import untrm.hotel_san_antonio.dao.UsuarioDAO;
 import untrm.hotel_san_antonio.modelo.Usuario;
@@ -13,6 +15,8 @@ import untrm.hotel_san_antonio.util.SesionActual;
 import untrm.hotel_san_antonio.util.Validador;
 
 public class UsuarioService {
+    private static final Logger LOG = Logger.getLogger(UsuarioService.class.getName());
+
     /** Contraseñas incorrectas seguidas que bloquean una cuenta. */
     public static final int MAX_INTENTOS = 5;
     /** Minutos que dura el bloqueo. */
@@ -44,12 +48,19 @@ public class UsuarioService {
                 }
                 if (PasswordUtil.coincide(contrasena, usuario.getContrasenaHash())) {
                     usuarios.limpiarIntentos(con, usuario.getIdUsuario());
+                    auditoria.registrar(con, usuario.getIdUsuario(), "INICIO_SESION", "sesion",
+                            usuario.getIdUsuario(), null);
                     encontrado = usuario;
-                } else if (usuarios.registrarFallo(con, usuario.getIdUsuario()) >= MAX_INTENTOS) {
-                    usuarios.bloquear(con, usuario.getIdUsuario(), MINUTOS_BLOQUEO);
-                    auditoria.registrar(con, usuario.getIdUsuario(), "USUARIO_BLOQUEADO", "usuario",
-                            usuario.getIdUsuario(), MAX_INTENTOS + " contraseñas incorrectas seguidas");
-                    bloqueoNuevo = MINUTOS_BLOQUEO;
+                } else {
+                    int fallos = usuarios.registrarFallo(con, usuario.getIdUsuario());
+                    auditoria.registrar(con, usuario.getIdUsuario(), "INICIO_SESION_FALLIDO", "sesion",
+                            usuario.getIdUsuario(), "Contraseña incorrecta (" + fallos + " seguida(s))");
+                    if (fallos >= MAX_INTENTOS) {
+                        usuarios.bloquear(con, usuario.getIdUsuario(), MINUTOS_BLOQUEO);
+                        auditoria.registrar(con, usuario.getIdUsuario(), "USUARIO_BLOQUEADO", "usuario",
+                                usuario.getIdUsuario(), MAX_INTENTOS + " contraseñas incorrectas seguidas");
+                        bloqueoNuevo = MINUTOS_BLOQUEO;
+                    }
                 }
                 con.commit();
             } catch (SQLException | RuntimeException error) {
@@ -63,6 +74,15 @@ public class UsuarioService {
                     PasswordUtil.hash(contrasena));
         }
         return encontrado;
+    }
+
+    /** Deja anotado el cierre de sesión; si la base no responde, no impide salir. */
+    public void registrarCierreSesion(int idUsuario) {
+        try (Connection con = ConexionBD.conectar()) {
+            auditoria.registrar(con, idUsuario, "CIERRE_SESION", "sesion", idUsuario, null);
+        } catch (SQLException error) {
+            LOG.log(Level.WARNING, "No se pudo anotar el cierre de sesión.", error);
+        }
     }
 
     /** El administrador levanta el bloqueo de una cuenta sin esperar a que venza. */
