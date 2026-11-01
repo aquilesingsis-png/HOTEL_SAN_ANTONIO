@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.Locale;
@@ -217,8 +218,32 @@ public class DashboardController {
     // INICIALIZACIÓN
     // =========================================================
 
+    private javafx.animation.Timeline reloj;
+
+    /** La fecha y la hora del Inicio se actualizan solas (cada segundo) mientras la pantalla está abierta. */
+    private void iniciarReloj() {
+        if (lblFecha == null || lblHora == null) return;
+        DateTimeFormatter formatoFecha = DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM 'de' yyyy", Locale.of("es", "ES"));
+        DateTimeFormatter formatoHora = DateTimeFormatter.ofPattern("hh:mm a", Locale.of("es", "ES"));
+        Runnable poner = () -> {
+            LocalDateTime ahora = LocalDateTime.now();
+            String fecha = ahora.format(formatoFecha);
+            lblFecha.setText("Hoy es " + fecha.substring(0, 1).toUpperCase() + fecha.substring(1));
+            lblHora.setText(ahora.format(formatoHora));
+        };
+        poner.run();
+        reloj = new javafx.animation.Timeline(new javafx.animation.KeyFrame(javafx.util.Duration.seconds(1), e -> poner.run()));
+        reloj.setCycleCount(javafx.animation.Animation.INDEFINITE);
+        reloj.play();
+        // al cambiar de pantalla el reloj se detiene; si el Inicio vuelve a mostrarse, sigue
+        lblHora.sceneProperty().addListener((o, antes, ahora) -> {
+            if (ahora == null) reloj.stop(); else reloj.play();
+        });
+    }
+
     @FXML
     public void initialize() {
+        iniciarReloj();
 
         // Saludo segun el rol de quien inicio sesion (no siempre es el Administrador)
         if (lblSaludo != null) {
