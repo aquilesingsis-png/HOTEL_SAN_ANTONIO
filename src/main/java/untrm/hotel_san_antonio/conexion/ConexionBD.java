@@ -1,7 +1,8 @@
-package untrm.hotel_san_antonio.util;
+package untrm.hotel_san_antonio.conexion;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import untrm.hotel_san_antonio.util.SesionActual;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

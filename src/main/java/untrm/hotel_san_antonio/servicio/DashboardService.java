@@ -7,7 +7,7 @@ import untrm.hotel_san_antonio.dao.ReservaDAO;
 import untrm.hotel_san_antonio.dao.VentaTiendaDAO;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Reserva;
-import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.conexion.ConexionBD;
 import untrm.hotel_san_antonio.util.SesionActual;
 
 import java.math.BigDecimal;

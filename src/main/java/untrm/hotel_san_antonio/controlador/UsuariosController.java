@@ -29,7 +29,7 @@ import untrm.hotel_san_antonio.util.Navegacion;
  */
 public class UsuariosController {
 
-    private static final String BASE = "/untrm/hotel_san_antonio/fxml/nuevos/usuarios/";
+    private static final String BASE = "/untrm/hotel_san_antonio/vista/nuevos/usuarios/";
     static final String RUTA_FORMULARIO = BASE + "usuario_form.fxml";
     static final String RUTA_ACCESO = BASE + "recuperacion_admin.fxml";
     static final String RUTA_HISTORIAL = BASE + "historial_usuarios.fxml";

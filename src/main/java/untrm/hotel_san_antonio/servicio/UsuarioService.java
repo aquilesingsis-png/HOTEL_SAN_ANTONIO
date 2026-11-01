@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import untrm.hotel_san_antonio.dao.AuditoriaDAO;
 import untrm.hotel_san_antonio.dao.UsuarioDAO;
 import untrm.hotel_san_antonio.modelo.Usuario;
-import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.conexion.ConexionBD;
 import untrm.hotel_san_antonio.util.PasswordUtil;
 import untrm.hotel_san_antonio.util.Permisos;
 import untrm.hotel_san_antonio.util.SesionActual;

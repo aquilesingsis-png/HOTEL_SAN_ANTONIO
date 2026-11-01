@@ -44,7 +44,7 @@
                 <VBox fx:id="barraLateral" spacing="6">
                     <Label text="OPERACIÓN" style="-fx-text-fill: #D4A84C; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 6px 0 0 8px;"/>
                     <ToggleButton fx:id="btnInicio" text="Limpieza" toggleGroup="$grupoMenu" selected="true"
-                                  userData="/untrm/hotel_san_antonio/fxml/habitaciones/limpieza.fxml" onAction="#onMenu"/>
+                                  userData="/untrm/hotel_san_antonio/vista/habitaciones/limpieza.fxml" onAction="#onMenu"/>
                 </VBox>
             </ScrollPane>
 

@@ -38,7 +38,7 @@ import untrm.hotel_san_antonio.util.XlsxTabla;
  */
 public class AlmacenController {
 
-    private static final String BASE = "/untrm/hotel_san_antonio/fxml/nuevos/almacen/";
+    private static final String BASE = "/untrm/hotel_san_antonio/vista/nuevos/almacen/";
     static final String RUTA_PRODUCTO = BASE + "producto_form.fxml";
     static final String RUTA_STOCK = BASE + "stock_form.fxml";
     static final String RUTA_CATEGORIAS = BASE + "categorias_form.fxml";

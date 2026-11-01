@@ -32,9 +32,9 @@ import untrm.hotel_san_antonio.util.Navegacion;
 public class CalendarioOcupacionController {
 
     private static final String RECURSO_FILA =
-            "/untrm/hotel_san_antonio/fxml/Reserva/Fila_calendario_reserva.fxml";
+            "/untrm/hotel_san_antonio/vista/Reserva/Fila_calendario_reserva.fxml";
     private static final String RECURSO_CELDA =
-            "/untrm/hotel_san_antonio/fxml/Reserva/Celda_calendario_reserva.fxml";
+            "/untrm/hotel_san_antonio/vista/Reserva/Celda_calendario_reserva.fxml";
     private static final Locale LOCALE_ES = Locale.of("es", "PE");
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 

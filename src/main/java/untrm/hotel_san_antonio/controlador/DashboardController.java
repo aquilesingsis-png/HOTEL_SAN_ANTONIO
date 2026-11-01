@@ -175,7 +175,7 @@ public class DashboardController {
     @FXML private Label lblTipoCambioFecha;
 
     @FXML private HBox cajaTipoCambio;
-    private static final String RUTA_CONVERSOR = "/untrm/hotel_san_antonio/fxml/dashboard/conversor_dolar.fxml";
+    private static final String RUTA_CONVERSOR = "/untrm/hotel_san_antonio/vista/dashboard/conversor_dolar.fxml";
 
     @FXML
     private ScrollPane scrollDashboard;
