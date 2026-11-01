@@ -11,9 +11,9 @@ import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Reserva;
-import untrm.hotel_san_antonio.servicio.ReservaService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.Registro;
+import untrm.hotel_san_antonio.modelo.servicio.ReservaService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.modelo.util.Registro;
 
 public class CambiarHabitacionController {
     @FXML private Label lblActual, lblMensaje;

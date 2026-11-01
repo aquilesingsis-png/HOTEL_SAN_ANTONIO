@@ -12,11 +12,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import untrm.hotel_san_antonio.servicio.UsuarioService;
-import untrm.hotel_san_antonio.servicio.UsuarioService.Cambio;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.Consulta;
-import untrm.hotel_san_antonio.util.EstiloGlobal;
+import untrm.hotel_san_antonio.modelo.servicio.UsuarioService;
+import untrm.hotel_san_antonio.modelo.servicio.UsuarioService.Cambio;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.Consulta;
+import untrm.hotel_san_antonio.controlador.util.EstiloGlobal;
 
 /** Ventana con el historial de cambios de usuarios: altas, ediciones, cambios de rol y recuperaciones. */
 public class HistorialUsuariosController {

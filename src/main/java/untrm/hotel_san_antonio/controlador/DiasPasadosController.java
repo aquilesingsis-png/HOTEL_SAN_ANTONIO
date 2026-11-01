@@ -18,13 +18,13 @@ import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.util.Duration;
-import untrm.hotel_san_antonio.dao.DiasSinUsoDAO.ResumenDia;
-import untrm.hotel_san_antonio.servicio.DiasSinUsoService;
-import untrm.hotel_san_antonio.servicio.DiasSinUsoService.Estado;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.Navegacion;
-import untrm.hotel_san_antonio.util.SesionActual;
-import untrm.hotel_san_antonio.util.Registro;
+import untrm.hotel_san_antonio.modelo.dao.DiasSinUsoDAO.ResumenDia;
+import untrm.hotel_san_antonio.modelo.servicio.DiasSinUsoService;
+import untrm.hotel_san_antonio.modelo.servicio.DiasSinUsoService.Estado;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.Navegacion;
+import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
+import untrm.hotel_san_antonio.modelo.util.Registro;
 
 /**
  * Registro de días pasados: solo se activa cuando el sistema estuvo sin uso (por ejemplo, un corte de luz).

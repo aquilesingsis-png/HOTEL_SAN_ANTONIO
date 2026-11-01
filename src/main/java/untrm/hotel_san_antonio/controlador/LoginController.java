@@ -16,12 +16,12 @@ import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import untrm.hotel_san_antonio.servicio.CuentaBloqueadaException;
-import untrm.hotel_san_antonio.servicio.UsuarioService;
+import untrm.hotel_san_antonio.modelo.servicio.CuentaBloqueadaException;
+import untrm.hotel_san_antonio.modelo.servicio.UsuarioService;
 import untrm.hotel_san_antonio.modelo.Usuario;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.Navegacion;
-import untrm.hotel_san_antonio.util.SesionActual;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.Navegacion;
+import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
 
 import java.io.IOException;
 import java.sql.SQLException;

@@ -9,10 +9,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import untrm.hotel_san_antonio.dao.AlmacenDAO;
-import untrm.hotel_san_antonio.dao.AlmacenDAO.CategoriaFila;
-import untrm.hotel_san_antonio.dao.AlmacenDAO.Item;
-import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO;
+import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO.CategoriaFila;
+import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO.Item;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
 
 /** Ventana para crear o editar un producto del almacén (solo el Administrador). */
 public class ProductoFormController {

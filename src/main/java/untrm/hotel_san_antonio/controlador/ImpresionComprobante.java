@@ -8,9 +8,9 @@ import java.util.Locale;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import untrm.hotel_san_antonio.modelo.ComprobanteDocumento;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.CarpetaGuardado;
-import untrm.hotel_san_antonio.util.PdfTexto;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.CarpetaGuardado;
+import untrm.hotel_san_antonio.modelo.util.PdfTexto;
 
 /** Guarda en PDF un comprobante ya emitido (lo usan la pantalla Comprobantes y el Carrito de la tienda). */
 public final class ImpresionComprobante {

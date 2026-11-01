@@ -11,10 +11,10 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import untrm.hotel_san_antonio.modelo.Usuario;
-import untrm.hotel_san_antonio.servicio.UsuarioService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.Navegacion;
-import untrm.hotel_san_antonio.util.SesionActual;
+import untrm.hotel_san_antonio.modelo.servicio.UsuarioService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.Navegacion;
+import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -122,11 +122,11 @@ public class PrincipalController {
     }
 
     private void consultarDiasSinUso(boolean avisar) {
-        javafx.concurrent.Task<untrm.hotel_san_antonio.servicio.DiasSinUsoService.Estado> tarea =
+        javafx.concurrent.Task<untrm.hotel_san_antonio.modelo.servicio.DiasSinUsoService.Estado> tarea =
                 new javafx.concurrent.Task<>() {
             @Override
-            protected untrm.hotel_san_antonio.servicio.DiasSinUsoService.Estado call() throws Exception {
-                return new untrm.hotel_san_antonio.servicio.DiasSinUsoService().registrarActividad();
+            protected untrm.hotel_san_antonio.modelo.servicio.DiasSinUsoService.Estado call() throws Exception {
+                return new untrm.hotel_san_antonio.modelo.servicio.DiasSinUsoService().registrarActividad();
             }
         };
         tarea.setOnSucceeded(e -> aplicarEstadoDias(tarea.getValue(), avisar));
@@ -144,10 +144,10 @@ public class PrincipalController {
         javafx.concurrent.Task<Integer> tarea = new javafx.concurrent.Task<>() {
             @Override
             protected Integer call() throws Exception {
-                return new untrm.hotel_san_antonio.servicio.ReservaService().marcarNoLlegaron();
+                return new untrm.hotel_san_antonio.modelo.servicio.ReservaService().marcarNoLlegaron();
             }
         };
-        tarea.setOnFailed(e -> untrm.hotel_san_antonio.util.Registro.fallo(
+        tarea.setOnFailed(e -> untrm.hotel_san_antonio.modelo.util.Registro.fallo(
                 "PrincipalController.marcarNoLlegaron", tarea.getException()));
         Thread hilo = new Thread(tarea, "no-llegaron");
         hilo.setDaemon(true);
@@ -207,7 +207,7 @@ public class PrincipalController {
         }
     }
 
-    private void aplicarEstadoDias(untrm.hotel_san_antonio.servicio.DiasSinUsoService.Estado estado, boolean avisar) {
+    private void aplicarEstadoDias(untrm.hotel_san_antonio.modelo.servicio.DiasSinUsoService.Estado estado, boolean avisar) {
         boolean admin = SesionActual.esAdministrador();
         boolean activo = estado.abierto() || (admin && estado.puedeReabrir());
         encenderDiasPasados(activo);

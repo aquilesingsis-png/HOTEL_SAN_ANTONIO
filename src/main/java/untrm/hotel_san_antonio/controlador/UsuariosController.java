@@ -17,11 +17,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import untrm.hotel_san_antonio.modelo.Usuario;
-import untrm.hotel_san_antonio.servicio.UsuarioService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.Consulta;
-import untrm.hotel_san_antonio.util.EstiloGlobal;
-import untrm.hotel_san_antonio.util.Navegacion;
+import untrm.hotel_san_antonio.modelo.servicio.UsuarioService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.Consulta;
+import untrm.hotel_san_antonio.controlador.util.EstiloGlobal;
+import untrm.hotel_san_antonio.controlador.util.Navegacion;
 
 /**
  * Usuarios: una sola lista con todas las cuentas. Desde aquí se crea un usuario, se edita (nombre, rol y

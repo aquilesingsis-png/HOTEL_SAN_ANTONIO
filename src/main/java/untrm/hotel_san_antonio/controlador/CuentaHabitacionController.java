@@ -15,10 +15,10 @@ import javafx.stage.Stage;
 import untrm.hotel_san_antonio.modelo.CuentaHabitacion;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Pago;
-import untrm.hotel_san_antonio.servicio.CuentaService;
-import untrm.hotel_san_antonio.servicio.ReservaService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.CampoValidacion;
+import untrm.hotel_san_antonio.modelo.servicio.CuentaService;
+import untrm.hotel_san_antonio.modelo.servicio.ReservaService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.CampoValidacion;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -72,7 +72,7 @@ public class CuentaHabitacionController {
 
     @FXML
     public void initialize() {
-        untrm.hotel_san_antonio.util.EstiloBotones.hoverPrimario(btnCheckOut);
+        untrm.hotel_san_antonio.controlador.util.EstiloBotones.hoverPrimario(btnCheckOut);
         cmbMetodo.setValue("Efectivo");
         cmbMetodo2.setValue("Yape");
         txtMonto2.setTextFormatter(new TextFormatter<String>(cambio ->

@@ -20,11 +20,11 @@ import javafx.stage.Stage;
 import untrm.hotel_san_antonio.modelo.Huesped;
 import untrm.hotel_san_antonio.modelo.Pago;
 import untrm.hotel_san_antonio.modelo.Reserva;
-import untrm.hotel_san_antonio.servicio.ReservaService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.ConsultaApi;
-import untrm.hotel_san_antonio.util.Navegacion;
-import untrm.hotel_san_antonio.util.Registro;
+import untrm.hotel_san_antonio.modelo.servicio.ReservaService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.ConsultaApi;
+import untrm.hotel_san_antonio.controlador.util.Navegacion;
+import untrm.hotel_san_antonio.modelo.util.Registro;
 
 /**
  * Ventana emergente con el detalle de una reserva (se abre desde el Calendario y desde la Lista).

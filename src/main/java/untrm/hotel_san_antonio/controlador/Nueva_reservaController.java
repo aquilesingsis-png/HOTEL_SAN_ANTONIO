@@ -30,20 +30,20 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import untrm.hotel_san_antonio.dao.HabitacionDAO;
+import untrm.hotel_san_antonio.modelo.dao.HabitacionDAO;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Huesped;
 import untrm.hotel_san_antonio.modelo.Pago;
 import untrm.hotel_san_antonio.modelo.Reserva;
-import untrm.hotel_san_antonio.servicio.ConflictoFechasException;
-import untrm.hotel_san_antonio.servicio.ReniecService;
-import untrm.hotel_san_antonio.servicio.ReservaService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.ConsultaApi;
-import untrm.hotel_san_antonio.util.SoloLectura;
-import untrm.hotel_san_antonio.util.Validador;
-import untrm.hotel_san_antonio.util.Registro;
+import untrm.hotel_san_antonio.modelo.servicio.ConflictoFechasException;
+import untrm.hotel_san_antonio.modelo.servicio.ReniecService;
+import untrm.hotel_san_antonio.modelo.servicio.ReservaService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.ConsultaApi;
+import untrm.hotel_san_antonio.controlador.util.SoloLectura;
+import untrm.hotel_san_antonio.modelo.util.Validador;
+import untrm.hotel_san_antonio.modelo.util.Registro;
 
 public class Nueva_reservaController {
 

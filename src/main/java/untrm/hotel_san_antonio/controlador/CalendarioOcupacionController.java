@@ -24,10 +24,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Reserva;
-import untrm.hotel_san_antonio.servicio.ReservaService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.Consulta;
-import untrm.hotel_san_antonio.util.Navegacion;
+import untrm.hotel_san_antonio.modelo.servicio.ReservaService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.Consulta;
+import untrm.hotel_san_antonio.controlador.util.Navegacion;
 
 public class CalendarioOcupacionController {
 

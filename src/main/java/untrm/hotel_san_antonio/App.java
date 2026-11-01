@@ -7,11 +7,11 @@ import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import untrm.hotel_san_antonio.modelo.Usuario;
-import untrm.hotel_san_antonio.servicio.UsuarioService;
-import untrm.hotel_san_antonio.util.Navegacion;
-import untrm.hotel_san_antonio.util.Registro;
-import untrm.hotel_san_antonio.util.SesionActual;
-import untrm.hotel_san_antonio.util.EstiloGlobal;
+import untrm.hotel_san_antonio.modelo.servicio.UsuarioService;
+import untrm.hotel_san_antonio.controlador.util.Navegacion;
+import untrm.hotel_san_antonio.modelo.util.Registro;
+import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
+import untrm.hotel_san_antonio.controlador.util.EstiloGlobal;
 
 /**
  * Clase principal - arranca JavaFX y carga el Login.

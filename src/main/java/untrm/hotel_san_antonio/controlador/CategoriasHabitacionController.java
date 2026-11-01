@@ -10,8 +10,8 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import untrm.hotel_san_antonio.modelo.TipoHabitacion;
-import untrm.hotel_san_antonio.servicio.CategoriaHabitacionService;
-import untrm.hotel_san_antonio.util.Registro;
+import untrm.hotel_san_antonio.modelo.servicio.CategoriaHabitacionService;
+import untrm.hotel_san_antonio.modelo.util.Registro;
 
 public class CategoriasHabitacionController {
     @FXML private TableView<TipoHabitacion> tabla;

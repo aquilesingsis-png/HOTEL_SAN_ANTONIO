@@ -11,9 +11,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import untrm.hotel_san_antonio.modelo.TipoCambio;
-import untrm.hotel_san_antonio.servicio.DecolectaTipoCambioService;
-import untrm.hotel_san_antonio.util.ConversorDolar;
-import untrm.hotel_san_antonio.util.Registro;
+import untrm.hotel_san_antonio.modelo.servicio.DecolectaTipoCambioService;
+import untrm.hotel_san_antonio.modelo.util.ConversorDolar;
+import untrm.hotel_san_antonio.modelo.util.Registro;
 
 /**
  * Ventana pequeña del tipo de cambio: se escribe un monto en dólares o en soles y el otro campo muestra su

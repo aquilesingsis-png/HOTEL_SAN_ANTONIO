@@ -10,8 +10,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import untrm.hotel_san_antonio.dao.CajaDAO;
-import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.modelo.dao.CajaDAO;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
 
 /** Ventana para registrar a mano un ingreso o un egreso de caja (solo el Administrador). */
 public class MovimientoCajaFormController {
