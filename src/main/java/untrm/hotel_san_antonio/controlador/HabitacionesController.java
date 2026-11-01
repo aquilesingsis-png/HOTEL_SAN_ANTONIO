@@ -8,7 +8,7 @@ import untrm.hotel_san_antonio.modelo.CuentaHabitacion;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.servicio.CuentaService;
 import untrm.hotel_san_antonio.modelo.servicio.HabitacionService;
-import untrm.hotel_san_antonio.modelo.servicio.ReservaService;
+import untrm.hotel_san_antonio.modelo.servicio.EstadiaService;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.controlador.util.Consulta;
 import untrm.hotel_san_antonio.controlador.util.Navegacion;
@@ -34,7 +34,7 @@ public class HabitacionesController {
 
     private final CuentaService cuentaService = new CuentaService();
     private final HabitacionService habitacionService = new HabitacionService();
-    private final ReservaService reservaService = new ReservaService();
+    private final EstadiaService estadiaService = new EstadiaService();
 
     private List<Habitacion> habitaciones = new ArrayList<>();
     private final Consulta<List<Habitacion>> consulta = new Consulta<>();
@@ -139,7 +139,7 @@ public class HabitacionesController {
             return;
         }
         try {
-            reservaService.hacerCheckIn(h.getIdHabitacion());
+            estadiaService.hacerCheckIn(h.getIdHabitacion());
             cargarHabitaciones();
             abrirCuenta(h); // al llegar se cobra el 50 % restante
         } catch (IllegalStateException e) {

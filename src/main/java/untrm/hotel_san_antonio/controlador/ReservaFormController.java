@@ -27,6 +27,7 @@ import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.modelo.servicio.ConflictoFechasException;
 import untrm.hotel_san_antonio.modelo.servicio.ReniecService;
 import untrm.hotel_san_antonio.modelo.servicio.HabitacionService;
+import untrm.hotel_san_antonio.modelo.servicio.EstadiaService;
 import untrm.hotel_san_antonio.modelo.servicio.ReservaService;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.controlador.util.CampoValidacion;
@@ -85,6 +86,7 @@ public class ReservaFormController {
 
     private final HuespedService huespedService = new HuespedService();
     private final ReservaService reservaService = new ReservaService();
+    private final EstadiaService estadiaService = new EstadiaService();
     private final HabitacionService habitacionService = new HabitacionService();
     private HuespedesAdicionales acompanantes;
 
@@ -620,7 +622,7 @@ public class ReservaFormController {
                 return; // canceló o no escribió nada
             }
 
-            java.time.LocalDate proxima = reservaService.proximaReserva(habitacion.getIdHabitacion());
+            java.time.LocalDate proxima = estadiaService.proximaReserva(habitacion.getIdHabitacion());
             String aviso = proxima == null ? "" : "\n\nOjo: la habitación tiene una reserva desde el "
                     + proxima.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ".";
             if (!Alertas.confirmar("Mantenimiento", "¿Poner la habitación " + habitacion.getNumero()

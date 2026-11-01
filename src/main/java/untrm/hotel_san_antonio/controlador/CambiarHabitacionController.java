@@ -11,7 +11,7 @@ import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Reserva;
-import untrm.hotel_san_antonio.modelo.servicio.ReservaService;
+import untrm.hotel_san_antonio.modelo.servicio.EstadiaService;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.modelo.util.Registro;
 
@@ -20,7 +20,7 @@ public class CambiarHabitacionController {
     @FXML private ComboBox<String> cmbNueva;
     @FXML private TextArea txtMotivo;
     @FXML private Button btnGuardar;
-    private final ReservaService servicio = new ReservaService();
+    private final EstadiaService servicio = new EstadiaService();
     private final Map<String, Habitacion> opciones = new HashMap<>();
     private Reserva reserva;
     private Runnable alCambiar;
@@ -61,8 +61,8 @@ public class CambiarHabitacionController {
             return;
         }
         btnGuardar.setDisable(true);
-        Task<ReservaService.ResultadoCambio> tarea = new Task<>() {
-            @Override protected ReservaService.ResultadoCambio call() throws Exception {
+        Task<EstadiaService.ResultadoCambio> tarea = new Task<>() {
+            @Override protected EstadiaService.ResultadoCambio call() throws Exception {
                 return servicio.cambiarHabitacion(reserva.getIdReserva(), nueva.getIdHabitacion(), txtMotivo.getText());
             }
         };
