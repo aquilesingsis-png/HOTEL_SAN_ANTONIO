@@ -551,7 +551,10 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON hotel_san_antonio.* TO 'hotel_app'@'127.
 --    La columna origen dice de donde vino el cambio: SISTEMA (el programa marca cada conexion con el usuario que inicio
 --    sesion, variable @auditoria_usuario_id) o BASE_DE_DATOS (alguien cambio datos directo desde phpMyAdmin o MySQL;
 --    el detalle indica con que usuario de MySQL). Las filas con tipo_operacion vacio son las que escribe el programa,
---    que guardan que accion fue y por que. Vigilan 22 tablas (insertar, modificar y borrar = 66 triggers).
+--    que guardan que accion fue y por que. Vigilan las 15 tablas importantes (datos de personas, usuarios, reservas
+--    y dinero; insertar, modificar y borrar = 45 triggers). No se vigilan las tablas que ya son un historial o un
+--    registro tecnico: movimiento_stock, cambio_habitacion, arqueo_caja, actividad_dia, corte_sistema,
+--    dia_regularizado y reserva_huesped.
 --    No guardan la clave cifrada de los usuarios. Para crear triggers hay que ejecutar el archivo con root.
 ALTER TABLE auditoria MODIFY COLUMN id_usuario INT NULL, MODIFY COLUMN id_entidad INT NULL;
 ALTER TABLE auditoria
@@ -562,69 +565,6 @@ ALTER TABLE auditoria
 CREATE INDEX IF NOT EXISTS idx_auditoria_fecha ON auditoria (fecha);
 CREATE INDEX IF NOT EXISTS idx_auditoria_usuario_fecha ON auditoria (id_usuario, fecha);
 
-DROP TRIGGER IF EXISTS trg_aud_actividad_dia_insert;
-CREATE TRIGGER trg_aud_actividad_dia_insert AFTER INSERT ON actividad_dia FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'INSERT', 'actividad_dia', NULL,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'INSERT', NULL, JSON_OBJECT('fecha', NEW.`fecha`, 'id_usuario', NEW.`id_usuario`, 'primer_registro', NEW.`primer_registro`, 'ultimo_registro', NEW.`ultimo_registro`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_actividad_dia_update;
-CREATE TRIGGER trg_aud_actividad_dia_update AFTER UPDATE ON actividad_dia FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'UPDATE', 'actividad_dia', NULL,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'UPDATE', JSON_OBJECT('fecha', OLD.`fecha`, 'id_usuario', OLD.`id_usuario`, 'primer_registro', OLD.`primer_registro`, 'ultimo_registro', OLD.`ultimo_registro`), JSON_OBJECT('fecha', NEW.`fecha`, 'id_usuario', NEW.`id_usuario`, 'primer_registro', NEW.`primer_registro`, 'ultimo_registro', NEW.`ultimo_registro`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL WHERE NOT (JSON_OBJECT('fecha', OLD.`fecha`, 'id_usuario', OLD.`id_usuario`, 'primer_registro', OLD.`primer_registro`, 'ultimo_registro', OLD.`ultimo_registro`) <=> JSON_OBJECT('fecha', NEW.`fecha`, 'id_usuario', NEW.`id_usuario`, 'primer_registro', NEW.`primer_registro`, 'ultimo_registro', NEW.`ultimo_registro`));
-DROP TRIGGER IF EXISTS trg_aud_actividad_dia_delete;
-CREATE TRIGGER trg_aud_actividad_dia_delete AFTER DELETE ON actividad_dia FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'DELETE', 'actividad_dia', NULL,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'DELETE', JSON_OBJECT('fecha', OLD.`fecha`, 'id_usuario', OLD.`id_usuario`, 'primer_registro', OLD.`primer_registro`, 'ultimo_registro', OLD.`ultimo_registro`), NULL, IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_arqueo_caja_insert;
-CREATE TRIGGER trg_aud_arqueo_caja_insert AFTER INSERT ON arqueo_caja FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'INSERT', 'arqueo_caja', NEW.`id_arqueo`,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'INSERT', NULL, JSON_OBJECT('id_arqueo', NEW.`id_arqueo`, 'id_usuario', NEW.`id_usuario`, 'turno', NEW.`turno`, 'efectivo_esperado', NEW.`efectivo_esperado`, 'efectivo_contado', NEW.`efectivo_contado`, 'diferencia', NEW.`diferencia`, 'observacion', NEW.`observacion`, 'fecha', NEW.`fecha`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_arqueo_caja_update;
-CREATE TRIGGER trg_aud_arqueo_caja_update AFTER UPDATE ON arqueo_caja FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'UPDATE', 'arqueo_caja', NEW.`id_arqueo`,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'UPDATE', JSON_OBJECT('id_arqueo', OLD.`id_arqueo`, 'id_usuario', OLD.`id_usuario`, 'turno', OLD.`turno`, 'efectivo_esperado', OLD.`efectivo_esperado`, 'efectivo_contado', OLD.`efectivo_contado`, 'diferencia', OLD.`diferencia`, 'observacion', OLD.`observacion`, 'fecha', OLD.`fecha`), JSON_OBJECT('id_arqueo', NEW.`id_arqueo`, 'id_usuario', NEW.`id_usuario`, 'turno', NEW.`turno`, 'efectivo_esperado', NEW.`efectivo_esperado`, 'efectivo_contado', NEW.`efectivo_contado`, 'diferencia', NEW.`diferencia`, 'observacion', NEW.`observacion`, 'fecha', NEW.`fecha`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL WHERE NOT (JSON_OBJECT('id_arqueo', OLD.`id_arqueo`, 'id_usuario', OLD.`id_usuario`, 'turno', OLD.`turno`, 'efectivo_esperado', OLD.`efectivo_esperado`, 'efectivo_contado', OLD.`efectivo_contado`, 'diferencia', OLD.`diferencia`, 'observacion', OLD.`observacion`, 'fecha', OLD.`fecha`) <=> JSON_OBJECT('id_arqueo', NEW.`id_arqueo`, 'id_usuario', NEW.`id_usuario`, 'turno', NEW.`turno`, 'efectivo_esperado', NEW.`efectivo_esperado`, 'efectivo_contado', NEW.`efectivo_contado`, 'diferencia', NEW.`diferencia`, 'observacion', NEW.`observacion`, 'fecha', NEW.`fecha`));
-DROP TRIGGER IF EXISTS trg_aud_arqueo_caja_delete;
-CREATE TRIGGER trg_aud_arqueo_caja_delete AFTER DELETE ON arqueo_caja FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'DELETE', 'arqueo_caja', OLD.`id_arqueo`,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'DELETE', JSON_OBJECT('id_arqueo', OLD.`id_arqueo`, 'id_usuario', OLD.`id_usuario`, 'turno', OLD.`turno`, 'efectivo_esperado', OLD.`efectivo_esperado`, 'efectivo_contado', OLD.`efectivo_contado`, 'diferencia', OLD.`diferencia`, 'observacion', OLD.`observacion`, 'fecha', OLD.`fecha`), NULL, IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_cambio_habitacion_insert;
-CREATE TRIGGER trg_aud_cambio_habitacion_insert AFTER INSERT ON cambio_habitacion FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'INSERT', 'cambio_habitacion', NEW.`id_cambio`,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'INSERT', NULL, JSON_OBJECT('id_cambio', NEW.`id_cambio`, 'id_reserva', NEW.`id_reserva`, 'id_habitacion_anterior', NEW.`id_habitacion_anterior`, 'id_habitacion_nueva', NEW.`id_habitacion_nueva`, 'id_usuario', NEW.`id_usuario`, 'fecha_cambio', NEW.`fecha_cambio`, 'precio_anterior', NEW.`precio_anterior`, 'precio_nuevo', NEW.`precio_nuevo`, 'motivo', NEW.`motivo`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_cambio_habitacion_update;
-CREATE TRIGGER trg_aud_cambio_habitacion_update AFTER UPDATE ON cambio_habitacion FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'UPDATE', 'cambio_habitacion', NEW.`id_cambio`,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'UPDATE', JSON_OBJECT('id_cambio', OLD.`id_cambio`, 'id_reserva', OLD.`id_reserva`, 'id_habitacion_anterior', OLD.`id_habitacion_anterior`, 'id_habitacion_nueva', OLD.`id_habitacion_nueva`, 'id_usuario', OLD.`id_usuario`, 'fecha_cambio', OLD.`fecha_cambio`, 'precio_anterior', OLD.`precio_anterior`, 'precio_nuevo', OLD.`precio_nuevo`, 'motivo', OLD.`motivo`), JSON_OBJECT('id_cambio', NEW.`id_cambio`, 'id_reserva', NEW.`id_reserva`, 'id_habitacion_anterior', NEW.`id_habitacion_anterior`, 'id_habitacion_nueva', NEW.`id_habitacion_nueva`, 'id_usuario', NEW.`id_usuario`, 'fecha_cambio', NEW.`fecha_cambio`, 'precio_anterior', NEW.`precio_anterior`, 'precio_nuevo', NEW.`precio_nuevo`, 'motivo', NEW.`motivo`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL WHERE NOT (JSON_OBJECT('id_cambio', OLD.`id_cambio`, 'id_reserva', OLD.`id_reserva`, 'id_habitacion_anterior', OLD.`id_habitacion_anterior`, 'id_habitacion_nueva', OLD.`id_habitacion_nueva`, 'id_usuario', OLD.`id_usuario`, 'fecha_cambio', OLD.`fecha_cambio`, 'precio_anterior', OLD.`precio_anterior`, 'precio_nuevo', OLD.`precio_nuevo`, 'motivo', OLD.`motivo`) <=> JSON_OBJECT('id_cambio', NEW.`id_cambio`, 'id_reserva', NEW.`id_reserva`, 'id_habitacion_anterior', NEW.`id_habitacion_anterior`, 'id_habitacion_nueva', NEW.`id_habitacion_nueva`, 'id_usuario', NEW.`id_usuario`, 'fecha_cambio', NEW.`fecha_cambio`, 'precio_anterior', NEW.`precio_anterior`, 'precio_nuevo', NEW.`precio_nuevo`, 'motivo', NEW.`motivo`));
-DROP TRIGGER IF EXISTS trg_aud_cambio_habitacion_delete;
-CREATE TRIGGER trg_aud_cambio_habitacion_delete AFTER DELETE ON cambio_habitacion FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'DELETE', 'cambio_habitacion', OLD.`id_cambio`,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'DELETE', JSON_OBJECT('id_cambio', OLD.`id_cambio`, 'id_reserva', OLD.`id_reserva`, 'id_habitacion_anterior', OLD.`id_habitacion_anterior`, 'id_habitacion_nueva', OLD.`id_habitacion_nueva`, 'id_usuario', OLD.`id_usuario`, 'fecha_cambio', OLD.`fecha_cambio`, 'precio_anterior', OLD.`precio_anterior`, 'precio_nuevo', OLD.`precio_nuevo`, 'motivo', OLD.`motivo`), NULL, IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
 DROP TRIGGER IF EXISTS trg_aud_categoria_insert;
 CREATE TRIGGER trg_aud_categoria_insert AFTER INSERT ON categoria FOR EACH ROW
     INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
@@ -688,27 +628,6 @@ CREATE TRIGGER trg_aud_comprobante_delete AFTER DELETE ON comprobante FOR EACH R
            IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
            'DELETE', JSON_OBJECT('id_comprobante', OLD.`id_comprobante`, 'id_reserva', OLD.`id_reserva`, 'id_usuario', OLD.`id_usuario`, 'tipo', OLD.`tipo`, 'numero', OLD.`numero`, 'fecha_emision', OLD.`fecha_emision`, 'monto_total', OLD.`monto_total`, 'cliente_tipo_doc', OLD.`cliente_tipo_doc`, 'cliente_documento', OLD.`cliente_documento`, 'cliente_nombre', OLD.`cliente_nombre`, 'cliente_direccion', OLD.`cliente_direccion`, 'subtotal', OLD.`subtotal`, 'igv', OLD.`igv`, 'estado', OLD.`estado`, 'fecha_anulacion', OLD.`fecha_anulacion`, 'id_usuario_anula', OLD.`id_usuario_anula`, 'motivo_anulacion', OLD.`motivo_anulacion`), NULL, IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
     FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_corte_sistema_insert;
-CREATE TRIGGER trg_aud_corte_sistema_insert AFTER INSERT ON corte_sistema FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'INSERT', 'corte_sistema', NEW.`id_corte`,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'INSERT', NULL, JSON_OBJECT('id_corte', NEW.`id_corte`, 'dia_desde', NEW.`dia_desde`, 'dia_hasta', NEW.`dia_hasta`, 'detectado_en', NEW.`detectado_en`, 'habilita_hasta', NEW.`habilita_hasta`, 'reaperturas', NEW.`reaperturas`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_corte_sistema_update;
-CREATE TRIGGER trg_aud_corte_sistema_update AFTER UPDATE ON corte_sistema FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'UPDATE', 'corte_sistema', NEW.`id_corte`,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'UPDATE', JSON_OBJECT('id_corte', OLD.`id_corte`, 'dia_desde', OLD.`dia_desde`, 'dia_hasta', OLD.`dia_hasta`, 'detectado_en', OLD.`detectado_en`, 'habilita_hasta', OLD.`habilita_hasta`, 'reaperturas', OLD.`reaperturas`), JSON_OBJECT('id_corte', NEW.`id_corte`, 'dia_desde', NEW.`dia_desde`, 'dia_hasta', NEW.`dia_hasta`, 'detectado_en', NEW.`detectado_en`, 'habilita_hasta', NEW.`habilita_hasta`, 'reaperturas', NEW.`reaperturas`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL WHERE NOT (JSON_OBJECT('id_corte', OLD.`id_corte`, 'dia_desde', OLD.`dia_desde`, 'dia_hasta', OLD.`dia_hasta`, 'detectado_en', OLD.`detectado_en`, 'habilita_hasta', OLD.`habilita_hasta`, 'reaperturas', OLD.`reaperturas`) <=> JSON_OBJECT('id_corte', NEW.`id_corte`, 'dia_desde', NEW.`dia_desde`, 'dia_hasta', NEW.`dia_hasta`, 'detectado_en', NEW.`detectado_en`, 'habilita_hasta', NEW.`habilita_hasta`, 'reaperturas', NEW.`reaperturas`));
-DROP TRIGGER IF EXISTS trg_aud_corte_sistema_delete;
-CREATE TRIGGER trg_aud_corte_sistema_delete AFTER DELETE ON corte_sistema FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'DELETE', 'corte_sistema', OLD.`id_corte`,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'DELETE', JSON_OBJECT('id_corte', OLD.`id_corte`, 'dia_desde', OLD.`dia_desde`, 'dia_hasta', OLD.`dia_hasta`, 'detectado_en', OLD.`detectado_en`, 'habilita_hasta', OLD.`habilita_hasta`, 'reaperturas', OLD.`reaperturas`), NULL, IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
 DROP TRIGGER IF EXISTS trg_aud_detalle_venta_insert;
 CREATE TRIGGER trg_aud_detalle_venta_insert AFTER INSERT ON detalle_venta FOR EACH ROW
     INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
@@ -729,27 +648,6 @@ CREATE TRIGGER trg_aud_detalle_venta_delete AFTER DELETE ON detalle_venta FOR EA
     SELECT NULLIF(@auditoria_usuario_id, 0), 'DELETE', 'detalle_venta', OLD.`id_detalle`,
            IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
            'DELETE', JSON_OBJECT('id_detalle', OLD.`id_detalle`, 'id_venta', OLD.`id_venta`, 'id_producto', OLD.`id_producto`, 'cantidad', OLD.`cantidad`, 'precio_unitario', OLD.`precio_unitario`, 'subtotal', OLD.`subtotal`), NULL, IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_dia_regularizado_insert;
-CREATE TRIGGER trg_aud_dia_regularizado_insert AFTER INSERT ON dia_regularizado FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'INSERT', 'dia_regularizado', NULL,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'INSERT', NULL, JSON_OBJECT('fecha', NEW.`fecha`, 'id_corte', NEW.`id_corte`, 'id_usuario', NEW.`id_usuario`, 'completado_en', NEW.`completado_en`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_dia_regularizado_update;
-CREATE TRIGGER trg_aud_dia_regularizado_update AFTER UPDATE ON dia_regularizado FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'UPDATE', 'dia_regularizado', NULL,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'UPDATE', JSON_OBJECT('fecha', OLD.`fecha`, 'id_corte', OLD.`id_corte`, 'id_usuario', OLD.`id_usuario`, 'completado_en', OLD.`completado_en`), JSON_OBJECT('fecha', NEW.`fecha`, 'id_corte', NEW.`id_corte`, 'id_usuario', NEW.`id_usuario`, 'completado_en', NEW.`completado_en`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL WHERE NOT (JSON_OBJECT('fecha', OLD.`fecha`, 'id_corte', OLD.`id_corte`, 'id_usuario', OLD.`id_usuario`, 'completado_en', OLD.`completado_en`) <=> JSON_OBJECT('fecha', NEW.`fecha`, 'id_corte', NEW.`id_corte`, 'id_usuario', NEW.`id_usuario`, 'completado_en', NEW.`completado_en`));
-DROP TRIGGER IF EXISTS trg_aud_dia_regularizado_delete;
-CREATE TRIGGER trg_aud_dia_regularizado_delete AFTER DELETE ON dia_regularizado FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'DELETE', 'dia_regularizado', NULL,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'DELETE', JSON_OBJECT('fecha', OLD.`fecha`, 'id_corte', OLD.`id_corte`, 'id_usuario', OLD.`id_usuario`, 'completado_en', OLD.`completado_en`), NULL, IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
     FROM DUAL;
 DROP TRIGGER IF EXISTS trg_aud_empresa_insert;
 CREATE TRIGGER trg_aud_empresa_insert AFTER INSERT ON empresa FOR EACH ROW
@@ -856,27 +754,6 @@ CREATE TRIGGER trg_aud_movimiento_caja_delete AFTER DELETE ON movimiento_caja FO
            IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
            'DELETE', JSON_OBJECT('id_movimiento', OLD.`id_movimiento`, 'id_usuario', OLD.`id_usuario`, 'tipo', OLD.`tipo`, 'concepto', OLD.`concepto`, 'metodo_pago', OLD.`metodo_pago`, 'monto', OLD.`monto`, 'referencia', OLD.`referencia`, 'observacion', OLD.`observacion`, 'fecha', OLD.`fecha`), NULL, IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
     FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_movimiento_stock_insert;
-CREATE TRIGGER trg_aud_movimiento_stock_insert AFTER INSERT ON movimiento_stock FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'INSERT', 'movimiento_stock', NEW.`id_movimiento`,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'INSERT', NULL, JSON_OBJECT('id_movimiento', NEW.`id_movimiento`, 'id_producto', NEW.`id_producto`, 'id_usuario', NEW.`id_usuario`, 'tipo', NEW.`tipo`, 'cantidad', NEW.`cantidad`, 'stock_anterior', NEW.`stock_anterior`, 'stock_resultante', NEW.`stock_resultante`, 'motivo', NEW.`motivo`, 'referencia', NEW.`referencia`, 'observacion', NEW.`observacion`, 'fecha', NEW.`fecha`, 'costo_unitario', NEW.`costo_unitario`, 'id_gasto', NEW.`id_gasto`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_movimiento_stock_update;
-CREATE TRIGGER trg_aud_movimiento_stock_update AFTER UPDATE ON movimiento_stock FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'UPDATE', 'movimiento_stock', NEW.`id_movimiento`,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'UPDATE', JSON_OBJECT('id_movimiento', OLD.`id_movimiento`, 'id_producto', OLD.`id_producto`, 'id_usuario', OLD.`id_usuario`, 'tipo', OLD.`tipo`, 'cantidad', OLD.`cantidad`, 'stock_anterior', OLD.`stock_anterior`, 'stock_resultante', OLD.`stock_resultante`, 'motivo', OLD.`motivo`, 'referencia', OLD.`referencia`, 'observacion', OLD.`observacion`, 'fecha', OLD.`fecha`, 'costo_unitario', OLD.`costo_unitario`, 'id_gasto', OLD.`id_gasto`), JSON_OBJECT('id_movimiento', NEW.`id_movimiento`, 'id_producto', NEW.`id_producto`, 'id_usuario', NEW.`id_usuario`, 'tipo', NEW.`tipo`, 'cantidad', NEW.`cantidad`, 'stock_anterior', NEW.`stock_anterior`, 'stock_resultante', NEW.`stock_resultante`, 'motivo', NEW.`motivo`, 'referencia', NEW.`referencia`, 'observacion', NEW.`observacion`, 'fecha', NEW.`fecha`, 'costo_unitario', NEW.`costo_unitario`, 'id_gasto', NEW.`id_gasto`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL WHERE NOT (JSON_OBJECT('id_movimiento', OLD.`id_movimiento`, 'id_producto', OLD.`id_producto`, 'id_usuario', OLD.`id_usuario`, 'tipo', OLD.`tipo`, 'cantidad', OLD.`cantidad`, 'stock_anterior', OLD.`stock_anterior`, 'stock_resultante', OLD.`stock_resultante`, 'motivo', OLD.`motivo`, 'referencia', OLD.`referencia`, 'observacion', OLD.`observacion`, 'fecha', OLD.`fecha`, 'costo_unitario', OLD.`costo_unitario`, 'id_gasto', OLD.`id_gasto`) <=> JSON_OBJECT('id_movimiento', NEW.`id_movimiento`, 'id_producto', NEW.`id_producto`, 'id_usuario', NEW.`id_usuario`, 'tipo', NEW.`tipo`, 'cantidad', NEW.`cantidad`, 'stock_anterior', NEW.`stock_anterior`, 'stock_resultante', NEW.`stock_resultante`, 'motivo', NEW.`motivo`, 'referencia', NEW.`referencia`, 'observacion', NEW.`observacion`, 'fecha', NEW.`fecha`, 'costo_unitario', NEW.`costo_unitario`, 'id_gasto', NEW.`id_gasto`));
-DROP TRIGGER IF EXISTS trg_aud_movimiento_stock_delete;
-CREATE TRIGGER trg_aud_movimiento_stock_delete AFTER DELETE ON movimiento_stock FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'DELETE', 'movimiento_stock', OLD.`id_movimiento`,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'DELETE', JSON_OBJECT('id_movimiento', OLD.`id_movimiento`, 'id_producto', OLD.`id_producto`, 'id_usuario', OLD.`id_usuario`, 'tipo', OLD.`tipo`, 'cantidad', OLD.`cantidad`, 'stock_anterior', OLD.`stock_anterior`, 'stock_resultante', OLD.`stock_resultante`, 'motivo', OLD.`motivo`, 'referencia', OLD.`referencia`, 'observacion', OLD.`observacion`, 'fecha', OLD.`fecha`, 'costo_unitario', OLD.`costo_unitario`, 'id_gasto', OLD.`id_gasto`), NULL, IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
 DROP TRIGGER IF EXISTS trg_aud_pago_insert;
 CREATE TRIGGER trg_aud_pago_insert AFTER INSERT ON pago FOR EACH ROW
     INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
@@ -939,27 +816,6 @@ CREATE TRIGGER trg_aud_reserva_delete AFTER DELETE ON reserva FOR EACH ROW
     SELECT NULLIF(@auditoria_usuario_id, 0), 'DELETE', 'reserva', OLD.`id_reserva`,
            IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
            'DELETE', JSON_OBJECT('id_reserva', OLD.`id_reserva`, 'id_huesped', OLD.`id_huesped`, 'id_habitacion', OLD.`id_habitacion`, 'id_usuario', OLD.`id_usuario`, 'fecha_reserva', OLD.`fecha_reserva`, 'fecha_checkin', OLD.`fecha_checkin`, 'fecha_checkout', OLD.`fecha_checkout`, 'num_huespedes', OLD.`num_huespedes`, 'hora_checkin', OLD.`hora_checkin`, 'monto_total', OLD.`monto_total`, 'estado', OLD.`estado`, 'canal', OLD.`canal`, 'id_empresa', OLD.`id_empresa`, 'motivo_cancelacion', OLD.`motivo_cancelacion`, 'detalle_cancelacion', OLD.`detalle_cancelacion`, 'fecha_evento', OLD.`fecha_evento`, 'motivo_registro_tardio', OLD.`motivo_registro_tardio`, 'id_usuario_regulariza', OLD.`id_usuario_regulariza`), NULL, IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_reserva_huesped_insert;
-CREATE TRIGGER trg_aud_reserva_huesped_insert AFTER INSERT ON reserva_huesped FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'INSERT', 'reserva_huesped', NULL,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'INSERT', NULL, JSON_OBJECT('id_reserva', NEW.`id_reserva`, 'id_huesped', NEW.`id_huesped`, 'principal', NEW.`principal`, 'fecha_asociacion', NEW.`fecha_asociacion`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL;
-DROP TRIGGER IF EXISTS trg_aud_reserva_huesped_update;
-CREATE TRIGGER trg_aud_reserva_huesped_update AFTER UPDATE ON reserva_huesped FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'UPDATE', 'reserva_huesped', NULL,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'UPDATE', JSON_OBJECT('id_reserva', OLD.`id_reserva`, 'id_huesped', OLD.`id_huesped`, 'principal', OLD.`principal`, 'fecha_asociacion', OLD.`fecha_asociacion`), JSON_OBJECT('id_reserva', NEW.`id_reserva`, 'id_huesped', NEW.`id_huesped`, 'principal', NEW.`principal`, 'fecha_asociacion', NEW.`fecha_asociacion`), IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
-    FROM DUAL WHERE NOT (JSON_OBJECT('id_reserva', OLD.`id_reserva`, 'id_huesped', OLD.`id_huesped`, 'principal', OLD.`principal`, 'fecha_asociacion', OLD.`fecha_asociacion`) <=> JSON_OBJECT('id_reserva', NEW.`id_reserva`, 'id_huesped', NEW.`id_huesped`, 'principal', NEW.`principal`, 'fecha_asociacion', NEW.`fecha_asociacion`));
-DROP TRIGGER IF EXISTS trg_aud_reserva_huesped_delete;
-CREATE TRIGGER trg_aud_reserva_huesped_delete AFTER DELETE ON reserva_huesped FOR EACH ROW
-    INSERT INTO auditoria (id_usuario, accion, entidad, id_entidad, detalle, tipo_operacion, datos_anteriores, datos_nuevos, origen)
-    SELECT NULLIF(@auditoria_usuario_id, 0), 'DELETE', 'reserva_huesped', NULL,
-           IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
-           'DELETE', JSON_OBJECT('id_reserva', OLD.`id_reserva`, 'id_huesped', OLD.`id_huesped`, 'principal', OLD.`principal`, 'fecha_asociacion', OLD.`fecha_asociacion`), NULL, IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
     FROM DUAL;
 DROP TRIGGER IF EXISTS trg_aud_tipo_habitacion_insert;
 CREATE TRIGGER trg_aud_tipo_habitacion_insert AFTER INSERT ON tipo_habitacion FOR EACH ROW
