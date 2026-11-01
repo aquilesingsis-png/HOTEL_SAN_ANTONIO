@@ -10,7 +10,7 @@ import untrm.hotel_san_antonio.modelo.Huesped;
 
 /** Carga únicamente filas dinámicas a partir del FXML editable en Scene Builder. */
 public class HuespedesAdicionales {
-    private static final String FXML = "/untrm/hotel_san_antonio/fxml/Reserva/huesped_adicional.fxml";
+    private static final String FXML = "/untrm/hotel_san_antonio/vista/Reserva/huesped_adicional.fxml";
     private final VBox contenedor;
     private final List<HuespedAdicionalController> controles = new ArrayList<>();
 

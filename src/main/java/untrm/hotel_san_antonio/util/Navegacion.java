@@ -14,7 +14,7 @@ import javafx.stage.Stage;
  */
 public class Navegacion {
 
-    private static final String EN_CONSTRUCCION = "/untrm/hotel_san_antonio/fxml/principal/en_construccion.fxml";
+    private static final String EN_CONSTRUCCION = "/untrm/hotel_san_antonio/vista/principal/en_construccion.fxml";
     private static Stage stagePrincipal;
     private static javafx.scene.layout.Pane centro;
 

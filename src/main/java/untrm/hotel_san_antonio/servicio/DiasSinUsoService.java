@@ -11,7 +11,7 @@ import untrm.hotel_san_antonio.dao.AuditoriaDAO;
 import untrm.hotel_san_antonio.dao.DiasSinUsoDAO;
 import untrm.hotel_san_antonio.dao.DiasSinUsoDAO.Corte;
 import untrm.hotel_san_antonio.dao.DiasSinUsoDAO.ResumenDia;
-import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.conexion.ConexionBD;
 import untrm.hotel_san_antonio.util.Permisos;
 import untrm.hotel_san_antonio.util.SesionActual;
 

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.conexion.ConexionBD;
 import untrm.hotel_san_antonio.util.Permisos;
 
 /**

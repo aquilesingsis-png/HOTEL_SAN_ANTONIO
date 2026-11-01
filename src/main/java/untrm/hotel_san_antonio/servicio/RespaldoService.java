@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import untrm.hotel_san_antonio.dao.AuditoriaDAO;
-import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.conexion.ConexionBD;
 import untrm.hotel_san_antonio.util.Permisos;
 import untrm.hotel_san_antonio.util.SesionActual;
 

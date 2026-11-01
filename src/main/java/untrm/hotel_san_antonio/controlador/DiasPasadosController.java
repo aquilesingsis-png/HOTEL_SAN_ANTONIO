@@ -33,8 +33,8 @@ import untrm.hotel_san_antonio.util.Registro;
  */
 public class DiasPasadosController {
 
-    static final String RUTA_VENTA = "/untrm/hotel_san_antonio/fxml/nuevos/dias/venta_pasada_form.fxml";
-    static final String RUTA_ESTADIA = "/untrm/hotel_san_antonio/fxml/Reserva/registro_historico.fxml";
+    static final String RUTA_VENTA = "/untrm/hotel_san_antonio/vista/nuevos/dias/venta_pasada_form.fxml";
+    static final String RUTA_ESTADIA = "/untrm/hotel_san_antonio/vista/Reserva/registro_historico.fxml";
     private static final DateTimeFormatter CORTO = DateTimeFormatter.ofPattern("dd/MM");
     private static final DateTimeFormatter LARGO = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter FECHA_HORA = DateTimeFormatter.ofPattern("dd/MM HH:mm");

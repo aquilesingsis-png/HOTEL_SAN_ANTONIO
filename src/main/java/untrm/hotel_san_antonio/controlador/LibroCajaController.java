@@ -39,8 +39,8 @@ import untrm.hotel_san_antonio.util.XlsxTabla;
  */
 public class LibroCajaController {
 
-    static final String RUTA_FORMULARIO = "/untrm/hotel_san_antonio/fxml/nuevos/caja/movimiento_caja_form.fxml";
-    private static final String RUTA_CIERRE = "/untrm/hotel_san_antonio/fxml/nuevos/caja/cierre_arqueo.fxml";
+    static final String RUTA_FORMULARIO = "/untrm/hotel_san_antonio/vista/nuevos/caja/movimiento_caja_form.fxml";
+    private static final String RUTA_CIERRE = "/untrm/hotel_san_antonio/vista/nuevos/caja/cierre_arqueo.fxml";
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final int FILAS_POR_PAGINA = 15;
     private static final String TODOS = "Todos";

@@ -24,7 +24,7 @@ import untrm.hotel_san_antonio.servicio.ComprobanteService;
 import untrm.hotel_san_antonio.servicio.VentaService;
 import untrm.hotel_san_antonio.util.Alertas;
 import untrm.hotel_san_antonio.util.ConsultaApi;
-import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.conexion.ConexionBD;
 import untrm.hotel_san_antonio.util.Registro;
 import untrm.hotel_san_antonio.util.SesionActual;
 import untrm.hotel_san_antonio.util.Validador;

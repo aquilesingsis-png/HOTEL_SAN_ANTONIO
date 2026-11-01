@@ -33,11 +33,11 @@ import java.util.Locale;
  */
 public class PrincipalController {
 
-    private static final String RUTA_LOGIN = "/untrm/hotel_san_antonio/fxml/login/login.fxml";
-    private static final String RUTA_MARCO_RECEPCIONISTA = "/untrm/hotel_san_antonio/fxml/principal/principal_recepcionista.fxml";
-    private static final String RUTA_MARCO_ADMIN = "/untrm/hotel_san_antonio/fxml/principal/principal_administrador.fxml";
-    private static final String RUTA_MARCO_LIMPIEZA = "/untrm/hotel_san_antonio/fxml/principal/principal_limpieza.fxml";
-    private static final String RUTA_CARRITO = "/untrm/hotel_san_antonio/fxml/carrito/carrito_tienda.fxml";
+    private static final String RUTA_LOGIN = "/untrm/hotel_san_antonio/vista/login/login.fxml";
+    private static final String RUTA_MARCO_RECEPCIONISTA = "/untrm/hotel_san_antonio/vista/principal/principal_recepcionista.fxml";
+    private static final String RUTA_MARCO_ADMIN = "/untrm/hotel_san_antonio/vista/principal/principal_administrador.fxml";
+    private static final String RUTA_MARCO_LIMPIEZA = "/untrm/hotel_san_antonio/vista/principal/principal_limpieza.fxml";
+    private static final String RUTA_CARRITO = "/untrm/hotel_san_antonio/vista/carrito/carrito_tienda.fxml";
 
     // Botones de opcion (Inicio, Habitaciones, y los de dentro de un submenu)
     private static final String ITEM = "-fx-background-color: transparent; -fx-text-fill: #F3ECDD; -fx-font-size: 14px; "
@@ -68,7 +68,7 @@ public class PrincipalController {
     private ToggleButton ultimaPantalla;
 
     // Registro de días pasados: el menú se enciende solo cuando hay días sin uso por registrar
-    private static final String RUTA_DIAS_PASADOS = "/untrm/hotel_san_antonio/fxml/nuevos/dias/dias_pasados.fxml";
+    private static final String RUTA_DIAS_PASADOS = "/untrm/hotel_san_antonio/vista/nuevos/dias/dias_pasados.fxml";
     private static PrincipalController instancia;
     private ToggleButton btnDiasPasados;
     private javafx.animation.Timeline latido;

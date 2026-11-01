@@ -22,7 +22,7 @@ import untrm.hotel_san_antonio.util.Navegacion;
 /** Vista "Lista" de la pantalla Reservas. El texto a buscar se lo pasa ReservasController. */
 public class ReservasProgramadasController {
 
-    static final String RUTA_DETALLE = "/untrm/hotel_san_antonio/fxml/Reserva/Detalle_reserva_ventana.fxml";
+    static final String RUTA_DETALLE = "/untrm/hotel_san_antonio/vista/Reserva/Detalle_reserva_ventana.fxml";
 
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final int TAMANO_PAGINA = 10;

@@ -13,11 +13,13 @@
 <?import javafx.scene.layout.VBox?>
 
 <!--
-    Marco principal para el ADMINISTRADOR: acceso a todos los modulos. Sin archivo .css (ver
-    principal_recepcionista.fxml para la explicacion). Igual que el del recepcionista (mismo
-    controlador), pero con los modulos de administracion: Usuarios, Reportes y estadisticas,
-    Almacen, y Caja completa. No incluye Huespedes.
-    Cada boton guarda en "userData" la ruta del FXML que abre; si no existe, se muestra "en construccion".
+    Marco principal para el RECEPCIONISTA: menu lateral + encabezado + contenido. Sin archivo .css:
+    el color/tamaño base de cada boton va inline aqui; PrincipalController aplica el resaltado al
+    pasar el mouse y el color del boton seleccionado (eso no se puede fijar en el FXML porque depende
+    de una accion del usuario).
+    Cada boton del menu guarda en "userData" la ruta del FXML que abre. Si ese archivo
+    todavia no existe (modulo pendiente), el marco muestra la pantalla "en construccion".
+    Un boton "menu-grupo" despliega el VBox que le sigue (solo uno abierto a la vez).
 -->
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="untrm.hotel_san_antonio.controlador.PrincipalController">
@@ -40,64 +42,37 @@
             <ScrollPane fx:id="scrollMenu" fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS"
                         style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;">
                 <VBox fx:id="barraLateral" spacing="6">
-
                     <Label text="OPERACIÓN" style="-fx-text-fill: #D4A84C; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 6px 0 0 8px;"/>
                     <ToggleButton fx:id="btnInicio" text="Inicio" toggleGroup="$grupoMenu" selected="true"
-                                  userData="/untrm/hotel_san_antonio/fxml/dashboard/dashboard_2.fxml" onAction="#onMenu"/>
+                                  userData="/untrm/hotel_san_antonio/vista/dashboard/dashboard_2.fxml" onAction="#onMenu"/>
                     <ToggleButton text="Habitaciones" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/habitaciones/habitaciones.fxml" onAction="#onMenu"/>
+                                  userData="/untrm/hotel_san_antonio/vista/habitaciones/habitaciones.fxml" onAction="#onMenu"/>
 
                     <Button text="Reservas  ▸" onAction="#onGrupo" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
                     <VBox userData="Reservas" visible="false" managed="false" spacing="2"
                           style="-fx-background-color: #2E1909; -fx-background-radius: 0 6px 6px 0; -fx-border-color: #B8862D; -fx-border-width: 0 0 0 2px; -fx-padding: 4px 0 4px 0;">
                         <ToggleButton text="Nueva reserva" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Nueva_reserva.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/vista/Reserva/Nueva_reserva.fxml" onAction="#onMenu"/>
                         <ToggleButton text="Ver reservas" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/Reserva/Reservas.fxml" onAction="#onMenu"/>
+                                      userData="/untrm/hotel_san_antonio/vista/Reserva/Reservas.fxml" onAction="#onMenu"/>
                     </VBox>
 
                     <ToggleButton text="Comprobantes" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/comprobante/comprobante.fxml" onAction="#onMenu"/>
+                                  userData="/untrm/hotel_san_antonio/vista/comprobante/comprobante.fxml" onAction="#onMenu"/>
                     <ToggleButton text="Registro de días pasados" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/nuevos/dias/dias_pasados.fxml" onAction="#onMenu"/>
-
-                    <Button text="Caja  ▸" onAction="#onGrupo" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand;"/>
-                    <VBox userData="Caja" visible="false" managed="false" spacing="2"
-                          style="-fx-background-color: #2E1909; -fx-background-radius: 0 6px 6px 0; -fx-border-color: #B8862D; -fx-border-width: 0 0 0 2px; -fx-padding: 4px 0 4px 0;">
-                        <ToggleButton text="Movimientos de caja" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/libro_caja.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Gastos" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/gastos.fxml" onAction="#onMenu"/>
-                        <ToggleButton text="Cierre y arqueo" toggleGroup="$grupoMenu"
-                                      userData="/untrm/hotel_san_antonio/fxml/nuevos/caja/cierre_arqueo.fxml" onAction="#onMenu"/>
-                    </VBox>
-
-                    <Label text="ADMINISTRACIÓN" style="-fx-text-fill: #D4A84C; -fx-font-size: 11px; -fx-font-weight: bold;">
-                        <padding><Insets top="14" left="8"/></padding>
-                    </Label>
-
-                    <ToggleButton text="Categorías de habitación" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/habitaciones/categorias_habitacion.fxml" onAction="#onMenu"/>
-
-                    <ToggleButton text="Usuarios" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/nuevos/usuarios/usuarios.fxml" onAction="#onMenu"/>
-
-                    <ToggleButton text="Reportes" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/nuevos/reportes/reportes.fxml" onAction="#onMenu"/>
-
-                    <ToggleButton text="Almacén" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/nuevos/almacen/almacen.fxml" onAction="#onMenu"/>
-
-                    <ToggleButton text="Respaldo" toggleGroup="$grupoMenu"
-                                  userData="/untrm/hotel_san_antonio/fxml/nuevos/respaldo/respaldo.fxml" onAction="#onMenu"/>
+                                  userData="/untrm/hotel_san_antonio/vista/nuevos/dias/dias_pasados.fxml" onAction="#onMenu"/>
+                    <ToggleButton text="Movimientos de caja" toggleGroup="$grupoMenu"
+                                  userData="/untrm/hotel_san_antonio/vista/nuevos/caja/libro_caja.fxml" onAction="#onMenu"/>
+                    <ToggleButton text="Cierre de turno" toggleGroup="$grupoMenu"
+                                  userData="/untrm/hotel_san_antonio/vista/nuevos/caja/cierre_arqueo.fxml" onAction="#onMenu"/>
                 </VBox>
             </ScrollPane>
 
             <Region style="-fx-background-color: #5A3516; -fx-min-height: 1px; -fx-pref-height: 1px; -fx-max-height: 1px;"/>
             <VBox spacing="2">
                 <padding><Insets top="10" bottom="8" left="8"/></padding>
-                <Label fx:id="lblUsuario" text="Ana Torres" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
-                <Label fx:id="lblRol" text="Administrador" style="-fx-text-fill: #E6C77A; -fx-font-size: 12px;"/>
+                <Label fx:id="lblUsuario" text="Luis Vasquez" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Label fx:id="lblRol" text="Recepcionista" style="-fx-text-fill: #E6C77A; -fx-font-size: 12px;"/>
             </VBox>
             <Button text="Cerrar sesión" onAction="#onCerrarSesion" maxWidth="Infinity" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: transparent; -fx-text-fill: #F3ECDD; -fx-border-color: #5A3516; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 7px 14px; -fx-cursor: hand;"/>
         </VBox>

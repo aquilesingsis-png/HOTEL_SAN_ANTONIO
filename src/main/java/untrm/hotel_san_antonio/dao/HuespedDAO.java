@@ -1,7 +1,7 @@
 package untrm.hotel_san_antonio.dao;
 
 import untrm.hotel_san_antonio.modelo.Huesped;
-import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.conexion.ConexionBD;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

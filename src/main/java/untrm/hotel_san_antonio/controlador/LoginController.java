@@ -241,7 +241,7 @@ public class LoginController {
 
     @FXML private void onOlvidoContrasena() {
         try {
-            Navegacion.abrirModal("/untrm/hotel_san_antonio/fxml/login/recuperacion.fxml",
+            Navegacion.abrirModal("/untrm/hotel_san_antonio/vista/login/recuperacion.fxml",
                     "Recuperar contraseña");
         } catch (IOException error) {
             Alertas.mostrarError("Error", "No se pudo abrir la recuperación de contraseña.");

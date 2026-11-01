@@ -32,7 +32,7 @@ import untrm.hotel_san_antonio.util.Registro;
  */
 public class DetalleReservaVentanaController {
 
-    private static final String RUTA_CAMBIO = "/untrm/hotel_san_antonio/fxml/Reserva/cambiar_habitacion.fxml";
+    private static final String RUTA_CAMBIO = "/untrm/hotel_san_antonio/vista/Reserva/cambiar_habitacion.fxml";
 
     @FXML private DetalleReservaController detalleReservaController;
     @FXML private Label lblHuespedes;

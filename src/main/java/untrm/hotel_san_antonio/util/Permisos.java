@@ -5,7 +5,7 @@ import untrm.hotel_san_antonio.modelo.Usuario;
 
 /** Autorización central usada por navegación y operaciones sensibles. */
 public final class Permisos {
-    private static final String BASE = "/untrm/hotel_san_antonio/fxml/";
+    private static final String BASE = "/untrm/hotel_san_antonio/vista/";
     private static final Set<String> RECEPCION = Set.of(
             BASE + "dashboard/dashboard_2.fxml",
             BASE + "dashboard/conversor_dolar.fxml",

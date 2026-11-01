@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import untrm.hotel_san_antonio.modelo.Gasto;
 import untrm.hotel_san_antonio.servicio.GastoService;
-import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.conexion.ConexionBD;
 import untrm.hotel_san_antonio.util.Permisos;
 import untrm.hotel_san_antonio.util.SesionActual;
 

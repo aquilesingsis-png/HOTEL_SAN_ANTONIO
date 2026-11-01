@@ -28,7 +28,7 @@ import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Huesped;
 import untrm.hotel_san_antonio.modelo.Pago;
 import untrm.hotel_san_antonio.modelo.Reserva;
-import untrm.hotel_san_antonio.util.ConexionBD;
+import untrm.hotel_san_antonio.conexion.ConexionBD;
 import untrm.hotel_san_antonio.util.SesionActual;
 import untrm.hotel_san_antonio.util.Permisos;
 import untrm.hotel_san_antonio.util.Validador;

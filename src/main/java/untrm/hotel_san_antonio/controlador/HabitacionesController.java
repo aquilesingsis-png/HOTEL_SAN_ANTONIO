@@ -28,7 +28,7 @@ import java.util.TreeMap;
  */
 public class HabitacionesController {
 
-    private static final String RUTA_FXML = "/untrm/hotel_san_antonio/fxml/habitaciones/";
+    private static final String RUTA_FXML = "/untrm/hotel_san_antonio/vista/habitaciones/";
 
     @FXML private ComboBox<String> cmbEstado, cmbTipo;
     @FXML private VBox contenedorPisos;
