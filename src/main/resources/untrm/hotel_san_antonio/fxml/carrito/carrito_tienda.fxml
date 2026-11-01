@@ -83,9 +83,9 @@
       <HBox alignment="CENTER_LEFT">
        <Label fx:id="lblMostrando" text="Mostrando 0 productos" style="-fx-text-fill: #657187; -fx-font-size: 12px;"/>
        <Region HBox.hgrow="ALWAYS"/>
-       <Button text="‹" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+       <Button text="‹" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: #5A3516; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
        <Button text="1" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #8B571C; -fx-text-fill: white; -fx-background-radius: 5;"/>
-       <Button text="›" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+       <Button text="›" disable="true" style="-fx-background-color: #A87425; -fx-text-fill: #5A3516; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
       </HBox>
      </VBox>
 
@@ -106,9 +106,9 @@
        <placeholder><VBox alignment="CENTER" spacing="8"><Label text="Carrito"/><Label text="El carrito está vacío." style="-fx-text-fill: #657187; -fx-font-size: 12px;"/></VBox></placeholder>
       </TableView>
       <HBox alignment="CENTER_RIGHT" spacing="6">
-       <Button text="−" onAction="#onRestarCantidad" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
-       <Button text="+" onAction="#onSumarCantidad" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
-       <Button text="Quitar" onAction="#onQuitarProducto" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+       <Button text="−" onAction="#onRestarCantidad" style="-fx-background-color: #A87425; -fx-text-fill: #5A3516; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+       <Button text="+" onAction="#onSumarCantidad" style="-fx-background-color: #A87425; -fx-text-fill: #5A3516; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
+       <Button text="Quitar" onAction="#onQuitarProducto" style="-fx-background-color: #A87425; -fx-text-fill: #5A3516; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6;"/>
       </HBox>
       <VBox spacing="6" style="-fx-background-color: #FFF9F1; -fx-border-color: #EADFD1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10;">
        <HBox><Label text="Subtotal"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="lblSubtotal" text="S/ 0.00" style="-fx-text-fill: #003B7A; -fx-font-weight: bold;"/></HBox>
@@ -132,7 +132,7 @@
       </HBox>
       <Region VBox.vgrow="ALWAYS"/>
       <HBox spacing="10">
-       <Button text="Cancelar" onAction="#onCancelar" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 44; -fx-font-weight: bold;"/>
+       <Button text="Cancelar" onAction="#onCancelar" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #A87425; -fx-text-fill: #5A3516; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: white; -fx-border-color: #D7DDE5; -fx-border-radius: 6; -fx-background-radius: 6; -fx-min-height: 44; -fx-font-weight: bold;"/>
        <Button fx:id="btnEmitir" text="Registrar venta" onAction="#onConfirmarVenta" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-background-color: #A87425; -fx-text-fill: white; -fx-background-radius: 5px; -fx-cursor: hand; -fx-background-color: #8B571C; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-min-height: 44;"/>
       </HBox>
      </VBox>
