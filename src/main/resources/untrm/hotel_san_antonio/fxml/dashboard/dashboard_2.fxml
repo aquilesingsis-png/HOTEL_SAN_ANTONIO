@@ -221,11 +221,11 @@
                                           <Label text="Hoy ▾" style="-fx-font-size: 11px; -fx-text-fill: #6A5F52; -fx-background-color: #F2EFE9; -fx-background-radius: 8; -fx-padding: 4 10 4 10;" />
                                        </children>
                                     </HBox>
-                                    <HBox alignment="CENTER_LEFT" spacing="18.0">
+                                    <VBox alignment="TOP_CENTER" spacing="6.0">
                                        <children>
                                           <StackPane>
                                              <children>
-                                                <PieChart fx:id="chartOcupacion" labelsVisible="false" legendVisible="false" prefHeight="190.0" prefWidth="190.0" startAngle="90.0" />
+                                                <PieChart fx:id="chartOcupacion" labelsVisible="false" legendVisible="false" prefHeight="150.0" prefWidth="150.0" startAngle="90.0" />
                                                 <VBox alignment="CENTER" mouseTransparent="true">
                                                    <children>
                                                       <Label fx:id="lblPorcentajeOcupacion" text="60%" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
@@ -237,30 +237,30 @@
                                           <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                              <children>
                                                 <HBox style="-fx-alignment: CENTER_LEFT;"><children>
-                                                   <Label text="●  Ocupadas" style="-fx-text-fill: #6B4A1E; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label text="● Ocupadas" style="-fx-text-fill: #6B4A1E; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
                                                    <Label fx:id="lblLeyOcupadas" text="18" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
                                                 <HBox style="-fx-alignment: CENTER_LEFT;"><children>
-                                                   <Label text="●  Disponibles" style="-fx-text-fill: #D8C39A; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label text="● Disponibles" style="-fx-text-fill: #D8C39A; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
                                                    <Label fx:id="lblLeyDisponibles" text="10" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
                                                 <HBox style="-fx-alignment: CENTER_LEFT;"><children>
-                                                   <Label text="●  En limpieza" style="-fx-text-fill: #D9A53B; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label text="● En limpieza" style="-fx-text-fill: #D9A53B; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
                                                    <Label fx:id="lblLeyLimpieza" text="2" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
                                                 <HBox style="-fx-alignment: CENTER_LEFT;"><children>
-                                                   <Label text="●  En mantenimiento" style="-fx-text-fill: #B3ACA2; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label text="● En mantenimiento" style="-fx-text-fill: #B3ACA2; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
                                                    <Label fx:id="lblLeyMantenimiento" text="0" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
                                                 <Region style="-fx-pref-height: 1; -fx-background-color: #EEE7D9;" />
                                                 <HBox style="-fx-alignment: CENTER_LEFT;"><children>
-                                                   <Label text="Total de habitaciones" style="-fx-font-size: 11.5px; -fx-text-fill: #6A5F52; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
+                                                   <Label text="Total" style="-fx-font-size: 11.5px; -fx-text-fill: #6A5F52; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
                                                    <Label fx:id="lblTotalHabitaciones" text="30" style="-fx-font-size: 12.5px; -fx-text-fill: #2C2118; -fx-font-weight: bold;" />
                                                 </children></HBox>
                                              </children>
                                           </VBox>
                                        </children>
-                                    </HBox>
+                                    </VBox>
                                  </children>
                               </VBox>
 
@@ -296,12 +296,12 @@
                               <VBox fx:id="tarjetaDistribucion" alignment="CENTER" prefWidth="330.0" spacing="6.0"
                                     style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
                                  <children>
-                                    <Label text="🧾  Distribución de ingresos (Hoy)" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
-                                    <HBox alignment="CENTER_LEFT" spacing="18.0">
+                                    <Label text="Ingresos de hoy" style="-fx-font-size: 13.5px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
+                                    <VBox alignment="TOP_CENTER" spacing="6.0">
                                        <children>
                                           <StackPane>
                                              <children>
-                                                <PieChart fx:id="chartDistribucion" labelsVisible="false" legendVisible="false" prefHeight="190.0" prefWidth="190.0" startAngle="90.0" />
+                                                <PieChart fx:id="chartDistribucion" labelsVisible="false" legendVisible="false" prefHeight="150.0" prefWidth="150.0" startAngle="90.0" />
                                                 <VBox alignment="CENTER" mouseTransparent="true">
                                                    <children>
                                                       <Label fx:id="lblTotalIngresos" text="S/ 2,680" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1F1811;" />
@@ -313,17 +313,17 @@
                                           <VBox spacing="10.0" HBox.hgrow="ALWAYS">
                                              <children>
                                                 <HBox style="-fx-alignment: CENTER_LEFT;"><children>
-                                                   <Label text="●  Habitaciones" style="-fx-text-fill: #6B4A1E; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label text="● Habitaciones" style="-fx-text-fill: #6B4A1E; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
                                                    <Label fx:id="lblPorcentajeHabitaciones" text="76%" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
                                                 <HBox style="-fx-alignment: CENTER_LEFT;"><children>
-                                                   <Label text="●  Tienda" style="-fx-text-fill: #D9A53B; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" />
+                                                   <Label text="● Tienda" style="-fx-text-fill: #D9A53B; -fx-font-size: 12px;" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
                                                    <Label fx:id="lblPorcentajeTienda" text="13%" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2C2118;" />
                                                 </children></HBox>
                                              </children>
                                           </VBox>
                                        </children>
-                                    </HBox>
+                                    </VBox>
                                  </children>
                               </VBox>
 
