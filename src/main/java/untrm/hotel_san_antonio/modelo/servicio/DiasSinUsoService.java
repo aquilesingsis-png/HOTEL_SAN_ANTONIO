@@ -10,7 +10,7 @@ import java.util.Set;
 import untrm.hotel_san_antonio.modelo.dao.AuditoriaDAO;
 import untrm.hotel_san_antonio.modelo.dao.DiasSinUsoDAO;
 import untrm.hotel_san_antonio.modelo.dao.DiasSinUsoDAO.Corte;
-import untrm.hotel_san_antonio.modelo.dao.DiasSinUsoDAO.ResumenDia;
+import untrm.hotel_san_antonio.modelo.ResumenDia;
 import untrm.hotel_san_antonio.modelo.conexion.ConexionBD;
 import untrm.hotel_san_antonio.modelo.seguridad.Permisos;
 import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;

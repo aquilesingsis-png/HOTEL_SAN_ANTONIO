@@ -12,8 +12,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO;
-import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO.Item;
+import untrm.hotel_san_antonio.modelo.servicio.AlmacenService;
+import untrm.hotel_san_antonio.modelo.ItemInventario;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 
 /** Ventana para registrar una entrada, una salida o un conteo físico de un producto. */
@@ -48,8 +48,8 @@ public class StockFormController {
         METODOS.put("Tarjeta", "TARJETA");
     }
 
-    private final AlmacenDAO dao = new AlmacenDAO();
-    private Item producto;
+    private final AlmacenService almacenService = new AlmacenService();
+    private ItemInventario producto;
     private Runnable alGuardar;
 
     @FXML
@@ -71,7 +71,7 @@ public class StockFormController {
         recalcular();
     }
 
-    public void iniciar(Item producto, Runnable alGuardar) {
+    public void iniciar(ItemInventario producto, Runnable alGuardar) {
         this.producto = producto;
         this.alGuardar = alGuardar;
         lblProducto.setText(producto.codigo() + " · " + producto.nombre());
@@ -89,7 +89,7 @@ public class StockFormController {
 
     /** Una entrada con motivo «Compra» pide el costo y puede anotarse como gasto. */
     private boolean esCompra() {
-        return ENTRADA.equals(cmbTipo.getValue()) && AlmacenDAO.MOTIVO_COMPRA.equals(cmbMotivo.getValue());
+        return ENTRADA.equals(cmbTipo.getValue()) && AlmacenService.MOTIVO_COMPRA.equals(cmbMotivo.getValue());
     }
 
     private BigDecimal leerCosto() {
@@ -155,7 +155,7 @@ public class StockFormController {
                 }
                 metodo = chkGasto.isSelected() ? METODOS.get(cmbMetodoPago.getValue()) : null;
             }
-            dao.moverStock(producto.id(), tipo(), cantidad, cmbMotivo.getValue(), txtReferencia.getText(),
+            almacenService.moverStock(producto.id(), tipo(), cantidad, cmbMotivo.getValue(), txtReferencia.getText(),
                     txtObservacion.getText(), costo, metodo);
             if (alGuardar != null) {
                 alGuardar.run();

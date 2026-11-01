@@ -2,7 +2,6 @@ package untrm.hotel_san_antonio.modelo.servicio;
 
 import untrm.hotel_san_antonio.modelo.dao.AuditoriaDAO;
 import untrm.hotel_san_antonio.modelo.dao.ComprobanteDAO;
-import untrm.hotel_san_antonio.modelo.dao.CuentaDAO;
 import untrm.hotel_san_antonio.modelo.dao.DetalleVentaDAO;
 import untrm.hotel_san_antonio.modelo.dao.HabitacionDAO;
 import untrm.hotel_san_antonio.modelo.dao.ReservaDAO;
@@ -46,7 +45,7 @@ public class ComprobanteService {
 
     private final ReservaDAO reservaDAO = new ReservaDAO();
     private final HabitacionDAO habitacionDAO = new HabitacionDAO();
-    private final CuentaDAO cuentaDAO = new CuentaDAO();
+    private final CuentaService cuentas = new CuentaService();
     private final VentaTiendaDAO ventaDAO = new VentaTiendaDAO();
     private final DetalleVentaDAO detalleDAO = new DetalleVentaDAO();
     private final ComprobanteDAO comprobanteDAO = new ComprobanteDAO();
@@ -85,7 +84,7 @@ public class ComprobanteService {
         try (Connection con = ConexionBD.conectar()) {
             Habitacion habitacion = habitacionDAO.buscarPorNumero(con, limpio);
             if (habitacion != null) {
-                CuentaHabitacion cuenta = cuentaDAO.obtener(con, habitacion.getIdHabitacion());
+                CuentaHabitacion cuenta = cuentas.obtener(con, habitacion.getIdHabitacion());
                 if (cuenta != null) {
                     return cuenta;
                 }
@@ -93,10 +92,10 @@ public class ComprobanteService {
             Reserva porCodigo = reservaDAO.buscarPorCodigo(con, limpio);
             if (porCodigo != null) {
                 return "CHECKIN".equals(porCodigo.getEstado())
-                        ? cuentaDAO.obtener(con, porCodigo.getIdHabitacion()) : null;
+                        ? cuentas.obtener(con, porCodigo.getIdHabitacion()) : null;
             }
             List<Reserva> enCurso = reservaDAO.buscar(con, limpio, "CHECKIN", null, null);
-            return enCurso.isEmpty() ? null : cuentaDAO.obtener(con, enCurso.get(0).getIdHabitacion());
+            return enCurso.isEmpty() ? null : cuentas.obtener(con, enCurso.get(0).getIdHabitacion());
         }
     }
 
@@ -210,7 +209,7 @@ public class ComprobanteService {
                 throw new IllegalStateException("Esta estadía ya tiene el comprobante " + existente
                         + ". No se emite otro.");
             }
-            CuentaHabitacion real = cuentaDAO.obtener(con, reserva.getIdHabitacion());
+            CuentaHabitacion real = cuentas.obtener(con, reserva.getIdHabitacion());
             if (real == null || real.getIdReserva() != reserva.getIdReserva()) {
                 throw new IllegalStateException("La cuenta cambió. Vuelve a cargar la operación.");
             }
@@ -407,7 +406,10 @@ public class ComprobanteService {
      * sean desde dos PCs); si aun asi otra se adelantara con el mismo numero, se pide el siguiente.
      */
     private int insertarConNumero(Connection con, Comprobante c) throws SQLException {
-        comprobanteDAO.bloquearSerie(con, c.getTipo());
+        if (!comprobanteDAO.tomarSerie(con, c.getTipo())) {
+            throw new IllegalStateException(
+                    "Otra persona está emitiendo un comprobante. Intenta de nuevo en unos segundos.");
+        }
         for (int intento = 1; ; intento++) {
             c.setNumero(comprobanteDAO.generarNumero(con, c.getTipo()));
             try {

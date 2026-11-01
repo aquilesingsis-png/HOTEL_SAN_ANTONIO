@@ -19,17 +19,15 @@ public class ComprobanteDAO {
     );
 
     /**
-     * Reserva el turno para emitir en la serie de ese tipo: una sola persona a la vez toma el siguiente
-     * numero (aunque sea desde otra PC); las demas esperan hasta 10 segundos. Se suelta con liberarSerie.
+     * Intenta reservar el turno para emitir en la serie de ese tipo: una sola persona a la vez toma el siguiente
+     * numero (aunque sea desde otra PC); las demas esperan hasta 10 segundos. Devuelve false si no lo consiguio.
+     * Se suelta con liberarSerie.
      */
-    public void bloquearSerie(Connection con, String tipo) throws SQLException {
+    public boolean tomarSerie(Connection con, String tipo) throws SQLException {
         try (PreparedStatement ps = con.prepareStatement("SELECT GET_LOCK(?, 10)")) {
             ps.setString(1, "hotel_comprobante_" + tipo);
             try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next() || rs.getInt(1) != 1) {
-                    throw new IllegalStateException(
-                            "Otra persona está emitiendo un comprobante. Intenta de nuevo en unos segundos.");
-                }
+                return rs.next() && rs.getInt(1) == 1;
             }
         }
     }

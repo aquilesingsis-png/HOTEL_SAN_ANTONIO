@@ -21,8 +21,9 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import untrm.hotel_san_antonio.modelo.dao.CajaDAO;
-import untrm.hotel_san_antonio.modelo.dao.CajaDAO.Movimiento;
+import untrm.hotel_san_antonio.modelo.servicio.CajaService;
+import untrm.hotel_san_antonio.modelo.MovimientoLibro;
+import untrm.hotel_san_antonio.modelo.TotalesCaja;
 import untrm.hotel_san_antonio.modelo.servicio.VentaService;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.controlador.util.Consulta;
@@ -60,26 +61,26 @@ public class LibroCajaController {
     @FXML private Label lblNeto;
     @FXML private Label lblEfectivo;
 
-    @FXML private TableView<Movimiento> tabla;
-    @FXML private TableColumn<Movimiento, String> colFecha;
-    @FXML private TableColumn<Movimiento, String> colTipo;
-    @FXML private TableColumn<Movimiento, String> colConcepto;
-    @FXML private TableColumn<Movimiento, String> colMonto;
-    @FXML private TableColumn<Movimiento, String> colMetodo;
-    @FXML private TableColumn<Movimiento, String> colCaja;
-    @FXML private TableColumn<Movimiento, String> colDocumento;
-    @FXML private TableColumn<Movimiento, String> colCliente;
-    @FXML private TableColumn<Movimiento, String> colResponsable;
+    @FXML private TableView<MovimientoLibro> tabla;
+    @FXML private TableColumn<MovimientoLibro, String> colFecha;
+    @FXML private TableColumn<MovimientoLibro, String> colTipo;
+    @FXML private TableColumn<MovimientoLibro, String> colConcepto;
+    @FXML private TableColumn<MovimientoLibro, String> colMonto;
+    @FXML private TableColumn<MovimientoLibro, String> colMetodo;
+    @FXML private TableColumn<MovimientoLibro, String> colCaja;
+    @FXML private TableColumn<MovimientoLibro, String> colDocumento;
+    @FXML private TableColumn<MovimientoLibro, String> colCliente;
+    @FXML private TableColumn<MovimientoLibro, String> colResponsable;
     @FXML private Label lblCantidad;
     @FXML private Label lblAviso;
     @FXML private Label lblPagina;
     @FXML private Button btnAnterior;
     @FXML private Button btnSiguiente;
 
-    private final CajaDAO cajaDAO = new CajaDAO();
+    private final CajaService cajaService = new CajaService();
     private final VentaService ventaService = new VentaService();
-    private List<Movimiento> resultado = List.of();
-    private CajaDAO.Totales totalesActuales = new CajaDAO.Totales(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+    private List<MovimientoLibro> resultado = List.of();
+    private TotalesCaja totalesActuales = new TotalesCaja(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
     private boolean recortado;
     private final Consulta<Carga> consulta = new Consulta<>();
     private int pagina = 1;
@@ -108,7 +109,7 @@ public class LibroCajaController {
         colResponsable.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().responsable()));
         colTipo.setCellFactory(columna -> celdaDeColor());
         // todas las celdas centradas en vertical; el monto, a la derecha
-        for (TableColumn<Movimiento, String> columna : List.of(colFecha, colConcepto, colMetodo, colCaja,
+        for (TableColumn<MovimientoLibro, String> columna : List.of(colFecha, colConcepto, colMetodo, colCaja,
                 colDocumento, colCliente, colResponsable)) {
             columna.setStyle("-fx-alignment: CENTER-LEFT;");
         }
@@ -122,7 +123,7 @@ public class LibroCajaController {
     }
 
     /** Lo que trae una busqueda: la lista (con uno de mas que el limite, para saber si hay mas) y los totales completos. */
-    private record Carga(List<Movimiento> lista, CajaDAO.Totales totales) { }
+    private record Carga(List<MovimientoLibro> lista, TotalesCaja totales) { }
 
     @FXML
     private void buscar() {
@@ -133,11 +134,11 @@ public class LibroCajaController {
         String origen = origenElegido();
         String texto = txtBuscar.getText();
         consulta.lanzar(tabla,
-                () -> new Carga(cajaDAO.listar(desde, hasta, tipo, metodo, origen, texto),
-                        cajaDAO.totales(desde, hasta, tipo, metodo, origen, texto)),
+                () -> new Carga(cajaService.listar(desde, hasta, tipo, metodo, origen, texto),
+                        cajaService.totales(desde, hasta, tipo, metodo, origen, texto)),
                 carga -> mostrarCarga(carga.lista(), carga.totales()),
                 error -> {
-                    mostrarCarga(List.of(), new CajaDAO.Totales(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
+                    mostrarCarga(List.of(), new TotalesCaja(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
                     if (error instanceof SecurityException) {
                         Alertas.mostrarError("Caja", error.getMessage());
                     } else {
@@ -146,11 +147,11 @@ public class LibroCajaController {
                 });
     }
 
-    private void mostrarCarga(List<Movimiento> lista, CajaDAO.Totales totales) {
+    private void mostrarCarga(List<MovimientoLibro> lista, TotalesCaja totales) {
         totalesActuales = totales;
         // la lista trae uno de mas que el limite: asi se sabe que hay mas y no se muestra en silencio un corte
-        recortado = lista.size() > CajaDAO.LIMITE;
-        resultado = recortado ? List.copyOf(lista.subList(0, CajaDAO.LIMITE)) : lista;
+        recortado = lista.size() > CajaService.LIMITE;
+        resultado = recortado ? List.copyOf(lista.subList(0, CajaService.LIMITE)) : lista;
         pagina = 1;
         mostrar();
     }
@@ -183,7 +184,7 @@ public class LibroCajaController {
     /** Anula la venta seleccionada: pide el motivo, avisa lo que pasa y deja todo en la auditoria. */
     @FXML
     private void anularVenta() {
-        Movimiento fila = tabla.getSelectionModel().getSelectedItem();
+        MovimientoLibro fila = tabla.getSelectionModel().getSelectedItem();
         if (!esVentaAnulable(fila)) {
             Alertas.mostrarInfo("Anular venta", "Selecciona en la lista una venta del carrito que no esté anulada.");
             return;
@@ -219,7 +220,7 @@ public class LibroCajaController {
         }
     }
 
-    private boolean esVentaAnulable(Movimiento fila) {
+    private boolean esVentaAnulable(MovimientoLibro fila) {
         return fila != null && "Carrito".equals(fila.origen()) && !"ANULADA".equals(fila.tipo());
     }
 
@@ -301,7 +302,7 @@ public class LibroCajaController {
                 + SesionActual.getUsuario().getNombreCompleto());
 
         List<List<String>> filas = new ArrayList<>();
-        for (Movimiento m : resultado) {
+        for (MovimientoLibro m : resultado) {
             filas.add(List.of(m.fecha().format(FORMATO_FECHA), textoTipo(m.tipo()), m.concepto(),
                     String.format(Locale.US, "%.2f", m.monto()), textoMetodo(m.metodo()), textoCaja(m.metodo()),
                     vacioSiNulo(m.documento()), vacioSiNulo(m.cliente()), m.responsable()));
@@ -328,8 +329,8 @@ public class LibroCajaController {
         btnAnterior.setDisable(pagina <= 1);
         btnSiguiente.setDisable(pagina >= total);
         lblCantidad.setText("TOTAL DE REGISTROS: " + resultado.size() + (recortado ? " (hay más)" : ""));
-        lblAviso.setText("Hay más de " + CajaDAO.LIMITE + " movimientos con estos filtros: la lista muestra solo los "
-                + CajaDAO.LIMITE + " más recientes. Los totales de arriba sí incluyen todos. Acota las fechas para ver el resto.");
+        lblAviso.setText("Hay más de " + CajaService.LIMITE + " movimientos con estos filtros: la lista muestra solo los "
+                + CajaService.LIMITE + " más recientes. Los totales de arriba sí incluyen todos. Acota las fechas para ver el resto.");
         lblAviso.setVisible(recortado);
         lblAviso.setManaged(recortado);
     }
@@ -339,7 +340,7 @@ public class LibroCajaController {
     }
 
     /** El tipo se pinta: ingreso en verde, egreso en rojo, cargo a habitacion en gris. */
-    private TableCell<Movimiento, String> celdaDeColor() {
+    private TableCell<MovimientoLibro, String> celdaDeColor() {
         return new TableCell<>() {
             @Override
             protected void updateItem(String texto, boolean vacio) {

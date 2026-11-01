@@ -13,10 +13,12 @@ import untrm.hotel_san_antonio.modelo.seguridad.Permisos;
 import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
 /** Operaciones sobre la cuenta de una habitacion ocupada: consultar, cobrar y hacer check-out. */
@@ -34,7 +36,7 @@ public class CuentaService {
     public CuentaHabitacion obtener(int idHabitacion) throws SQLException {
         Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
         try (Connection con = ConexionBD.conectar()) {
-            return cuentaDAO.obtener(con, idHabitacion);
+            return obtener(con, idHabitacion);
         }
     }
 
@@ -51,7 +53,7 @@ public class CuentaService {
         try (Connection con = ConexionBD.conectar()) {
             con.setAutoCommit(false);
             try {
-                CuentaHabitacion cuenta = cuentaDAO.obtener(con, idHabitacion);
+                CuentaHabitacion cuenta = obtener(con, idHabitacion);
                 if (cuenta == null) {
                     throw new IllegalStateException("La habitación ya no tiene una estadía activa.");
                 }
@@ -99,7 +101,7 @@ public class CuentaService {
         try (Connection con = ConexionBD.conectar()) {
             con.setAutoCommit(false);
             try {
-                CuentaHabitacion cuenta = cuentaDAO.obtener(con, idHabitacion);
+                CuentaHabitacion cuenta = obtener(con, idHabitacion);
                 if (cuenta == null) {
                     throw new IllegalStateException("La habitación ya no tiene una estadía activa.");
                 }
@@ -142,7 +144,7 @@ public class CuentaService {
         try (Connection con = ConexionBD.conectar()) {
             con.setAutoCommit(false);
             try {
-                CuentaHabitacion cuenta = cuentaDAO.obtener(con, idHabitacion);
+                CuentaHabitacion cuenta = obtener(con, idHabitacion);
                 if (cuenta == null) {
                     throw new IllegalStateException("La habitación ya no tiene una estadía activa.");
                 }
@@ -166,5 +168,71 @@ public class CuentaService {
     private String numeroHabitacion(Connection con, int idHabitacion) throws SQLException {
         Habitacion h = habitacionDAO.buscarPorId(con, idHabitacion);
         return h == null ? String.valueOf(idHabitacion) : h.getNumero();
+    }
+
+    private static final DateTimeFormatter FECHA_CUENTA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    /**
+     * Arma la cuenta de una habitación ocupada: el alojamiento noche por noche, los consumos de la tienda
+     * cargados a la habitación y los pagos hechos.
+     *
+     * @return la cuenta, o null si la habitación no tiene una reserva en CHECKIN
+     */
+    public CuentaHabitacion obtener(Connection con, int idHabitacion) throws SQLException {
+        CuentaDAO.EstadiaEnCurso estadia = cuentaDAO.buscarEstadiaEnCurso(con, idHabitacion);
+        if (estadia == null) {
+            return null;
+        }
+        CuentaHabitacion cuenta = new CuentaHabitacion();
+        LocalDate ingreso = estadia.ingreso();
+        LocalDate salida = estadia.salida();
+        BigDecimal montoTotal = estadia.montoTotal();
+        cuenta.setIdReserva(estadia.idReserva());
+        cuenta.setIdHabitacion(idHabitacion);
+        cuenta.setIdHuesped(estadia.idHuesped());
+        cuenta.setIngreso(ingreso);
+        cuenta.setHuesped(estadia.nombres() + " " + estadia.apellidos());
+        cuenta.setTipoDocumento(estadia.tipoDocumento());
+        cuenta.setNumDocumento(estadia.numDocumento());
+        cuenta.setTelefono(estadia.telefono());
+        if (estadia.razonSocial() != null) {
+            cuenta.setEmpresa(estadia.razonSocial() + " (RUC " + estadia.ruc() + ")");
+        }
+        cuenta.setFechaIngreso(ingreso.format(FECHA_CUENTA));
+        cuenta.setFechaSalida(salida.format(FECHA_CUENTA));
+        cuenta.setSalida(salida);
+
+        // Alojamiento: una fila por noche, desde el ingreso hasta la salida, a la tarifa pactada
+        int noches = (int) ChronoUnit.DAYS.between(ingreso, salida);
+        BigDecimal porNoche = montoTotal.divide(BigDecimal.valueOf(noches), 2, RoundingMode.HALF_UP);
+        cuenta.setTarifaNoche(porNoche);
+        cuenta.setNoches(noches);
+        BigDecimal acumulado = BigDecimal.ZERO;
+        for (int i = 0; i < noches; i++) {
+            LocalDate desde = ingreso.plusDays(i);
+            // la última noche absorbe los céntimos de redondeo para que el total coincida con la reserva
+            BigDecimal importe = (i == noches - 1) ? montoTotal.subtract(acumulado) : porNoche;
+            acumulado = acumulado.add(importe);
+            cuenta.getCargos().add(new CuentaHabitacion.Linea(desde.format(FECHA_CUENTA),
+                    desde.plusDays(1).format(FECHA_CUENTA), "Alojamiento", "Noche " + (i + 1), 1, importe, importe));
+        }
+
+        for (CuentaDAO.Consumo consumo : cuentaDAO.listarConsumos(con, idHabitacion, estadia.idHuesped(), ingreso)) {
+            cuenta.getCargos().add(new CuentaHabitacion.Linea(consumo.fecha().format(FECHA_CUENTA), "—", "Tienda",
+                    consumo.producto(), consumo.cantidad(), consumo.precioUnitario(), consumo.subtotal()));
+        }
+
+        for (CuentaDAO.PagoRegistrado pago : cuentaDAO.listarPagos(con, estadia.idReserva())) {
+            String fechaVisible = pago.fechaEvento() == null
+                    ? pago.fechaPago().format(FECHA_CUENTA)
+                    : pago.fechaEvento().toString() + " (registrado " + pago.fechaPago().format(FECHA_CUENTA) + ")";
+            cuenta.getPagos().add(new CuentaHabitacion.PagoLinea(fechaVisible, capitalizar(pago.tipo()),
+                    capitalizar(pago.metodo()), pago.monto()));
+        }
+        return cuenta;
+    }
+
+    private String capitalizar(String texto) {
+        return texto.substring(0, 1).toUpperCase() + texto.substring(1).toLowerCase();
     }
 }

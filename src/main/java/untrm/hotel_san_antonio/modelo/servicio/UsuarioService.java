@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import untrm.hotel_san_antonio.modelo.dao.AuditoriaDAO;
 import untrm.hotel_san_antonio.modelo.dao.UsuarioDAO;
+import untrm.hotel_san_antonio.modelo.CambioUsuario;
 import untrm.hotel_san_antonio.modelo.Usuario;
 import untrm.hotel_san_antonio.modelo.conexion.ConexionBD;
 import untrm.hotel_san_antonio.modelo.seguridad.PasswordUtil;
@@ -115,8 +116,6 @@ public class UsuarioService {
     }
 
     /** Una fila del historial de cambios de usuarios. */
-    public record Cambio(java.time.LocalDateTime fecha, String afectado, String accion, String detalle, String realizadoPor) { }
-
     /**
      * Cambia nombre, apellido, estado y rol en una sola operación. Protege al administrador que está
      * usando el sistema y deja siempre al menos un administrador activo.
@@ -162,21 +161,9 @@ public class UsuarioService {
         }
     }
 
-    public List<Cambio> listarHistorial() throws SQLException {
+    public List<CambioUsuario> listarHistorial() throws SQLException {
         Permisos.requerir("ADMINISTRADOR");
-        String sql = "SELECT a.fecha, COALESCE(afectado.usuario, CONCAT('#', a.id_entidad)), a.accion, "
-                + "COALESCE(a.detalle, ''), COALESCE(actor.usuario, 'Base de datos') FROM auditoria a "
-                + "LEFT JOIN usuario actor ON actor.id_usuario = a.id_usuario "
-                + "LEFT JOIN usuario afectado ON afectado.id_usuario = a.id_entidad "
-                + "WHERE a.entidad = 'usuario' AND (a.tipo_operacion IS NULL OR a.origen = 'BASE_DE_DATOS') "
-                + "ORDER BY a.fecha DESC, a.id_auditoria DESC";
-        List<Cambio> lista = new java.util.ArrayList<>();
-        try (Connection con = ConexionBD.conectar(); java.sql.Statement st = con.createStatement();
-             java.sql.ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) lista.add(new Cambio(rs.getTimestamp(1).toLocalDateTime(), rs.getString(2),
-                    rs.getString(3), rs.getString(4), rs.getString(5)));
-        }
-        return lista;
+        return auditoria.listarCambiosDeUsuarios();
     }
 
     public int crear(String nombre, String apellido, String login, String contrasena,

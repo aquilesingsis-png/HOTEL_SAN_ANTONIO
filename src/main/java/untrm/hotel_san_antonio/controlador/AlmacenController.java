@@ -20,8 +20,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
-import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO;
-import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO.Item;
+import untrm.hotel_san_antonio.modelo.servicio.AlmacenService;
+import untrm.hotel_san_antonio.modelo.ItemInventario;
+import untrm.hotel_san_antonio.modelo.CategoriaResumen;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.controlador.util.Consulta;
 import untrm.hotel_san_antonio.controlador.util.EstiloGlobal;
@@ -63,22 +64,22 @@ public class AlmacenController {
     @FXML private Button btnEditar;
     @FXML private Button btnStock;
     @FXML private Button btnEliminar;
-    @FXML private TableView<Item> tabla;
-    @FXML private TableColumn<Item, String> colCodigo;
-    @FXML private TableColumn<Item, String> colBarras;
-    @FXML private TableColumn<Item, String> colProducto;
-    @FXML private TableColumn<Item, String> colMarca;
-    @FXML private TableColumn<Item, String> colCategoria;
-    @FXML private TableColumn<Item, String> colPrecio;
-    @FXML private TableColumn<Item, String> colStock;
-    @FXML private TableColumn<Item, String> colSituacion;
-    @FXML private TableColumn<Item, String> colEstado;
+    @FXML private TableView<ItemInventario> tabla;
+    @FXML private TableColumn<ItemInventario, String> colCodigo;
+    @FXML private TableColumn<ItemInventario, String> colBarras;
+    @FXML private TableColumn<ItemInventario, String> colProducto;
+    @FXML private TableColumn<ItemInventario, String> colMarca;
+    @FXML private TableColumn<ItemInventario, String> colCategoria;
+    @FXML private TableColumn<ItemInventario, String> colPrecio;
+    @FXML private TableColumn<ItemInventario, String> colStock;
+    @FXML private TableColumn<ItemInventario, String> colSituacion;
+    @FXML private TableColumn<ItemInventario, String> colEstado;
     @FXML private Label lblCantidad;
 
-    private final AlmacenDAO dao = new AlmacenDAO();
-    private List<Item> inventario = List.of();
+    private final AlmacenService almacenService = new AlmacenService();
+    private List<ItemInventario> inventario = List.of();
     private final Consulta<Carga> consulta = new Consulta<>();
-    private List<Item> visibles = List.of();
+    private List<ItemInventario> visibles = List.of();
     private boolean cargando;
 
     @FXML
@@ -98,7 +99,7 @@ public class AlmacenController {
         colSituacion.setCellValueFactory(d -> new SimpleStringProperty(situacion(d.getValue())));
         colEstado.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().activo() ? "Activo" : "Inactivo"));
         colSituacion.setCellFactory(columna -> celdaSituacion());
-        for (TableColumn<Item, String> columna : List.of(colCodigo, colBarras, colProducto, colMarca,
+        for (TableColumn<ItemInventario, String> columna : List.of(colCodigo, colBarras, colProducto, colMarca,
                 colCategoria, colEstado)) {
             columna.setStyle("-fx-alignment: CENTER-LEFT;");
         }
@@ -128,15 +129,15 @@ public class AlmacenController {
     // ------------------------------------------------------------------- acciones
 
     /** Lo que trae una carga del almacen: el inventario y los nombres de las categorias. */
-    private record Carga(List<Item> inventario, List<String> categorias) { }
+    private record Carga(List<ItemInventario> inventario, List<String> categorias) { }
 
     @FXML
     private void cargar() {
         consulta.lanzar(tabla, () -> {
-                    List<Item> items = dao.listar();
+                    List<ItemInventario> items = almacenService.listar();
                     List<String> nombres = new ArrayList<>();
                     try {
-                        for (AlmacenDAO.CategoriaFila fila : dao.categorias()) nombres.add(fila.nombre());
+                        for (CategoriaResumen fila : almacenService.categorias()) nombres.add(fila.nombre());
                     } catch (SQLException error) {
                         // el listado sigue funcionando sin el filtro de categorías
                     }
@@ -172,13 +173,13 @@ public class AlmacenController {
 
     @FXML
     private void editar() {
-        Item elegido = tabla.getSelectionModel().getSelectedItem();
+        ItemInventario elegido = tabla.getSelectionModel().getSelectedItem();
         if (elegido != null) abrirProducto(elegido);
     }
 
     @FXML
     private void ajustarStock() {
-        Item elegido = tabla.getSelectionModel().getSelectedItem();
+        ItemInventario elegido = tabla.getSelectionModel().getSelectedItem();
         if (elegido == null) return;
         try {
             Navegacion.<StockFormController>abrirModal(RUTA_STOCK, "Ajustar stock",
@@ -190,14 +191,14 @@ public class AlmacenController {
 
     @FXML
     private void eliminar() {
-        Item elegido = tabla.getSelectionModel().getSelectedItem();
+        ItemInventario elegido = tabla.getSelectionModel().getSelectedItem();
         if (elegido == null) return;
         if (!Alertas.confirmar("Eliminar producto", "¿Eliminar «" + elegido.nombre()
                 + "»? Solo se puede si nunca se vendió ni tuvo movimientos de stock; si no, desactívelo al editarlo.")) {
             return;
         }
         try {
-            dao.eliminarProducto(elegido.id());
+            almacenService.eliminarProducto(elegido.id());
             cargar();
         } catch (IllegalStateException | SecurityException error) {
             Alertas.mostrarError("Eliminar producto", error.getMessage());
@@ -216,7 +217,7 @@ public class AlmacenController {
         }
     }
 
-    private void abrirProducto(Item producto) {
+    private void abrirProducto(ItemInventario producto) {
         try {
             Navegacion.<ProductoFormController>abrirModal(RUTA_PRODUCTO,
                     producto == null ? "Nuevo producto" : "Editar producto",
@@ -255,7 +256,7 @@ public class AlmacenController {
         return valor == null ? 10 : Integer.parseInt(valor.split(" ")[0]);
     }
 
-    private String situacion(Item item) {
+    private String situacion(ItemInventario item) {
         if (!item.activo()) return "—";
         if (item.stock() == 0) return AGOTADO;
         return item.stock() <= umbral() ? BAJO : NORMAL;
@@ -264,8 +265,8 @@ public class AlmacenController {
     private void filtrar() {
         if (cargando) return;
         String texto = txtBuscar.getText() == null ? "" : txtBuscar.getText().trim().toLowerCase(Locale.ROOT);
-        List<Item> resultado = new ArrayList<>();
-        for (Item item : inventario) {
+        List<ItemInventario> resultado = new ArrayList<>();
+        for (ItemInventario item : inventario) {
             if (!texto.isEmpty() && !(item.nombre().toLowerCase(Locale.ROOT).contains(texto)
                     || item.marca().toLowerCase(Locale.ROOT).contains(texto)
                     || item.codigoBarra().toLowerCase(Locale.ROOT).contains(texto)
@@ -278,11 +279,11 @@ public class AlmacenController {
             resultado.add(item);
         }
         visibles = resultado;
-        Item elegido = tabla.getSelectionModel().getSelectedItem();
+        ItemInventario elegido = tabla.getSelectionModel().getSelectedItem();
         tabla.getItems().setAll(visibles);
         tabla.refresh();
         if (elegido != null) {
-            for (Item item : visibles) {
+            for (ItemInventario item : visibles) {
                 if (item.id() == elegido.id()) tabla.getSelectionModel().select(item);
             }
         }
@@ -296,7 +297,7 @@ public class AlmacenController {
         int unidades = 0;
         int bajos = 0;
         int agotados = 0;
-        for (Item item : inventario) {
+        for (ItemInventario item : inventario) {
             if (!item.activo()) continue;
             activos++;
             unidades += item.stock();
@@ -310,7 +311,7 @@ public class AlmacenController {
     }
 
     /** Agotado en rojo, stock bajo en ámbar y normal en verde. */
-    private TableCell<Item, String> celdaSituacion() {
+    private TableCell<ItemInventario, String> celdaSituacion() {
         return new TableCell<>() {
             @Override
             protected void updateItem(String texto, boolean vacio) {
@@ -362,7 +363,7 @@ public class AlmacenController {
         List<List<String>> filas = new ArrayList<>();
         int unidades = 0;
         BigDecimal valor = BigDecimal.ZERO;
-        for (Item item : visibles) {
+        for (ItemInventario item : visibles) {
             filas.add(List.of(item.codigo(), item.codigoBarra(), item.nombre(), item.marca(), item.categoria(),
                     item.precio().toPlainString(), String.valueOf(item.stock()), situacion(item),
                     item.activo() ? "Activo" : "Inactivo"));

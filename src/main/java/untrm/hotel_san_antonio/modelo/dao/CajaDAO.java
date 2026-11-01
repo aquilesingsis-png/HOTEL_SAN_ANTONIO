@@ -2,38 +2,28 @@ package untrm.hotel_san_antonio.modelo.dao;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import untrm.hotel_san_antonio.modelo.CierreCaja;
+import untrm.hotel_san_antonio.modelo.MovimientoLibro;
+import untrm.hotel_san_antonio.modelo.TotalesCaja;
 import untrm.hotel_san_antonio.modelo.conexion.ConexionBD;
-import untrm.hotel_san_antonio.modelo.seguridad.Permisos;
-import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
 
 /**
  * Libro de caja: una sola lista con todo el dinero que entra y sale, venga de donde venga
- * (pagos de alojamiento, ventas del carrito, movimientos manuales y gastos).
+ * (pagos de alojamiento, ventas del carrito, movimientos manuales y gastos). Acceso a datos.
  */
 public class CajaDAO {
 
-    /**
-     * Un renglon del libro de caja. tipo: INGRESO, EGRESO, CARGO (venta cargada a una habitacion) o ANULADA
-     * (venta anulada: se ve pero no suma). idOrigen es el numero de la reserva, venta, movimiento o gasto.
-     */
-    public record Movimiento(LocalDateTime fecha, String tipo, String concepto, BigDecimal monto,
-                             String metodo, String documento, String cliente, String responsable,
-                             String origen, int idOrigen) { }
+    /** Cuántos renglones trae como máximo la lista; uno más se pide para saber si hay más. */
+    public static final int LIMITE = 5000;
 
-    /** Un cierre de caja ya guardado (borrador o confirmado); confirmado es la hora en que se confirmo. */
-    public record Cierre(int id, LocalDate fecha, String turno, String responsable, BigDecimal esperado,
-                         BigDecimal contado, BigDecimal diferencia, String estado, LocalDateTime confirmado) { }
-
-    /** Los cuatro origenes del dinero, unidos en una misma tabla virtual. */
+    /** Los cuatro orígenes del dinero, unidos en una misma tabla virtual. */
     private static final String TODOS = ""
             + "SELECT COALESCE(TIMESTAMP(p.fecha_evento, TIME(p.fecha_pago)), p.fecha_pago) AS fecha, 'INGRESO' AS tipo, "
             + "CONCAT(IF(r.estado = 'CANCELADA', 'Adelanto retenido por cancelación', CONCAT('Pago de cliente - ', "
@@ -71,25 +61,22 @@ public class CajaDAO {
             + "CONCAT('Gasto - ', g.concepto, ' (', g.categoria, ')'), g.monto, UPPER(g.metodo_pago), NULL, '', "
             + "CONCAT(u.nombre, ' ', u.apellido), 'Gasto', g.id_gasto "
             + "FROM gasto g JOIN usuario u ON u.id_usuario = g.id_usuario WHERE g.activo = TRUE";
-
-    /** Los ultimos cierres de caja, del mas reciente al mas antiguo: el Administrador ve todos; recepcion, los suyos. */
-    public List<Cierre> listarCierres() throws SQLException {
-        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
-        boolean todos = SesionActual.esAdministrador();
+    /** Los últimos 40 cierres de caja, del más reciente al más antiguo; con idUsuario solo los de esa persona. */
+    public List<CierreCaja> listarCierres(Integer idUsuario) throws SQLException {
         String sql = "SELECT c.id_cierre, c.fecha, c.turno, CONCAT(u.nombre, ' ', u.apellido) AS responsable, "
                 + "c.efectivo_esperado, c.efectivo_contado, c.diferencia, c.estado, c.fecha_confirmacion "
                 + "FROM cierre_caja c JOIN usuario u ON u.id_usuario = c.id_usuario "
-                + (todos ? "" : "WHERE c.id_usuario = ? ")
+                + (idUsuario == null ? "" : "WHERE c.id_usuario = ? ")
                 + "ORDER BY c.fecha DESC, c.id_cierre DESC LIMIT 40";
-        List<Cierre> lista = new ArrayList<>();
+        List<CierreCaja> lista = new ArrayList<>();
         try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql)) {
-            if (!todos) {
-                ps.setInt(1, SesionActual.getUsuario().getIdUsuario());
+            if (idUsuario != null) {
+                ps.setInt(1, idUsuario);
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     java.sql.Timestamp confirmado = rs.getTimestamp("fecha_confirmacion");
-                    lista.add(new Cierre(rs.getInt("id_cierre"), rs.getDate("fecha").toLocalDate(), rs.getString("turno"),
+                    lista.add(new CierreCaja(rs.getInt("id_cierre"), rs.getDate("fecha").toLocalDate(), rs.getString("turno"),
                             rs.getString("responsable"), rs.getBigDecimal("efectivo_esperado"),
                             rs.getBigDecimal("efectivo_contado"), rs.getBigDecimal("diferencia"), rs.getString("estado"),
                             confirmado == null ? null : confirmado.toLocalDateTime()));
@@ -99,34 +86,27 @@ public class CajaDAO {
         return lista;
     }
 
-    /** Cuantos renglones trae como maximo la lista; si hay mas, la pantalla avisa y los totales siguen completos. */
-    public static final int LIMITE = 5000;
-
-    /** Ingresos, egresos y efectivo en caja (ingresos menos egresos en efectivo) de todo lo que cumple los filtros. */
-    public record Totales(BigDecimal ingresos, BigDecimal egresos, BigDecimal efectivo) { }
-
     /**
      * @param tipo   INGRESO, EGRESO, CARGO, ANULADA o null (todos)
      * @param metodo EFECTIVO, YAPE, TRANSFERENCIA, TARJETA o null (todos)
      * @param origen Alojamiento, Carrito, Manual, Gasto o null (todos)
      * @param texto  se busca en el concepto, el cliente, el responsable y el documento
      */
-    public List<Movimiento> listar(LocalDate desde, LocalDate hasta, String tipo, String metodo,
-                                   String origen, String texto) throws SQLException {
-        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
+    public List<MovimientoLibro> listarMovimientos(LocalDate desde, LocalDate hasta, String tipo, String metodo,
+                                                   String origen, String texto) throws SQLException {
         List<Object> valores = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM (").append(TODOS).append(") t WHERE 1 = 1 ")
                 .append(filtros(desde, hasta, tipo, metodo, origen, texto, valores))
-                .append("ORDER BY t.fecha DESC LIMIT ").append(LIMITE + 1);   // uno de mas, para saber si hay mas
+                .append("ORDER BY t.fecha DESC LIMIT ").append(LIMITE + 1);   // uno de más, para saber si hay más
 
-        List<Movimiento> lista = new ArrayList<>();
+        List<MovimientoLibro> lista = new ArrayList<>();
         try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
             for (int i = 0; i < valores.size(); i++) {
                 ps.setObject(i + 1, valores.get(i));
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    lista.add(new Movimiento(rs.getTimestamp("fecha").toLocalDateTime(), rs.getString("tipo"),
+                    lista.add(new MovimientoLibro(rs.getTimestamp("fecha").toLocalDateTime(), rs.getString("tipo"),
                             rs.getString("concepto"), rs.getBigDecimal("monto"), rs.getString("metodo"),
                             rs.getString("documento"), rs.getString("cliente"), rs.getString("responsable"),
                             rs.getString("origen"), rs.getInt("id_origen")));
@@ -137,9 +117,8 @@ public class CajaDAO {
     }
 
     /** Los totales de todo lo que cumple los filtros, sin el corte de la lista. */
-    public Totales totales(LocalDate desde, LocalDate hasta, String tipo, String metodo,
-                           String origen, String texto) throws SQLException {
-        Permisos.requerir("ADMINISTRADOR", "RECEPCIONISTA");
+    public TotalesCaja totales(LocalDate desde, LocalDate hasta, String tipo, String metodo,
+                               String origen, String texto) throws SQLException {
         List<Object> valores = new ArrayList<>();
         String sql = "SELECT COALESCE(SUM(CASE WHEN t.tipo = 'INGRESO' THEN t.monto END), 0), "
                 + "COALESCE(SUM(CASE WHEN t.tipo = 'EGRESO' THEN t.monto END), 0), "
@@ -153,7 +132,7 @@ public class CajaDAO {
             }
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
-                return new Totales(rs.getBigDecimal(1), rs.getBigDecimal(2), rs.getBigDecimal(3));
+                return new TotalesCaja(rs.getBigDecimal(1), rs.getBigDecimal(2), rs.getBigDecimal(3));
             }
         }
     }
@@ -192,48 +171,24 @@ public class CajaDAO {
         return sql.toString();
     }
 
-    private final AuditoriaDAO auditoria = new AuditoriaDAO();
-
-    private int claveGenerada(PreparedStatement ps) throws SQLException {
-        try (ResultSet rs = ps.getGeneratedKeys()) {
-            if (!rs.next()) throw new SQLException("No se obtuvo el identificador generado.");
-            return rs.getInt(1);
-        }
-    }
-
-    /** Un ingreso o egreso de caja escrito a mano (solo el Administrador). */
-    public void guardarMovimientoCaja(String tipo, String concepto, String metodo,
-                                      BigDecimal monto, String referencia, String observacion,
-                                      String turno) throws SQLException {
-        Permisos.requerir("ADMINISTRADOR");
-        if (!List.of("INGRESO", "EGRESO").contains(tipo))
-            throw new IllegalArgumentException("Seleccione ingreso o egreso.");
-        if (concepto == null || concepto.isBlank() || concepto.length() > 150)
-            throw new IllegalArgumentException("Indique un concepto de hasta 150 caracteres.");
-        if (!List.of("EFECTIVO", "TARJETA", "TRANSFERENCIA", "YAPE").contains(metodo))
-            throw new IllegalArgumentException("Seleccione un método de pago válido.");
-        if (monto == null || monto.signum() <= 0 || monto.scale() > 2
-                || monto.compareTo(new BigDecimal("99999999.99")) > 0) {
-            throw new IllegalArgumentException("El monto debe ser mayor que cero, con hasta dos decimales.");
-        }
-        if (turno == null || turno.isBlank() || turno.length() > 50)
-            throw new IllegalArgumentException("Indique el turno o caja (hasta 50 caracteres).");
-        String nota = "Turno/caja: " + turno.trim()
-                + (observacion == null || observacion.isBlank() ? "" : "\n" + observacion.trim());
-        if (nota.length() > 500) throw new IllegalArgumentException("La observación supera 500 caracteres.");
-        try (Connection con = ConexionBD.conectar()) {
-            con.setAutoCommit(false);
-            try (PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO movimiento_caja(id_usuario,tipo,concepto,metodo_pago,monto,referencia,observacion) "
-                    + "VALUES (?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
-                ps.setInt(1, SesionActual.getUsuario().getIdUsuario()); ps.setString(2, tipo); ps.setString(3, concepto.trim());
-                ps.setString(4, metodo); ps.setBigDecimal(5, monto);
-                ps.setString(6, referencia); ps.setString(7, nota);
-                ps.executeUpdate();
-                auditoria.registrar(con, SesionActual.getUsuario().getIdUsuario(), "CAJA_MOVIMIENTO", "movimiento_caja",
-                        claveGenerada(ps), tipo + " " + monto + " " + concepto.trim());
-                con.commit();
-            } catch (SQLException | RuntimeException ex) { con.rollback(); throw ex; }
+    /** Guarda un ingreso o egreso escrito a mano y devuelve su número. */
+    public int insertarMovimiento(Connection con, int idUsuario, String tipo, String concepto, String metodo,
+                                  BigDecimal monto, String referencia, String observacion) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "INSERT INTO movimiento_caja(id_usuario,tipo,concepto,metodo_pago,monto,referencia,observacion) "
+                + "VALUES (?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, idUsuario);
+            ps.setString(2, tipo);
+            ps.setString(3, concepto);
+            ps.setString(4, metodo);
+            ps.setBigDecimal(5, monto);
+            ps.setString(6, referencia);
+            ps.setString(7, observacion);
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (!rs.next()) throw new SQLException("No se obtuvo el identificador generado.");
+                return rs.getInt(1);
+            }
         }
     }
 }

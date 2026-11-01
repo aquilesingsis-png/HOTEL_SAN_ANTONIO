@@ -16,7 +16,7 @@ import untrm.hotel_san_antonio.modelo.CuentaHabitacion;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Pago;
 import untrm.hotel_san_antonio.modelo.servicio.CuentaService;
-import untrm.hotel_san_antonio.modelo.servicio.ReservaService;
+import untrm.hotel_san_antonio.modelo.servicio.EstadiaService;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.controlador.util.CampoValidacion;
 
@@ -64,7 +64,7 @@ public class CuentaHabitacionController {
     private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final CuentaService cuentaService = new CuentaService();
-    private final ReservaService reservaService = new ReservaService();
+    private final EstadiaService estadiaService = new EstadiaService();
 
     private CuentaHabitacion cuentaActual;
     private Habitacion habitacion;
@@ -289,7 +289,7 @@ public class CuentaHabitacionController {
             return;
         }
         try {
-            reservaService.deshacerCheckIn(habitacion.getIdHabitacion(), motivo);
+            estadiaService.deshacerCheckIn(habitacion.getIdHabitacion(), motivo);
             if (alCambiar != null) {
                 alCambiar.run();
             }

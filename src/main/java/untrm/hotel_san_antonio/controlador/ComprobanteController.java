@@ -7,7 +7,6 @@ package untrm.hotel_san_antonio.controlador;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -25,8 +24,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 
-import untrm.hotel_san_antonio.modelo.dao.EmpresaDAO;
-import untrm.hotel_san_antonio.modelo.dao.HuespedDAO;
+import untrm.hotel_san_antonio.modelo.servicio.EmpresaService;
+import untrm.hotel_san_antonio.modelo.servicio.HuespedService;
 import untrm.hotel_san_antonio.modelo.Comprobante;
 import untrm.hotel_san_antonio.modelo.ComprobanteDocumento;
 import untrm.hotel_san_antonio.modelo.CuentaHabitacion;
@@ -36,7 +35,6 @@ import untrm.hotel_san_antonio.modelo.Huesped;
 import untrm.hotel_san_antonio.modelo.servicio.ComprobanteService;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.controlador.util.ConsultaApi;
-import untrm.hotel_san_antonio.modelo.conexion.ConexionBD;
 import untrm.hotel_san_antonio.modelo.util.PdfTexto;
 import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
 import untrm.hotel_san_antonio.modelo.util.Validador;
@@ -78,8 +76,8 @@ public class ComprobanteController {
     private static final DateTimeFormatter FECHA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final ComprobanteService comprobanteService = new ComprobanteService();
-    private final HuespedDAO huespedDAO = new HuespedDAO();
-    private final EmpresaDAO empresaDAO = new EmpresaDAO();
+    private final HuespedService huespedService = new HuespedService();
+    private final EmpresaService empresaService = new EmpresaService();
 
     private CuentaHabitacion cuentaActual;
     private ComprobanteService.VentaPendiente ventaActual;
@@ -303,7 +301,7 @@ public class ComprobanteController {
             return;
         }
         try {
-            Huesped local = huespedDAO.buscarPorDocumento("DNI", dni);
+            Huesped local = huespedService.buscarPorDocumento("DNI", dni);
             if (local != null) {
                 txtCliente.setText((local.getNombres() + " " + local.getApellidos()).trim());
                 // si el nombre cambio en RENIEC, se corrige en la base y aqui
@@ -331,8 +329,8 @@ public class ComprobanteController {
             return;
         }
         Empresa local;
-        try (Connection con = ConexionBD.conectar()) {
-            local = empresaDAO.buscarPorRuc(con, ruc);
+        try {
+            local = empresaService.buscarPorRuc(ruc);
         } catch (SQLException e) {
             Alertas.mostrarError("Error de base de datos", "No se pudo buscar la empresa.\n\n" + e.getMessage());
             return;

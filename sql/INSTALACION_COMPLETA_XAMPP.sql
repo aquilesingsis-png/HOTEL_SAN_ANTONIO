@@ -7,7 +7,7 @@
 --   actualizaciones (esta al final, bajo un titulo con lineas de =====). Se puede ejecutar mas de una vez.
 -- Todo cambio nuevo de la base se agrega al final de ese bloque, con ADD COLUMN IF NOT EXISTS y similares.
 --
--- Una base nueva crea 24 tablas, tipos, 24 habitaciones, catalogo de tienda, dos cuentas y el usuario de MySQL
+-- Una base nueva crea 23 tablas, tipos, 24 habitaciones, catalogo de tienda, dos cuentas y el usuario de MySQL
 -- hotel_app (el que usa el programa, con privilegios minimos; vea el punto 8 del bloque final).
 -- No contiene personas, reservas ni pagos inventados.
 -- Las habitaciones se inician DISPONIBLES para evitar ocupaciones ficticias.
@@ -385,17 +385,6 @@ CREATE TABLE movimiento_caja (
     CONSTRAINT fk_mc_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
     CONSTRAINT chk_mc_monto CHECK (monto > 0)
 );
-CREATE TABLE arqueo_caja (
-    id_arqueo INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    turno VARCHAR(50) NOT NULL,
-    efectivo_esperado DECIMAL(10,2) NOT NULL,
-    efectivo_contado DECIMAL(10,2) NOT NULL,
-    diferencia DECIMAL(10,2) NOT NULL,
-    observacion VARCHAR(500) NULL,
-    fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_ac_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
-);
 CREATE TABLE cierre_caja (
     id_cierre INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
@@ -553,7 +542,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON hotel_san_antonio.* TO 'hotel_app'@'127.
 --    el detalle indica con que usuario de MySQL). Las filas con tipo_operacion vacio son las que escribe el programa,
 --    que guardan que accion fue y por que. Vigilan las 15 tablas importantes (datos de personas, usuarios, reservas
 --    y dinero; insertar, modificar y borrar = 45 triggers). No se vigilan las tablas que ya son un historial o un
---    registro tecnico: movimiento_stock, cambio_habitacion, arqueo_caja, actividad_dia, corte_sistema,
+--    registro tecnico: movimiento_stock, cambio_habitacion, actividad_dia, corte_sistema,
 --    dia_regularizado y reserva_huesped.
 --    No guardan la clave cifrada de los usuarios. Para crear triggers hay que ejecutar el archivo con root.
 ALTER TABLE auditoria MODIFY COLUMN id_usuario INT NULL, MODIFY COLUMN id_entidad INT NULL;
@@ -880,3 +869,9 @@ CREATE TRIGGER trg_aud_venta_tienda_delete AFTER DELETE ON venta_tienda FOR EACH
            IF(@auditoria_usuario_id IS NULL, CONCAT('Cambio directo en la base de datos por ', USER()), 'Cambio hecho desde el sistema'),
            'DELETE', JSON_OBJECT('id_venta', OLD.`id_venta`, 'id_huesped', OLD.`id_huesped`, 'id_habitacion', OLD.`id_habitacion`, 'id_usuario', OLD.`id_usuario`, 'id_comprobante', OLD.`id_comprobante`, 'cliente_externo', OLD.`cliente_externo`, 'metodo_pago', OLD.`metodo_pago`, 'fecha_venta', OLD.`fecha_venta`, 'total', OLD.`total`, 'fecha_evento', OLD.`fecha_evento`, 'motivo_registro_tardio', OLD.`motivo_registro_tardio`, 'id_usuario_regulariza', OLD.`id_usuario_regulariza`, 'estado', OLD.`estado`, 'fecha_anulacion', OLD.`fecha_anulacion`, 'id_usuario_anula', OLD.`id_usuario_anula`, 'motivo_anulacion', OLD.`motivo_anulacion`), NULL, IF(@auditoria_usuario_id IS NULL, 'BASE_DE_DATOS', 'SISTEMA')
     FROM DUAL;
+
+-- 10) LIMPIEZA: se quita la tabla arqueo_caja (ningun modulo la usa; el conteo de efectivo esta en cierre_caja)
+--     y se agrega la clave foranea que faltaba en venta_tienda.id_usuario_regulariza.
+DROP TABLE IF EXISTS arqueo_caja;
+ALTER TABLE venta_tienda
+    ADD CONSTRAINT fk_venta_regulariza FOREIGN KEY IF NOT EXISTS (id_usuario_regulariza) REFERENCES usuario(id_usuario);

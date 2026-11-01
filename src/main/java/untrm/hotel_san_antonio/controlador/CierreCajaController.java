@@ -23,9 +23,10 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import untrm.hotel_san_antonio.modelo.dao.CajaDAO;
-import untrm.hotel_san_antonio.modelo.dao.CajaDAO.Cierre;
-import untrm.hotel_san_antonio.modelo.dao.CierreCajaDAO;
+import untrm.hotel_san_antonio.modelo.servicio.CajaService;
+import untrm.hotel_san_antonio.modelo.CierreCaja;
+import untrm.hotel_san_antonio.modelo.EntradaCierre;
+import untrm.hotel_san_antonio.modelo.ResumenCierre;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
 
@@ -77,19 +78,18 @@ public class CierreCajaController {
     @FXML private CheckBox chkRevisado;
     @FXML private Label lblMensaje;
 
-    @FXML private TableView<Cierre> tablaCierres;
-    @FXML private TableColumn<Cierre, String> colNumero;
-    @FXML private TableColumn<Cierre, String> colFecha;
-    @FXML private TableColumn<Cierre, String> colHora;
-    @FXML private TableColumn<Cierre, String> colTurno;
-    @FXML private TableColumn<Cierre, String> colResponsable;
-    @FXML private TableColumn<Cierre, String> colEsperado;
-    @FXML private TableColumn<Cierre, String> colContado;
-    @FXML private TableColumn<Cierre, String> colDiferencia;
-    @FXML private TableColumn<Cierre, String> colEstado;
+    @FXML private TableView<CierreCaja> tablaCierres;
+    @FXML private TableColumn<CierreCaja, String> colNumero;
+    @FXML private TableColumn<CierreCaja, String> colFecha;
+    @FXML private TableColumn<CierreCaja, String> colHora;
+    @FXML private TableColumn<CierreCaja, String> colTurno;
+    @FXML private TableColumn<CierreCaja, String> colResponsable;
+    @FXML private TableColumn<CierreCaja, String> colEsperado;
+    @FXML private TableColumn<CierreCaja, String> colContado;
+    @FXML private TableColumn<CierreCaja, String> colDiferencia;
+    @FXML private TableColumn<CierreCaja, String> colEstado;
 
-    private final CierreCajaDAO dao = new CierreCajaDAO();
-    private final CajaDAO cajaDAO = new CajaDAO();
+    private final CajaService cajaService = new CajaService();
     private final List<Spinner<Integer>> spinnersBilletes = new ArrayList<>();
     private final List<Spinner<Integer>> spinnersMonedas = new ArrayList<>();
     private final List<Label> subtotalesBilletes = new ArrayList<>();
@@ -241,7 +241,7 @@ public class CierreCajaController {
     @FXML
     private void cargarTurno() {
         try {
-            CierreCajaDAO.Resumen resumen = dao.resumen();
+            ResumenCierre resumen = cajaService.resumenCierre();
             cargando = true;
             txtFondoInicial.setText(resumen.fondoInicial().setScale(2).toPlainString());
             // sin un cierre anterior no hay de donde sacar la caja chica: se escribe una sola vez, a mano
@@ -267,7 +267,7 @@ public class CierreCajaController {
 
     private void cargarHistorial() {
         try {
-            tablaCierres.getItems().setAll(cajaDAO.listarCierres());
+            tablaCierres.getItems().setAll(cajaService.listarCierres());
         } catch (SQLException | SecurityException error) {
             tablaCierres.getItems().clear();
             lblMensaje.setText("No se pudo cargar el historial: " + error.getMessage());
@@ -329,7 +329,7 @@ public class CierreCajaController {
                 }
             }
             String observacion = txtObservacion.getText() == null ? "" : txtObservacion.getText().trim();
-            dao.guardar(new CierreCajaDAO.Entrada(turno, importe(txtFondoInicial), importe(txtCobros),
+            cajaService.guardarCierre(new EntradaCierre(turno, importe(txtFondoInicial), importe(txtCobros),
                     importe(txtOtros), importe(txtSalidas), contado, fondoSiguiente, observacion), confirmar);
             Alertas.mostrarInfo(confirmar ? "Cierre confirmado" : "Borrador guardado",
                     confirmar ? "El cierre del turno quedó registrado."

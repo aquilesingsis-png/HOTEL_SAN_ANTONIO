@@ -1,5 +1,7 @@
 package untrm.hotel_san_antonio.modelo.dao;
 
+import untrm.hotel_san_antonio.modelo.ResumenDia;
+
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
@@ -20,9 +22,6 @@ public class DiasSinUsoDAO {
     /** Un tramo de días seguidos sin uso y el estado de su plazo. */
     public record Corte(int id, LocalDate desde, LocalDate hasta, LocalDateTime habilitaHasta,
                         boolean vigente, long minutosRestantes, int reaperturas) { }
-
-    /** Lo registrado para un día pasado: ventas del carrito y pagos de reservas. */
-    public record ResumenDia(int ventas, BigDecimal totalVentas, int pagos, BigDecimal totalPagos) { }
 
     /** Fecha de hoy según el servidor de base de datos (el mismo reloj de todo el sistema). */
     public LocalDate hoy(Connection con) throws SQLException {

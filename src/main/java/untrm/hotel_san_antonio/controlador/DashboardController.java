@@ -6,27 +6,17 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
 import java.util.Locale;
-import java.util.Map;
 
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import javafx.scene.Node;
-import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
-import javafx.scene.chart.XYChart;
-import javafx.scene.paint.Color;
 
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 
@@ -42,6 +32,7 @@ import untrm.hotel_san_antonio.modelo.servicio.DecolectaTipoCambioService;
 import untrm.hotel_san_antonio.modelo.servicio.DashboardService;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.controlador.util.EstiloUtil;
+import untrm.hotel_san_antonio.controlador.util.GraficosInicio;
 import untrm.hotel_san_antonio.controlador.util.Navegacion;
 import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
 import untrm.hotel_san_antonio.modelo.util.Registro;
@@ -214,12 +205,6 @@ public class DashboardController {
     private TableColumn<Habitacion, String> colMantEstado;
 
     // Colores de las filas de las mini-tablas (antes en estilos.css, ".mini-table .table-row-cell").
-    private static final String FILA_MINI_NORMAL =
-            "-fx-background-color: #FFFFFF; -fx-border-color: transparent transparent #F0ECE2 transparent;";
-    private static final String FILA_MINI_IMPAR =
-            "-fx-background-color: #FBF9F5; -fx-border-color: transparent transparent #F0ECE2 transparent;";
-    private static final String FILA_MINI_SELECCIONADA =
-            "-fx-background-color: #704313; -fx-text-background-color: white;";
 
     private final DashboardService dashboardService = new DashboardService();
 
@@ -295,8 +280,8 @@ public class DashboardController {
         configurarColumnas();
 
         // Estilo de las mini-tablas (encabezado y filas), antes resuelto por ".mini-table" en el .css
-        estilizarMiniTabla(tablaLlegadas);
-        estilizarMiniTabla(tablaMantenimiento);
+        GraficosInicio.estilizarMiniTabla(tablaLlegadas);
+        GraficosInicio.estilizarMiniTabla(tablaMantenimiento);
 
         cargarDatos();
 
@@ -355,10 +340,10 @@ public class DashboardController {
                 new PieChart.Data("Habitaciones", r.ingresosHabitacionesHoy.doubleValue() + 0.0001),
                 new PieChart.Data("Tienda", r.ingresosTiendaHoy.doubleValue() + 0.0001)
         ));
-        colorearRodajas(chartDistribucion, "#8A5A1E", "#D9A53B");
+        GraficosInicio.colorearRodajas(chartDistribucion, "#8A5A1E", "#D9A53B");
 
-        crearGraficoIngresos(r.ingresosUltimaSemana);
-        crearGraficoHoras(r.movimientoPorHora);
+        contenedorGraficoIngresos.getChildren().setAll(GraficosInicio.graficoIngresos(r.ingresosUltimaSemana));
+        contenedorGraficoHoras.getChildren().setAll(GraficosInicio.graficoHoras(r.movimientoPorHora, SesionActual.esAdministrador()));
         if (SesionActual.esAdministrador()) {
             // respeta el periodo que el administrador eligió en cada gráfico
             actualizarHoras();
@@ -386,7 +371,7 @@ public class DashboardController {
                     new PieChart.Data("Limpieza", Math.max(r.limpieza, 0.0001)),
                     new PieChart.Data("Mantenimiento", Math.max(r.mantenimiento, 0.0001))
             ));
-            colorearRodajas(chartOcupacion, "#8A5A1E", "#D8C39A", "#D9A53B", "#B3ACA2");
+            GraficosInicio.colorearRodajas(chartOcupacion, "#8A5A1E", "#D8C39A", "#D9A53B", "#B3ACA2");
             return;
         }
         double promedio;
@@ -408,7 +393,7 @@ public class DashboardController {
                 new PieChart.Data("Ocupadas", Math.max(promedio, 0.0001)),
                 new PieChart.Data("Disponibles", Math.max(libres, 0.0001))
         ));
-        colorearRodajas(chartOcupacion, "#8A5A1E", "#D8C39A");
+        GraficosInicio.colorearRodajas(chartOcupacion, "#8A5A1E", "#D8C39A");
     }
 
     private void actualizarOcupacion() {
@@ -417,7 +402,7 @@ public class DashboardController {
 
     private void actualizarHoras() {
         try {
-            crearGraficoHoras(dashboardService.movimientoPorHora(diasHoras));
+            contenedorGraficoHoras.getChildren().setAll(GraficosInicio.graficoHoras(dashboardService.movimientoPorHora(diasHoras), SesionActual.esAdministrador()));
         } catch (SQLException e) {
             Alertas.mostrarError("Error de base de datos", "No se pudo cargar el movimiento por hora.\n\n" + e.getMessage());
         }
@@ -425,7 +410,7 @@ public class DashboardController {
 
     private void actualizarIngresos() {
         try {
-            crearGraficoIngresos(dashboardService.ingresosPorDia(diasIngresos));
+            contenedorGraficoIngresos.getChildren().setAll(GraficosInicio.graficoIngresos(dashboardService.ingresosPorDia(diasIngresos)));
         } catch (SQLException e) {
             Alertas.mostrarError("Error de base de datos", "No se pudieron cargar los ingresos.\n\n" + e.getMessage());
         }
@@ -477,23 +462,6 @@ public class DashboardController {
 
         lbl.setText(flecha + " " + Math.abs(cambio) + "%");
         lbl.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 8 10 0 0;");
-    }
-
-    /**
-     * Colorea, en orden, las "rodajas" de un donut (PieChart). Un Chart es un Region, no un
-     * Control (no tiene "piel" que avisar cuando esta lista): sus rodajas recien existen despues
-     * del primer paso de layout, por eso hace falta esperar un par de pulsos con Platform.runLater.
-     */
-    private void colorearRodajas(PieChart chart, String... colores) {
-        Platform.runLater(() -> Platform.runLater(() -> {
-            java.util.List<PieChart.Data> datos = chart.getData();
-            for (int i = 0; i < datos.size() && i < colores.length; i++) {
-                Node rodaja = datos.get(i).getNode();
-                if (rodaja != null) {
-                    rodaja.setStyle("-fx-pie-color: " + colores[i] + ";");
-                }
-            }
-        }));
     }
 
 
@@ -657,74 +625,6 @@ public class DashboardController {
     // GRÁFICO DE MOVIMIENTO POR HORA
     // =========================================================
 
-    /**
-     * Gráfico de líneas con puntos: cuántas operaciones (ventas del carrito y cobros de reservas) hubo en cada
-     * hora, para ver si el movimiento sube o baja a lo largo del día. Recepción ve las 24 horas de hoy; el
-     * administrador, el acumulado de 30 días entre las 7h y las 21h (más si hay movimiento fuera de ese rango).
-     */
-    private void crearGraficoHoras(Map<Integer, Integer> porHora) {
-        contenedorGraficoHoras.getChildren().clear();
-
-        int desde = 0;
-        int hasta = 23;
-        if (SesionActual.esAdministrador()) {
-            desde = 7;
-            hasta = 21;
-            for (int hora : porHora.keySet()) {
-                desde = Math.min(desde, hora);
-                hasta = Math.max(hasta, hora);
-            }
-        }
-
-        CategoryAxis ejeX = new CategoryAxis();
-        NumberAxis ejeY = new NumberAxis();
-        LineChart<String, Number> grafico = new LineChart<>(ejeX, ejeY);
-        grafico.setLegendVisible(false);
-        grafico.setAnimated(false);
-        grafico.setCreateSymbols(true);
-        grafico.setPrefHeight(230);
-        grafico.setStyle("-fx-background-color: transparent; -fx-padding: 0;");
-        grafico.setVerticalGridLinesVisible(false);
-
-        int maximo = porHora.values().stream().mapToInt(Integer::intValue).max().orElse(0);
-        int techo = Math.max(4, (int) Math.ceil(maximo * 1.2));
-        ejeY.setAutoRanging(false);
-        ejeY.setLowerBound(0);
-        ejeY.setUpperBound(techo);
-        ejeY.setTickUnit(Math.max(1, Math.ceil(techo / 4.0)));
-        ejeY.setMinorTickVisible(false);
-        ejeY.setTickMarkVisible(false);
-        ejeX.setTickMarkVisible(false);
-        ejeX.setTickLabelFill(Color.web("#A89B89"));
-        ejeY.setTickLabelFill(Color.web("#A89B89"));
-        ejeX.setStyle("-fx-font-size: 10.5px;");
-        ejeY.setStyle("-fx-font-size: 10.5px;");
-
-        XYChart.Series<String, Number> serie = new XYChart.Series<>();
-        for (int hora = desde; hora <= hasta; hora++) {
-            serie.getData().add(new XYChart.Data<>(hora + "h", porHora.getOrDefault(hora, 0)));
-        }
-        grafico.getData().add(serie);
-
-        // al pasar el mouse por cada punto se ve cuántas operaciones fueron a esa hora
-        for (XYChart.Data<String, Number> dato : serie.getData()) {
-            Runnable ayuda = () -> {
-                Node punto = dato.getNode();
-                if (punto != null) {
-                    int n = dato.getYValue().intValue();
-                    Tooltip.install(punto, new Tooltip(n + (n == 1 ? " operación a las " : " operaciones a las ")
-                            + dato.getXValue()));
-                }
-            };
-            if (dato.getNode() != null) {
-                ayuda.run();
-            } else {
-                dato.nodeProperty().addListener((obs, antes, nodo) -> ayuda.run());
-            }
-        }
-        contenedorGraficoHoras.getChildren().add(grafico);
-    }
-
     private HBox crearAlerta(String color, String texto) {
         Region punto = new Region();
         punto.setPrefSize(8.0, 8.0);
@@ -763,125 +663,8 @@ public class DashboardController {
 
 
     // =========================================================
-    // ESTILO DE LAS MINI-TABLAS (llegadas / mantenimiento)
-    // =========================================================
-
-    private void estilizarMiniTabla(TableView<?> tabla) {
-
-        if (tabla == null) {
-            return;
-        }
-
-        tabla.setStyle("-fx-background-color: transparent; -fx-font-size: 11.5px;");
-
-        aplicarFilasMiniTabla(tabla);
-
-        // Los encabezados de columna del TableView son piezas internas que la piel arma recien
-        // en su primer paso de layout: hace falta esperar un pulso mas alla de "la piel ya existe".
-        EstiloUtil.alArmarPiel(tabla, () -> Platform.runLater(() -> {
-
-            Node fondoEncabezado = tabla.lookup(".column-header-background");
-            if (fondoEncabezado != null) {
-                fondoEncabezado.setStyle("-fx-background-color: transparent;");
-            }
-
-            for (Node encabezado : tabla.lookupAll(".column-header")) {
-                encabezado.setStyle(
-                        "-fx-background-color: transparent; -fx-border-color: transparent transparent #E7E0D3 transparent;");
-            }
-
-            for (Node relleno : tabla.lookupAll(".filler")) {
-                relleno.setStyle(
-                        "-fx-background-color: transparent; -fx-border-color: transparent transparent #E7E0D3 transparent;");
-            }
-
-            for (Node etiqueta : tabla.lookupAll(".column-header .label")) {
-                etiqueta.setStyle("-fx-text-fill: #8A7F70; -fx-font-weight: normal; -fx-font-size: 10.5px;");
-            }
-        }));
-    }
-
-    private <T> void aplicarFilasMiniTabla(TableView<T> tabla) {
-
-        tabla.setFixedCellSize(34);
-
-        tabla.setRowFactory(t -> {
-
-            TableRow<T> fila = new TableRow<>();
-
-            Runnable actualizar = () -> {
-                if (fila.isEmpty()) {
-                    fila.setStyle("");
-                } else if (fila.isSelected()) {
-                    fila.setStyle(FILA_MINI_SELECCIONADA);
-                } else if (fila.getIndex() % 2 != 0) {
-                    fila.setStyle(FILA_MINI_IMPAR);
-                } else {
-                    fila.setStyle(FILA_MINI_NORMAL);
-                }
-            };
-
-            fila.selectedProperty().addListener((obs, antes, ahora) -> actualizar.run());
-            fila.indexProperty().addListener((obs, antes, ahora) -> actualizar.run());
-            fila.itemProperty().addListener((obs, antes, ahora) -> actualizar.run());
-
-            return fila;
-        });
-    }
-
-
-    // =========================================================
     // GRÁFICO DE INGRESOS (últimos 7 días)
     // =========================================================
-
-    private void crearGraficoIngresos(Map<LocalDate, BigDecimal> ingresosPorDia) {
-
-        contenedorGraficoIngresos.getChildren().clear();
-
-        CategoryAxis ejeX = new CategoryAxis();
-
-        NumberAxis ejeY = new NumberAxis();
-
-        AreaChart<String, Number> grafico =
-                new AreaChart<>(ejeX, ejeY);
-
-        grafico.setLegendVisible(false);
-
-        grafico.setAnimated(false);
-
-        grafico.setPrefHeight(230);
-
-        grafico.setStyle("-fx-background-color: transparent; -fx-padding: 0;");
-
-        grafico.setVerticalGridLinesVisible(false);
-
-        ejeY.setLowerBound(0);
-        ejeY.setAutoRanging(false);
-        double maximo = ingresosPorDia.values().stream().mapToDouble(BigDecimal::doubleValue).max().orElse(0);
-        double techo = Math.max(100, Math.ceil((maximo * 1.2) / 100) * 100);
-        ejeY.setUpperBound(techo);
-        ejeY.setTickUnit(techo / 4);
-
-        // Color y tamaño de las etiquetas de los ejes (antes ".income-chart .axis" en el .css)
-        ejeX.setTickLabelFill(Color.web("#A89B89"));
-        ejeY.setTickLabelFill(Color.web("#A89B89"));
-        ejeX.setStyle("-fx-font-size: 10.5px;");
-        ejeY.setStyle("-fx-font-size: 10.5px;");
-        ejeX.setTickMarkVisible(false);
-        ejeY.setTickMarkVisible(false);
-        ejeY.setMinorTickVisible(false);
-
-        XYChart.Series<String, Number> serie = new XYChart.Series<>();
-        for (Map.Entry<LocalDate, BigDecimal> dia : ingresosPorDia.entrySet()) {
-            String etiqueta = ingresosPorDia.size() > 7
-                    ? dia.getKey().format(DateTimeFormatter.ofPattern("dd/MM"))
-                    : dia.getKey().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.of("es", "PE"));
-            serie.getData().add(new XYChart.Data<>(etiqueta, dia.getValue()));
-        }
-        grafico.getData().add(serie);
-
-        contenedorGraficoIngresos.getChildren().add(grafico);
-    }
 
 
     // =========================================================

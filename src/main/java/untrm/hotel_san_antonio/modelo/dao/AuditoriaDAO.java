@@ -1,12 +1,17 @@
 package untrm.hotel_san_antonio.modelo.dao;
 
+import untrm.hotel_san_antonio.modelo.CambioUsuario;
+import untrm.hotel_san_antonio.modelo.conexion.ConexionBD;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class AuditoriaDAO {
     public void registrar(Connection con, int idUsuario, String accion, String entidad,
@@ -40,5 +45,25 @@ public class AuditoriaDAO {
                 return fecha == null ? null : fecha.toLocalDateTime();
             }
         }
+    }
+
+    /**
+     * Los cambios a cuentas de usuario, del más reciente al más antiguo: lo que hizo el programa y los cambios
+     * hechos directo en la base de datos (sin repetir cada cambio que ya anotó el programa).
+     */
+    public List<CambioUsuario> listarCambiosDeUsuarios() throws SQLException {
+        String sql = "SELECT a.fecha, COALESCE(afectado.usuario, CONCAT('#', a.id_entidad)), a.accion, "
+                + "COALESCE(a.detalle, ''), COALESCE(actor.usuario, 'Base de datos') FROM auditoria a "
+                + "LEFT JOIN usuario actor ON actor.id_usuario = a.id_usuario "
+                + "LEFT JOIN usuario afectado ON afectado.id_usuario = a.id_entidad "
+                + "WHERE a.entidad = 'usuario' AND (a.tipo_operacion IS NULL OR a.origen = 'BASE_DE_DATOS') "
+                + "ORDER BY a.fecha DESC, a.id_auditoria DESC";
+        List<CambioUsuario> lista = new ArrayList<>();
+        try (Connection con = ConexionBD.conectar(); java.sql.Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) lista.add(new CambioUsuario(rs.getTimestamp(1).toLocalDateTime(), rs.getString(2),
+                    rs.getString(3), rs.getString(4), rs.getString(5)));
+        }
+        return lista;
     }
 }

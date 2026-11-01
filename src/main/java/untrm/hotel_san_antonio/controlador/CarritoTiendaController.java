@@ -8,10 +8,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import untrm.hotel_san_antonio.modelo.dao.CategoriaDAO;
-import untrm.hotel_san_antonio.modelo.dao.EmpresaDAO;
-import untrm.hotel_san_antonio.modelo.dao.HuespedDAO;
-import untrm.hotel_san_antonio.modelo.dao.ProductoDAO;
+import untrm.hotel_san_antonio.modelo.EstadiaActiva;
+import untrm.hotel_san_antonio.modelo.servicio.EmpresaService;
+import untrm.hotel_san_antonio.modelo.servicio.HuespedService;
 import untrm.hotel_san_antonio.modelo.Categoria;
 import untrm.hotel_san_antonio.modelo.Comprobante;
 import untrm.hotel_san_antonio.modelo.ComprobanteDocumento;
@@ -24,7 +23,6 @@ import untrm.hotel_san_antonio.modelo.servicio.ComprobanteService;
 import untrm.hotel_san_antonio.modelo.servicio.VentaService;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.controlador.util.ConsultaApi;
-import untrm.hotel_san_antonio.modelo.conexion.ConexionBD;
 import untrm.hotel_san_antonio.modelo.util.Registro;
 import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
 import untrm.hotel_san_antonio.modelo.util.Validador;
@@ -96,10 +94,8 @@ public class CarritoTiendaController {
     @FXML 
     private TableColumn<DetalleVenta,BigDecimal> colCarritoPrecio, colSubtotal;
 
-    private final ProductoDAO productoDAO = new ProductoDAO();
-    private final CategoriaDAO categoriaDAO = new CategoriaDAO();
-    private final HuespedDAO huespedDAO = new HuespedDAO();
-    private final EmpresaDAO empresaDAO = new EmpresaDAO();
+    private final HuespedService huespedService = new HuespedService();
+    private final EmpresaService empresaService = new EmpresaService();
     private final VentaService ventaService = new VentaService();
     private final ComprobanteService comprobanteService = new ComprobanteService();
     private final ObservableList<Producto> productos = FXCollections.observableArrayList();
@@ -219,7 +215,7 @@ public class CarritoTiendaController {
         try {
             ObservableList<Categoria> lista = FXCollections.observableArrayList();
             lista.add(new Categoria(0, "Todas las categorías"));
-            lista.addAll(categoriaDAO.listar());
+            lista.addAll(ventaService.listarCategorias());
             cmbCategoria.setItems(lista);
             cmbCategoria.getSelectionModel().selectFirst();
         } catch (SQLException e) { Alertas.mostrarError("Tiendita", "No se pudieron cargar las categorías.\n" + e.getMessage()); }
@@ -229,18 +225,14 @@ public class CarritoTiendaController {
         try {
             Categoria c = cmbCategoria.getValue();
             Integer id = c == null || c.getIdCategoria() == 0 ? null : c.getIdCategoria();
-            productos.setAll(productoDAO.buscarActivos(txtBuscar.getText(), id));
+            productos.setAll(ventaService.buscarProductosActivos(txtBuscar.getText(), id));
             lblMostrando.setText("Mostrando 1 - " + productos.size() + " de " + productos.size() + " productos");
         } catch (SQLException e) { Alertas.mostrarError("Tiendita", "No se pudieron cargar los productos.\n" + e.getMessage()); }
     }
 
     private void cargarHabitaciones() {
-        ObservableList<EstadiaActiva> lista = FXCollections.observableArrayList();
-        String sql = "SELECT r.id_huesped,r.id_habitacion,h.numero,CONCAT(hu.nombres,' ',hu.apellidos) huesped FROM reserva r INNER JOIN habitacion h ON h.id_habitacion=r.id_habitacion INNER JOIN huesped hu ON hu.id_huesped=r.id_huesped WHERE r.estado='CHECKIN' ORDER BY h.numero";
-        try (Connection cn=ConexionBD.conectar(); 
-                PreparedStatement ps=cn.prepareStatement(sql); ResultSet rs=ps.executeQuery()) {
-            while(rs.next()) lista.add(new EstadiaActiva(rs.getInt(1),rs.getInt(2),rs.getString(3),rs.getString(4)));
-            cmbHabitacion.setItems(lista);
+        try {
+            cmbHabitacion.setItems(FXCollections.observableArrayList(ventaService.listarEstadiasActivas()));
             cmbHabitacion.setConverter(new StringConverter<EstadiaActiva>() { 
                 public String toString(EstadiaActiva e){
                     return e==null?"":e.toString();} 
@@ -274,7 +266,7 @@ public class CarritoTiendaController {
             return;
         }
         try {
-            Huesped local = huespedDAO.buscarPorDocumento("DNI", dni);
+            Huesped local = huespedService.buscarPorDocumento("DNI", dni);
             if (local != null) {
                 aplicarDatosPersona(dni, (local.getNombres() + " " + local.getApellidos()).trim());
                 // si el nombre cambio en RENIEC, se corrige en la base y aqui
@@ -304,8 +296,8 @@ public class CarritoTiendaController {
             return;
         }
         Empresa local;
-        try (Connection con = ConexionBD.conectar()) {
-            local = empresaDAO.buscarPorRuc(con, ruc);
+        try {
+            local = empresaService.buscarPorRuc(ruc);
         } catch (SQLException e) {
             Alertas.mostrarError("Error de base de datos", "No se pudo buscar la empresa.\n\n" + e.getMessage());
             return;
@@ -424,7 +416,7 @@ public class CarritoTiendaController {
         }
         Producto p;
         try {
-            p = productoDAO.buscarActivoPorId(d.getIdProducto());
+            p = ventaService.buscarProductoActivo(d.getIdProducto());
         } catch (SQLException ex) {
             Alertas.mostrarError("Producto", "No se pudo comprobar el stock.\n" + ex.getMessage());
             return;
@@ -505,40 +497,62 @@ public class CarritoTiendaController {
         String nombre = texto(txtNombreCliente);
         String direccion = texto(txtDireccion);
 
+        if (!ventaValida(habitacion, tipo, documento, nombre, direccion)) {
+            return;
+        }
+        VentaTienda venta = armarVenta(habitacion, nombre);
+        String detalle = habitacion != null ? "\nSe carga a la habitación " + habitacion.numero + " y se cobra con su cuenta."
+                : tipo != null ? "\nSe emitirá " + ("FACTURA".equals(tipo) ? "una factura." : "una boleta.") : "";
+        if (!Alertas.confirmar("Registrar venta", "Total: " + lblTotal.getText() + detalle + "\n¿Registrar la venta?")) {
+            return;
+        }
+        try {
+            int id = ventaService.registrarVenta(venta, new ArrayList<>(carrito));
+            venta.setIdVenta(id);
+            mostrarResultadoDeVenta(venta, id, tipo, documento, nombre, direccion);
+        } catch (Exception ex) {
+            Alertas.mostrarError("Venta", ex.getMessage());
+        }
+    }
+
+    /** Revisa lo que escribió el usuario antes de registrar la venta; avisa y devuelve false si algo falta. */
+    private boolean ventaValida(EstadiaActiva habitacion, String tipo, String documento, String nombre,
+                                String direccion) {
         if (carrito.isEmpty()) {
             Alertas.mostrarInfo("Carrito vacío", "Agrega al menos un producto antes de registrar la venta.");
-            return;
+            return false;
         }
         if (SesionActual.getUsuario() == null) {
             Alertas.mostrarError("Sesión", "No existe un usuario autenticado.");
-            return;
+            return false;
         }
         if ("FACTURA".equals(tipo)) {
             // Una factura siempre identifica a quien se le factura: el RUC no es opcional.
             if (!Validador.esRucValido(documento)) {
                 Alertas.mostrarInfo("RUC requerido", "Para una factura, ingrese un RUC válido de 11 dígitos.");
                 txtBuscarDni.requestFocus();
-                return;
+                return false;
             }
             if (nombre.isEmpty()) {
                 Alertas.mostrarInfo("Datos incompletos", "Ingrese la razón social de la empresa.");
                 txtNombreCliente.requestFocus();
-                return;
+                return false;
             }
             if (nombre.length() > 150 || direccion.isEmpty() || direccion.length() > 200) {
                 Alertas.mostrarInfo("Datos incompletos", "Revise la razón social y la dirección de facturación.");
-                return;
+                return false;
             }
         } else if ("BOLETA".equals(tipo) && !documento.isEmpty() && !Validador.esDniValido(documento)) {
             // En una boleta, el cliente puede preferir no dar sus datos: solo se valida si escribió algo.
             Alertas.mostrarInfo("DNI inválido", "El DNI debe contener exactamente 8 dígitos.");
             txtBuscarDni.requestFocus();
-            return;
+            return false;
         }
-        if (habitacion == null && !pagoValido()) {
-            return;
-        }
+        return habitacion != null || pagoValido();
+    }
 
+    /** La venta con los datos de la pantalla: a una habitación o pagada en el momento. */
+    private VentaTienda armarVenta(EstadiaActiva habitacion, String nombre) {
         VentaTienda venta = new VentaTienda();
         venta.setIdUsuario(SesionActual.getUsuario().getIdUsuario());
         venta.setIdComprobante(null);
@@ -553,44 +567,39 @@ public class CarritoTiendaController {
                     : btnTransferencia.isSelected() ? "TRANSFERENCIA" : "EFECTIVO");
             venta.setClienteExterno(nombre.isEmpty() ? "Cliente varios" : nombre);
         }
-        String detalle = habitacion != null ? "\nSe carga a la habitación " + habitacion.numero + " y se cobra con su cuenta."
-                : tipo != null ? "\nSe emitirá " + ("FACTURA".equals(tipo) ? "una factura." : "una boleta.") : "";
-        if (!Alertas.confirmar("Registrar venta", "Total: " + lblTotal.getText() + detalle + "\n¿Registrar la venta?")) {
-            return;
+        return venta;
+    }
+
+    /** Después de registrar la venta: emite el comprobante si el cliente lo pidió, limpia la pantalla y avisa. */
+    private void mostrarResultadoDeVenta(VentaTienda venta, int id, String tipo, String documento, String nombre,
+                                         String direccion) throws Exception {
+        ComprobanteDocumento emitido = null;
+        String problema = null;
+        if (tipo != null) {
+            try {
+                Comprobante c = comprobanteService.generarParaVenta(venta, tipo, new ComprobanteService.DatosCliente(
+                        "FACTURA".equals(tipo) ? "RUC" : "DNI", documento, nombre, direccion));
+                emitido = comprobanteService.documento(c.getIdComprobante());
+            } catch (Exception ex) {
+                Registro.fallo("CarritoTiendaController.onConfirmarVenta (comprobante de la venta " + id + ")", ex);
+                problema = ex.getMessage();
+            }
         }
-        try {
-            int id = ventaService.registrarVenta(venta, new ArrayList<>(carrito));
-            venta.setIdVenta(id);
-            ComprobanteDocumento emitido = null;
-            String problema = null;
-            if (tipo != null) {
-                try {
-                    Comprobante c = comprobanteService.generarParaVenta(venta, tipo, new ComprobanteService.DatosCliente(
-                            "FACTURA".equals(tipo) ? "RUC" : "DNI", documento, nombre, direccion));
-                    emitido = comprobanteService.documento(c.getIdComprobante());
-                } catch (Exception ex) {
-                    Registro.fallo("CarritoTiendaController.onConfirmarVenta (comprobante de la venta " + id + ")", ex);
-                    problema = ex.getMessage();
-                }
+        carrito.clear();
+        limpiarCliente();
+        actualizarTotales();
+        cargarProductos();
+        if (problema != null) {
+            Alertas.mostrarAdvertencia("Venta registrada sin comprobante", "La venta N.º " + id
+                    + " quedó registrada, pero no se pudo emitir el comprobante: " + problema
+                    + "\nPuedes emitirlo desde Comprobantes (origen «Venta de tienda») con el número de venta.");
+        } else if (emitido != null) {
+            if (Alertas.confirmar("Comprobante emitido", "Venta N.º " + id + " registrada. Se emitió el comprobante "
+                    + emitido.getComprobante().getNumero() + ".\n\n¿Guardarlo en PDF ahora?")) {
+                ImpresionComprobante.guardarPdf(tablaCarrito.getScene().getWindow(), emitido);
             }
-            carrito.clear();
-            limpiarCliente();
-            actualizarTotales();
-            cargarProductos();
-            if (problema != null) {
-                Alertas.mostrarAdvertencia("Venta registrada sin comprobante", "La venta N.º " + id
-                        + " quedó registrada, pero no se pudo emitir el comprobante: " + problema
-                        + "\nPuedes emitirlo desde Comprobantes (origen «Venta de tienda») con el número de venta.");
-            } else if (emitido != null) {
-                if (Alertas.confirmar("Comprobante emitido", "Venta N.º " + id + " registrada. Se emitió el comprobante "
-                        + emitido.getComprobante().getNumero() + ".\n\n¿Guardarlo en PDF ahora?")) {
-                    ImpresionComprobante.guardarPdf(tablaCarrito.getScene().getWindow(), emitido);
-                }
-            } else {
-                Alertas.mostrarInfo("Venta registrada", "Venta N.º " + id + " registrada correctamente.");
-            }
-        } catch (Exception ex) {
-            Alertas.mostrarError("Venta", ex.getMessage());
+        } else {
+            Alertas.mostrarInfo("Venta registrada", "Venta N.º " + id + " registrada correctamente.");
         }
     }
 
@@ -699,20 +708,4 @@ public class CarritoTiendaController {
         ((Stage) tablaCarrito.getScene().getWindow()).close();
     }
 
-    private static class EstadiaActiva {
-        final int idHuesped, idHabitacion;
-        final String numero, huesped;
-
-        EstadiaActiva(int idHuesped, int idHabitacion, String numero, String huesped) {
-            this.idHuesped = idHuesped;
-            this.idHabitacion = idHabitacion;
-            this.numero = numero;
-            this.huesped = huesped;
-        }
-
-        @Override
-        public String toString() {
-            return "Hab. " + numero + " — " + huesped;
-        }
-    }
 }

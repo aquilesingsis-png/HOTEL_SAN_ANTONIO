@@ -144,7 +144,7 @@ public class PrincipalController {
         javafx.concurrent.Task<Integer> tarea = new javafx.concurrent.Task<>() {
             @Override
             protected Integer call() throws Exception {
-                return new untrm.hotel_san_antonio.modelo.servicio.ReservaService().marcarNoLlegaron();
+                return new untrm.hotel_san_antonio.modelo.servicio.EstadiaService().marcarNoLlegaron();
             }
         };
         tarea.setOnFailed(e -> untrm.hotel_san_antonio.modelo.util.Registro.fallo(

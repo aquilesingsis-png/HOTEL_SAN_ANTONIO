@@ -130,13 +130,7 @@ public class DashboardService {
     /** Habitaciones ocupadas en promedio durante los últimos {@code dias} días, contando hoy (según las reservas). */
     public double ocupadasPromedio(int dias) throws SQLException {
         try (Connection con = ConexionBD.conectar()) {
-            int dias1 = Math.max(1, dias);
-            LocalDate hoy = LocalDate.now();
-            int suma = 0;
-            for (int atras = 0; atras < dias1; atras++) {
-                suma += reservaDAO.contarOcupadasEnFecha(con, hoy.minusDays(atras));
-            }
-            return suma / (double) dias1;
+            return reservaDAO.ocupadasPromedio(con, LocalDate.now(), Math.max(1, dias));
         }
     }
 
