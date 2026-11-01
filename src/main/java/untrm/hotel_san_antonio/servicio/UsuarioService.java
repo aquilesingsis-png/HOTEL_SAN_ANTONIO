@@ -168,7 +168,8 @@ public class UsuarioService {
                 + "COALESCE(a.detalle, ''), COALESCE(actor.usuario, 'Base de datos') FROM auditoria a "
                 + "LEFT JOIN usuario actor ON actor.id_usuario = a.id_usuario "
                 + "LEFT JOIN usuario afectado ON afectado.id_usuario = a.id_entidad "
-                + "WHERE a.entidad = 'usuario' ORDER BY a.fecha DESC, a.id_auditoria DESC";
+                + "WHERE a.entidad = 'usuario' AND (a.tipo_operacion IS NULL OR a.origen = 'BASE_DE_DATOS') "
+                + "ORDER BY a.fecha DESC, a.id_auditoria DESC";
         List<Cambio> lista = new java.util.ArrayList<>();
         try (Connection con = ConexionBD.conectar(); java.sql.Statement st = con.createStatement();
              java.sql.ResultSet rs = st.executeQuery(sql)) {
