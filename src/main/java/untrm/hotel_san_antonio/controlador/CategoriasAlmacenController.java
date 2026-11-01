@@ -10,10 +10,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import untrm.hotel_san_antonio.dao.AlmacenDAO;
-import untrm.hotel_san_antonio.dao.AlmacenDAO.CategoriaFila;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.Consulta;
+import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO;
+import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO.CategoriaFila;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.Consulta;
 
 /** Ventana para crear, renombrar y eliminar las categorías de productos. */
 public class CategoriasAlmacenController {

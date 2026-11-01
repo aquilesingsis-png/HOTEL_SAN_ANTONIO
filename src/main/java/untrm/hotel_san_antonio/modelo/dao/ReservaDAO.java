@@ -1,0 +1,480 @@
+package untrm.hotel_san_antonio.modelo.dao;
+
+import untrm.hotel_san_antonio.modelo.Reserva;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ReservaDAO {
+
+    public void cambiarHabitacionYPrecio(Connection con, int idReserva, int idHabitacion,
+                                         java.math.BigDecimal total) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE reserva SET id_habitacion = ?, monto_total = ? WHERE id_reserva = ?")) {
+            ps.setInt(1, idHabitacion);
+            ps.setBigDecimal(2, total);
+            ps.setInt(3, idReserva);
+            if (ps.executeUpdate() != 1) throw new SQLException("No se pudo actualizar la reserva.");
+        }
+    }
+
+    public void marcarRegistroRetroactivo(Connection con, int idReserva, java.time.LocalDate fechaEvento,
+                                          String motivo, int usuario) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "UPDATE reserva SET fecha_evento = ?, motivo_registro_tardio = ?, "
+                + "id_usuario_regulariza = ? WHERE id_reserva = ?")) {
+            ps.setDate(1, Date.valueOf(fechaEvento));
+            ps.setString(2, motivo);
+            ps.setInt(3, usuario);
+            ps.setInt(4, idReserva);
+            ps.executeUpdate();
+        }
+    }
+
+    public boolean existeCruceHistorico(Connection con, int idHabitacion,
+                                        java.time.LocalDate ingreso, java.time.LocalDate salida) throws SQLException {
+        String sql = "SELECT 1 FROM reserva WHERE id_habitacion = ? AND estado <> 'CANCELADA' "
+                + "AND fecha_checkin < ? AND fecha_checkout > ? LIMIT 1";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacion);
+            ps.setDate(2, Date.valueOf(salida));
+            ps.setDate(3, Date.valueOf(ingreso));
+            try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
+        }
+    }
+
+    /** Columnas que se traen siempre que se necesita mostrar una reserva (con el huesped y la habitacion). */
+    private static final String SELECT_BASE =
+            "SELECT r.*, "
+            + "hu.tipo_documento AS hu_tipo_doc, hu.num_documento AS hu_num_doc, "
+            + "hu.nombres AS hu_nombres, hu.apellidos AS hu_apellidos, "
+            + "hu.telefono AS hu_telefono, hu.email AS hu_email, "
+            + "h.numero AS hab_numero, h.piso AS hab_piso, t.nombre AS hab_tipo "
+            + "FROM reserva r "
+            + "JOIN huesped hu ON hu.id_huesped = r.id_huesped "
+            + "JOIN habitacion h ON h.id_habitacion = r.id_habitacion "
+            + "JOIN tipo_habitacion t ON t.id_tipo = h.id_tipo ";
+
+    private Reserva mapearFila(ResultSet rs) throws SQLException {
+        Reserva r = new Reserva();
+        r.setIdReserva(rs.getInt("id_reserva"));
+        r.setIdHuesped(rs.getInt("id_huesped"));
+        r.setIdHabitacion(rs.getInt("id_habitacion"));
+        r.setIdUsuario(rs.getInt("id_usuario"));
+        java.sql.Timestamp fechaReserva = rs.getTimestamp("fecha_reserva");
+        if (fechaReserva != null) {
+            r.setFechaReserva(fechaReserva.toLocalDateTime());
+        }
+        r.setFechaCheckin(rs.getDate("fecha_checkin").toLocalDate());
+        r.setFechaCheckout(rs.getDate("fecha_checkout").toLocalDate());
+        r.setMontoTotal(rs.getBigDecimal("monto_total"));
+        r.setEstado(rs.getString("estado"));
+        r.setCanal(rs.getString("canal"));
+        int idEmpresa = rs.getInt("id_empresa");
+        r.setIdEmpresa(rs.wasNull() ? null : idEmpresa);
+        r.setMotivoCancelacion(rs.getString("motivo_cancelacion"));
+        r.setDetalleCancelacion(rs.getString("detalle_cancelacion"));
+        r.setNumHuespedes(rs.getInt("num_huespedes"));
+        java.sql.Time horaCheckin = rs.getTime("hora_checkin");
+        if (horaCheckin != null) {
+            r.setHoraCheckin(horaCheckin.toLocalTime());
+        }
+
+        r.setTipoDocumentoHuesped(rs.getString("hu_tipo_doc"));
+        r.setNumDocumentoHuesped(rs.getString("hu_num_doc"));
+        r.setNombreHuesped((rs.getString("hu_nombres") + " " + rs.getString("hu_apellidos")).trim());
+        r.setTelefonoHuesped(rs.getString("hu_telefono"));
+        r.setEmailHuesped(rs.getString("hu_email"));
+        r.setNumeroHabitacion(rs.getString("hab_numero"));
+        r.setPisoHabitacion(rs.getInt("hab_piso"));
+        r.setNombreTipoHabitacion(rs.getString("hab_tipo"));
+        return r;
+    }
+
+    /** Cuantas reservas trae como maximo la lista de reservas (las mas recientes primero). */
+    public static final int LIMITE_LISTA = 1000;
+
+    /**
+     * Busca reservas para la lista de "Reservas programadas".
+     * @param texto     filtra por codigo (numero de reserva), nombre/apellido, documento o numero de habitacion; null o vacio = sin filtro
+     * @param estado    ESTADO exacto, "POR_LLEGAR" (confirmada con ingreso hoy o despues) o null/vacio para todas
+     * @param desde     fecha de ingreso minima, o null
+     * @param hasta     fecha de ingreso maxima, o null
+     */
+    public List<Reserva> buscar(Connection con, String texto, String estado, LocalDate desde, LocalDate hasta) throws SQLException {
+        StringBuilder sql = new StringBuilder(SELECT_BASE).append("WHERE 1 = 1 ");
+        List<Object> parametros = new ArrayList<>();
+
+        if (texto != null && !texto.isBlank()) {
+            String comodin = "%" + texto.trim() + "%";
+            sql.append("AND (CONCAT('R-', LPAD(r.id_reserva, 4, '0')) LIKE ? "
+                    + "OR CONCAT(hu.nombres, ' ', hu.apellidos) LIKE ? "
+                    + "OR hu.num_documento LIKE ? OR h.numero LIKE ?) ");
+            parametros.add(comodin);
+            parametros.add(comodin);
+            parametros.add(comodin);
+            parametros.add(comodin);
+        }
+        if ("POR_LLEGAR".equals(estado)) {
+            sql.append("AND r.estado = 'CONFIRMADA' AND r.fecha_checkin >= CURDATE() ");
+        } else if (estado != null && !estado.isBlank()) {
+            sql.append("AND r.estado = ? ");
+            parametros.add(estado);
+        }
+        if (desde != null) {
+            sql.append("AND r.fecha_checkin >= ? ");
+            parametros.add(Date.valueOf(desde));
+        }
+        if (hasta != null) {
+            sql.append("AND r.fecha_checkin <= ? ");
+            parametros.add(Date.valueOf(hasta));
+        }
+        sql.append("ORDER BY r.fecha_checkin DESC, r.id_reserva DESC LIMIT ").append(LIMITE_LISTA);
+
+        List<Reserva> lista = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < parametros.size(); i++) {
+                ps.setObject(i + 1, parametros.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapearFila(rs));
+                }
+            }
+        }
+        return lista;
+    }
+
+    /** Busca una reserva únicamente cuando el texto representa un código exacto. */
+    public Reserva buscarPorCodigo(Connection con, String texto) throws SQLException {
+        Integer idExacto = extraerIdCodigo(texto);
+        if (idExacto == null) {
+            return null;
+        }
+        try (PreparedStatement ps = con.prepareStatement(SELECT_BASE + "WHERE r.id_reserva = ?")) {
+            ps.setInt(1, idExacto);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapearFila(rs);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Contrato conservado para consumidores externos al módulo. Las acciones sensibles de
+     * Reservas usan buscarPorCodigo y controlan explícitamente las coincidencias ambiguas.
+     */
+    public Reserva buscarUno(Connection con, String texto) throws SQLException {
+        Reserva exacta = buscarPorCodigo(con, texto);
+        if (exacta != null) {
+            return exacta;
+        }
+        List<Reserva> resultados = buscar(con, texto, null, null, null);
+        return resultados.isEmpty() ? null : resultados.get(0);
+    }
+
+    /** Si "texto" es un codigo de reserva ("R-0005", "R5", "5", "#5"), devuelve el id; si no, null. */
+    private Integer extraerIdCodigo(String texto) {
+        if (texto == null) {
+            return null;
+        }
+        String limpio = texto.trim().replaceAll("(?i)^R-?", "").replace("#", "");
+        return limpio.matches("\\d+") ? Integer.valueOf(limpio) : null;
+    }
+
+    /** Reservas (vigentes y estadias ya finalizadas) que se cruzan con el rango, para el calendario. */
+    public List<Reserva> listarEnRango(Connection con, LocalDate desde, LocalDate hasta) throws SQLException {
+        String sql = "SELECT r.id_reserva, r.id_habitacion, r.fecha_checkin, r.fecha_checkout, r.estado, "
+                + "hu.nombres AS hu_nombres, hu.apellidos AS hu_apellidos "
+                + "FROM reserva r JOIN huesped hu ON hu.id_huesped = r.id_huesped "
+                + "WHERE r.estado IN ('CONFIRMADA','CHECKIN','FINALIZADA') "
+                + "AND r.fecha_checkin <= ? AND r.fecha_checkout > ?";
+        List<Reserva> lista = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(hasta));
+            ps.setDate(2, Date.valueOf(desde));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Reserva r = new Reserva();
+                    r.setIdReserva(rs.getInt("id_reserva"));
+                    r.setIdHabitacion(rs.getInt("id_habitacion"));
+                    r.setFechaCheckin(rs.getDate("fecha_checkin").toLocalDate());
+                    r.setFechaCheckout(rs.getDate("fecha_checkout").toLocalDate());
+                    r.setEstado(rs.getString("estado"));
+                    r.setNombreHuesped((rs.getString("hu_nombres") + " " + rs.getString("hu_apellidos")).trim());
+                    lista.add(r);
+                }
+            }
+        }
+        return lista;
+    }
+
+    /** Cuantos huespedes hay hospedados ahora mismo (suma de num_huespedes de las reservas en CHECKIN). */
+    public int sumarHuespedesActivos(Connection con) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(num_huespedes), 0) FROM reserva WHERE estado = 'CHECKIN'";
+        try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            rs.next();
+            return rs.getInt(1);
+        }
+    }
+
+    /**
+     * Cuantas habitaciones (y cuantos huespedes) tenian una estadia en curso en una fecha pasada,
+     * para comparar la ocupacion de hoy contra la de ayer en el Dashboard.
+     */
+    public int contarOcupadasEnFecha(Connection con, LocalDate fecha) throws SQLException {
+        String sql = "SELECT COUNT(DISTINCT id_habitacion) FROM reserva "
+                + "WHERE estado IN ('CHECKIN','FINALIZADA') AND fecha_checkin <= ? AND fecha_checkout > ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(fecha));
+            ps.setDate(2, Date.valueOf(fecha));
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+
+    public int sumarHuespedesEnFecha(Connection con, LocalDate fecha) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(num_huespedes), 0) FROM reserva "
+                + "WHERE estado IN ('CHECKIN','FINALIZADA') AND fecha_checkin <= ? AND fecha_checkout > ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(fecha));
+            ps.setDate(2, Date.valueOf(fecha));
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+
+    /** Reservas cuyo ingreso fue exactamente esa fecha (para comparar las llegadas de hoy contra las de ayer). */
+    public int contarLlegadasEnFecha(Connection con, LocalDate fecha) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM reserva WHERE fecha_checkin = ? "
+                + "AND estado IN ('CONFIRMADA','CHECKIN','FINALIZADA')";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(fecha));
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+
+    /** Reservas que llegan hoy (confirmadas o que ya hicieron check-in hoy), para el Dashboard. */
+    public List<Reserva> listarLlegadasHoy(Connection con) throws SQLException {
+        String sql = SELECT_BASE + "WHERE r.fecha_checkin = CURDATE() AND r.estado IN ('CONFIRMADA','CHECKIN') "
+                + "ORDER BY r.estado, hu.apellidos";
+        List<Reserva> lista = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(mapearFila(rs));
+            }
+        }
+        return lista;
+    }
+
+    /** Cancela solo si el estado persistido continúa siendo cancelable. */
+    public boolean cancelarSiCancelable(Connection con, int idReserva, String motivo, String detalle) throws SQLException {
+        String sql = "UPDATE reserva SET estado = 'CANCELADA', motivo_cancelacion = ?, detalle_cancelacion = ? "
+                + "WHERE id_reserva = ? AND estado = 'CONFIRMADA'";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, motivo);
+            ps.setString(2, detalle);
+            ps.setInt(3, idReserva);
+            return ps.executeUpdate() == 1;
+        }
+    }
+
+    /**
+     * Reservas confirmadas que no llegaron: se dan por perdidas desde el mediodia del dia siguiente al de la
+     * llegada (un huesped puede llegar de madrugada y seguir siendo de la noche reservada).
+     */
+    public List<Reserva> listarNoLlegaron(Connection con) throws SQLException {
+        String sql = SELECT_BASE + "WHERE r.estado = 'CONFIRMADA' "
+                + "AND TIMESTAMP(DATE_ADD(r.fecha_checkin, INTERVAL 1 DAY), '12:00:00') <= NOW() "
+                + "ORDER BY r.fecha_checkin, r.id_reserva FOR UPDATE";
+        List<Reserva> lista = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(mapearFila(rs));
+            }
+        }
+        return lista;
+    }
+
+    /** Bloquea la habitación para serializar altas concurrentes sobre la misma fila. */
+    public void bloquearHabitacion(Connection con, int idHabitacion) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT id_habitacion FROM habitacion WHERE id_habitacion = ? FOR UPDATE")) {
+            ps.setInt(1, idHabitacion);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new IllegalStateException("La habitación seleccionada ya no existe.");
+                }
+            }
+        }
+    }
+
+    /**
+     * Bloquea y devuelve el id de la estadia en curso (CHECKIN) de ese huesped en esa habitacion que ya habia
+     * empezado el dia indicado, o -1 si ya no hay (la estadia termino o es de otro huesped).
+     */
+    public int bloquearEstadiaEnCurso(Connection con, int idHabitacion, int idHuesped, LocalDate dia)
+            throws SQLException {
+        String sql = "SELECT id_reserva FROM reserva WHERE id_habitacion = ? AND id_huesped = ? "
+                + "AND estado = 'CHECKIN' AND fecha_checkin <= ? ORDER BY fecha_checkin DESC LIMIT 1 FOR UPDATE";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacion);
+            ps.setInt(2, idHuesped);
+            ps.setDate(3, Date.valueOf(dia));
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : -1;
+            }
+        }
+    }
+
+    public int obtenerCapacidadHabitacion(Connection con, int idHabitacion) throws SQLException {
+        String sql = "SELECT t.capacidad FROM habitacion h "
+                + "JOIN tipo_habitacion t ON t.id_tipo = h.id_tipo WHERE h.id_habitacion = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacion);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : -1;
+            }
+        }
+    }
+
+    public Reserva buscarPorId(Connection con, int idReserva, boolean bloquear) throws SQLException {
+        String sql = SELECT_BASE + "WHERE r.id_reserva = ?" + (bloquear ? " FOR UPDATE" : "");
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idReserva);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapearFila(rs) : null;
+            }
+        }
+    }
+
+    /** true si la habitacion ya tiene una reserva vigente que se cruza con esas fechas. */
+    public boolean existeCruce(Connection con, int idHabitacion, LocalDate ingreso, LocalDate salida) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM reserva WHERE id_habitacion = ? "
+                + "AND estado IN ('CONFIRMADA','CHECKIN') "
+                + "AND fecha_checkin < ? AND fecha_checkout > ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacion);
+            ps.setDate(2, Date.valueOf(salida));
+            ps.setDate(3, Date.valueOf(ingreso));
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1) > 0;
+            }
+        }
+    }
+
+    /**
+     * Fecha de ingreso de la primera reserva vigente de la habitacion que se cruza con el rango
+     * [desde, hasta), o null si el rango esta libre. La estadia en curso no cuenta si se pide desde su salida.
+     */
+    public LocalDate primerCruce(Connection con, int idHabitacion, LocalDate desde, LocalDate hasta) throws SQLException {
+        String sql = "SELECT MIN(fecha_checkin) FROM reserva WHERE id_habitacion = ? "
+                + "AND estado IN ('CONFIRMADA','CHECKIN') "
+                + "AND fecha_checkin < ? AND fecha_checkout > ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacion);
+            ps.setDate(2, Date.valueOf(hasta));
+            ps.setDate(3, Date.valueOf(desde));
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                Date fecha = rs.getDate(1);
+                return fecha == null ? null : fecha.toLocalDate();
+            }
+        }
+    }
+
+    /** Extiende la estadia: nueva fecha de salida y el monto de las noches agregadas se suma al total. */
+    public void ampliar(Connection con, int idReserva, LocalDate nuevaSalida, java.math.BigDecimal incremento) throws SQLException {
+        String sql = "UPDATE reserva SET fecha_checkout = ?, monto_total = monto_total + ? WHERE id_reserva = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(nuevaSalida));
+            ps.setBigDecimal(2, incremento);
+            ps.setInt(3, idReserva);
+            ps.executeUpdate();
+        }
+    }
+
+    /** Id de la reserva CONFIRMADA que corresponde recibir hoy en la habitacion, o -1 si no hay. */
+    public int buscarParaCheckin(Connection con, int idHabitacion, LocalDate hoy) throws SQLException {
+        String sql = "SELECT id_reserva FROM reserva WHERE id_habitacion = ? AND estado = 'CONFIRMADA' "
+                + "AND fecha_checkin <= ? AND fecha_checkout > ? ORDER BY fecha_checkin LIMIT 1";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacion);
+            ps.setDate(2, Date.valueOf(hoy));
+            ps.setDate(3, Date.valueOf(hoy));
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : -1;
+            }
+        }
+    }
+
+    public boolean actualizarEstadoSiEs(Connection con, int idReserva, String estadoEsperado,
+                                         String nuevoEstado) throws SQLException {
+        String sql = "UPDATE reserva SET estado = ? WHERE id_reserva = ? AND estado = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, nuevoEstado);
+            ps.setInt(2, idReserva);
+            ps.setString(3, estadoEsperado);
+            return ps.executeUpdate() == 1;
+        }
+    }
+
+    /** Cierra la estadia: la reserva pasa a FINALIZADA. */
+    public void finalizar(Connection con, int idReserva) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement("UPDATE reserva SET estado = 'FINALIZADA' WHERE id_reserva = ?")) {
+            ps.setInt(1, idReserva);
+            ps.executeUpdate();
+        }
+    }
+
+    /** Inserta la reserva y devuelve el id generado. */
+    public int insertar(Connection con, Reserva r) throws SQLException {
+        String sql = "INSERT INTO reserva (id_huesped, id_habitacion, id_usuario, fecha_checkin, fecha_checkout, "
+                + "monto_total, estado, canal, id_empresa, num_huespedes, hora_checkin) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, r.getIdHuesped());
+            ps.setInt(2, r.getIdHabitacion());
+            ps.setInt(3, r.getIdUsuario());
+            ps.setDate(4, Date.valueOf(r.getFechaCheckin()));
+            ps.setDate(5, Date.valueOf(r.getFechaCheckout()));
+            ps.setBigDecimal(6, r.getMontoTotal());
+            ps.setString(7, r.getEstado());
+            ps.setString(8, r.getCanal());
+            if (r.getIdEmpresa() == null) {
+                ps.setNull(9, Types.INTEGER);
+            } else {
+                ps.setInt(9, r.getIdEmpresa());
+            }
+            ps.setInt(10, r.getNumHuespedes() <= 0 ? 1 : r.getNumHuespedes());
+            if (r.getHoraCheckin() == null) {
+                ps.setNull(11, Types.TIME);
+            } else {
+                ps.setTime(11, java.sql.Time.valueOf(r.getHoraCheckin()));
+            }
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+}

@@ -18,21 +18,21 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import untrm.hotel_san_antonio.dao.HuespedDAO;
+import untrm.hotel_san_antonio.modelo.dao.HuespedDAO;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Huesped;
 import untrm.hotel_san_antonio.modelo.Pago;
 import untrm.hotel_san_antonio.modelo.Reserva;
-import untrm.hotel_san_antonio.servicio.ConflictoFechasException;
-import untrm.hotel_san_antonio.servicio.ReniecService;
-import untrm.hotel_san_antonio.servicio.HabitacionService;
-import untrm.hotel_san_antonio.servicio.ReservaService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.CampoValidacion;
-import untrm.hotel_san_antonio.util.ConsultaApi;
-import untrm.hotel_san_antonio.util.SoloLectura;
-import untrm.hotel_san_antonio.util.Validador;
+import untrm.hotel_san_antonio.modelo.servicio.ConflictoFechasException;
+import untrm.hotel_san_antonio.modelo.servicio.ReniecService;
+import untrm.hotel_san_antonio.modelo.servicio.HabitacionService;
+import untrm.hotel_san_antonio.modelo.servicio.ReservaService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.CampoValidacion;
+import untrm.hotel_san_antonio.controlador.util.ConsultaApi;
+import untrm.hotel_san_antonio.controlador.util.SoloLectura;
+import untrm.hotel_san_antonio.modelo.util.Validador;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -42,7 +42,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-import untrm.hotel_san_antonio.util.Registro;
+import untrm.hotel_san_antonio.modelo.util.Registro;
 
 /**
  * Ventana "Registrar huesped y reserva": se abre al hacer clic en una habitacion
@@ -98,7 +98,7 @@ public class ReservaFormController {
         spHuespedes.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 1, 1));
         spHuespedes.valueProperty().addListener((obs, antes, ahora) -> acompanantes.actualizar(ahora));
         acompanantes.actualizar(1);
-        untrm.hotel_san_antonio.util.EstiloBotones.hoverPrimario(btnGuardar);
+        untrm.hotel_san_antonio.controlador.util.EstiloBotones.hoverPrimario(btnGuardar);
         cmbTipoDoc.getItems().addAll(TIPOS_DOC.keySet());
         cmbTipoDoc.setValue("DNI");
         cmbMetodo.getItems().addAll(METODOS.keySet());

@@ -12,12 +12,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleButton;
-import untrm.hotel_san_antonio.dao.ReservaDAO;
+import untrm.hotel_san_antonio.modelo.dao.ReservaDAO;
 import untrm.hotel_san_antonio.modelo.Reserva;
-import untrm.hotel_san_antonio.servicio.ReservaService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.Consulta;
-import untrm.hotel_san_antonio.util.Navegacion;
+import untrm.hotel_san_antonio.modelo.servicio.ReservaService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.Consulta;
+import untrm.hotel_san_antonio.controlador.util.Navegacion;
 
 /** Vista "Lista" de la pantalla Reservas. El texto a buscar se lo pasa ReservasController. */
 public class ReservasProgramadasController {

@@ -11,8 +11,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import untrm.hotel_san_antonio.modelo.Usuario;
-import untrm.hotel_san_antonio.servicio.UsuarioService;
-import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.modelo.servicio.UsuarioService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
 
 /** Ventana para crear un usuario o editar sus datos, su rol y su estado (solo el Administrador). */
 public class UsuarioFormController {

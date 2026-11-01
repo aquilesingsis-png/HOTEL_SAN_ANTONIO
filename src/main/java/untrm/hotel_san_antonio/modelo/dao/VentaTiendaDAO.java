@@ -1,0 +1,269 @@
+package untrm.hotel_san_antonio.modelo.dao;
+
+import untrm.hotel_san_antonio.modelo.VentaTienda;
+
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class VentaTiendaDAO {
+
+    public int insertar(Connection cn, VentaTienda venta) throws SQLException {
+        String sql = "INSERT INTO venta_tienda " +
+                "(id_huesped, id_habitacion, id_usuario, id_comprobante, cliente_externo, metodo_pago, total) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement ps = cn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            setNullableInt(ps, 1, venta.getIdHuesped());
+            setNullableInt(ps, 2, venta.getIdHabitacion());
+            ps.setInt(3, venta.getIdUsuario());
+            setNullableInt(ps, 4, venta.getIdComprobante());
+            if (venta.getClienteExterno() == null || venta.getClienteExterno().trim().isEmpty()) {
+                ps.setNull(5, Types.VARCHAR);
+            } else {
+                ps.setString(5, venta.getClienteExterno().trim());
+            }
+            if (venta.getMetodoPago() == null) {
+                ps.setNull(6, Types.VARCHAR);
+            } else {
+                ps.setString(6, venta.getMetodoPago());
+            }
+            ps.setBigDecimal(7, venta.getTotal());
+
+            if (ps.executeUpdate() != 1) {
+                throw new SQLException("No se pudo registrar la venta de tiendita.");
+            }
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        throw new SQLException("No se obtuvo el identificador de la venta.");
+    }
+
+    /** Venta de un día pasado: guarda la fecha real del hecho, el motivo y quién la regularizó. */
+    public int insertarRetroactiva(Connection cn, VentaTienda venta, LocalDate fechaEvento, String motivo,
+                                   int idUsuarioRegulariza) throws SQLException {
+        int id = insertar(cn, venta);
+        try (PreparedStatement ps = cn.prepareStatement(
+                "UPDATE venta_tienda SET fecha_evento = ?, motivo_registro_tardio = ?, id_usuario_regulariza = ? "
+                + "WHERE id_venta = ?")) {
+            ps.setDate(1, Date.valueOf(fechaEvento));
+            ps.setString(2, motivo);
+            ps.setInt(3, idUsuarioRegulariza);
+            ps.setInt(4, id);
+            ps.executeUpdate();
+        }
+        return id;
+    }
+
+    private void setNullableInt(PreparedStatement ps, int indice, Integer valor) throws SQLException {
+        if (valor == null) {
+            ps.setNull(indice, Types.INTEGER);
+        } else {
+            ps.setInt(indice, valor);
+        }
+    }
+
+    /**
+     * Una venta que todavia no tiene comprobante (id_comprobante IS NULL), o null si no existe, ya se facturo
+     * o esta anulada.
+     */
+    public VentaTienda buscarPendientePorId(Connection con, int idVenta) throws SQLException {
+        return buscarPendientePorId(con, idVenta, false);
+    }
+
+    /** Igual, pero con bloquear = true la fila queda reservada hasta terminar la transaccion. */
+    public VentaTienda buscarPendientePorId(Connection con, int idVenta, boolean bloquear) throws SQLException {
+        return buscar(con, "SELECT * FROM venta_tienda WHERE id_venta = ? AND id_comprobante IS NULL "
+                + "AND estado = 'ACTIVA'", idVenta, bloquear);
+    }
+
+    /** Una venta en cualquier estado (activa o anulada), o null si no existe. */
+    public VentaTienda buscarPorId(Connection con, int idVenta, boolean bloquear) throws SQLException {
+        return buscar(con, "SELECT * FROM venta_tienda WHERE id_venta = ?", idVenta, bloquear);
+    }
+
+    private VentaTienda buscar(Connection con, String sql, int idVenta, boolean bloquear) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(bloquear ? sql + " FOR UPDATE" : sql)) {
+            ps.setInt(1, idVenta);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                VentaTienda v = new VentaTienda();
+                v.setIdVenta(rs.getInt("id_venta"));
+                int idHuesped = rs.getInt("id_huesped");
+                v.setIdHuesped(rs.wasNull() ? null : idHuesped);
+                int idHabitacion = rs.getInt("id_habitacion");
+                v.setIdHabitacion(rs.wasNull() ? null : idHabitacion);
+                v.setIdUsuario(rs.getInt("id_usuario"));
+                int idComprobante = rs.getInt("id_comprobante");
+                v.setIdComprobante(rs.wasNull() ? null : idComprobante);
+                v.setClienteExterno(rs.getString("cliente_externo"));
+                v.setMetodoPago(rs.getString("metodo_pago"));
+                v.setFechaVenta(rs.getTimestamp("fecha_venta").toLocalDateTime());
+                Date fechaEvento = rs.getDate("fecha_evento");
+                v.setFechaEvento(fechaEvento == null ? null : fechaEvento.toLocalDate());
+                v.setTotal(rs.getBigDecimal("total"));
+                v.setEstado(rs.getString("estado"));
+                return v;
+            }
+        }
+    }
+
+    /**
+     * Anula la venta (no se borra): queda marcada con quien la anulo, cuando y por que.
+     *
+     * @return false si la venta ya estaba anulada
+     */
+    public boolean anular(Connection con, int idVenta, int idUsuario, String motivo) throws SQLException {
+        String sql = "UPDATE venta_tienda SET estado = 'ANULADA', fecha_anulacion = NOW(), id_usuario_anula = ?, "
+                + "motivo_anulacion = ? WHERE id_venta = ? AND estado = 'ACTIVA'";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            ps.setString(2, motivo);
+            ps.setInt(3, idVenta);
+            return ps.executeUpdate() == 1;
+        }
+    }
+
+    /** Reserva las ventas que tienen ese comprobante hasta terminar la transaccion. */
+    public void bloquearPorComprobante(Connection con, int idComprobante) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT id_venta FROM venta_tienda WHERE id_comprobante = ? FOR UPDATE")) {
+            ps.setInt(1, idComprobante);
+            ps.executeQuery().close();
+        }
+    }
+
+    /** Cuando se anula un comprobante, las ventas activas que lo tenian vuelven a quedar sin comprobante. */
+    public int desenlazarComprobante(Connection con, int idComprobante) throws SQLException {
+        String sql = "UPDATE venta_tienda SET id_comprobante = NULL WHERE id_comprobante = ? AND estado = 'ACTIVA'";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idComprobante);
+            return ps.executeUpdate();
+        }
+    }
+
+    /** Cuantos consumos activos tiene una estadia (ventas cargadas a la habitacion desde el dia de ingreso). */
+    public int contarConsumosActivos(Connection con, int idHabitacion, int idHuesped, LocalDate ingreso)
+            throws SQLException {
+        String sql = "SELECT COUNT(*) FROM venta_tienda WHERE id_habitacion = ? AND id_huesped = ? "
+                + "AND fecha_venta >= ? AND estado = 'ACTIVA'";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacion);
+            ps.setInt(2, idHuesped);
+            ps.setDate(3, Date.valueOf(ingreso));
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+
+    /**
+     * Enlaza a un comprobante recien generado la venta indicada (para el origen "Venta de tienda").
+     * Solo enlaza ventas cobradas en el momento: una cargada a una habitacion se cobra y se factura
+     * junto con la estadia.
+     *
+     * @return false si la venta ya tenia comprobante o esta cargada a una habitacion
+     */
+    public boolean enlazarComprobante(Connection con, int idVenta, int idComprobante) throws SQLException {
+        String sql = "UPDATE venta_tienda SET id_comprobante = ? "
+                + "WHERE id_venta = ? AND id_comprobante IS NULL AND id_habitacion IS NULL AND estado = 'ACTIVA'";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idComprobante);
+            ps.setInt(2, idVenta);
+            return ps.executeUpdate() == 1;
+        }
+    }
+
+    /**
+     * Enlaza a un comprobante recien generado todos los consumos de tienda que quedaron pendientes
+     * durante una estadia (mismos que arma CuentaDAO para la cuenta de la habitacion).
+     */
+    public void enlazarComprobantePorEstadia(Connection con, int idHabitacion, int idHuesped,
+                                              LocalDate ingreso, int idComprobante) throws SQLException {
+        String sql = "UPDATE venta_tienda SET id_comprobante = ? WHERE id_habitacion = ? AND id_huesped = ? "
+                + "AND id_comprobante IS NULL AND fecha_venta >= ? AND estado = 'ACTIVA'";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idComprobante);
+            ps.setInt(2, idHabitacion);
+            ps.setInt(3, idHuesped);
+            ps.setDate(4, Date.valueOf(ingreso));
+            ps.executeUpdate();
+        }
+    }
+
+    /**
+     * Al cambiar de habitacion durante la estadia, los consumos que siguen sin cobrar pasan a la
+     * habitacion nueva: la cuenta se arma por habitacion y, si se quedaran en la anterior, ya no se
+     * cobrarian (mismos criterios que CuentaDAO).
+     *
+     * @return cuantas ventas se trasladaron
+     */
+    public int trasladarConsumosPendientes(Connection con, int idHabitacionAnterior, int idHabitacionNueva,
+                                           int idHuesped, LocalDate ingreso) throws SQLException {
+        String sql = "UPDATE venta_tienda SET id_habitacion = ? WHERE id_habitacion = ? AND id_huesped = ? "
+                + "AND id_comprobante IS NULL AND fecha_venta >= ? AND estado = 'ACTIVA'";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacionNueva);
+            ps.setInt(2, idHabitacionAnterior);
+            ps.setInt(3, idHuesped);
+            ps.setDate(4, Date.valueOf(ingreso));
+            return ps.executeUpdate();
+        }
+    }
+
+    /** Cuanto se vendio hoy en la tiendita, para el Dashboard. */
+    public BigDecimal sumarHoy(Connection con) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(total), 0) FROM venta_tienda "
+                + "WHERE COALESCE(fecha_evento, DATE(fecha_venta)) = CURDATE() AND estado = 'ACTIVA'";
+        try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            rs.next();
+            return rs.getBigDecimal(1);
+        }
+    }
+
+    /** Cuantas ventas de tiendita se hicieron hoy, para el Dashboard. */
+    public int contarHoy(Connection con) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM venta_tienda "
+                + "WHERE COALESCE(fecha_evento, DATE(fecha_venta)) = CURDATE() AND estado = 'ACTIVA'";
+        try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            rs.next();
+            return rs.getInt(1);
+        }
+    }
+
+    /** Total vendido en tiendita por dia entre [desde, hasta], con 0 en los dias sin ventas. */
+    public Map<LocalDate, BigDecimal> sumarPorDia(Connection con, LocalDate desde, LocalDate hasta) throws SQLException {
+        Map<LocalDate, BigDecimal> porDia = new LinkedHashMap<>();
+        for (LocalDate dia = desde; !dia.isAfter(hasta); dia = dia.plusDays(1)) {
+            porDia.put(dia, BigDecimal.ZERO);
+        }
+        String sql = "SELECT COALESCE(fecha_evento, DATE(fecha_venta)) AS dia, SUM(total) AS total FROM venta_tienda "
+                + "WHERE COALESCE(fecha_evento, DATE(fecha_venta)) BETWEEN ? AND ? AND estado = 'ACTIVA' "
+                + "GROUP BY COALESCE(fecha_evento, DATE(fecha_venta))";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(desde));
+            ps.setDate(2, Date.valueOf(hasta));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    porDia.put(rs.getDate("dia").toLocalDate(), rs.getBigDecimal("total"));
+                }
+            }
+        }
+        return porDia;
+    }
+}

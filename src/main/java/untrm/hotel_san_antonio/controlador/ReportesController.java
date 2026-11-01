@@ -19,16 +19,16 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
-import untrm.hotel_san_antonio.dao.ReportesDAO;
-import untrm.hotel_san_antonio.dao.ReportesDAO.Resultado;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.Consulta;
-import untrm.hotel_san_antonio.util.EstiloGlobal;
-import untrm.hotel_san_antonio.util.ExportarArchivo;
-import untrm.hotel_san_antonio.util.PdfTabla;
-import untrm.hotel_san_antonio.util.SesionActual;
-import untrm.hotel_san_antonio.util.TablaExportable;
-import untrm.hotel_san_antonio.util.XlsxTabla;
+import untrm.hotel_san_antonio.modelo.dao.ReportesDAO;
+import untrm.hotel_san_antonio.modelo.dao.ReportesDAO.Resultado;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.Consulta;
+import untrm.hotel_san_antonio.controlador.util.EstiloGlobal;
+import untrm.hotel_san_antonio.controlador.util.ExportarArchivo;
+import untrm.hotel_san_antonio.modelo.util.PdfTabla;
+import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
+import untrm.hotel_san_antonio.modelo.util.TablaExportable;
+import untrm.hotel_san_antonio.modelo.util.XlsxTabla;
 
 /**
  * Reportes del Administrador en una sola pantalla: se elige el reporte (ocupacion, ingresos o ventas de

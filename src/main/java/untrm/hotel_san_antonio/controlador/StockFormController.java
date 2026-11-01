@@ -12,9 +12,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import untrm.hotel_san_antonio.dao.AlmacenDAO;
-import untrm.hotel_san_antonio.dao.AlmacenDAO.Item;
-import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO;
+import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO.Item;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
 
 /** Ventana para registrar una entrada, una salida o un conteo físico de un producto. */
 public class StockFormController {

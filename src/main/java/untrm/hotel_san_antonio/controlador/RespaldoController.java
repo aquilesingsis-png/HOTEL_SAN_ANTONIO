@@ -14,11 +14,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import untrm.hotel_san_antonio.util.CarpetaGuardado;
-import untrm.hotel_san_antonio.servicio.RespaldoService;
-import untrm.hotel_san_antonio.servicio.RespaldoService.Resultado;
-import untrm.hotel_san_antonio.servicio.RespaldoService.UltimoRespaldo;
-import untrm.hotel_san_antonio.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.CarpetaGuardado;
+import untrm.hotel_san_antonio.modelo.servicio.RespaldoService;
+import untrm.hotel_san_antonio.modelo.servicio.RespaldoService.Resultado;
+import untrm.hotel_san_antonio.modelo.servicio.RespaldoService.UltimoRespaldo;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
 
 /**
  * Respaldo: el administrador guarda una copia de toda la base de datos en un archivo .sql, en la carpeta que

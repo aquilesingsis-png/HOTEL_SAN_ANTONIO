@@ -19,13 +19,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import untrm.hotel_san_antonio.dao.ProductoDAO;
+import untrm.hotel_san_antonio.modelo.dao.ProductoDAO;
 import untrm.hotel_san_antonio.modelo.DetalleVenta;
 import untrm.hotel_san_antonio.modelo.Producto;
 import untrm.hotel_san_antonio.modelo.VentaTienda;
-import untrm.hotel_san_antonio.servicio.VentaService;
-import untrm.hotel_san_antonio.util.EstiloGlobal;
-import untrm.hotel_san_antonio.util.SesionActual;
+import untrm.hotel_san_antonio.modelo.servicio.VentaService;
+import untrm.hotel_san_antonio.controlador.util.EstiloGlobal;
+import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
 
 /** Ventana para registrar ventas del carrito de un día en que el sistema no se usó (cobradas al momento). */
 public class VentaPasadaFormController {

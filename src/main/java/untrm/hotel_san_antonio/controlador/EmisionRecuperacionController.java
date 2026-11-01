@@ -9,7 +9,7 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
 import untrm.hotel_san_antonio.modelo.Usuario;
-import untrm.hotel_san_antonio.servicio.RecuperacionService;
+import untrm.hotel_san_antonio.modelo.servicio.RecuperacionService;
 
 /**
  * Ventana del administrador para restablecer el acceso de un usuario: genera un código de un solo uso

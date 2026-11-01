@@ -5,7 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import untrm.hotel_san_antonio.servicio.RecuperacionService;
+import untrm.hotel_san_antonio.modelo.servicio.RecuperacionService;
 
 public class RecuperacionController {
     @FXML private TextField txtUsuario;

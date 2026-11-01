@@ -23,11 +23,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import untrm.hotel_san_antonio.dao.CajaDAO;
-import untrm.hotel_san_antonio.dao.CajaDAO.Cierre;
-import untrm.hotel_san_antonio.dao.CierreCajaDAO;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.SesionActual;
+import untrm.hotel_san_antonio.modelo.dao.CajaDAO;
+import untrm.hotel_san_antonio.modelo.dao.CajaDAO.Cierre;
+import untrm.hotel_san_antonio.modelo.dao.CierreCajaDAO;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
 
 /**
  * Cierre de caja por turno (mañana, tarde o noche) con el arqueo adentro. El sistema calcula lo que debe

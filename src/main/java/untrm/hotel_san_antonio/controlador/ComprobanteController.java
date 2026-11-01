@@ -25,21 +25,21 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 
-import untrm.hotel_san_antonio.dao.EmpresaDAO;
-import untrm.hotel_san_antonio.dao.HuespedDAO;
+import untrm.hotel_san_antonio.modelo.dao.EmpresaDAO;
+import untrm.hotel_san_antonio.modelo.dao.HuespedDAO;
 import untrm.hotel_san_antonio.modelo.Comprobante;
 import untrm.hotel_san_antonio.modelo.ComprobanteDocumento;
 import untrm.hotel_san_antonio.modelo.CuentaHabitacion;
 import untrm.hotel_san_antonio.modelo.DetalleVenta;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Huesped;
-import untrm.hotel_san_antonio.servicio.ComprobanteService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.ConsultaApi;
-import untrm.hotel_san_antonio.conexion.ConexionBD;
-import untrm.hotel_san_antonio.util.PdfTexto;
-import untrm.hotel_san_antonio.util.SesionActual;
-import untrm.hotel_san_antonio.util.Validador;
+import untrm.hotel_san_antonio.modelo.servicio.ComprobanteService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.ConsultaApi;
+import untrm.hotel_san_antonio.modelo.conexion.ConexionBD;
+import untrm.hotel_san_antonio.modelo.util.PdfTexto;
+import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
+import untrm.hotel_san_antonio.modelo.util.Validador;
 
 /**
  * Genera el comprobante de una estadia con check-in (alojamiento + consumos de tienda

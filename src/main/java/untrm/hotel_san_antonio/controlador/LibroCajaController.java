@@ -21,17 +21,17 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import untrm.hotel_san_antonio.dao.CajaDAO;
-import untrm.hotel_san_antonio.dao.CajaDAO.Movimiento;
-import untrm.hotel_san_antonio.servicio.VentaService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.Consulta;
-import untrm.hotel_san_antonio.util.ExportarArchivo;
-import untrm.hotel_san_antonio.util.Navegacion;
-import untrm.hotel_san_antonio.util.PdfTabla;
-import untrm.hotel_san_antonio.util.SesionActual;
-import untrm.hotel_san_antonio.util.TablaExportable;
-import untrm.hotel_san_antonio.util.XlsxTabla;
+import untrm.hotel_san_antonio.modelo.dao.CajaDAO;
+import untrm.hotel_san_antonio.modelo.dao.CajaDAO.Movimiento;
+import untrm.hotel_san_antonio.modelo.servicio.VentaService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.Consulta;
+import untrm.hotel_san_antonio.controlador.util.ExportarArchivo;
+import untrm.hotel_san_antonio.controlador.util.Navegacion;
+import untrm.hotel_san_antonio.modelo.util.PdfTabla;
+import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
+import untrm.hotel_san_antonio.modelo.util.TablaExportable;
+import untrm.hotel_san_antonio.modelo.util.XlsxTabla;
 
 /**
  * Caja: una sola lista con todo el dinero que entra y sale (alojamiento, carrito, movimientos manuales

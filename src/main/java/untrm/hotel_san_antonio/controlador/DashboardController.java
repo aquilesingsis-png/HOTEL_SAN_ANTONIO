@@ -38,13 +38,13 @@ import javafx.scene.layout.VBox;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Reserva;
 import untrm.hotel_san_antonio.modelo.TipoCambio;
-import untrm.hotel_san_antonio.servicio.DecolectaTipoCambioService;
-import untrm.hotel_san_antonio.servicio.DashboardService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.EstiloUtil;
-import untrm.hotel_san_antonio.util.Navegacion;
-import untrm.hotel_san_antonio.util.SesionActual;
-import untrm.hotel_san_antonio.util.Registro;
+import untrm.hotel_san_antonio.modelo.servicio.DecolectaTipoCambioService;
+import untrm.hotel_san_antonio.modelo.servicio.DashboardService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.controlador.util.EstiloUtil;
+import untrm.hotel_san_antonio.controlador.util.Navegacion;
+import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
+import untrm.hotel_san_antonio.modelo.util.Registro;
 
 public class DashboardController {
 

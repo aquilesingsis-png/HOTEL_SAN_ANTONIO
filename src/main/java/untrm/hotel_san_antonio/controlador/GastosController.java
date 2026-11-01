@@ -13,9 +13,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import untrm.hotel_san_antonio.modelo.Gasto;
-import untrm.hotel_san_antonio.servicio.GastoService;
-import untrm.hotel_san_antonio.util.Alertas;
-import untrm.hotel_san_antonio.util.Registro;
+import untrm.hotel_san_antonio.modelo.servicio.GastoService;
+import untrm.hotel_san_antonio.controlador.util.Alertas;
+import untrm.hotel_san_antonio.modelo.util.Registro;
 
 public class GastosController {
     @FXML private DatePicker dpFecha, dpDesde, dpHasta;

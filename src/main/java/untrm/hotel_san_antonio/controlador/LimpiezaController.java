@@ -14,9 +14,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Duration;
 import untrm.hotel_san_antonio.modelo.Habitacion;
-import untrm.hotel_san_antonio.servicio.LimpiezaService;
-import untrm.hotel_san_antonio.util.EstiloGlobal;
-import untrm.hotel_san_antonio.util.Registro;
+import untrm.hotel_san_antonio.modelo.servicio.LimpiezaService;
+import untrm.hotel_san_antonio.controlador.util.EstiloGlobal;
+import untrm.hotel_san_antonio.modelo.util.Registro;
 
 /**
  * Limpieza: muestra solo las habitaciones que dejó el check-out (estado LIMPIEZA) y se actualiza sola.
