@@ -165,8 +165,8 @@ public class UsuarioService {
     public List<Cambio> listarHistorial() throws SQLException {
         Permisos.requerir("ADMINISTRADOR");
         String sql = "SELECT a.fecha, COALESCE(afectado.usuario, CONCAT('#', a.id_entidad)), a.accion, "
-                + "COALESCE(a.detalle, ''), actor.usuario FROM auditoria a "
-                + "JOIN usuario actor ON actor.id_usuario = a.id_usuario "
+                + "COALESCE(a.detalle, ''), COALESCE(actor.usuario, 'Base de datos') FROM auditoria a "
+                + "LEFT JOIN usuario actor ON actor.id_usuario = a.id_usuario "
                 + "LEFT JOIN usuario afectado ON afectado.id_usuario = a.id_entidad "
                 + "WHERE a.entidad = 'usuario' ORDER BY a.fecha DESC, a.id_auditoria DESC";
         List<Cambio> lista = new java.util.ArrayList<>();
