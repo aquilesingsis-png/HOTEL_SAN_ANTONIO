@@ -10,7 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import untrm.hotel_san_antonio.modelo.dao.CajaDAO;
+import untrm.hotel_san_antonio.modelo.servicio.CajaService;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 
 /** Ventana para registrar a mano un ingreso o un egreso de caja (solo el Administrador). */
@@ -25,7 +25,7 @@ public class MovimientoCajaFormController {
     @FXML private TextArea txtObservacion;
     @FXML private Label lblMensaje;
 
-    private final CajaDAO dao = new CajaDAO();
+    private final CajaService cajaService = new CajaService();
     private Runnable alGuardar;
 
     @FXML
@@ -52,7 +52,7 @@ public class MovimientoCajaFormController {
             return;
         }
         try {
-            dao.guardarMovimientoCaja(cmbTipo.getValue().toUpperCase(Locale.ROOT), txtConcepto.getText(),
+            cajaService.guardarMovimientoCaja(cmbTipo.getValue().toUpperCase(Locale.ROOT), txtConcepto.getText(),
                     cmbMetodo.getValue().toUpperCase(Locale.ROOT), monto, txtReferencia.getText().trim(),
                     txtObservacion.getText(), txtTurno.getText());
             Alertas.mostrarInfo("Movimiento registrado", "El movimiento se guardó en la caja.");

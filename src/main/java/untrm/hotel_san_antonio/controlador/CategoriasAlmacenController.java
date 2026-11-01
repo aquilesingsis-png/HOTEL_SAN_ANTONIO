@@ -10,22 +10,22 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO;
-import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO.CategoriaFila;
+import untrm.hotel_san_antonio.modelo.servicio.AlmacenService;
+import untrm.hotel_san_antonio.modelo.CategoriaResumen;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.controlador.util.Consulta;
 
 /** Ventana para crear, renombrar y eliminar las categorías de productos. */
 public class CategoriasAlmacenController {
 
-    @FXML private TableView<CategoriaFila> tabla;
-    @FXML private TableColumn<CategoriaFila, String> colNombre;
-    @FXML private TableColumn<CategoriaFila, String> colProductos;
+    @FXML private TableView<CategoriaResumen> tabla;
+    @FXML private TableColumn<CategoriaResumen, String> colNombre;
+    @FXML private TableColumn<CategoriaResumen, String> colProductos;
     @FXML private TextField txtNombre;
     @FXML private Label lblMensaje;
 
-    private final AlmacenDAO dao = new AlmacenDAO();
-    private final Consulta<List<CategoriaFila>> consulta = new Consulta<>();
+    private final AlmacenService almacenService = new AlmacenService();
+    private final Consulta<List<CategoriaResumen>> consulta = new Consulta<>();
     private Runnable alCerrar;
     private boolean huboCambios;
 
@@ -49,7 +49,7 @@ public class CategoriasAlmacenController {
     }
 
     private void cargar() {
-        consulta.lanzar(tabla, () -> dao.categorias(),
+        consulta.lanzar(tabla, () -> almacenService.categorias(),
                 lista -> tabla.getItems().setAll(lista),
                 error -> lblMensaje.setText("No se pudieron cargar las categorías."));
     }
@@ -66,9 +66,9 @@ public class CategoriasAlmacenController {
     @FXML
     private void guardar() {
         lblMensaje.setText("");
-        CategoriaFila elegida = tabla.getSelectionModel().getSelectedItem();
+        CategoriaResumen elegida = tabla.getSelectionModel().getSelectedItem();
         try {
-            dao.guardarCategoria(elegida == null ? null : elegida.id(), txtNombre.getText());
+            almacenService.guardarCategoria(elegida == null ? null : elegida.id(), txtNombre.getText());
             huboCambios = true;
             cargar();
             nueva();
@@ -81,7 +81,7 @@ public class CategoriasAlmacenController {
 
     @FXML
     private void eliminar() {
-        CategoriaFila elegida = tabla.getSelectionModel().getSelectedItem();
+        CategoriaResumen elegida = tabla.getSelectionModel().getSelectedItem();
         if (elegida == null) {
             lblMensaje.setText("Elija primero una categoría de la tabla.");
             return;
@@ -91,7 +91,7 @@ public class CategoriasAlmacenController {
             return;
         }
         try {
-            dao.eliminarCategoria(elegida.id());
+            almacenService.eliminarCategoria(elegida.id());
             huboCambios = true;
             cargar();
             nueva();

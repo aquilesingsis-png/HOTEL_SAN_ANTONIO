@@ -30,7 +30,7 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import untrm.hotel_san_antonio.modelo.dao.HabitacionDAO;
+import untrm.hotel_san_antonio.modelo.servicio.HabitacionService;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Huesped;
@@ -108,7 +108,7 @@ public class Nueva_reservaController {
     @FXML private Label lblAyudaPago;
 
     private final ReservaService reservaService = new ReservaService();
-    private final HabitacionDAO habitacionDAO = new HabitacionDAO();
+    private final HabitacionService habitacionService = new HabitacionService();
     private HuespedesAdicionales acompanantes;
     private Habitacion habitacionSeleccionada;
     private Node tarjetaSeleccionada;
@@ -510,7 +510,7 @@ public class Nueva_reservaController {
             Set<Integer> idsDisponibles = new HashSet<>();
             for (Habitacion habitacion : disponibles) idsDisponibles.add(habitacion.getIdHabitacion());
             Map<Integer, List<Habitacion>> porPiso = new TreeMap<>();
-            for (Habitacion habitacion : habitacionDAO.listar()) {
+            for (Habitacion habitacion : habitacionService.listar()) {
                 if (piso != null && habitacion.getPiso() != piso) continue;
                 if (tipo != null && !tipo.equals(habitacion.getTipo().getNombre())) continue;
                 porPiso.computeIfAbsent(habitacion.getPiso(), numero -> new ArrayList<>()).add(habitacion);

@@ -19,8 +19,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
-import untrm.hotel_san_antonio.modelo.dao.ReportesDAO;
-import untrm.hotel_san_antonio.modelo.dao.ReportesDAO.Resultado;
+import untrm.hotel_san_antonio.modelo.servicio.ReportesService;
+import untrm.hotel_san_antonio.modelo.servicio.ReportesService.Resultado;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.controlador.util.Consulta;
 import untrm.hotel_san_antonio.controlador.util.EstiloGlobal;
@@ -67,7 +67,7 @@ public class ReportesController {
     @FXML private Label lblCantidad;
     @FXML private TableView<List<String>> tabla;
 
-    private final ReportesDAO dao = new ReportesDAO();
+    private final ReportesService reportesService = new ReportesService();
     private final Consulta<Resultado> consulta = new Consulta<>();
     private Resultado ultimo;
     private String ultimoReporte;
@@ -114,7 +114,7 @@ public class ReportesController {
                 case OCUPACION -> {
                     lblFiltro1.setText("Tipo de habitación");
                     cmbFiltro1.getItems().setAll(TODOS);
-                    cmbFiltro1.getItems().addAll(listaSegura(() -> dao.tiposHabitacion()));
+                    cmbFiltro1.getItems().addAll(listaSegura(() -> reportesService.tiposHabitacion()));
                     cmbAgrupar.getItems().setAll("Día", "Semana", "Mes");
                 }
                 case INGRESOS -> {
@@ -130,7 +130,7 @@ public class ReportesController {
                 default -> {
                     lblFiltro1.setText("Categoría");
                     cmbFiltro1.getItems().setAll(TODOS);
-                    cmbFiltro1.getItems().addAll(listaSegura(() -> dao.categorias()));
+                    cmbFiltro1.getItems().addAll(listaSegura(() -> reportesService.categorias()));
                     boxBuscar.setVisible(true);
                     boxBuscar.setManaged(true);
                     cmbAgrupar.getItems().setAll("Producto", "Categoría", "Día", "Mes");
@@ -179,9 +179,9 @@ public class ReportesController {
         String texto = txtBuscar.getText();
         consulta.lanzar(tabla,
                 () -> switch (reporte) {
-                    case OCUPACION -> dao.ocupacion(desde, hasta, filtro, agrupacion);
-                    case INGRESOS -> dao.ingresos(desde, hasta, filtro, metodo, agrupacion);
-                    default -> dao.ventas(desde, hasta, filtro, texto, agrupacion);
+                    case OCUPACION -> reportesService.ocupacion(desde, hasta, filtro, agrupacion);
+                    case INGRESOS -> reportesService.ingresos(desde, hasta, filtro, metodo, agrupacion);
+                    default -> reportesService.ventas(desde, hasta, filtro, texto, agrupacion);
                 },
                 r -> {
                     ultimo = r;

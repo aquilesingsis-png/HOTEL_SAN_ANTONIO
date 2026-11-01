@@ -4,7 +4,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.VBox;
-import untrm.hotel_san_antonio.modelo.dao.HabitacionDAO;
 import untrm.hotel_san_antonio.modelo.CuentaHabitacion;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.servicio.CuentaService;
@@ -33,7 +32,6 @@ public class HabitacionesController {
     @FXML private ComboBox<String> cmbEstado, cmbTipo;
     @FXML private VBox contenedorPisos;
 
-    private final HabitacionDAO habitacionDAO = new HabitacionDAO();
     private final CuentaService cuentaService = new CuentaService();
     private final HabitacionService habitacionService = new HabitacionService();
     private final ReservaService reservaService = new ReservaService();
@@ -67,7 +65,7 @@ public class HabitacionesController {
     }
 
     private void cargarHabitaciones() {
-        consulta.lanzar(contenedorPisos, () -> habitacionDAO.listar(),
+        consulta.lanzar(contenedorPisos, () -> habitacionService.listar(),
                 lista -> {
                     habitaciones = lista;
                     construirTarjetas();

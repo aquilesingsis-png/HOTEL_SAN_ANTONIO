@@ -18,7 +18,7 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import untrm.hotel_san_antonio.modelo.dao.HuespedDAO;
+import untrm.hotel_san_antonio.modelo.servicio.HuespedService;
 import untrm.hotel_san_antonio.modelo.Empresa;
 import untrm.hotel_san_antonio.modelo.Habitacion;
 import untrm.hotel_san_antonio.modelo.Huesped;
@@ -83,7 +83,7 @@ public class ReservaFormController {
     @FXML private Label lblAvisoCapacidad;
     @FXML private VBox contenedorAcompanantes;
 
-    private final HuespedDAO huespedDAO = new HuespedDAO();
+    private final HuespedService huespedService = new HuespedService();
     private final ReservaService reservaService = new ReservaService();
     private final HabitacionService habitacionService = new HabitacionService();
     private HuespedesAdicionales acompanantes;
@@ -94,11 +94,25 @@ public class ReservaFormController {
 
     @FXML
     public void initialize() {
+        configurarHuespedes();
+        configurarListasIniciales();
+        configurarFechas();
+        configurarFormatosDeCampos();
+        configurarPagoDividido();
+        configurarLimitesYEmpresa();
+    }
+
+    /** Las personas que ingresan y el aspecto del botón de guardar. */
+    private void configurarHuespedes() {
         acompanantes = new HuespedesAdicionales(contenedorAcompanantes);
         spHuespedes.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 1, 1));
         spHuespedes.valueProperty().addListener((obs, antes, ahora) -> acompanantes.actualizar(ahora));
         acompanantes.actualizar(1);
         untrm.hotel_san_antonio.controlador.util.EstiloBotones.hoverPrimario(btnGuardar);
+    }
+
+    /** Los valores con que arrancan las listas y el país. */
+    private void configurarListasIniciales() {
         cmbTipoDoc.getItems().addAll(TIPOS_DOC.keySet());
         cmbTipoDoc.setValue("DNI");
         cmbMetodo.getItems().addAll(METODOS.keySet());
@@ -109,6 +123,10 @@ public class ReservaFormController {
 
         // al cambiar el DNI se vuelven a abrir los nombres hasta que se busque otra vez
         txtDocumento.textProperty().addListener((obs, antes, ahora) -> bloquearIdentidad(false));
+    }
+
+    /** Ingreso siempre hoy; salida desde mañana. Si cambian las fechas se recalcula el total. */
+    private void configurarFechas() {
         dpIngreso.setEditable(false);
         dpSalida.setEditable(false);
         dpIngreso.setValue(LocalDate.now());
@@ -138,7 +156,10 @@ public class ReservaFormController {
             recalcular();
         });
         dpSalida.valueProperty().addListener((obs, antes, ahora) -> recalcular());
+    }
 
+    /** Los campos solo aceptan lo que es válido para cada formato. */
+    private void configurarFormatosDeCampos() {
         // Los campos solo aceptan lo que es valido para cada formato
         txtDocumento.setTextFormatter(new TextFormatter<String>(c -> {
             String texto = c.getControlNewText();
@@ -155,7 +176,10 @@ public class ReservaFormController {
 
         txtAdelanto.setOnKeyTyped(e -> adelantoManual = true);
         txtAdelanto.textProperty().addListener((obs, antes, ahora) -> actualizarResumen());
+    }
 
+    /** El segundo pago, cuando el cobro se divide en dos métodos. */
+    private void configurarPagoDividido() {
         txtMonto2.setTextFormatter(new TextFormatter<String>(c -> c.getControlNewText().matches("\\d{0,6}(\\.\\d{0,2})?") ? c : null));
         boxSegundoPago.visibleProperty().bind(chkDividirPago.selectedProperty());
         boxSegundoPago.managedProperty().bind(boxSegundoPago.visibleProperty());
@@ -163,7 +187,10 @@ public class ReservaFormController {
         chkDividirPago.selectedProperty().addListener((obs, antes, ahora) -> actualizarResumen());
         cmbMetodo.valueProperty().addListener((obs, antes, ahora) -> actualizarResumen());
         cmbMetodo2.valueProperty().addListener((obs, antes, ahora) -> actualizarResumen());
+    }
 
+    /** Largos máximos de los textos y la parte de la empresa (RUC). */
+    private void configurarLimitesYEmpresa() {
         limitarLargo(txtNombres, 80);
         limitarLargo(txtApellidos, 80);
         limitarLargo(txtPais, 60);
@@ -310,7 +337,7 @@ public class ReservaFormController {
         }
 
         try {
-            Huesped local = huespedDAO.buscarPorDocumento("DNI", dni);
+            Huesped local = huespedService.buscarPorDocumento("DNI", dni);
             if (local != null) {
                 txtNombres.setText(local.getNombres());
                 txtApellidos.setText(local.getApellidos());

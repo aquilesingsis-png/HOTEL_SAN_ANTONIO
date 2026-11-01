@@ -1,6 +1,8 @@
 package untrm.hotel_san_antonio.modelo.dao;
 
+import untrm.hotel_san_antonio.modelo.EstadiaActiva;
 import untrm.hotel_san_antonio.modelo.Reserva;
+import untrm.hotel_san_antonio.modelo.conexion.ConexionBD;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -313,15 +315,13 @@ public class ReservaDAO {
         return lista;
     }
 
-    /** Bloquea la habitación para serializar altas concurrentes sobre la misma fila. */
-    public void bloquearHabitacion(Connection con, int idHabitacion) throws SQLException {
+    /** Bloquea la habitación para serializar altas concurrentes sobre la misma fila; false si ya no existe. */
+    public boolean bloquearHabitacion(Connection con, int idHabitacion) throws SQLException {
         try (PreparedStatement ps = con.prepareStatement(
                 "SELECT id_habitacion FROM habitacion WHERE id_habitacion = ? FOR UPDATE")) {
             ps.setInt(1, idHabitacion);
             try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    throw new IllegalStateException("La habitación seleccionada ya no existe.");
-                }
+                return rs.next();
             }
         }
     }
@@ -474,6 +474,42 @@ public class ReservaDAO {
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 rs.next();
                 return rs.getInt(1);
+            }
+        }
+    }
+
+    /** Las habitaciones con un huésped alojado ahora (check-in hecho), ordenadas por número. */
+    public List<EstadiaActiva> listarEstadiasActivas() throws SQLException {
+        String sql = "SELECT r.id_huesped,r.id_habitacion,h.numero,CONCAT(hu.nombres,' ',hu.apellidos) huesped "
+                + "FROM reserva r INNER JOIN habitacion h ON h.id_habitacion=r.id_habitacion "
+                + "INNER JOIN huesped hu ON hu.id_huesped=r.id_huesped WHERE r.estado='CHECKIN' ORDER BY h.numero";
+        List<EstadiaActiva> lista = new ArrayList<>();
+        try (Connection con = ConexionBD.conectar(); PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(new EstadiaActiva(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4)));
+            }
+        }
+        return lista;
+    }
+
+    /**
+     * Cuántas habitaciones hubo ocupadas en promedio durante los últimos {@code dias} días, contando hoy.
+     * Es una sola consulta: suma, para cada reserva en curso, las noches que caen dentro del período.
+     */
+    public double ocupadasPromedio(Connection con, LocalDate hoy, int dias) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(GREATEST(0, DATEDIFF(LEAST(r.fecha_checkout, ? + INTERVAL 1 DAY), "
+                + "GREATEST(r.fecha_checkin, ?)))), 0) FROM reserva r "
+                + "WHERE r.estado IN ('CHECKIN','FINALIZADA') AND r.fecha_checkin <= ? AND r.fecha_checkout > ?";
+        LocalDate desde = hoy.minusDays(dias - 1L);
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(hoy));
+            ps.setDate(2, Date.valueOf(desde));
+            ps.setDate(3, Date.valueOf(hoy));
+            ps.setDate(4, Date.valueOf(desde));
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getDouble(1) / dias;
             }
         }
     }

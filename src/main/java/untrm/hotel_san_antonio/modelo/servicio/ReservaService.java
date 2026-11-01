@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.HashSet;
 
 import untrm.hotel_san_antonio.modelo.dao.ComprobanteDAO;
-import untrm.hotel_san_antonio.modelo.dao.CuentaDAO;
 import untrm.hotel_san_antonio.modelo.dao.EmpresaDAO;
 import untrm.hotel_san_antonio.modelo.dao.HabitacionDAO;
 import untrm.hotel_san_antonio.modelo.dao.HuespedDAO;
@@ -35,6 +34,9 @@ import untrm.hotel_san_antonio.modelo.util.Validador;
 
 /** Fuente única de las reglas de negocio del módulo Reservas. */
 public class ReservaService {
+    /** Cuántas reservas trae como máximo la lista; si hay más, la pantalla avisa. */
+    public static final int LIMITE_LISTA = untrm.hotel_san_antonio.modelo.dao.ReservaDAO.LIMITE_LISTA;
+
 
     public static final int MAX_NOCHES = 60;
     private static final int MAX_DIAS_ANTICIPACION = 365;
@@ -51,7 +53,7 @@ public class ReservaService {
     private final AuditoriaDAO auditoriaDAO = new AuditoriaDAO();
     private final CambioHabitacionDAO cambioHabitacionDAO = new CambioHabitacionDAO();
     private final VentaTiendaDAO ventaDAO = new VentaTiendaDAO();
-    private final CuentaDAO cuentaDAO = new CuentaDAO();
+    private final CuentaService cuentas = new CuentaService();
     private final ComprobanteDAO comprobanteDAO = new ComprobanteDAO();
 
     public record ResultadoCambio(BigDecimal total, BigDecimal pagado, BigDecimal saldo) {}
@@ -94,8 +96,8 @@ public class ReservaService {
                 if (inicial == null) throw new IllegalArgumentException("La reserva no existe.");
                 int idAnterior = inicial.getIdHabitacion();
                 if (idAnterior == idNueva) throw new IllegalArgumentException("Seleccione otra habitación.");
-                reservaDAO.bloquearHabitacion(con, Math.min(idAnterior, idNueva));
-                reservaDAO.bloquearHabitacion(con, Math.max(idAnterior, idNueva));
+                bloquearHabitacion(con, Math.min(idAnterior, idNueva));
+                bloquearHabitacion(con, Math.max(idAnterior, idNueva));
                 Reserva reserva = reservaDAO.buscarPorId(con, idReserva, true);
                 if (reserva == null || reserva.getIdHabitacion() != idAnterior) {
                     throw new IllegalStateException("La reserva cambió; actualice la pantalla.");
@@ -223,7 +225,7 @@ public class ReservaService {
             try {
                 new DiasSinUsoService().requerirDiaPendiente(con, fechaEvento);
                 new DiasSinUsoService().requerirDiaPendiente(con, fechaPagoReal);
-                reservaDAO.bloquearHabitacion(con, reserva.getIdHabitacion());
+                bloquearHabitacion(con, reserva.getIdHabitacion());
                 int capacidad = reservaDAO.obtenerCapacidadHabitacion(con, reserva.getIdHabitacion());
                 if (capacidad <= 0 || huespedes.size() > capacidad)
                     throw new IllegalArgumentException("La habitación no admite a todos los huéspedes.");
@@ -257,7 +259,7 @@ public class ReservaService {
         try (Connection conexion = ConexionBD.conectar()) {
             conexion.setAutoCommit(false);
             try {
-                reservaDAO.bloquearHabitacion(conexion, idHabitacion);
+                bloquearHabitacion(conexion, idHabitacion);
                 if (!"DISPONIBLE".equals(habitacionDAO.obtenerEstado(conexion, idHabitacion))) {
                     throw new IllegalStateException("La habitación no está disponible para recibir al huésped todavía.");
                 }
@@ -292,8 +294,8 @@ public class ReservaService {
         try (Connection conexion = ConexionBD.conectar()) {
             conexion.setAutoCommit(false);
             try {
-                reservaDAO.bloquearHabitacion(conexion, idHabitacion);
-                CuentaHabitacion cuenta = cuentaDAO.obtener(conexion, idHabitacion);
+                bloquearHabitacion(conexion, idHabitacion);
+                CuentaHabitacion cuenta = cuentas.obtener(conexion, idHabitacion);
                 if (cuenta == null) {
                     throw new IllegalStateException("La habitación no tiene una estadía en curso.");
                 }
@@ -576,7 +578,7 @@ public class ReservaService {
 
     private void prepararReservaDentroDeTransaccion(Connection conexion, Reserva reserva,
                                                       boolean checkinInmediato) throws SQLException {
-        reservaDAO.bloquearHabitacion(conexion, reserva.getIdHabitacion());
+        bloquearHabitacion(conexion, reserva.getIdHabitacion());
         int capacidad = reservaDAO.obtenerCapacidadHabitacion(conexion, reserva.getIdHabitacion());
         if (capacidad <= 0) {
             throw new IllegalStateException("La habitación seleccionada ya no existe.");
@@ -783,5 +785,12 @@ public class ReservaService {
 
     private String textoOpcional(String texto) {
         return texto == null || texto.isBlank() ? null : texto.trim();
+    }
+
+    /** Bloquea la habitación para que dos altas sobre la misma no se crucen; falla si ya no existe. */
+    private void bloquearHabitacion(Connection con, int idHabitacion) throws SQLException {
+        if (!reservaDAO.bloquearHabitacion(con, idHabitacion)) {
+            throw new IllegalStateException("La habitación seleccionada ya no existe.");
+        }
     }
 }

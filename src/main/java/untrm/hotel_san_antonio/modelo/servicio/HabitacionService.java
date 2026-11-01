@@ -74,4 +74,9 @@ public class HabitacionService {
             }
         }
     }
+
+    /** Todas las habitaciones con su tipo y su estado. */
+    public java.util.List<Habitacion> listar() throws SQLException {
+        return habitaciones.listar();
+    }
 }

@@ -1,15 +1,16 @@
 package untrm.hotel_san_antonio.modelo.servicio;
 
 import untrm.hotel_san_antonio.modelo.dao.AuditoriaDAO;
-import untrm.hotel_san_antonio.modelo.dao.CierreCajaDAO;
+import untrm.hotel_san_antonio.modelo.dao.CategoriaDAO;
 import untrm.hotel_san_antonio.modelo.dao.ComprobanteDAO;
-import untrm.hotel_san_antonio.modelo.dao.CuentaDAO;
 import untrm.hotel_san_antonio.modelo.dao.DetalleVentaDAO;
 import untrm.hotel_san_antonio.modelo.dao.HabitacionDAO;
 import untrm.hotel_san_antonio.modelo.dao.ProductoDAO;
 import untrm.hotel_san_antonio.modelo.dao.ReservaDAO;
 import untrm.hotel_san_antonio.modelo.dao.VentaTiendaDAO;
+import untrm.hotel_san_antonio.modelo.Categoria;
 import untrm.hotel_san_antonio.modelo.Comprobante;
+import untrm.hotel_san_antonio.modelo.EstadiaActiva;
 import untrm.hotel_san_antonio.modelo.CuentaHabitacion;
 import untrm.hotel_san_antonio.modelo.DetalleVenta;
 import untrm.hotel_san_antonio.modelo.Habitacion;
@@ -36,11 +37,11 @@ public class VentaService {
     private final DetalleVentaDAO detalleDAO = new DetalleVentaDAO();
     private final ProductoDAO productoDAO = new ProductoDAO();
     private final DiasSinUsoService diasSinUso = new DiasSinUsoService();
-    private final CuentaDAO cuentaDAO = new CuentaDAO();
+    private final CuentaService cuentas = new CuentaService();
     private final ReservaDAO reservaDAO = new ReservaDAO();
     private final HabitacionDAO habitacionDAO = new HabitacionDAO();
     private final ComprobanteDAO comprobanteDAO = new ComprobanteDAO();
-    private final CierreCajaDAO cierreDAO = new CierreCajaDAO();
+    private final CajaService cajaService = new CajaService();
     private final AuditoriaDAO auditoriaDAO = new AuditoriaDAO();
 
     private static final DateTimeFormatter FECHA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -150,7 +151,9 @@ public class VentaService {
                 return idVenta;
             } catch (Exception ex) {
                 cn.rollback();
-                try { cn.setAutoCommit(autoCommitAnterior); } catch (SQLException ignored) {}
+                try { cn.setAutoCommit(autoCommitAnterior); } catch (SQLException ignored) {
+                    // la conexión vuelve al grupo enseguida; no hay nada más que hacer con ella
+                }
                 if (ex instanceof SQLException) {
                     throw (SQLException) ex;
                 }
@@ -185,7 +188,7 @@ public class VentaService {
             boolean cierresTomados = false;
             try {
                 // quien cierra la caja y quien anula una venta no se pisan: el cierre cuenta lo que ya esta confirmado
-                cierreDAO.bloquearCierres(con);
+                cajaService.bloquearCierres(con);
                 cierresTomados = true;
 
                 // todas las operaciones bloquean en el mismo orden (estadia, ventas, comprobante) para no trabarse entre si
@@ -239,7 +242,7 @@ public class VentaService {
                 throw e;
             } finally {
                 if (cierresTomados) {
-                    cierreDAO.liberarCierres(con);
+                    cajaService.liberarCierres(con);
                 }
             }
         }
@@ -247,7 +250,7 @@ public class VentaService {
 
     /** Una venta cobrada que ya entro en un cierre de caja confirmado no se puede anular. */
     private void exigirFueraDeCierre(Connection con, VentaTienda venta) throws SQLException {
-        LocalDateTime ultimoCierre = cierreDAO.ultimaConfirmacion(con);
+        LocalDateTime ultimoCierre = cajaService.ultimaConfirmacion(con);
         if (ultimoCierre != null && venta.getFechaVenta().isBefore(ultimoCierre)) {
             throw new IllegalStateException("Esta venta ya está dentro del cierre de caja confirmado el "
                     + ultimoCierre.format(FECHA_HORA) + " y no se puede anular. Si fue un error, el administrador "
@@ -275,7 +278,7 @@ public class VentaService {
             throw new IllegalStateException("Este consumo ya está en el comprobante " + (c == null ? "" : c.getNumero() + " ")
                     + "de la estadía. Primero hay que anular ese comprobante (solo el administrador).");
         }
-        CuentaHabitacion cuenta = cuentaDAO.obtener(con, venta.getIdHabitacion());
+        CuentaHabitacion cuenta = cuentas.obtener(con, venta.getIdHabitacion());
         if (cuenta == null || cuenta.getIdReserva() != idReserva) {
             throw new IllegalStateException("La estadía cambió. Vuelve a cargar la lista y reintenta.");
         }
@@ -316,5 +319,27 @@ public class VentaService {
 
     private static String abreviar(String texto, int maximo) {
         return texto.length() <= maximo ? texto : texto.substring(0, maximo - 1) + "…";
+    }
+
+    // ---------------------------------------------------------- consultas para el carrito
+
+    /** Las categorías de productos, para filtrar el catálogo. */
+    public List<Categoria> listarCategorias() throws SQLException {
+        return new CategoriaDAO().listar();
+    }
+
+    /** Los productos activos que coinciden con el texto y la categoría (ambos opcionales). */
+    public List<Producto> buscarProductosActivos(String texto, Integer idCategoria) throws SQLException {
+        return productoDAO.buscarActivos(texto, idCategoria);
+    }
+
+    /** Un producto activo por su número, o null si no existe o está inactivo. */
+    public Producto buscarProductoActivo(int idProducto) throws SQLException {
+        return productoDAO.buscarActivoPorId(idProducto);
+    }
+
+    /** Las habitaciones con un huésped alojado ahora, a las que se les puede cargar un consumo. */
+    public List<EstadiaActiva> listarEstadiasActivas() throws SQLException {
+        return reservaDAO.listarEstadiasActivas();
     }
 }

@@ -7,16 +7,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import untrm.hotel_san_antonio.modelo.dao.AuditoriaDAO;
+import untrm.hotel_san_antonio.modelo.dao.RespaldoDAO;
 import untrm.hotel_san_antonio.modelo.conexion.ConexionBD;
 import untrm.hotel_san_antonio.modelo.seguridad.Permisos;
 import untrm.hotel_san_antonio.modelo.seguridad.SesionActual;
@@ -38,6 +36,7 @@ public class RespaldoService {
     private static final DateTimeFormatter FORMATO = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final AuditoriaDAO auditoria = new AuditoriaDAO();
+    private final RespaldoDAO respaldos = new RespaldoDAO();
 
     /** Nombre sugerido para el archivo, con la fecha y la hora. */
     public static String nombreSugerido() {
@@ -57,11 +56,8 @@ public class RespaldoService {
         try (Connection con = ConexionBD.conectar();
              BufferedWriter salida = Files.newBufferedWriter(destino, StandardCharsets.UTF_8)) {
             con.setAutoCommit(false);
-            try (Statement st = con.createStatement()) {
-                st.execute("SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ");
-                st.execute("START TRANSACTION WITH CONSISTENT SNAPSHOT");
-            }
-            List<String> nombres = listarTablas(con);
+            respaldos.iniciarLecturaCoherente(con);
+            List<String> nombres = respaldos.listarTablas(con);
             salida.write("-- Respaldo de la base de datos Hotel San Antonio\n");
             salida.write("-- Fecha: " + LocalDateTime.now().format(FORMATO) + "\n");
             salida.write("-- Para restaurar: en phpMyAdmin elija la base hotel_san_antonio y use Importar con este archivo.\n");
@@ -86,21 +82,8 @@ public class RespaldoService {
     /** El último respaldo hecho desde el sistema, o null si nunca se hizo. */
     public UltimoRespaldo ultimo() throws SQLException {
         Permisos.requerir("ADMINISTRADOR");
-        String sql = "SELECT a.fecha, u.usuario FROM auditoria a JOIN usuario u ON u.id_usuario = a.id_usuario "
-                + "WHERE a.accion = 'RESPALDO_CREAR' ORDER BY a.fecha DESC, a.id_auditoria DESC LIMIT 1";
-        try (Connection con = ConexionBD.conectar(); Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            return rs.next() ? new UltimoRespaldo(rs.getTimestamp(1).toLocalDateTime(), rs.getString(2)) : null;
-        }
-    }
-
-    private List<String> listarTablas(Connection con) throws SQLException {
-        List<String> nombres = new ArrayList<>();
-        try (Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery("SHOW FULL TABLES WHERE Table_type = 'BASE TABLE'")) {
-            while (rs.next()) nombres.add(rs.getString(1));
-        }
-        return nombres;
+        RespaldoDAO.Registro registro = respaldos.ultimoRespaldo();
+        return registro == null ? null : new UltimoRespaldo(registro.fecha(), registro.usuario());
     }
 
     /** Escribe la definición de la tabla y todas sus filas; devuelve cuántas filas escribió. */
@@ -110,35 +93,26 @@ public class RespaldoService {
         salida.write("-- Tabla " + tabla + "\n");
         salida.write("-- ----------------------------------------------------------------\n");
         salida.write("DROP TABLE IF EXISTS " + nombre + ";\n");
-        try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery("SHOW CREATE TABLE " + nombre)) {
-            rs.next();
-            salida.write(rs.getString(2) + ";\n\n");
-        }
-        long total = 0;
-        try (Statement st = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
-            st.setFetchSize(Integer.MIN_VALUE); // el servidor envía fila por fila
-            try (ResultSet rs = st.executeQuery("SELECT * FROM " + nombre)) {
-                ResultSetMetaData meta = rs.getMetaData();
-                int columnas = meta.getColumnCount();
-                int enLote = 0;
-                while (rs.next()) {
-                    salida.write(enLote == 0 ? "INSERT INTO " + nombre + " VALUES\n(" : ",\n(");
-                    for (int i = 1; i <= columnas; i++) {
-                        if (i > 1) salida.write(",");
-                        salida.write(valor(rs, i, meta.getColumnType(i)));
-                    }
-                    salida.write(")");
-                    total++;
-                    if (++enLote == FILAS_POR_INSERT) {
-                        salida.write(";\n");
-                        enLote = 0;
-                    }
-                }
-                if (enLote > 0) salida.write(";\n");
+        salida.write(respaldos.definicionTabla(con, nombre) + ";\n\n");
+        long[] total = {0};
+        int[] enLote = {0};
+        respaldos.recorrerFilas(con, nombre, (rs, meta) -> {
+            int columnas = meta.getColumnCount();
+            salida.write(enLote[0] == 0 ? "INSERT INTO " + nombre + " VALUES\n(" : ",\n(");
+            for (int i = 1; i <= columnas; i++) {
+                if (i > 1) salida.write(",");
+                salida.write(valor(rs, i, meta.getColumnType(i)));
             }
-        }
+            salida.write(")");
+            total[0]++;
+            if (++enLote[0] == FILAS_POR_INSERT) {
+                salida.write(";\n");
+                enLote[0] = 0;
+            }
+        });
+        if (enLote[0] > 0) salida.write(";\n");
         salida.write("\n");
-        return total;
+        return total[0];
     }
 
     private String valor(ResultSet rs, int columna, int tipo) throws SQLException {

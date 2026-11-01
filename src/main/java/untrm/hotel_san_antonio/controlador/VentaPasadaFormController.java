@@ -19,7 +19,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import untrm.hotel_san_antonio.modelo.dao.ProductoDAO;
 import untrm.hotel_san_antonio.modelo.DetalleVenta;
 import untrm.hotel_san_antonio.modelo.Producto;
 import untrm.hotel_san_antonio.modelo.VentaTienda;
@@ -60,7 +59,6 @@ public class VentaPasadaFormController {
     @FXML private Button btnRegistrar;
     @FXML private Label lblMensaje;
 
-    private final ProductoDAO productoDAO = new ProductoDAO();
     private final VentaService ventaService = new VentaService();
     private final List<Linea> lineas = new ArrayList<>();
     private LocalDate dia;
@@ -96,7 +94,7 @@ public class VentaPasadaFormController {
         colSubtotal.setStyle("-fx-alignment: CENTER-RIGHT;");
         EstiloGlobal.restilizarEncabezados(tabla);
         try {
-            cmbProducto.getItems().setAll(productoDAO.buscarActivos(null, null));
+            cmbProducto.getItems().setAll(ventaService.buscarProductosActivos(null, null));
         } catch (SQLException error) {
             lblMensaje.setText("No se pudieron cargar los productos.");
         }
@@ -221,7 +219,7 @@ public class VentaPasadaFormController {
     /** El stock cambió con la venta: se vuelve a leer para que la lista muestre lo que queda. */
     private void recargarProductos() {
         try {
-            cmbProducto.getItems().setAll(productoDAO.buscarActivos(null, null));
+            cmbProducto.getItems().setAll(ventaService.buscarProductosActivos(null, null));
         } catch (SQLException error) {
             // la lista anterior sigue sirviendo; el servicio vuelve a validar el stock al registrar
         }

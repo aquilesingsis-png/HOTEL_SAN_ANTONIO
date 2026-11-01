@@ -9,9 +9,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO;
-import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO.CategoriaFila;
-import untrm.hotel_san_antonio.modelo.dao.AlmacenDAO.Item;
+import untrm.hotel_san_antonio.modelo.servicio.AlmacenService;
+import untrm.hotel_san_antonio.modelo.CategoriaResumen;
+import untrm.hotel_san_antonio.modelo.ItemInventario;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 
 /** Ventana para crear o editar un producto del almacén (solo el Administrador). */
@@ -21,15 +21,15 @@ public class ProductoFormController {
     @FXML private TextField txtBarras;
     @FXML private TextField txtNombre;
     @FXML private TextField txtMarca;
-    @FXML private ChoiceBox<CategoriaFila> cmbCategoria;
+    @FXML private ChoiceBox<CategoriaResumen> cmbCategoria;
     @FXML private TextField txtPrecio;
     @FXML private TextField txtStock;
     @FXML private Label lblNotaStock;
     @FXML private ChoiceBox<String> cmbEstado;
     @FXML private Label lblMensaje;
 
-    private final AlmacenDAO dao = new AlmacenDAO();
-    private Item editando;
+    private final AlmacenService almacenService = new AlmacenService();
+    private ItemInventario editando;
     private Runnable alGuardar;
 
     @FXML
@@ -38,17 +38,17 @@ public class ProductoFormController {
         cmbEstado.setValue("Activo");
         cmbCategoria.setConverter(new StringConverter<>() {
             @Override
-            public String toString(CategoriaFila fila) {
+            public String toString(CategoriaResumen fila) {
                 return fila == null ? "" : fila.nombre();
             }
 
             @Override
-            public CategoriaFila fromString(String texto) {
+            public CategoriaResumen fromString(String texto) {
                 return null;
             }
         });
         try {
-            cmbCategoria.getItems().setAll(dao.categorias());
+            cmbCategoria.getItems().setAll(almacenService.categorias());
         } catch (SQLException | SecurityException error) {
             lblMensaje.setText("No se pudieron cargar las categorías.");
         }
@@ -58,7 +58,7 @@ public class ProductoFormController {
      * @param producto el producto a editar, o null para uno nuevo
      * @param alGuardar se ejecuta al guardar, para que la lista del almacén se actualice
      */
-    public void iniciar(Item producto, Runnable alGuardar) {
+    public void iniciar(ItemInventario producto, Runnable alGuardar) {
         this.editando = producto;
         this.alGuardar = alGuardar;
         if (producto == null) {
@@ -70,7 +70,7 @@ public class ProductoFormController {
         txtBarras.setText(producto.codigoBarra());
         txtNombre.setText(producto.nombre());
         txtMarca.setText(producto.marca());
-        for (CategoriaFila fila : cmbCategoria.getItems()) {
+        for (CategoriaResumen fila : cmbCategoria.getItems()) {
             if (fila.id() == producto.idCategoria()) {
                 cmbCategoria.setValue(fila);
             }
@@ -85,7 +85,7 @@ public class ProductoFormController {
     @FXML
     private void guardar() {
         lblMensaje.setText("");
-        CategoriaFila categoria = cmbCategoria.getValue();
+        CategoriaResumen categoria = cmbCategoria.getValue();
         if (categoria == null) {
             lblMensaje.setText("Seleccione una categoría.");
             return;
@@ -107,7 +107,7 @@ public class ProductoFormController {
             }
         }
         try {
-            dao.guardarProducto(editando == null ? null : editando.id(), txtBarras.getText(), txtNombre.getText(),
+            almacenService.guardarProducto(editando == null ? null : editando.id(), txtBarras.getText(), txtNombre.getText(),
                     txtMarca.getText(), categoria.id(), precio, stock, "Activo".equals(cmbEstado.getValue()));
             if (alGuardar != null) {
                 alGuardar.run();

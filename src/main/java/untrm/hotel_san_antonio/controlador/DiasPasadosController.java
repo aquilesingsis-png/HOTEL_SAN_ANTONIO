@@ -18,7 +18,7 @@ import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.util.Duration;
-import untrm.hotel_san_antonio.modelo.dao.DiasSinUsoDAO.ResumenDia;
+import untrm.hotel_san_antonio.modelo.ResumenDia;
 import untrm.hotel_san_antonio.modelo.servicio.DiasSinUsoService;
 import untrm.hotel_san_antonio.modelo.servicio.DiasSinUsoService.Estado;
 import untrm.hotel_san_antonio.controlador.util.Alertas;

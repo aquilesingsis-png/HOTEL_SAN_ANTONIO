@@ -13,7 +13,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import untrm.hotel_san_antonio.modelo.servicio.UsuarioService;
-import untrm.hotel_san_antonio.modelo.servicio.UsuarioService.Cambio;
+import untrm.hotel_san_antonio.modelo.CambioUsuario;
 import untrm.hotel_san_antonio.controlador.util.Alertas;
 import untrm.hotel_san_antonio.controlador.util.Consulta;
 import untrm.hotel_san_antonio.controlador.util.EstiloGlobal;
@@ -24,17 +24,17 @@ public class HistorialUsuariosController {
     private static final DateTimeFormatter FORMATO = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @FXML private TextField txtBuscar;
-    @FXML private TableView<Cambio> tabla;
-    @FXML private TableColumn<Cambio, String> colFecha;
-    @FXML private TableColumn<Cambio, String> colAfectado;
-    @FXML private TableColumn<Cambio, String> colAccion;
-    @FXML private TableColumn<Cambio, String> colDetalle;
-    @FXML private TableColumn<Cambio, String> colRealizadoPor;
+    @FXML private TableView<CambioUsuario> tabla;
+    @FXML private TableColumn<CambioUsuario, String> colFecha;
+    @FXML private TableColumn<CambioUsuario, String> colAfectado;
+    @FXML private TableColumn<CambioUsuario, String> colAccion;
+    @FXML private TableColumn<CambioUsuario, String> colDetalle;
+    @FXML private TableColumn<CambioUsuario, String> colRealizadoPor;
     @FXML private Label lblCantidad;
 
     private final UsuarioService servicio = new UsuarioService();
-    private List<Cambio> todos = List.of();
-    private final Consulta<List<Cambio>> consulta = new Consulta<>();
+    private List<CambioUsuario> todos = List.of();
+    private final Consulta<List<CambioUsuario>> consulta = new Consulta<>();
 
     @FXML
     public void initialize() {
@@ -43,7 +43,7 @@ public class HistorialUsuariosController {
         colAccion.setCellValueFactory(d -> new SimpleStringProperty(accion(d.getValue().accion())));
         colDetalle.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().detalle()));
         colRealizadoPor.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().realizadoPor()));
-        for (TableColumn<Cambio, String> columna : List.of(colFecha, colAfectado, colAccion, colDetalle, colRealizadoPor)) {
+        for (TableColumn<CambioUsuario, String> columna : List.of(colFecha, colAfectado, colAccion, colDetalle, colRealizadoPor)) {
             columna.setStyle("-fx-alignment: CENTER-LEFT;");
         }
         txtBuscar.textProperty().addListener((o, antes, ahora) -> filtrar());
@@ -61,8 +61,8 @@ public class HistorialUsuariosController {
 
     private void filtrar() {
         String texto = txtBuscar.getText() == null ? "" : txtBuscar.getText().trim().toLowerCase(Locale.ROOT);
-        List<Cambio> resultado = new ArrayList<>();
-        for (Cambio c : todos) {
+        List<CambioUsuario> resultado = new ArrayList<>();
+        for (CambioUsuario c : todos) {
             String fila = (c.afectado() + " " + accion(c.accion()) + " " + c.detalle() + " " + c.realizadoPor())
                     .toLowerCase(Locale.ROOT);
             if (texto.isEmpty() || fila.contains(texto)) resultado.add(c);
