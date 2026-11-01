@@ -13,13 +13,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Configuración JDBC: valores locales incluidos para XAMPP, archivo externo
- * editable y, con prioridad mayor, propiedades JVM o variables de entorno.
- * La configuración se lee una vez y solo se vuelve a leer si config.properties cambia.
- * Las conexiones salen de un pequeño grupo (HikariCP): cerrar una conexión la devuelve al grupo, no la corta.
- * Si la base no responde, la conexión falla a los 5 segundos en vez de dejar la pantalla colgada.
- */
 public class ConexionBD {
     private static final Logger LOG = Logger.getLogger(ConexionBD.class.getName());
     private static final int TIEMPO_CONEXION_MS = 5000;
