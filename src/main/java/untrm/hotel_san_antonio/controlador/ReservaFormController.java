@@ -80,6 +80,7 @@ public class ReservaFormController {
     @FXML private Label lblResCalculo, lblResTotal, lblResMinimo, lblResSaldo;
     @FXML private ScrollPane scrollForm;
     @FXML private Spinner<Integer> spHuespedes;
+    @FXML private Label lblAvisoCapacidad;
     @FXML private VBox contenedorAcompanantes;
 
     private final HuespedDAO huespedDAO = new HuespedDAO();
@@ -187,6 +188,11 @@ public class ReservaFormController {
 
         int capacidad = h.getTipo().getCapacidad();
         spHuespedes.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, capacidad, 1));
+        // si la habitación admite una sola persona, el selector no se mueve y se explica por qué
+        spHuespedes.setDisable(capacidad <= 1);
+        lblAvisoCapacidad.setText(capacidad <= 1
+                ? "Esta habitación admite solo 1 persona."
+                : "Máximo " + capacidad + " personas.");
         acompanantes.actualizar(1);
         lblTitulo.setText("Habitación " + h.getNumero() + " · " + h.getTipo().getNombre() + " · Piso " + h.getPiso());
         lblEstadoHab.setText("● Disponible");
