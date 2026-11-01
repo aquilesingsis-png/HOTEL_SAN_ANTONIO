@@ -105,6 +105,41 @@ public class DashboardService {
     }
 
     /** Numeros y listas que necesita dashboard_2.fxml; sin logica, solo datos ya calculados. */
+    /** Movimiento por hora de los últimos {@code dias} días, contando hoy (1 = solo hoy). */
+    public Map<Integer, Integer> movimientoPorHora(int dias) throws SQLException {
+        try (Connection con = ConexionBD.conectar()) {
+            return dashboardDAO.movimientoPorHora(con, dias);
+        }
+    }
+
+    /** Ingresos (habitaciones + tienda) de cada uno de los últimos {@code dias} días, contando hoy. */
+    public java.util.LinkedHashMap<LocalDate, BigDecimal> ingresosPorDia(int dias) throws SQLException {
+        try (Connection con = ConexionBD.conectar()) {
+            LocalDate hoy = LocalDate.now();
+            LocalDate desde = hoy.minusDays(Math.max(1, dias) - 1L);
+            Map<LocalDate, BigDecimal> pagos = pagoDAO.sumarPorDia(con, desde, hoy);
+            Map<LocalDate, BigDecimal> ventas = ventaTiendaDAO.sumarPorDia(con, desde, hoy);
+            java.util.LinkedHashMap<LocalDate, BigDecimal> resultado = new java.util.LinkedHashMap<>();
+            for (LocalDate dia = desde; !dia.isAfter(hoy); dia = dia.plusDays(1)) {
+                resultado.put(dia, pagos.getOrDefault(dia, BigDecimal.ZERO).add(ventas.getOrDefault(dia, BigDecimal.ZERO)));
+            }
+            return resultado;
+        }
+    }
+
+    /** Habitaciones ocupadas en promedio durante los últimos {@code dias} días, contando hoy (según las reservas). */
+    public double ocupadasPromedio(int dias) throws SQLException {
+        try (Connection con = ConexionBD.conectar()) {
+            int dias1 = Math.max(1, dias);
+            LocalDate hoy = LocalDate.now();
+            int suma = 0;
+            for (int atras = 0; atras < dias1; atras++) {
+                suma += reservaDAO.contarOcupadasEnFecha(con, hoy.minusDays(atras));
+            }
+            return suma / (double) dias1;
+        }
+    }
+
     public static class Resumen {
         public int totalHabitaciones;
         public int ocupadas;

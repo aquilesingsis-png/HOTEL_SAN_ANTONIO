@@ -68,7 +68,12 @@ public class DashboardDAO {
      * @param ultimosTreintaDias false = solo hoy; true = los últimos 30 días juntos
      */
     public Map<Integer, Integer> movimientoPorHora(Connection con, boolean ultimosTreintaDias) throws SQLException {
-        String desde = ultimosTreintaDias ? "DATE_SUB(CURDATE(), INTERVAL 29 DAY)" : "CURDATE()";
+        return movimientoPorHora(con, ultimosTreintaDias ? 30 : 1);
+    }
+
+    /** Lo mismo, de los últimos {@code dias} días contando hoy (1 = solo hoy). */
+    public Map<Integer, Integer> movimientoPorHora(Connection con, int dias) throws SQLException {
+        String desde = "DATE_SUB(CURDATE(), INTERVAL " + (Math.max(1, dias) - 1) + " DAY)";
         String sql = "SELECT h, COUNT(*) FROM ("
                 + "SELECT HOUR(fecha_pago) AS h, DATE(fecha_pago) AS d FROM pago WHERE fecha_evento IS NULL "
                 + "UNION ALL "
