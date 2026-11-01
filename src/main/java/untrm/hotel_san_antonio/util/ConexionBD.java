@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,7 +35,24 @@ public class ConexionBD {
             throw new SQLException("Configure db.url y db.user en config.properties o mediante HOTEL_DB_URL y HOTEL_DB_USER.");
         }
         if (password == null) password = "";
-        return grupo(url, usuario, password).getConnection();
+        Connection conexion = grupo(url, usuario, password).getConnection();
+        marcarUsuario(conexion);
+        return conexion;
+    }
+
+    /**
+     * Marca la conexión con el usuario que inició sesión (0 si todavía no hay sesión). Los triggers de auditoría
+     * solo anotan los cambios que llegan sin esa marca, o sea los hechos directo en la base de datos.
+     */
+    private static void marcarUsuario(Connection conexion) throws SQLException {
+        var sesion = SesionActual.getUsuario();
+        try (PreparedStatement ps = conexion.prepareStatement("SET @auditoria_usuario_id = ?")) {
+            ps.setInt(1, sesion == null ? 0 : sesion.getIdUsuario());
+            ps.execute();
+        } catch (SQLException error) {
+            conexion.close();
+            throw error;
+        }
     }
 
     /** El grupo de conexiones; si cambia la configuración (url, usuario o clave), se arma uno nuevo. */
