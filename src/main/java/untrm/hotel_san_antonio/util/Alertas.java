@@ -51,7 +51,7 @@ public class Alertas {
         Alert alerta = new Alert(Alert.AlertType.WARNING);
         alerta.setTitle(titulo);
         alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
+        ponerTexto(alerta, mensaje);
         estilizar(alerta.getDialogPane(), "#D9A53B");
         alerta.showAndWait();
     }
@@ -60,7 +60,7 @@ public class Alertas {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
         alerta.setTitle(titulo);
         alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
+        ponerTexto(alerta, mensaje);
         estilizar(alerta.getDialogPane(), "#1C9748");
         alerta.showAndWait();
     }
@@ -69,10 +69,21 @@ public class Alertas {
         Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
         alerta.setTitle(titulo);
         alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
+        ponerTexto(alerta, mensaje);
         estilizar(alerta.getDialogPane(), "#B8862D");
         Optional<ButtonType> resultado = alerta.showAndWait();
         return resultado.isPresent() && resultado.get() == ButtonType.OK;
+    }
+
+    /** Pone el mensaje en la ventana partido en lineas, para que un texto largo se lea completo y no termine en "...". */
+    static void ponerTexto(Alert alerta, String mensaje) {
+        Label contenido = new Label(mensaje == null ? "" : mensaje);
+        contenido.setWrapText(true);
+        contenido.setPrefWidth(480);
+        contenido.setStyle("-fx-font-size: 13px; -fx-text-fill: #2C2118;");
+        DialogPane panel = alerta.getDialogPane();
+        panel.setContent(contenido);
+        panel.setMinWidth(540);
     }
 
     /** Pide una linea de texto corta (ej. el motivo de un mantenimiento). Null si se cancelo o quedo vacio. */

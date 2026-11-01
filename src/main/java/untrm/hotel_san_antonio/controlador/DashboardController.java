@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.Locale;
@@ -159,6 +160,16 @@ public class DashboardController {
     @FXML private VBox tarjetaHoras;
     @FXML private Label lblTituloHoras;
     @FXML private Label lblSubtituloHoras;
+    @FXML private Label lblPeriodoOcupacion;
+    @FXML private Label lblSubOcupacion;
+    @FXML private javafx.scene.control.MenuButton mbOcupacion;
+    @FXML private javafx.scene.control.MenuButton mbHoras;
+    @FXML private javafx.scene.control.MenuButton mbIngresos;
+    // periodo (en días) que el administrador eligió en cada gráfico; 1 = hoy
+    private int diasOcupacion = 1;
+    private int diasHoras = 30;
+    private int diasIngresos = 7;
+    private DashboardService.Resumen resumen;
     @FXML private StackPane contenedorGraficoHoras;
     @FXML private Label lblTipoCambio;
     @FXML private Label lblTipoCambioFecha;
@@ -217,8 +228,32 @@ public class DashboardController {
     // INICIALIZACIÓN
     // =========================================================
 
+    private javafx.animation.Timeline reloj;
+
+    /** La fecha y la hora del Inicio se actualizan solas (cada segundo) mientras la pantalla está abierta. */
+    private void iniciarReloj() {
+        if (lblFecha == null || lblHora == null) return;
+        DateTimeFormatter formatoFecha = DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM 'de' yyyy", Locale.of("es", "ES"));
+        DateTimeFormatter formatoHora = DateTimeFormatter.ofPattern("hh:mm a", Locale.of("es", "ES"));
+        Runnable poner = () -> {
+            LocalDateTime ahora = LocalDateTime.now();
+            String fecha = ahora.format(formatoFecha);
+            lblFecha.setText("Hoy es " + fecha.substring(0, 1).toUpperCase() + fecha.substring(1));
+            lblHora.setText(ahora.format(formatoHora));
+        };
+        poner.run();
+        reloj = new javafx.animation.Timeline(new javafx.animation.KeyFrame(javafx.util.Duration.seconds(1), e -> poner.run()));
+        reloj.setCycleCount(javafx.animation.Animation.INDEFINITE);
+        reloj.play();
+        // al cambiar de pantalla el reloj se detiene; si el Inicio vuelve a mostrarse, sigue
+        lblHora.sceneProperty().addListener((o, antes, ahora) -> {
+            if (ahora == null) reloj.stop(); else reloj.play();
+        });
+    }
+
     @FXML
     public void initialize() {
+        iniciarReloj();
 
         // Saludo segun el rol de quien inicio sesion (no siempre es el Administrador)
         if (lblSaludo != null) {
@@ -304,18 +339,8 @@ public class DashboardController {
         lblVentasTiendaCantidad.setText(r.ventasTiendaHoyCantidad
                 + (r.ventasTiendaHoyCantidad == 1 ? " venta realizada" : " ventas realizadas"));
 
-        lblPorcentajeOcupacion.setText(r.getPorcentajeOcupacion() + "%");
-        lblLeyOcupadas.setText(String.valueOf(r.ocupadas));
-        lblLeyDisponibles.setText(String.valueOf(r.disponibles));
-        lblLeyLimpieza.setText(String.valueOf(r.limpieza));
-        lblLeyMantenimiento.setText(String.valueOf(r.mantenimiento));
-        chartOcupacion.setData(javafx.collections.FXCollections.observableArrayList(
-                new PieChart.Data("Ocupadas", Math.max(r.ocupadas, 0.0001)),
-                new PieChart.Data("Disponibles", Math.max(r.disponibles, 0.0001)),
-                new PieChart.Data("Limpieza", Math.max(r.limpieza, 0.0001)),
-                new PieChart.Data("Mantenimiento", Math.max(r.mantenimiento, 0.0001))
-        ));
-        colorearRodajas(chartOcupacion, "#8A5A1E", "#D8C39A", "#D9A53B", "#B3ACA2");
+        resumen = r;
+        mostrarOcupacion(r);
 
         BigDecimal ingresosHoy = r.getIngresosHoy();
         int porcentajeHabitaciones = porcentaje(r.ingresosHabitacionesHoy, ingresosHoy);
@@ -334,11 +359,95 @@ public class DashboardController {
 
         crearGraficoIngresos(r.ingresosUltimaSemana);
         crearGraficoHoras(r.movimientoPorHora);
+        if (SesionActual.esAdministrador()) {
+            // respeta el periodo que el administrador eligió en cada gráfico
+            actualizarHoras();
+            actualizarIngresos();
+        }
 
         tablaLlegadas.getItems().setAll(r.llegadasHoy);
         tablaMantenimiento.getItems().setAll(r.enMantenimiento);
 
         poblarAlertas(r);
+    }
+
+    /** Ocupación del hotel: hoy muestra el estado actual de las habitaciones; en 7 o 30 días, el promedio de ocupadas. */
+    private void mostrarOcupacion(DashboardService.Resumen r) {
+        if (diasOcupacion <= 1) {
+            lblSubOcupacion.setText("Ocupación actual");
+            lblPorcentajeOcupacion.setText(r.getPorcentajeOcupacion() + "%");
+            lblLeyOcupadas.setText(String.valueOf(r.ocupadas));
+            lblLeyDisponibles.setText(String.valueOf(r.disponibles));
+            lblLeyLimpieza.setText(String.valueOf(r.limpieza));
+            lblLeyMantenimiento.setText(String.valueOf(r.mantenimiento));
+            chartOcupacion.setData(javafx.collections.FXCollections.observableArrayList(
+                    new PieChart.Data("Ocupadas", Math.max(r.ocupadas, 0.0001)),
+                    new PieChart.Data("Disponibles", Math.max(r.disponibles, 0.0001)),
+                    new PieChart.Data("Limpieza", Math.max(r.limpieza, 0.0001)),
+                    new PieChart.Data("Mantenimiento", Math.max(r.mantenimiento, 0.0001))
+            ));
+            colorearRodajas(chartOcupacion, "#8A5A1E", "#D8C39A", "#D9A53B", "#B3ACA2");
+            return;
+        }
+        double promedio;
+        try {
+            promedio = dashboardService.ocupadasPromedio(diasOcupacion);
+        } catch (SQLException e) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo calcular la ocupación.\n\n" + e.getMessage());
+            return;
+        }
+        double libres = Math.max(0, r.totalHabitaciones - promedio);
+        int porcentaje = r.totalHabitaciones == 0 ? 0 : (int) Math.round(promedio * 100.0 / r.totalHabitaciones);
+        lblSubOcupacion.setText("Ocupación promedio");
+        lblPorcentajeOcupacion.setText(porcentaje + "%");
+        lblLeyOcupadas.setText(String.format(Locale.US, "%.1f", promedio));
+        lblLeyDisponibles.setText(String.format(Locale.US, "%.1f", libres));
+        lblLeyLimpieza.setText("—");
+        lblLeyMantenimiento.setText("—");
+        chartOcupacion.setData(javafx.collections.FXCollections.observableArrayList(
+                new PieChart.Data("Ocupadas", Math.max(promedio, 0.0001)),
+                new PieChart.Data("Disponibles", Math.max(libres, 0.0001))
+        ));
+        colorearRodajas(chartOcupacion, "#8A5A1E", "#D8C39A");
+    }
+
+    private void actualizarOcupacion() {
+        if (resumen != null) mostrarOcupacion(resumen);
+    }
+
+    private void actualizarHoras() {
+        try {
+            crearGraficoHoras(dashboardService.movimientoPorHora(diasHoras));
+        } catch (SQLException e) {
+            Alertas.mostrarError("Error de base de datos", "No se pudo cargar el movimiento por hora.\n\n" + e.getMessage());
+        }
+    }
+
+    private void actualizarIngresos() {
+        try {
+            crearGraficoIngresos(dashboardService.ingresosPorDia(diasIngresos));
+        } catch (SQLException e) {
+            Alertas.mostrarError("Error de base de datos", "No se pudieron cargar los ingresos.\n\n" + e.getMessage());
+        }
+    }
+
+    private static String etiquetaPeriodo(int dias) {
+        return dias == 1 ? "Hoy" : dias + " días";
+    }
+
+    /** Convierte la etiqueta del gráfico en un menú desplegable con los periodos que se pueden elegir. */
+    private void armarPeriodo(javafx.scene.control.MenuButton boton, int[] opciones, int inicial,
+                              java.util.function.IntConsumer alElegir) {
+        boton.setText(etiquetaPeriodo(inicial));
+        boton.getItems().clear();
+        for (int dias : opciones) {
+            javafx.scene.control.MenuItem opcion = new javafx.scene.control.MenuItem(etiquetaPeriodo(dias));
+            opcion.setOnAction(e -> {
+                boton.setText(etiquetaPeriodo(dias));
+                alElegir.accept(dias);
+            });
+            boton.getItems().add(opcion);
+        }
     }
 
     private String formatoMoneda(BigDecimal monto) {
@@ -471,7 +580,18 @@ public class DashboardController {
         mostrar(tarjetaSemana, admin);
         mostrar(tarjetaDistribucion, admin);
         lblTituloHoras.setText(admin ? "⏱  Horas de más movimiento" : "⏱  Movimiento de hoy por hora");
-        lblSubtituloHoras.setText(admin ? "Últimos 30 días ▾" : "Hoy ▾");
+        lblSubtituloHoras.setText("Hoy");
+        // Administrador: los periodos son menús que se pueden elegir. Recepción: solo se ve "Hoy", sin menú.
+        mostrar(lblPeriodoOcupacion, !admin);
+        mostrar(lblSubtituloHoras, !admin);
+        mostrar(mbOcupacion, admin);
+        mostrar(mbHoras, admin);
+        mostrar(mbIngresos, admin);
+        if (admin) {
+            armarPeriodo(mbOcupacion, new int[]{1, 7, 30}, diasOcupacion, dias -> { diasOcupacion = dias; actualizarOcupacion(); });
+            armarPeriodo(mbHoras, new int[]{1, 7, 30}, diasHoras, dias -> { diasHoras = dias; actualizarHoras(); });
+            armarPeriodo(mbIngresos, new int[]{7, 30}, diasIngresos, dias -> { diasIngresos = dias; actualizarIngresos(); });
+        }
     }
 
     private void mostrar(Node nodo, boolean visible) {
@@ -753,7 +873,9 @@ public class DashboardController {
 
         XYChart.Series<String, Number> serie = new XYChart.Series<>();
         for (Map.Entry<LocalDate, BigDecimal> dia : ingresosPorDia.entrySet()) {
-            String etiqueta = dia.getKey().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.of("es", "PE"));
+            String etiqueta = ingresosPorDia.size() > 7
+                    ? dia.getKey().format(DateTimeFormatter.ofPattern("dd/MM"))
+                    : dia.getKey().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.of("es", "PE"));
             serie.getData().add(new XYChart.Data<>(etiqueta, dia.getValue()));
         }
         grafico.getData().add(serie);
