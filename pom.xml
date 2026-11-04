@@ -67,6 +67,12 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>untrm.hotel_san_antonio.App</mainClass>
+                    <!-- Limites de memoria de la aplicacion (heap inicial, heap maximo y recolector G1) -->
+                    <options>
+                        <option>-Xms256m</option>
+                        <option>-Xmx1024m</option>
+                        <option>-XX:+UseG1GC</option>
+                    </options>
                 </configuration>
                 <executions>
                     <execution>
@@ -103,6 +109,9 @@
 				<option>${profiler.jvmargs.arg3}</option>
 				<option>${profiler.jvmargs.arg4}</option>
 				<option>${profiler.jvmargs.arg5}</option>
+				<option>-Xms256m</option>
+				<option>-Xmx1024m</option>
+				<option>-XX:+UseG1GC</option>
                             </options>
                         </configuration>
                     </execution>
