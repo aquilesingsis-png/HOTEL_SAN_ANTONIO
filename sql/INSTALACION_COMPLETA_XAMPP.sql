@@ -439,7 +439,23 @@ START TRANSACTION;
 INSERT INTO usuario (nombre, apellido, usuario, contrasena_hash, rol, activo)
 VALUES
     ('Administrador', 'General', 'admin', '$2a$12$ET1YhvtHTpUfKqn9a2IgK.C31dagjN48Wfislm6Cveof20tsuK0cu', 'ADMINISTRADOR', 1),
-    ('Recepcionista', 'Hotel', 'recepcion', '$2a$12$6z4YEdVPJwck30EsbE5BmO0waS860fXLzK9j2QMEO5ic1WsIxhGBy', 'RECEPCIONISTA', 1);
+    ('Recepcionista', 'Hotel', 'recepcion', '$2a$12$6z4YEdVPJwck30EsbE5BmO0waS860fXLzK9j2QMEO5ic1WsIxhGBy', 'RECEPCIONISTA', 1),
+    ('Personal', 'Limpieza', 'limpieza', '$2a$12$6z4YEdVPJwck30EsbE5BmO0waS860fXLzK9j2QMEO5ic1WsIxhGBy', 'LIMPIEZA', 1);
+COMMIT;
+
+-- DATOS DE PRUEBA DEL EQUIPO (los mismos en todas las computadoras): un huesped con una reserva ya finalizada y
+-- pagada, y su habitacion 102 en limpieza. Se cargan aqui, antes de los triggers, para que no llenen la auditoria.
+START TRANSACTION;
+INSERT INTO huesped (tipo_documento, num_documento, nombres, apellidos, pais_procedencia, fecha_registro)
+VALUES ('DNI', '60217536', 'JORBIN BRAYAN', 'VENTURA VALER', _utf8mb4 0x506572C3BA, '2026-10-03 12:42:17');
+INSERT INTO reserva (id_huesped, id_habitacion, id_usuario, fecha_reserva, fecha_checkin, fecha_checkout,
+                     num_huespedes, monto_total, estado, canal)
+VALUES (1, 2, 2, '2026-10-03 12:42:17', '2026-10-03', '2026-10-04', 1, 100.00, 'FINALIZADA', 'PRESENCIAL');
+INSERT INTO reserva_huesped (id_reserva, id_huesped, principal, fecha_asociacion)
+VALUES (1, 1, 1, '2026-10-03 12:42:17');
+INSERT INTO pago (id_reserva, id_usuario, monto, metodo_pago, tipo_pago, fecha_pago)
+VALUES (1, 2, 100.00, 'EFECTIVO', 'COMPLETO', '2026-10-03 12:42:17');
+UPDATE habitacion SET estado = 'LIMPIEZA' WHERE id_habitacion = 2;
 COMMIT;
 
 
