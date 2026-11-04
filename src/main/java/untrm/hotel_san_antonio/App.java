@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import untrm.hotel_san_antonio.modelo.Usuario;
+import untrm.hotel_san_antonio.modelo.conexion.ConexionBD;
 import untrm.hotel_san_antonio.modelo.servicio.UsuarioService;
 import untrm.hotel_san_antonio.controlador.util.Navegacion;
 import untrm.hotel_san_antonio.modelo.util.Registro;
@@ -44,13 +45,17 @@ public class App extends Application {
         stage.show();
     }
 
-    /** Si se cierra la ventana con la sesión abierta, queda anotado el cierre de sesión. */
+    /** Si se cierra la ventana con la sesión abierta, queda anotado el cierre de sesión; luego se liberan las conexiones. */
     @Override
     public void stop() {
-        Usuario activo = SesionActual.getUsuario();
-        if (activo != null) {
-            SesionActual.cerrar();
-            new UsuarioService().registrarCierreSesion(activo.getIdUsuario());
+        try {
+            Usuario activo = SesionActual.getUsuario();
+            if (activo != null) {
+                SesionActual.cerrar();
+                new UsuarioService().registrarCierreSesion(activo.getIdUsuario());
+            }
+        } finally {
+            ConexionBD.cerrar();
         }
     }
 

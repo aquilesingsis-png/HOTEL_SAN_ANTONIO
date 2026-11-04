@@ -56,6 +56,13 @@ public class ConexionBD {
         }
     }
 
+    /** Cierra el grupo de conexiones y sus hilos; se llama al salir del programa. */
+    public static synchronized void cerrar() {
+        if (grupo != null && !grupo.isClosed()) {
+            grupo.close();
+        }
+    }
+
     /** El grupo de conexiones; si cambia la configuración (url, usuario o clave), se arma uno nuevo. */
     private static synchronized HikariDataSource grupo(String url, String usuario, String password) {
         String clave = url + "\n" + usuario + "\n" + password;
