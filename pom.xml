@@ -109,9 +109,6 @@
 				<option>${profiler.jvmargs.arg3}</option>
 				<option>${profiler.jvmargs.arg4}</option>
 				<option>${profiler.jvmargs.arg5}</option>
-				<option>-Xms256m</option>
-				<option>-Xmx1024m</option>
-				<option>-XX:+UseG1GC</option>
                             </options>
                         </configuration>
                     </execution>
