@@ -373,10 +373,11 @@ public class ReservaFormController {
     private void verificarIdentidadExistente(String dni) {
         Task<Huesped> consulta = ReniecService.consultarDni(dni);
         consulta.setOnSucceeded(e -> {
-            if (!dni.equals(txtDocumento.getText().trim()) || consulta.getValue() == null) return;
+            Huesped deReniec = consulta.getValue();
+            if (!dni.equals(txtDocumento.getText().trim()) || deReniec == null) return;
             Task<Huesped> actualizar = new Task<>() {
                 @Override protected Huesped call() throws Exception {
-                    return reservaService.reconciliarIdentidadDni(dni, consulta.getValue());
+                    return reservaService.reconciliarIdentidadDni(dni, deReniec);
                 }
             };
             actualizar.setOnSucceeded(ev -> {
