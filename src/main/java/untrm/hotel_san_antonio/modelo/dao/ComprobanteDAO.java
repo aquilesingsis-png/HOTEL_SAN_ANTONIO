@@ -43,15 +43,19 @@ public class ComprobanteDAO {
     }
 
     /**
-     * Siguiente numero correlativo de la serie de ese tipo (ej. "B001-000002"): el ultimo emitido mas uno.
+     * Siguiente numero correlativo de la serie de ese tipo (ej. "B001-000002"): el numero mas alto emitido mas uno.
+     * Se toma el mayor NUMERO de la serie (no el ultimo id), porque los ids no siempre van en el mismo orden que
+     * los numeros (por ejemplo, en una base con datos cargados en bloque) y asi nunca se repite uno ya usado.
      * Se llama con el turno de la serie ya tomado; la lectura con bloqueo trae siempre el dato mas reciente.
      */
     public String generarNumero(Connection con, String tipo) throws SQLException {
         String serie = SERIE.getOrDefault(tipo, "X001");
-        String sql = "SELECT numero FROM comprobante WHERE tipo = ? ORDER BY id_comprobante DESC LIMIT 1 FOR UPDATE";
+        String sql = "SELECT numero FROM comprobante WHERE tipo = ? AND numero LIKE ? "
+                + "ORDER BY numero DESC LIMIT 1 FOR UPDATE";
         int ultimo = 0;
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, tipo);
+            ps.setString(2, serie + "-%");
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     String numero = rs.getString(1);
